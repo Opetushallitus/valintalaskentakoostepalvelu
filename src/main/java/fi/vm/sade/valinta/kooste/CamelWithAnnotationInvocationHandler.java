@@ -23,13 +23,11 @@ import org.apache.camel.impl.DefaultExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CamelWithAnnotationInvocationHandler extends AbstractCamelInvocationHandler
-    implements InvocationHandler {
+public class CamelWithAnnotationInvocationHandler extends AbstractCamelInvocationHandler implements InvocationHandler {
   private final Logger LOG = LoggerFactory.getLogger(CamelWithAnnotationInvocationHandler.class);
   private final MethodInfoCache methodInfoCache;
 
-  public CamelWithAnnotationInvocationHandler(
-      Endpoint endpoint, Producer producer, MethodInfoCache methodInfoCache) {
+  public CamelWithAnnotationInvocationHandler(Endpoint endpoint, Producer producer, MethodInfoCache methodInfoCache) {
     super(endpoint, producer);
     this.methodInfoCache = methodInfoCache;
   }
@@ -37,8 +35,7 @@ public class CamelWithAnnotationInvocationHandler extends AbstractCamelInvocatio
   @Override
   public Object doInvokeProxy(Object proxy, Method method, Object[] args) throws Throwable {
     MethodInfo methodInfo = methodInfoCache.getMethodInfo(method);
-    final ExchangePattern pattern =
-        methodInfo != null ? methodInfo.getPattern() : ExchangePattern.InOut;
+    final ExchangePattern pattern = methodInfo != null ? methodInfo.getPattern() : ExchangePattern.InOut;
     final Exchange exchange = new DefaultExchange(endpoint, pattern);
 
     List<Object> bodyArgs = Lists.newArrayListWithExpectedSize(args.length);
@@ -76,26 +73,22 @@ public class CamelWithAnnotationInvocationHandler extends AbstractCamelInvocatio
     return valueAdded;
   }
 
-  protected Object invokeWithExchange(final Method method, final Exchange exchange)
-      throws Throwable {
+  protected Object invokeWithExchange(final Method method, final Exchange exchange) throws Throwable {
     // is the return type a future
     final boolean isFuture = method.getReturnType() == Future.class;
 
     // create task to execute the proxy and gather the reply
-    FutureTask<Object> task =
-        new FutureTask<Object>(
-            new Callable<Object>() {
-              public Object call() throws Exception {
-                // process the exchange
-                LOG.trace(
-                    "Proxied method call {} invoking producer: {}", method.getName(), producer);
-                producer.process(exchange);
+    FutureTask<Object> task = new FutureTask<Object>(new Callable<Object>() {
+      public Object call() throws Exception {
+        // process the exchange
+        LOG.trace("Proxied method call {} invoking producer: {}", method.getName(), producer);
+        producer.process(exchange);
 
-                Object answer = afterInvoke(method, exchange, exchange.getPattern(), isFuture);
-                LOG.trace("Proxied method call {} returning: {}", method.getName(), answer);
-                return answer;
-              }
-            });
+        Object answer = afterInvoke(method, exchange, exchange.getPattern(), isFuture);
+        LOG.trace("Proxied method call {} returning: {}", method.getName(), answer);
+        return answer;
+      }
+    });
 
     if (isFuture) {
       // submit task and return future

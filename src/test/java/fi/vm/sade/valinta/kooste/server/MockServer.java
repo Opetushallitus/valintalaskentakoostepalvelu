@@ -35,16 +35,10 @@ public class MockServer {
         server.setExecutor(null);
         server.start();
         succeededToStart = true;
-        System.out.println(
-            "Started " + getClass().getName() + " listening in port " + freeLocalPort);
+        System.out.println("Started " + getClass().getName() + " listening in port " + freeLocalPort);
       } catch (Exception e) {
-        System.err.println(
-            getClass().getName()
-                + " WARNING : Could not start server on attempt "
-                + numberOfAttempt
-                + "/"
-                + maxAttempts
-                + " , exception was:");
+        System.err.println(getClass().getName() + " WARNING : Could not start server on attempt "
+            + numberOfAttempt + "/" + maxAttempts + " , exception was:");
         e.printStackTrace();
       }
     }
@@ -59,13 +53,8 @@ public class MockServer {
   }
 
   public MockServer addHandler(String path, HttpHandler handler) {
-    System.out.println(
-        getClass().getName()
-            + " listening in port "
-            + freeLocalPort
-            + " added handler for path '"
-            + path
-            + "'");
+    System.out.println(getClass().getName() + " listening in port " + freeLocalPort + " added handler for path '"
+        + path + "'");
     paths.add(path);
     this.httpServer.createContext(path, wrapWithCallerIdAssertion(handler));
     return this;
@@ -76,9 +65,7 @@ public class MockServer {
       try {
         Headers requestHeaders = exchange.getRequestHeaders();
         List<String> callerIdHeader = requestHeaders.get(CALLER_ID);
-        Assert.assertThat(
-            "Expected '" + CALLER_ID + "' header in " + requestHeaders.entrySet(),
-            callerIdHeader,
+        Assert.assertThat("Expected '" + CALLER_ID + "' header in " + requestHeaders.entrySet(), callerIdHeader,
             Matchers.contains("1.2.246.562.10.00000000001.valintalaskentakoostepalvelu"));
         handler.handle(exchange);
       } catch (Throwable t) {

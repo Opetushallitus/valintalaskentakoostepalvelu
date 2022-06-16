@@ -25,8 +25,7 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
   private final ConcurrentHashMap<String, String> hakutyyppiArvo = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, String> haunKohdejoukkoArvo = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<String, Date> lukuvuosi = new ConcurrentHashMap<>();
-  private final ConcurrentHashMap<String, HenkiloPerustietoDto> henkilotiedot =
-      new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, HenkiloPerustietoDto> henkilotiedot = new ConcurrentHashMap<>();
 
   private TarjontaAsyncResource tarjontaAsyncResource;
   private final Date now;
@@ -45,16 +44,10 @@ public class KelaCache implements PaivamaaraSource, HenkilotietoSource {
       if (alkamiskausiUri == null) {
         // Kyseessä jatkuva haku, haetaan alkamistiedot koulutukselta
         try {
-          List<Toteutus> toteutukset =
-              tarjontaAsyncResource
-                  .haeHakukohde(hakukohdeOid)
-                  .thenComposeAsync(
-                      hakukohde ->
-                          CompletableFutureUtil.sequence(
-                              hakukohde.toteutusOids.stream()
-                                  .map(tarjontaAsyncResource::haeToteutus)
-                                  .collect(Collectors.toList())))
-                  .get(5, TimeUnit.MINUTES);
+          List<Toteutus> toteutukset = tarjontaAsyncResource.haeHakukohde(hakukohdeOid)
+              .thenComposeAsync(hakukohde -> CompletableFutureUtil.sequence(hakukohde.toteutusOids
+                  .stream().map(tarjontaAsyncResource::haeToteutus).collect(Collectors.toList())))
+              .get(5, TimeUnit.MINUTES);
           for (Toteutus toteutus : toteutukset) {
             alkamiskausiUri = toteutus.alkamiskausiUri;
             vuosi = toteutus.alkamisvuosi;

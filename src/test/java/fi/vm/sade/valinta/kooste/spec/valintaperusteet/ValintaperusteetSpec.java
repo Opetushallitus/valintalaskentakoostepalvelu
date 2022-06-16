@@ -106,12 +106,11 @@ public class ValintaperusteetSpec extends ConstantsSpec {
   }
 
   public static class HakukohdeJaValintakoeBuilder {
-    private HakukohdeJaValintakoeDTO hakukohdeJaValintakoe =
-        new HakukohdeJaValintakoeDTO("", Lists.newArrayList());
+    private HakukohdeJaValintakoeDTO hakukohdeJaValintakoe = new HakukohdeJaValintakoeDTO("", Lists.newArrayList());
 
     public HakukohdeJaValintakoeBuilder setHakukohdeOid(String hakukohdeOid) {
-      hakukohdeJaValintakoe =
-          new HakukohdeJaValintakoeDTO(hakukohdeOid, hakukohdeJaValintakoe.getValintakoeDTO());
+      hakukohdeJaValintakoe = new HakukohdeJaValintakoeDTO(hakukohdeOid,
+          hakukohdeJaValintakoe.getValintakoeDTO());
       return this;
     }
 
@@ -119,12 +118,10 @@ public class ValintaperusteetSpec extends ConstantsSpec {
       ValintakoeDTO vk = Mockito.spy(new ValintakoeDTO());
       vk.setOid(valintakoeOid);
       vk.setTunniste(valintakoeOid);
-      Mockito.when(vk.getSelvitettyTunniste())
-          .thenAnswer(
-              a -> {
-                throw new UnsupportedOperationException(
-                    "Selvitettyä tunnistetta ei ole laitettu hakukohde ja valintakoe resurssin läpi!");
-              });
+      Mockito.when(vk.getSelvitettyTunniste()).thenAnswer(a -> {
+        throw new UnsupportedOperationException(
+            "Selvitettyä tunnistetta ei ole laitettu hakukohde ja valintakoe resurssin läpi!");
+      });
       hakukohdeJaValintakoe.getValintakoeDTO().add(vk);
       return this;
     }

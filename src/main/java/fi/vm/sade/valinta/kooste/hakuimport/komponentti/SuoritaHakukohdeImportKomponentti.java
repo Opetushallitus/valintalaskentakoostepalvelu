@@ -35,8 +35,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SuoritaHakukohdeImportKomponentti {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SuoritaHakukohdeImportKomponentti.class);
   private static final int KOUTA_HAKUKOHDE_OID_LENGTH = 35;
   private static final String NOLLA = "0.0";
   private static final String PAASYKOE_TYYPPI_URI = "valintakokeentyyppi_1";
@@ -55,10 +54,8 @@ public class SuoritaHakukohdeImportKomponentti {
   private KoodistoCachedAsyncResource koodistoAsyncResource;
 
   @Autowired
-  public SuoritaHakukohdeImportKomponentti(
-      TarjontaAsyncResource tarjontaAsyncResource,
-      KoutaAsyncResource koutaAsyncResource,
-      OrganisaatioAsyncResource organisaatioAsyncResource,
+  public SuoritaHakukohdeImportKomponentti(TarjontaAsyncResource tarjontaAsyncResource,
+      KoutaAsyncResource koutaAsyncResource, OrganisaatioAsyncResource organisaatioAsyncResource,
       KoodistoCachedAsyncResource koodistoAsyncResource) {
     this.tarjontaAsyncResource = tarjontaAsyncResource;
     this.koutaAsyncResource = koutaAsyncResource;
@@ -66,46 +63,31 @@ public class SuoritaHakukohdeImportKomponentti {
     this.koodistoAsyncResource = koodistoAsyncResource;
   }
 
-  private CompletableFuture<List<Pair<String, List<Koodi>>>> hakukohteetKooditYlakoodeineen(
-      List<Koodi> koodit) {
-    return CompletableFutureUtil.sequence(
-        koodit.stream()
-            .filter(koodi -> "hakukohteet".equals(koodi.getKoodistoUri()))
-            .collect(
-                Collectors.toMap(
-                    Koodi::getKoodiUri,
-                    Function.identity(),
-                    (k, kk) -> k.getVersio() < kk.getVersio() ? kk : k))
-            .values()
-            .stream()
-            .map(
-                hakukohteetKoodi -> {
-                  String uri = hakukohteetKoodi.getKoodiUri() + "#" + hakukohteetKoodi.getVersio();
-                  return koodistoAsyncResource
-                      .ylakoodit(uri)
-                      .thenApplyAsync(ylakoodit -> Pair.of(uri, ylakoodit));
-                })
-            .collect(Collectors.toList()));
+  private CompletableFuture<List<Pair<String, List<Koodi>>>> hakukohteetKooditYlakoodeineen(List<Koodi> koodit) {
+    return CompletableFutureUtil
+        .sequence(koodit.stream().filter(koodi -> "hakukohteet".equals(koodi.getKoodistoUri()))
+            .collect(Collectors.toMap(Koodi::getKoodiUri, Function.identity(),
+                (k, kk) -> k.getVersio() < kk.getVersio() ? kk : k))
+            .values().stream().map(hakukohteetKoodi -> {
+              String uri = hakukohteetKoodi.getKoodiUri() + "#" + hakukohteetKoodi.getVersio();
+              return koodistoAsyncResource.ylakoodit(uri)
+                  .thenApplyAsync(ylakoodit -> Pair.of(uri, ylakoodit));
+            }).collect(Collectors.toList()));
   }
 
-  private boolean vastaavaPohjakoulutus(
-      Pair<String, List<Koodi>> hakukohteet, String pohjakoulutusvaatimustoinenasteUri) {
+  private boolean vastaavaPohjakoulutus(Pair<String, List<Koodi>> hakukohteet,
+      String pohjakoulutusvaatimustoinenasteUri) {
     return hakukohteet.getRight().stream()
-        .anyMatch(
-            ylakoodi ->
-                "pohjakoulutusvaatimustoinenaste".equals(ylakoodi.getKoodistoUri())
-                    && pohjakoulutusvaatimustoinenasteUri.split("#")[0].equals(
-                        ylakoodi.getKoodiUri()));
+        .anyMatch(ylakoodi -> "pohjakoulutusvaatimustoinenaste".equals(ylakoodi.getKoodistoUri())
+            && pohjakoulutusvaatimustoinenasteUri.split("#")[0].equals(ylakoodi.getKoodiUri()));
   }
 
   private boolean vainOsaamisalaanLiittyva(Pair<String, List<Koodi>> hakukohteet) {
-    return hakukohteet.getRight().stream()
-        .noneMatch(ylakoodi -> "koulutus".equals(ylakoodi.getKoodistoUri()));
+    return hakukohteet.getRight().stream().noneMatch(ylakoodi -> "koulutus".equals(ylakoodi.getKoodistoUri()));
   }
 
-  public HakukohdeImportDTO suoritaHakukohdeImport(
-      @Body // @Property(OPH.HAKUKOHDEOID)
-          String hakukohdeOid) {
+  public HakukohdeImportDTO suoritaHakukohdeImport(@Body // @Property(OPH.HAKUKOHDEOID)
+  String hakukohdeOid) {
     try {
       if (hakukohdeOid.length() == KOUTA_HAKUKOHDE_OID_LENGTH) {
         return processKoutaHakukohde(hakukohdeOid);
@@ -124,68 +106,47 @@ public class SuoritaHakukohdeImportKomponentti {
     String hakukohdeKoodiTunniste = getHakukohdeKoodiTunniste(hakukohde);
     HakukohdeImportDTO importTyyppi = new HakukohdeImportDTO();
     Haku haku = tarjontaAsyncResource.haeHaku(hakukohde.hakuOid).get(5, TimeUnit.MINUTES);
-    List<CompletableFuture<Toteutus>> toteutusFs =
-        hakukohde.toteutusOids.stream()
-            .map(tarjontaAsyncResource::haeToteutus)
-            .collect(Collectors.toList());
-    List<Koulutus> koulutukset =
-        CompletableFutureUtil.sequence(
-                toteutusFs.stream()
-                    .map(
-                        toteutusF ->
-                            toteutusF.thenComposeAsync(
-                                toteutus ->
-                                    tarjontaAsyncResource.haeKoulutus(toteutus.koulutusOid)))
-                    .collect(Collectors.toList()))
-            .get(5, TimeUnit.MINUTES);
-    List<Toteutus> toteutukset =
-        CompletableFutureUtil.sequence(toteutusFs).get(5, TimeUnit.MINUTES);
+    List<CompletableFuture<Toteutus>> toteutusFs = hakukohde.toteutusOids.stream()
+        .map(tarjontaAsyncResource::haeToteutus).collect(Collectors.toList());
+    List<Koulutus> koulutukset = CompletableFutureUtil.sequence(toteutusFs.stream()
+        .map(toteutusF -> toteutusF
+            .thenComposeAsync(toteutus -> tarjontaAsyncResource.haeKoulutus(toteutus.koulutusOid)))
+        .collect(Collectors.toList())).get(5, TimeUnit.MINUTES);
+    List<Toteutus> toteutukset = CompletableFutureUtil.sequence(toteutusFs).get(5, TimeUnit.MINUTES);
     Map<String, Koodi> kaudet = koodistoAsyncResource.haeKoodisto("kausi");
 
     importTyyppi.setTarjoajaOid(hakukohde.tarjoajaOids.iterator().next());
     importTyyppi.setTarjoajaOids(hakukohde.tarjoajaOids);
     importTyyppi.setHaunkohdejoukkoUri(haku.kohdejoukkoUri);
 
-    CompletableFutureUtil.sequence(
-            hakukohde.tarjoajaOids.stream()
-                .map(organisaatioAsyncResource::haeOrganisaatio)
-                .collect(Collectors.toList()))
-        .get(5, TimeUnit.MINUTES)
-        .forEach(
-            tarjoaja ->
-                tarjoaja
-                    .getNimi()
-                    .forEach(
-                        (kieli, nimi) -> {
-                          MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
-                          dto.setLang("kieli_" + kieli);
-                          dto.setText(nimi);
-                          importTyyppi.getTarjoajaNimi().add(dto);
-                        }));
-
-    hakukohde.nimi.forEach(
-        (kieli, nimi) -> {
+    CompletableFutureUtil
+        .sequence(hakukohde.tarjoajaOids.stream().map(organisaatioAsyncResource::haeOrganisaatio)
+            .collect(Collectors.toList()))
+        .get(5, TimeUnit.MINUTES).forEach(tarjoaja -> tarjoaja.getNimi().forEach((kieli, nimi) -> {
           MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
-          dto.setLang(kieli);
+          dto.setLang("kieli_" + kieli);
           dto.setText(nimi);
-          importTyyppi.getHakukohdeNimi().add(dto);
-        });
+          importTyyppi.getTarjoajaNimi().add(dto);
+        }));
+
+    hakukohde.nimi.forEach((kieli, nimi) -> {
+      MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
+      dto.setLang(kieli);
+      dto.setText(nimi);
+      importTyyppi.getHakukohdeNimi().add(dto);
+    });
 
     if (haku.hakukausiUri != null) {
-      kaudet.forEach(
-          (arvo, koodi) -> {
-            if (haku.hakukausiUri.startsWith(koodi.getKoodiUri())) {
-              koodi
-                  .getMetadata()
-                  .forEach(
-                      metadata -> {
-                        MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
-                        dto.setLang("kieli_" + metadata.getKieli().toLowerCase());
-                        dto.setText(metadata.getNimi());
-                        importTyyppi.getHakuKausi().add(dto);
-                      });
-            }
+      kaudet.forEach((arvo, koodi) -> {
+        if (haku.hakukausiUri.startsWith(koodi.getKoodiUri())) {
+          koodi.getMetadata().forEach(metadata -> {
+            MonikielinenTekstiDTO dto = new MonikielinenTekstiDTO();
+            dto.setLang("kieli_" + metadata.getKieli().toLowerCase());
+            dto.setText(metadata.getNimi());
+            importTyyppi.getHakuKausi().add(dto);
           });
+        }
+      });
     }
 
     if (haku.hakukausiVuosi != null) {
@@ -194,62 +155,31 @@ public class SuoritaHakukohdeImportKomponentti {
 
     HakukohdekoodiDTO hkt = new HakukohdekoodiDTO();
     String hakukohteetUri = hakukohde.hakukohteetUri;
-    String pohjakoulutusvaatimustoinenasteUri =
-        IterableUtil.singleton(
-            hakukohde.pohjakoulutusvaatimusUrit.stream()
-                    .filter(uri -> uri.startsWith("pohjakoulutusvaatimustoinenaste_"))
-                ::iterator);
+    String pohjakoulutusvaatimustoinenasteUri = IterableUtil.singleton(hakukohde.pohjakoulutusvaatimusUrit.stream()
+        .filter(uri -> uri.startsWith("pohjakoulutusvaatimustoinenaste_"))::iterator);
     if (hakukohteetUri == null && pohjakoulutusvaatimustoinenasteUri != null) {
-      String osaamisalaUri =
-          IterableUtil.singleton(
-              toteutukset.stream()
-                      .flatMap(toteutus -> toteutus.osaamisalaUris.stream())
-                      .filter(Objects::nonNull)
-                      .distinct()
-                  ::iterator);
+      String osaamisalaUri = IterableUtil
+          .singleton(toteutukset.stream().flatMap(toteutus -> toteutus.osaamisalaUris.stream())
+              .filter(Objects::nonNull).distinct()::iterator);
       if (osaamisalaUri != null) {
-        hakukohteetUri =
-            koodistoAsyncResource
-                .alakoodit(osaamisalaUri)
-                .thenComposeAsync(this::hakukohteetKooditYlakoodeineen)
-                .thenApplyAsync(
-                    hakukohteetKoodit ->
-                        IterableUtil.singleton(
-                            hakukohteetKoodit.stream()
-                                    .filter(
-                                        h ->
-                                            this.vastaavaPohjakoulutus(
-                                                    h, pohjakoulutusvaatimustoinenasteUri)
-                                                && this.vainOsaamisalaanLiittyva(h))
-                                    .map(Pair::getLeft)
-                                ::iterator))
-                .get(5, TimeUnit.MINUTES);
+        hakukohteetUri = koodistoAsyncResource.alakoodit(osaamisalaUri)
+            .thenComposeAsync(this::hakukohteetKooditYlakoodeineen)
+            .thenApplyAsync(hakukohteetKoodit -> IterableUtil.singleton(hakukohteetKoodit.stream()
+                .filter(h -> this.vastaavaPohjakoulutus(h, pohjakoulutusvaatimustoinenasteUri)
+                    && this.vainOsaamisalaanLiittyva(h))
+                .map(Pair::getLeft)::iterator))
+            .get(5, TimeUnit.MINUTES);
       }
       if (hakukohteetUri == null) {
-        String koulutusUri =
-            IterableUtil.singleton(
-                koulutukset.stream()
-                        .map(koulutus -> koulutus.koulutusUrit)
-                        .flatMap(koulutusUrit -> koulutusUrit.stream())
-                        .filter(Objects::nonNull)
-                        .distinct()
-                    ::iterator);
+        String koulutusUri = IterableUtil.singleton(koulutukset.stream().map(koulutus -> koulutus.koulutusUrit)
+            .flatMap(koulutusUrit -> koulutusUrit.stream()).filter(Objects::nonNull).distinct()::iterator);
         if (koulutusUri != null) {
-          hakukohteetUri =
-              koodistoAsyncResource
-                  .alakoodit(koulutusUri)
-                  .thenComposeAsync(this::hakukohteetKooditYlakoodeineen)
-                  .thenApplyAsync(
-                      hakukohteetKoodit ->
-                          IterableUtil.singleton(
-                              hakukohteetKoodit.stream()
-                                      .filter(
-                                          h ->
-                                              this.vastaavaPohjakoulutus(
-                                                  h, pohjakoulutusvaatimustoinenasteUri))
-                                      .map(Pair::getLeft)
-                                  ::iterator))
-                  .get(5, TimeUnit.MINUTES);
+          hakukohteetUri = koodistoAsyncResource.alakoodit(koulutusUri)
+              .thenComposeAsync(this::hakukohteetKooditYlakoodeineen)
+              .thenApplyAsync(hakukohteetKoodit -> IterableUtil.singleton(hakukohteetKoodit.stream()
+                  .filter(h -> this.vastaavaPohjakoulutus(h, pohjakoulutusvaatimustoinenasteUri))
+                  .map(Pair::getLeft)::iterator))
+              .get(5, TimeUnit.MINUTES);
         }
       }
     }
@@ -262,8 +192,7 @@ public class SuoritaHakukohdeImportKomponentti {
     importTyyppi.setHakukohdeOid(hakukohde.oid);
     importTyyppi.setHakuOid(hakukohde.hakuOid);
     importTyyppi.setTila(hakukohde.tila.name());
-    importTyyppi.setValinnanAloituspaikat(
-        Objects.requireNonNullElse(hakukohde.valintojenAloituspaikat, 0));
+    importTyyppi.setValinnanAloituspaikat(Objects.requireNonNullElse(hakukohde.valintojenAloituspaikat, 0));
 
     AvainArvoDTO avainArvo = new AvainArvoDTO();
 
@@ -276,12 +205,8 @@ public class SuoritaHakukohdeImportKomponentti {
     avainArvo.setArvo(hakukohdeKoodiTunniste + "_riittava_kielitaito");
     importTyyppi.getValintaperuste().add(avainArvo);
 
-    String opetuskieli =
-        toteutukset.stream()
-            .flatMap(koulutus -> koulutus.opetuskielet.stream())
-            .map(uri -> uri.replace("kieli_", ""))
-            .findAny()
-            .orElse(null);
+    String opetuskieli = toteutukset.stream().flatMap(koulutus -> koulutus.opetuskielet.stream())
+        .map(uri -> uri.replace("kieli_", "")).findAny().orElse(null);
     avainArvo = new AvainArvoDTO();
     avainArvo.setAvain("opetuskieli");
     avainArvo.setArvo(opetuskieli);
@@ -304,14 +229,12 @@ public class SuoritaHakukohdeImportKomponentti {
 
   private HakukohdeImportDTO processKoutaHakukohde(String hakukohdeOid)
       throws ExecutionException, InterruptedException, TimeoutException {
-    KoutaHakukohde hakukohde =
-        this.koutaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
+    KoutaHakukohde hakukohde = this.koutaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
     String hakukohdeKoodiTunniste = getHakukohdeKoodiTunniste(hakukohde);
     HakukohdeImportDTO importTyyppi = processCommonHakukohde(hakukohde);
 
     HakukohdekoodiDTO hakukohdekoodi = new HakukohdekoodiDTO();
-    if (hakukohde.koulutustyyppikoodi != null
-        && hakukohde.koulutustyyppikoodi.equals(KOULUTUSTYYPPIKOODI_LUKIO)) {
+    if (hakukohde.koulutustyyppikoodi != null && hakukohde.koulutustyyppikoodi.equals(KOULUTUSTYYPPIKOODI_LUKIO)) {
       hakukohdekoodi.setKoodiUri(HAKUKOHDEKOODI_LUKIO);
       importTyyppi.setHakukohdekoodi(hakukohdekoodi);
     } else if (hakukohde.hakukohdeKoodiUri != null) {
@@ -319,43 +242,28 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.setHakukohdekoodi(hakukohdekoodi);
     }
 
-    List<HakukohteenValintakoeDTO> uniqueValintakokeet =
-        Set.of(PAASYKOE_TYYPPI_URI, LISANAYTTO_TYYPPI_URI).stream()
-            .map(hakukohde::getValintakoeOfType)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .map(
-                vk -> {
-                  HakukohteenValintakoeDTO dto = new HakukohteenValintakoeDTO();
-                  dto.setOid(vk.id);
-                  dto.setTyyppiUri(vk.valintakokeentyyppiUri);
-                  return dto;
-                })
-            .collect(Collectors.toList());
+    List<HakukohteenValintakoeDTO> uniqueValintakokeet = Set.of(PAASYKOE_TYYPPI_URI, LISANAYTTO_TYYPPI_URI).stream()
+        .map(hakukohde::getValintakoeOfType).filter(Optional::isPresent).map(Optional::get).map(vk -> {
+          HakukohteenValintakoeDTO dto = new HakukohteenValintakoeDTO();
+          dto.setOid(vk.id);
+          dto.setTyyppiUri(vk.valintakokeentyyppiUri);
+          return dto;
+        }).collect(Collectors.toList());
     importTyyppi.setValintakoe(uniqueValintakokeet);
 
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "painotettu_keskiarvo_hylkays_max",
-        hakukohde.alinHyvaksyttyKeskiarvo != null
-            ? hakukohde.alinHyvaksyttyKeskiarvo.toString()
-            : NOLLA);
+    addAvainArvoToValintaperuste(importTyyppi, "painotettu_keskiarvo_hylkays_max",
+        hakukohde.alinHyvaksyttyKeskiarvo != null ? hakukohde.alinHyvaksyttyKeskiarvo.toString() : NOLLA);
 
     Optional<KoutaValintakoe> paasykoe = hakukohde.getValintakoeOfType(PAASYKOE_TYYPPI_URI);
-    BigDecimal paasykoeHylkaysMax =
-        paasykoe.map(pk -> pk.vahimmaispisteet).orElse(new BigDecimal("0.0"));
-    addAvainArvoToValintaperuste(
-        importTyyppi, "paasykoe_hylkays_max", paasykoeHylkaysMax.toString());
+    BigDecimal paasykoeHylkaysMax = paasykoe.map(pk -> pk.vahimmaispisteet).orElse(new BigDecimal("0.0"));
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_hylkays_max", paasykoeHylkaysMax.toString());
 
     Optional<KoutaValintakoe> lisanaytto = hakukohde.getValintakoeOfType(LISANAYTTO_TYYPPI_URI);
-    BigDecimal lisanayttoHylkaysMax =
-        lisanaytto.map(pk -> pk.vahimmaispisteet).orElse(new BigDecimal("0.0"));
-    addAvainArvoToValintaperuste(
-        importTyyppi, "lisanaytto_hylkays_max", lisanayttoHylkaysMax.toString());
+    BigDecimal lisanayttoHylkaysMax = lisanaytto.map(pk -> pk.vahimmaispisteet).orElse(new BigDecimal("0.0"));
+    addAvainArvoToValintaperuste(importTyyppi, "lisanaytto_hylkays_max", lisanayttoHylkaysMax.toString());
 
-    Map<String, Koodi> koodiarvoKoodi =
-        koodistoAsyncResource.haeKoodisto(
-            KoodistoCachedAsyncResource.PAINOTETTAVAT_OPPIAINEET_LUKIOSSA);
+    Map<String, Koodi> koodiarvoKoodi = koodistoAsyncResource
+        .haeKoodisto(KoodistoCachedAsyncResource.PAINOTETTAVAT_OPPIAINEET_LUKIOSSA);
     Map<String, String> koodiUriKoodiArvo = new HashMap<>();
     for (Koodi koodi : koodiarvoKoodi.values()) {
       koodiUriKoodiArvo.put(koodi.getKoodiUri(), koodi.getKoodiArvo());
@@ -364,13 +272,11 @@ public class SuoritaHakukohdeImportKomponentti {
     for (PainotettuArvosana arvosana : hakukohde.painotetutArvosanat) {
       String koodiarvo = koodiUriKoodiArvo.get(StringUtils.substringBefore(arvosana.koodiUri, "#"));
       if (koodiarvo != null && !koodiarvo.isEmpty()) {
-        addAvainArvoToValintaperuste(
-            importTyyppi, koodiarvo + PAINOKERROIN_POSTFIX, arvosana.painokerroin.toString());
+        addAvainArvoToValintaperuste(importTyyppi, koodiarvo + PAINOKERROIN_POSTFIX,
+            arvosana.painokerroin.toString());
 
         String oppiaine = koodiarvo.split("_")[0];
-        if (oppiaine.equals(A11KIELI)
-            || oppiaine.equals(A21KIELI)
-            || oppiaine.equals(B21KIELI)
+        if (oppiaine.equals(A11KIELI) || oppiaine.equals(A21KIELI) || oppiaine.equals(B21KIELI)
             || oppiaine.equals(B31KIELI)) {
           // koodiarvo is formatted A1_FI
           String kieli = koodiarvo.split("_")[1];
@@ -383,15 +289,10 @@ public class SuoritaHakukohdeImportKomponentti {
       }
     }
 
-    addAvainArvoToValintaperuste(
-        importTyyppi, "paasykoe_tunniste", hakukohdeKoodiTunniste + "_paasykoe");
-    addAvainArvoToValintaperuste(
-        importTyyppi, "lisanaytto_tunniste", hakukohdeKoodiTunniste + "_lisanaytto");
-    addAvainArvoToValintaperuste(
-        importTyyppi, "lisapiste_tunniste", hakukohdeKoodiTunniste + "_lisapiste");
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "urheilija_lisapiste_tunniste",
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_tunniste", hakukohdeKoodiTunniste + "_paasykoe");
+    addAvainArvoToValintaperuste(importTyyppi, "lisanaytto_tunniste", hakukohdeKoodiTunniste + "_lisanaytto");
+    addAvainArvoToValintaperuste(importTyyppi, "lisapiste_tunniste", hakukohdeKoodiTunniste + "_lisapiste");
+    addAvainArvoToValintaperuste(importTyyppi, "urheilija_lisapiste_tunniste",
         hakukohdeKoodiTunniste + "_urheilija_lisapiste");
 
     return importTyyppi;
@@ -399,15 +300,14 @@ public class SuoritaHakukohdeImportKomponentti {
 
   private HakukohdeImportDTO processTarjontaHakukohde(String hakukohdeOid)
       throws InterruptedException, ExecutionException, TimeoutException {
-    AbstractHakukohde hakukohde =
-        this.tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
+    AbstractHakukohde hakukohde = this.tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, TimeUnit.MINUTES);
     String hakukohdeKoodiTunniste = getHakukohdeKoodiTunniste(hakukohde);
     HakukohdeImportDTO importTyyppi = processCommonHakukohde(hakukohde);
 
     AvainArvoDTO avainArvo;
 
-    HakukohdeValintaperusteetDTO valintaperusteet =
-        tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid).get(60, TimeUnit.SECONDS);
+    HakukohdeValintaperusteetDTO valintaperusteet = tarjontaAsyncResource.findValintaperusteetByOid(hakukohdeOid)
+        .get(60, TimeUnit.SECONDS);
 
     importTyyppi.setValintakoe(new ArrayList<>());
     for (ValintakoeDTO valintakoeDTO : valintaperusteet.getValintakokeet()) {
@@ -417,70 +317,45 @@ public class SuoritaHakukohdeImportKomponentti {
       importTyyppi.getValintakoe().add(v);
     }
 
-    addAvainArvoToValintaperuste(
-        importTyyppi, "paasykoe_min", valintaperusteet.getPaasykoeMin().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi, "paasykoe_max", valintaperusteet.getPaasykoeMax().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi, "paasykoe_hylkays_min", valintaperusteet.getPaasykoeHylkaysMin().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi, "paasykoe_hylkays_max", valintaperusteet.getPaasykoeHylkaysMax().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi, "lisanaytto_min", valintaperusteet.getLisanayttoMin().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi, "lisanaytto_max", valintaperusteet.getLisanayttoMax().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "lisanaytto_hylkays_min",
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_min", valintaperusteet.getPaasykoeMin().toString());
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_max", valintaperusteet.getPaasykoeMax().toString());
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_hylkays_min",
+        valintaperusteet.getPaasykoeHylkaysMin().toString());
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_hylkays_max",
+        valintaperusteet.getPaasykoeHylkaysMax().toString());
+    addAvainArvoToValintaperuste(importTyyppi, "lisanaytto_min", valintaperusteet.getLisanayttoMin().toString());
+    addAvainArvoToValintaperuste(importTyyppi, "lisanaytto_max", valintaperusteet.getLisanayttoMax().toString());
+    addAvainArvoToValintaperuste(importTyyppi, "lisanaytto_hylkays_min",
         valintaperusteet.getLisanayttoHylkaysMin().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "lisanaytto_hylkays_max",
+    addAvainArvoToValintaperuste(importTyyppi, "lisanaytto_hylkays_max",
         valintaperusteet.getLisanayttoHylkaysMax().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "paasykoe_ja_lisanaytto_hylkays_min",
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_ja_lisanaytto_hylkays_min",
         valintaperusteet.getHylkaysMin().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "paasykoe_ja_lisanaytto_hylkays_max",
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_ja_lisanaytto_hylkays_max",
         valintaperusteet.getHylkaysMax().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "painotettu_keskiarvo_hylkays_min",
+    addAvainArvoToValintaperuste(importTyyppi, "painotettu_keskiarvo_hylkays_min",
         valintaperusteet.getPainotettuKeskiarvoHylkaysMin().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "painotettu_keskiarvo_hylkays_max",
+    addAvainArvoToValintaperuste(importTyyppi, "painotettu_keskiarvo_hylkays_max",
         valintaperusteet.getPainotettuKeskiarvoHylkaysMax().toString());
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "paasykoe_tunniste",
+    addAvainArvoToValintaperuste(importTyyppi, "paasykoe_tunniste",
         valintaperusteet.getPaasykoeTunniste() != null
             ? valintaperusteet.getPaasykoeTunniste()
             : hakukohdeKoodiTunniste + "_paasykoe");
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "lisanaytto_tunniste",
+    addAvainArvoToValintaperuste(importTyyppi, "lisanaytto_tunniste",
         valintaperusteet.getLisanayttoTunniste() != null
             ? valintaperusteet.getLisanayttoTunniste()
             : hakukohdeKoodiTunniste + "_lisanaytto");
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "lisapiste_tunniste",
+    addAvainArvoToValintaperuste(importTyyppi, "lisapiste_tunniste",
         valintaperusteet.getLisapisteTunniste() != null
             ? valintaperusteet.getLisapisteTunniste()
             : hakukohdeKoodiTunniste + "_lisapiste");
-    addAvainArvoToValintaperuste(
-        importTyyppi,
-        "urheilija_lisapiste_tunniste",
+    addAvainArvoToValintaperuste(importTyyppi, "urheilija_lisapiste_tunniste",
         valintaperusteet.getUrheilijaLisapisteTunniste() != null
             ? valintaperusteet.getUrheilijaLisapisteTunniste()
             : hakukohdeKoodiTunniste + "_urheilija_lisapiste");
 
     for (String avain : valintaperusteet.getPainokertoimet().keySet()) {
-      addAvainArvoToValintaperuste(
-          importTyyppi, avain, valintaperusteet.getPainokertoimet().get(avain));
+      addAvainArvoToValintaperuste(importTyyppi, avain, valintaperusteet.getPainokertoimet().get(avain));
     }
 
     return importTyyppi;
@@ -490,8 +365,7 @@ public class SuoritaHakukohdeImportKomponentti {
     return hakukohde.oid.replace(".", "_");
   }
 
-  private void addAvainArvoToValintaperuste(
-      HakukohdeImportDTO importTyyppi, String avain, String arvo) {
+  private void addAvainArvoToValintaperuste(HakukohdeImportDTO importTyyppi, String avain, String arvo) {
     AvainArvoDTO avainArvo = new AvainArvoDTO();
     avainArvo.setAvain(avain);
     avainArvo.setArvo(arvo);

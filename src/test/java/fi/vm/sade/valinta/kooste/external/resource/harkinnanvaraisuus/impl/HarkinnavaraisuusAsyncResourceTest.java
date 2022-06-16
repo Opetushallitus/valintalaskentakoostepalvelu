@@ -53,7 +53,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
   public void testHakemustenHarkinnanvaraisuudetYliajoSurenTiedoilla()
       throws ExecutionException, InterruptedException, TimeoutException {
 
-    // Luodaan kaksi hakemusta, toisella on suressa yksilöllistetty MA+AI ja toisella tavallinen
+    // Luodaan kaksi hakemusta, toisella on suressa yksilöllistetty MA+AI ja
+    // toisella tavallinen
     // valmis peruskoulusuoritus.
     String leikkuriPvm = "2032-06-06";
     List<String> hakemusOids = new ArrayList<>();
@@ -129,41 +130,32 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o1, o2);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
-    List<HenkiloViiteDto> onrResult =
-        List.of(new HenkiloViiteDto(aliasForHenkiloOid1, henkiloOid1));
+    List<HenkiloViiteDto> onrResult = List.of(new HenkiloViiteDto(aliasForHenkiloOid1, henkiloOid1));
 
     when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(hakemusOids))
         .thenReturn(CompletableFuture.completedFuture(ataruResult));
     when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(
-            List.of(henkiloOid1, henkiloOid2, aliasForHenkiloOid1)))
-        .thenReturn(CompletableFuture.completedFuture(sureResult));
+        List.of(henkiloOid1, henkiloOid2, aliasForHenkiloOid1)))
+            .thenReturn(CompletableFuture.completedFuture(sureResult));
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1, henkiloOid2)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
-    assertEquals(
-        1,
-        hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
-            .count());
+    assertEquals(1,
+        hhv.get().stream().filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet()
+            .get(0).getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI)).count());
   }
 
   @Test
   public void testAtarutietojenYliajoSurenTiedoilla()
       throws ExecutionException, InterruptedException, TimeoutException {
 
-    // Luodaan kaksi hakemusta, toisella on suressa yksilöllistetty MA+AI ja toisella tavallinen
+    // Luodaan kaksi hakemusta, toisella on suressa yksilöllistetty MA+AI ja
+    // toisella tavallinen
     // valmis peruskoulusuoritus.
     String leikkuriPvm = "2032-06-06";
 
@@ -205,56 +197,34 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o1, o2);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
-    List<HenkiloViiteDto> onrResult =
-        List.of(new HenkiloViiteDto(aliasForHenkiloOid1, henkiloOid1));
+    List<HenkiloViiteDto> onrResult = List.of(new HenkiloViiteDto(aliasForHenkiloOid1, henkiloOid1));
 
-    when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(
-            List.of(henkiloOid1, henkiloOid2)))
+    when(mockSure.getSuorituksetForOppijasWithoutEnsikertalaisuus(List.of(henkiloOid1, henkiloOid2)))
         .thenReturn(CompletableFuture.completedFuture(sureResult));
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1, henkiloOid2)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
 
-    HakemuksenHarkinnanvaraisuus hhv1 =
-        new HakemuksenHarkinnanvaraisuus(
-            hakemusOid1,
-            List.of(
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid1, HarkinnanvaraisuudenSyy.ATARU_OPPIMISVAIKEUDET),
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid2, HarkinnanvaraisuudenSyy.ATARU_OPPIMISVAIKEUDET)));
+    HakemuksenHarkinnanvaraisuus hhv1 = new HakemuksenHarkinnanvaraisuus(hakemusOid1, List.of(
+        new HakutoiveenHarkinnanvaraisuus(hakukohdeOid1, HarkinnanvaraisuudenSyy.ATARU_OPPIMISVAIKEUDET),
+        new HakutoiveenHarkinnanvaraisuus(hakukohdeOid2, HarkinnanvaraisuudenSyy.ATARU_OPPIMISVAIKEUDET)));
     hhv1.setHenkiloOid(henkiloOid1);
 
-    HakemuksenHarkinnanvaraisuus hhv2 =
-        new HakemuksenHarkinnanvaraisuus(
-            hakemusOid2,
-            List.of(
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid1, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN),
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid3, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
+    HakemuksenHarkinnanvaraisuus hhv2 = new HakemuksenHarkinnanvaraisuus(hakemusOid2, List.of(
+        new HakutoiveenHarkinnanvaraisuus(hakukohdeOid1, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN),
+        new HakutoiveenHarkinnanvaraisuus(hakukohdeOid3, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
     hhv2.setHenkiloOid(henkiloOid2);
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getSyncedHarkinnanvaraisuudes(List.of(hhv1, hhv2));
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h
+        .getSyncedHarkinnanvaraisuudes(List.of(hhv1, hhv2));
 
-    assertEquals(
-        1,
-        hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
-            .count());
-    assertEquals(
-        1, hhv.get().stream().filter(hark -> hakemusOid1.equals(hark.getHakemusOid())).count());
-    assertEquals(
-        1, hhv.get().stream().filter(hark -> hakemusOid2.equals(hark.getHakemusOid())).count());
+    assertEquals(1,
+        hhv.get().stream().filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet()
+            .get(0).getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI)).count());
+    assertEquals(1, hhv.get().stream().filter(hark -> hakemusOid1.equals(hark.getHakemusOid())).count());
+    assertEquals(1, hhv.get().stream().filter(hark -> hakemusOid2.equals(hark.getHakemusOid())).count());
   }
 
   @Test
@@ -312,8 +282,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o2);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
     when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(List.of(hakemusOid2)))
         .thenReturn(CompletableFuture.completedFuture(ataruResult));
@@ -322,19 +292,13 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid2)))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(List.of(hakemusOid2));
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h
+        .getHarkinnanvaraisuudetForHakemukses(List.of(hakemusOid2));
 
-    assertEquals(
-        1,
+    assertEquals(1,
         hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA))
+            .filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet().get(0)
+                .getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA))
             .count());
   }
 
@@ -390,8 +354,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o1);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
     List<HenkiloViiteDto> onrResult = Collections.emptyList();
 
@@ -402,19 +366,12 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
-    assertEquals(
-        1,
+    assertEquals(1,
         hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI))
+            .filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet().get(0)
+                .getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI))
             .count());
   }
 
@@ -470,8 +427,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o1);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
     List<HenkiloViiteDto> onrResult = Collections.emptyList();
 
@@ -482,26 +439,18 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
-    assertEquals(
-        1,
+    assertEquals(1,
         hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN))
+            .filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet().get(0)
+                .getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN))
             .count());
   }
 
   @Test
-  public void
-      testHakemuksenHarkinnanvaraisuusietoaYliajetaanJosSuressa2018JalkeenTallennettuTietoJaYksMatAi()
-          throws ExecutionException, InterruptedException, TimeoutException {
+  public void testHakemuksenHarkinnanvaraisuusietoaYliajetaanJosSuressa2018JalkeenTallennettuTietoJaYksMatAi()
+      throws ExecutionException, InterruptedException, TimeoutException {
 
     String leikkuriPvm = "2032-06-06";
     List<String> hakemusOids = new ArrayList<>();
@@ -551,8 +500,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o1);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
     List<HenkiloViiteDto> onrResult = Collections.emptyList();
 
@@ -563,20 +512,11 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
-    assertEquals(
-        1,
-        hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
-            .count());
+    assertEquals(1,
+        hhv.get().stream().filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet()
+            .get(0).getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI)).count());
   }
 
   @Test
@@ -623,8 +563,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
     when(mockAtaru.getApplicationsByOidsWithHarkinnanvaraisuustieto(List.of(hakemusOid)))
         .thenReturn(CompletableFuture.completedFuture(ataruResult));
@@ -633,26 +573,18 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid)))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(List.of(hakemusOid));
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h
+        .getHarkinnanvaraisuudetForHakemukses(List.of(hakemusOid));
 
-    assertEquals(
-        1,
-        hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN_HAKUKOHDE))
-            .count());
+    assertEquals(1, hhv.get().stream()
+        .filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet().get(0)
+            .getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN_HAKUKOHDE))
+        .count());
   }
 
   @Test
-  public void
-      hakemuksellaIlmoitettuEiTodistuksiaYliajetaanJosDeadlineaEiOhitettuJaSuressaKeskenTilainenPkSuoritus()
-          throws ExecutionException, InterruptedException, TimeoutException {
+  public void hakemuksellaIlmoitettuEiTodistuksiaYliajetaanJosDeadlineaEiOhitettuJaSuressaKeskenTilainenPkSuoritus()
+      throws ExecutionException, InterruptedException, TimeoutException {
 
     String leikkuriPvm = "2032-06-06";
     List<String> hakemusOids = new ArrayList<>();
@@ -702,8 +634,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o1);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
     List<HenkiloViiteDto> onrResult = Collections.emptyList();
 
@@ -714,19 +646,12 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
-    assertEquals(
-        1,
+    assertEquals(1,
         hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN))
+            .filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet().get(0)
+                .getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN))
             .count());
   }
 
@@ -782,8 +707,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o1);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
     List<HenkiloViiteDto> onrResult = Collections.emptyList();
 
@@ -794,19 +719,12 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
-    assertEquals(
-        1,
+    assertEquals(1,
         hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA))
+            .filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet().get(0)
+                .getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.SURE_EI_PAATTOTODISTUSTA))
             .count());
   }
 
@@ -851,8 +769,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
     List<Oppija> sureResult = List.of(o1);
 
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
 
     List<HenkiloViiteDto> onrResult = Collections.emptyList();
 
@@ -863,27 +781,20 @@ public class HarkinnavaraisuusAsyncResourceTest {
     when(mockOnr.haeHenkiloOidDuplikaatit(Set.of(henkiloOid1)))
         .thenReturn(CompletableFuture.completedFuture(onrResult));
 
-    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv =
-        h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
+    CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> hhv = h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
-    assertEquals(
-        1,
+    assertEquals(1,
         hhv.get().stream()
-            .filter(
-                hakemuksenHarkinnanvaraisuus ->
-                    hakemuksenHarkinnanvaraisuus
-                        .getHakutoiveet()
-                        .get(0)
-                        .getHarkinnanvaraisuudenSyy()
-                        .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN))
+            .filter(hakemuksenHarkinnanvaraisuus -> hakemuksenHarkinnanvaraisuus.getHakutoiveet().get(0)
+                .getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN))
             .count());
   }
 
   @Test
   public void suorituksenPerusteellaYksMatAi() {
     String leikkuriPvm = "2022-06-06";
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
     String hakukohdeOid = "1.2.246.562.20.88759381234";
     String hakemusOid = "1.2.246.562.11.00001131111";
     String henkiloOid1 = "1.2.246.562.24.47613331111";
@@ -903,12 +814,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
     o1.setSuoritukset(List.of(sa1));
     o1.setOppijanumero(henkiloOid1);
 
-    HakemuksenHarkinnanvaraisuus eiHark =
-        new HakemuksenHarkinnanvaraisuus(
-            hakemusOid,
-            List.of(
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
+    HakemuksenHarkinnanvaraisuus eiHark = new HakemuksenHarkinnanvaraisuus(hakemusOid,
+        List.of(new HakutoiveenHarkinnanvaraisuus(hakukohdeOid, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
 
     boolean isYksMatAi = h.hasYksilollistettyMatAi(eiHark, o1);
     assertTrue(isYksMatAi);
@@ -917,8 +824,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
   @Test
   public void suorituksenPerusteellaEiYksMatAi() {
     String leikkuriPvm = "2022-06-06";
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
     String hakukohdeOid = "1.2.246.562.20.88759381234";
     String hakemusOid = "1.2.246.562.11.00001131111";
     String henkiloOid1 = "1.2.246.562.24.47613331111";
@@ -938,12 +845,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
     o1.setSuoritukset(List.of(sa1));
     o1.setOppijanumero(henkiloOid1);
 
-    HakemuksenHarkinnanvaraisuus eiHark =
-        new HakemuksenHarkinnanvaraisuus(
-            hakemusOid,
-            List.of(
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid, HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)));
+    HakemuksenHarkinnanvaraisuus eiHark = new HakemuksenHarkinnanvaraisuus(hakemusOid,
+        List.of(new HakutoiveenHarkinnanvaraisuus(hakukohdeOid, HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)));
 
     boolean isYksMatAi = h.hasYksilollistettyMatAi(eiHark, o1);
     assertFalse(isYksMatAi);
@@ -952,8 +855,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
   @Test
   public void hakemuksenPerusteellaYksMatAi() {
     String leikkuriPvm = "2082-06-06";
-    HarkinnanvaraisuusAsyncResource h =
-        new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
+    HarkinnanvaraisuusAsyncResource h = new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure,
+        mockOnr);
     String hakukohdeOid = "1.2.246.562.20.88759381234";
     String hakemusOid = "1.2.246.562.11.00001131111";
     String henkiloOid1 = "1.2.246.562.24.47613331111";
@@ -962,12 +865,8 @@ public class HarkinnavaraisuusAsyncResourceTest {
     o1.setSuoritukset(Collections.emptyList());
     o1.setOppijanumero(henkiloOid1);
 
-    HakemuksenHarkinnanvaraisuus eiHark =
-        new HakemuksenHarkinnanvaraisuus(
-            hakemusOid,
-            List.of(
-                new HakutoiveenHarkinnanvaraisuus(
-                    hakukohdeOid, HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)));
+    HakemuksenHarkinnanvaraisuus eiHark = new HakemuksenHarkinnanvaraisuus(hakemusOid,
+        List.of(new HakutoiveenHarkinnanvaraisuus(hakukohdeOid, HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)));
 
     boolean isYksMatAi = h.hasYksilollistettyMatAi(eiHark, o1);
     assertTrue(isYksMatAi);

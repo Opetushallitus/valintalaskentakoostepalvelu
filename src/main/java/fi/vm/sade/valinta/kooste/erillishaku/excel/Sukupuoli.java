@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
 public enum Sukupuoli {
-  MIES,
-  NAINEN,
-  EI_SUKUPUOLTA;
+  MIES, NAINEN, EI_SUKUPUOLTA;
 
   public static Sukupuoli fromString(String s) {
     try {

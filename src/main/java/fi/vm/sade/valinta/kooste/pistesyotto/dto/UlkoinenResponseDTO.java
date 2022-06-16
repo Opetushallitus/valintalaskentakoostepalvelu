@@ -25,12 +25,6 @@ public class UlkoinenResponseDTO {
 
   @Override
   public String toString() {
-    return "UlkoinenResponseDTO{"
-        + "kasiteltyOk='"
-        + kasiteltyOk
-        + '\''
-        + ", virheet="
-        + virheet
-        + '}';
+    return "UlkoinenResponseDTO{" + "kasiteltyOk='" + kasiteltyOk + '\'' + ", virheet=" + virheet + '}';
   }
 }

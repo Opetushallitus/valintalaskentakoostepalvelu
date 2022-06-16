@@ -30,26 +30,18 @@ public class ImportedErillisHakuExcel {
     }
   }
 
-  public ImportedErillisHakuExcel(
-      Hakutyyppi hakutyyppi,
-      InputStream inputStream,
+  public ImportedErillisHakuExcel(Hakutyyppi hakutyyppi, InputStream inputStream,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
     this(createExcel(hakutyyppi, inputStream, koodistoCachedAsyncResource));
   }
 
-  private static List<ErillishakuRivi> createExcel(
-      Hakutyyppi hakutyyppi,
-      InputStream inputStream,
-      KoodistoCachedAsyncResource koodistoCachedAsyncResource)
-      throws ExcelValidointiPoikkeus {
+  private static List<ErillishakuRivi> createExcel(Hakutyyppi hakutyyppi, InputStream inputStream,
+      KoodistoCachedAsyncResource koodistoCachedAsyncResource) throws ExcelValidointiPoikkeus {
     try {
       final List<ErillishakuRivi> rivit = Lists.newArrayList();
-      new ErillishakuExcel(
-              hakutyyppi,
-              rivi -> rivit.add(rivi.withAidinkieli(resolveAidinkieli(rivi.getAidinkieli()))),
-              koodistoCachedAsyncResource)
-          .getExcel()
-          .tuoXlsx(inputStream);
+      new ErillishakuExcel(hakutyyppi,
+          rivi -> rivit.add(rivi.withAidinkieli(resolveAidinkieli(rivi.getAidinkieli()))),
+          koodistoCachedAsyncResource).getExcel().tuoXlsx(inputStream);
       return rivit;
     } catch (ExcelValidointiPoikkeus e) {
       throw e;
@@ -61,24 +53,14 @@ public class ImportedErillisHakuExcel {
 
   private HenkiloCreateDTO convert(final ErillishakuRivi rivi) {
     return new HenkiloCreateDTO(
-        Optional.ofNullable(rivi.getAidinkieli())
-            .map(ImportedErillisHakuExcel::resolveAidinkieli)
-            .orElse("fi"),
-        rivi.getSukupuoli().name(),
-        rivi.getEtunimi(),
-        rivi.getSukunimi(),
-        rivi.getHenkilotunnus(),
-        rivi.getSyntymaAika(),
-        rivi.getPersonOid(),
-        HenkiloTyyppi.OPPIJA,
-        rivi.getAsiointikieli(),
+        Optional.ofNullable(rivi.getAidinkieli()).map(ImportedErillisHakuExcel::resolveAidinkieli).orElse("fi"),
+        rivi.getSukupuoli().name(), rivi.getEtunimi(), rivi.getSukunimi(), rivi.getHenkilotunnus(),
+        rivi.getSyntymaAika(), rivi.getPersonOid(), HenkiloTyyppi.OPPIJA, rivi.getAsiointikieli(),
         rivi.getKansalaisuus());
   }
 
   private static String resolveAidinkieli(String aidinkieli) {
-    return isFloatingPointNumber(aidinkieli)
-        ? aidinkieli.substring(0, aidinkieli.indexOf("."))
-        : aidinkieli;
+    return isFloatingPointNumber(aidinkieli) ? aidinkieli.substring(0, aidinkieli.indexOf(".")) : aidinkieli;
   }
 
   private static boolean isFloatingPointNumber(String str) {

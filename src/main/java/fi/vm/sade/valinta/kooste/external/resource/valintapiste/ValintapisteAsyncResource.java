@@ -14,15 +14,14 @@ public interface ValintapisteAsyncResource {
   String LAST_MODIFIED = "Last-Modified";
   String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 
-  CompletableFuture<PisteetWithLastModified> getValintapisteet(
-      String hakuOID, String hakukohdeOID, AuditSession auditSession);
+  CompletableFuture<PisteetWithLastModified> getValintapisteet(String hakuOID, String hakukohdeOID,
+      AuditSession auditSession);
 
-  Observable<PisteetWithLastModified> getValintapisteet(
-      Collection<String> hakemusOIDs, AuditSession auditSession);
+  Observable<PisteetWithLastModified> getValintapisteet(Collection<String> hakemusOIDs, AuditSession auditSession);
 
-  CompletableFuture<PisteetWithLastModified> getValintapisteetWithHakemusOidsAsFuture(
-      List<String> hakemusOIDs, AuditSession auditSession);
+  CompletableFuture<PisteetWithLastModified> getValintapisteetWithHakemusOidsAsFuture(List<String> hakemusOIDs,
+      AuditSession auditSession);
 
-  CompletableFuture<Set<String>> putValintapisteet(
-      Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet, AuditSession auditSession);
+  CompletableFuture<Set<String>> putValintapisteet(Optional<String> ifUnmodifiedSince, List<Valintapisteet> pisteet,
+      AuditSession auditSession);
 }

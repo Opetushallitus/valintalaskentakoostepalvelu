@@ -39,8 +39,7 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   private final UrlConfiguration urlConfiguration;
 
   @Autowired
-  public AtaruAsyncResourceImpl(
-      @Qualifier("AtaruHttpClient") HttpClient client,
+  public AtaruAsyncResourceImpl(@Qualifier("AtaruHttpClient") HttpClient client,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
     this.client = client;
@@ -49,43 +48,32 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
     this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
   }
 
-  private CompletableFuture<List<HakemusWrapper>> getApplications(
-      String hakukohdeOid, List<String> hakemusOids, Boolean withHarkinnanvaraisuustieto) {
+  private CompletableFuture<List<HakemusWrapper>> getApplications(String hakukohdeOid, List<String> hakemusOids,
+      Boolean withHarkinnanvaraisuustieto) {
     if (hakukohdeOid == null && hakemusOids.isEmpty()) {
       return CompletableFuture.completedFuture(Collections.emptyList());
     }
     return getApplicationsInChunks(hakukohdeOid, hakemusOids, withHarkinnanvaraisuustieto)
-        .thenComposeAsync(
-            hakemukset -> {
-              if (hakemukset.isEmpty()) {
-                return CompletableFuture.completedFuture(Collections.emptyList());
-              } else {
-                return getHenkilot(hakemukset)
-                    .thenComposeAsync(
-                        henkilot -> {
-                          ensureKansalaisuus(henkilot);
-                          Stream<String> asuinmaaKoodit =
-                              hakemukset.stream()
-                                  .map(h -> h.getKeyValues().get("country-of-residence"));
-                          Stream<String> kansalaisuusKoodit =
-                              henkilot.values().stream()
-                                  .flatMap(
-                                      h ->
-                                          h.getKansalaisuus().stream()
-                                              .map(KansalaisuusDto::getKansalaisuusKoodi));
-                          return getMaakoodit(asuinmaaKoodit, kansalaisuusKoodit)
-                              .thenApplyAsync(
-                                  maakoodit ->
-                                      hakemukset.stream()
-                                          .map(hakemusToHakemusWrapper(henkilot, maakoodit))
-                                          .collect(Collectors.toList()));
-                        });
-              }
+        .thenComposeAsync(hakemukset -> {
+          if (hakemukset.isEmpty()) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+          } else {
+            return getHenkilot(hakemukset).thenComposeAsync(henkilot -> {
+              ensureKansalaisuus(henkilot);
+              Stream<String> asuinmaaKoodit = hakemukset.stream()
+                  .map(h -> h.getKeyValues().get("country-of-residence"));
+              Stream<String> kansalaisuusKoodit = henkilot.values().stream().flatMap(
+                  h -> h.getKansalaisuus().stream().map(KansalaisuusDto::getKansalaisuusKoodi));
+              return getMaakoodit(asuinmaaKoodit, kansalaisuusKoodit).thenApplyAsync(
+                  maakoodit -> hakemukset.stream().map(hakemusToHakemusWrapper(henkilot, maakoodit))
+                      .collect(Collectors.toList()));
             });
+          }
+        });
   }
 
-  private CompletableFuture<List<AtaruHakemus>> getApplicationChunk(
-      String hakukohdeOid, List<String> hakemusOids, Boolean withHarkinnanvaraisuustieto) {
+  private CompletableFuture<List<AtaruHakemus>> getApplicationChunk(String hakukohdeOid, List<String> hakemusOids,
+      Boolean withHarkinnanvaraisuustieto) {
     Map<String, String> query = new HashMap<>();
     if (hakukohdeOid != null) {
       query.put("hakukohdeOid", hakukohdeOid);
@@ -93,90 +81,61 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
     if (withHarkinnanvaraisuustieto) {
       query.put("harkinnanvaraisuustiedotHakutoiveille", "true");
     }
-    return this.client.postJson(
-        this.urlConfiguration.url("ataru.applications.by-hakukohde", query),
-        Duration.ofMinutes(1),
-        hakemusOids,
-        new TypeToken<List<String>>() {}.getType(),
-        new TypeToken<List<AtaruHakemus>>() {}.getType());
+    return this.client.postJson(this.urlConfiguration.url("ataru.applications.by-hakukohde", query),
+        Duration.ofMinutes(1), hakemusOids, new TypeToken<List<String>>() {
+        }.getType(), new TypeToken<List<AtaruHakemus>>() {
+        }.getType());
   }
 
-  private CompletableFuture<List<AtaruHakemus>> getApplicationsInChunks(
-      String hakukohdeOid, List<String> hakemusOids, Boolean withHarkinnanvaraisuustieto) {
+  private CompletableFuture<List<AtaruHakemus>> getApplicationsInChunks(String hakukohdeOid, List<String> hakemusOids,
+      Boolean withHarkinnanvaraisuustieto) {
     if (hakemusOids.isEmpty()) {
       return getApplicationChunk(hakukohdeOid, hakemusOids, withHarkinnanvaraisuustieto);
     } else {
-      return CompletableFutureUtil.sequence(
-              Lists.partition(hakemusOids, SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE).stream()
-                  .map(
-                      chunk ->
-                          getApplicationChunk(hakukohdeOid, chunk, withHarkinnanvaraisuustieto))
-                  .collect(Collectors.toList()))
-          .thenApplyAsync(
-              chunks -> chunks.stream().flatMap(List::stream).collect(Collectors.toList()));
+      return CompletableFutureUtil
+          .sequence(Lists.partition(hakemusOids, SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE).stream()
+              .map(chunk -> getApplicationChunk(hakukohdeOid, chunk, withHarkinnanvaraisuustieto))
+              .collect(Collectors.toList()))
+          .thenApplyAsync(chunks -> chunks.stream().flatMap(List::stream).collect(Collectors.toList()));
     }
   }
 
   private void ensureKansalaisuus(Map<String, HenkiloPerustietoDto> henkilot) {
-    List<String> missingKansalaisuus =
-        henkilot.entrySet().stream()
-            .filter(e -> e.getValue().getKansalaisuus().isEmpty())
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
+    List<String> missingKansalaisuus = henkilot.entrySet().stream()
+        .filter(e -> e.getValue().getKansalaisuus().isEmpty()).map(Map.Entry::getKey)
+        .collect(Collectors.toList());
     if (!missingKansalaisuus.isEmpty()) {
-      LOG.warn(
-          String.format(
-              "Kansalaisuus missing from henkilöt: %s", String.join(", ", missingKansalaisuus)));
+      LOG.warn(String.format("Kansalaisuus missing from henkilöt: %s", String.join(", ", missingKansalaisuus)));
     }
   }
 
-  private CompletableFuture<Map<String, HenkiloPerustietoDto>> getHenkilot(
-      List<AtaruHakemus> hakemukset) {
+  private CompletableFuture<Map<String, HenkiloPerustietoDto>> getHenkilot(List<AtaruHakemus> hakemukset) {
     return oppijanumerorekisteriAsyncResource.haeHenkilot(
-        hakemukset.stream()
-            .map(AtaruHakemus::getPersonOid)
-            .distinct()
-            .collect(Collectors.toList()));
+        hakemukset.stream().map(AtaruHakemus::getPersonOid).distinct().collect(Collectors.toList()));
   }
 
   private Function<AtaruHakemus, AtaruHakemusWrapper> hakemusToHakemusWrapper(
       Map<String, HenkiloPerustietoDto> henkilot, Map<String, Koodi> maakoodit) {
     return hakemus -> {
-      String ISOmaakoodi =
-          maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
+      String ISOmaakoodi = maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
       HenkiloPerustietoDto henkilo = henkilot.get(hakemus.getPersonOid());
-      List<String> kansalaisuudet =
-          henkilo.getKansalaisuus().stream()
-              .map(k -> maakoodit.get(k.getKansalaisuusKoodi()).getKoodiArvo())
-              .collect(Collectors.toList());
+      List<String> kansalaisuudet = henkilo.getKansalaisuus().stream()
+          .map(k -> maakoodit.get(k.getKansalaisuusKoodi()).getKoodiArvo()).collect(Collectors.toList());
       Map<String, String> newKeyValues = new HashMap<>(hakemus.getKeyValues());
       newKeyValues.replace("country-of-residence", ISOmaakoodi);
-      AtaruHakemus h =
-          new AtaruHakemus(
-              hakemus.getHakemusOid(),
-              hakemus.getPersonOid(),
-              hakemus.getHakuOid(),
-              hakemus.getHakutoiveet(),
-              hakemus.getMaksuvelvollisuus(),
-              hakemus.getAsiointikieli(),
-              newKeyValues);
+      AtaruHakemus h = new AtaruHakemus(hakemus.getHakemusOid(), hakemus.getPersonOid(), hakemus.getHakuOid(),
+          hakemus.getHakutoiveet(), hakemus.getMaksuvelvollisuus(), hakemus.getAsiointikieli(), newKeyValues);
       AtaruHakemusWrapper wrapper = new AtaruHakemusWrapper(h, henkilo);
       wrapper.setKansalaisuus(kansalaisuudet);
       return wrapper;
     };
   }
 
-  private CompletableFuture<Map<String, Koodi>> getMaakoodit(
-      Stream<String> asuinmaaKoodit, Stream<String> kansalaisuusKoodit) {
-    return CompletableFutureUtil.sequence(
-        Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
-            .distinct()
-            .collect(
-                Collectors.toMap(
-                    koodiArvo -> koodiArvo,
-                    koodiArvo ->
-                        koodistoCachedAsyncResource.maatjavaltiot2ToMaatjavaltiot1(
-                            "maatjavaltiot2_" + koodiArvo))));
+  private CompletableFuture<Map<String, Koodi>> getMaakoodit(Stream<String> asuinmaaKoodit,
+      Stream<String> kansalaisuusKoodit) {
+    return CompletableFutureUtil.sequence(Stream.concat(asuinmaaKoodit, kansalaisuusKoodit).distinct()
+        .collect(Collectors.toMap(koodiArvo -> koodiArvo, koodiArvo -> koodistoCachedAsyncResource
+            .maatjavaltiot2ToMaatjavaltiot1("maatjavaltiot2_" + koodiArvo))));
   }
 
   @Override
@@ -185,8 +144,8 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(
-      String hakukohdeOid, boolean withHarkinnanvaraisuustieto) {
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid,
+      boolean withHarkinnanvaraisuustieto) {
     return getApplications(hakukohdeOid, Lists.newArrayList(), withHarkinnanvaraisuustieto);
   }
 
@@ -196,8 +155,7 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(
-      List<String> oids) {
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(List<String> oids) {
     return getApplications(null, oids, true);
   }
 }

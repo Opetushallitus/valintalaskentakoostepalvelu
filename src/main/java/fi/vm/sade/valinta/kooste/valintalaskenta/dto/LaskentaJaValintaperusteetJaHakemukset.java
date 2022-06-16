@@ -14,13 +14,9 @@ public class LaskentaJaValintaperusteetJaHakemukset {
   private final List<ValintaperusteetHakijaryhmaDTO> hakijaryhmat;
   private final String hakukohdeOid;
 
-  public LaskentaJaValintaperusteetJaHakemukset(
-      LaskentaStartParams laskenta,
-      String hakukohdeOid,
-      List<ValintaperusteetDTO> valintaperusteet,
-      List<Hakemus> hakemukset,
-      List<ApplicationAdditionalDataDTO> lisatiedot,
-      List<ValintaperusteetHakijaryhmaDTO> hakijaryhmat) {
+  public LaskentaJaValintaperusteetJaHakemukset(LaskentaStartParams laskenta, String hakukohdeOid,
+      List<ValintaperusteetDTO> valintaperusteet, List<Hakemus> hakemukset,
+      List<ApplicationAdditionalDataDTO> lisatiedot, List<ValintaperusteetHakijaryhmaDTO> hakijaryhmat) {
     this.laskenta = laskenta;
     this.hakukohdeOid = hakukohdeOid;
     this.valintaperusteet = valintaperusteet;

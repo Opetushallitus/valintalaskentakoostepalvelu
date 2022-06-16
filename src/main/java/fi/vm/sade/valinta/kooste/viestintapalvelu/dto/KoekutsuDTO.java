@@ -19,12 +19,7 @@ public class KoekutsuDTO {
     this.templateName = null;
   }
 
-  public KoekutsuDTO(
-      String letterBodyText,
-      String tarjoajaOid,
-      String tag,
-      String hakukohdeOid,
-      Haku haku,
+  public KoekutsuDTO(String letterBodyText, String tarjoajaOid, String tag, String hakukohdeOid, Haku haku,
       String templateName) {
     this.letterBodyText = letterBodyText;
     this.tarjoajaOid = tarjoajaOid;

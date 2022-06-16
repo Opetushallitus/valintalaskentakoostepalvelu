@@ -185,14 +185,9 @@ public class SuoritusrekisteriSpec {
 
     public SuoritusBuilder build() {
       if (arvosana.isValinnainen()) { // lisataan indeksi jos valinnainen
-        arvosana.setJarjestys(
-            (int)
-                suoritus.suoritusJaArvosanat.getArvosanat().stream()
-                    .filter(
-                        a -> {
-                          return a.isValinnainen() && arvosana.getAine().equals(a.getAine());
-                        })
-                    .count());
+        arvosana.setJarjestys((int) suoritus.suoritusJaArvosanat.getArvosanat().stream().filter(a -> {
+          return a.isValinnainen() && arvosana.getAine().equals(a.getAine());
+        }).count());
       }
       suoritus.suoritusJaArvosanat.getArvosanat().add(arvosana);
       return suoritus;

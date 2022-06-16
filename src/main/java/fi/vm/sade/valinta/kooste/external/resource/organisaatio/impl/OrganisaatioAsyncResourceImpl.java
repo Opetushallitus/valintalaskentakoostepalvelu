@@ -29,15 +29,13 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 
   @Override
   public CompletableFuture<Organisaatio> haeOrganisaatio(String organisaatioOid) {
-    return this.client.getJson(
-        this.urlConfiguration.url("organisaatio-service.organisaatio", organisaatioOid),
-        Duration.ofMinutes(1),
-        new TypeToken<Organisaatio>() {}.getType());
+    return this.client.getJson(this.urlConfiguration.url("organisaatio-service.organisaatio", organisaatioOid),
+        Duration.ofMinutes(1), new TypeToken<Organisaatio>() {
+        }.getType());
   }
 
   @Override
-  public CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(
-      String organisaatioOid) {
+  public CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(String organisaatioOid) {
     Map<String, String> parameters = new HashMap<>();
     parameters.put("oid", organisaatioOid);
     parameters.put("aktiiviset", Boolean.toString(true));
@@ -46,25 +44,20 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
 
     return client.getJson(
         this.urlConfiguration.url("organisaatio-service.organisaatio.hierarkia.tyyppi", parameters),
-        Duration.ofMinutes(1),
-        new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType());
+        Duration.ofMinutes(1), new TypeToken<OrganisaatioTyyppiHierarkia>() {
+        }.getType());
   }
 
   @Override
   public CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
-    return this.client
-        .getResponse(
-            this.urlConfiguration.url(
-                "organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
-            Duration.ofMinutes(1),
-            x -> x)
-        .thenApply(
-            response -> {
-              if (response.statusCode() == 404) {
-                return Optional.empty();
-              }
-              return Optional.of(
-                  this.client.parseJson(response, new TypeToken<HakutoimistoDTO>() {}.getType()));
-            });
+    return this.client.getResponse(
+        this.urlConfiguration.url("organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
+        Duration.ofMinutes(1), x -> x).thenApply(response -> {
+          if (response.statusCode() == 404) {
+            return Optional.empty();
+          }
+          return Optional.of(this.client.parseJson(response, new TypeToken<HakutoimistoDTO>() {
+          }.getType()));
+        });
   }
 }

@@ -5,7 +5,8 @@ public class Pisteet {
   private String minimi;
   private String ensikertMinimi;
 
-  public Pisteet() {}
+  public Pisteet() {
+  }
 
   public Pisteet(String oma, String minimi, String ensikertMinimi) {
     this.oma = oma;
@@ -27,16 +28,7 @@ public class Pisteet {
 
   @Override
   public String toString() {
-    return "Pisteet{"
-        + "oma='"
-        + oma
-        + '\''
-        + ", minimi='"
-        + minimi
-        + '\''
-        + ", ensikertalaisen minimipisteet='"
-        + ensikertMinimi
-        + '\''
-        + '}';
+    return "Pisteet{" + "oma='" + oma + '\'' + ", minimi='" + minimi + '\'' + ", ensikertalaisen minimipisteet='"
+        + ensikertMinimi + '\'' + '}';
   }
 }

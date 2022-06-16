@@ -16,7 +16,9 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-/** TODO maybe move to java-cas or some other suitable place on a sunnier day. */
+/**
+ * TODO maybe move to java-cas or some other suitable place on a sunnier day.
+ */
 public class AuthorizationUtil {
   public static AuditSession createAuditSession(HttpServletRequest httpServletRequestJaxRS) {
     return createAuditSession(false, httpServletRequestJaxRS);
@@ -38,8 +40,8 @@ public class AuthorizationUtil {
     throw new InternalError("Ei löydetty HTTP requestia.");
   }
 
-  public static AuditSession createAuditSession(
-      boolean isUnmodifiedSinceMandatory, HttpServletRequest httpServletRequestJaxRS) {
+  public static AuditSession createAuditSession(boolean isUnmodifiedSinceMandatory,
+      HttpServletRequest httpServletRequestJaxRS) {
     HttpServletRequest httpServletRequest = request(httpServletRequestJaxRS);
     AuditSession session = new AuditSession();
     session.setSessionId(httpServletRequest.getSession().getId());
@@ -47,18 +49,16 @@ public class AuthorizationUtil {
     session.setPersonOid(AuditLog.loggedInUserOid());
     session.setInetAddress(HttpServletRequestUtils.getRemoteAddress(httpServletRequest));
     session.setUserAgent(
-        Optional.ofNullable(httpServletRequest.getHeader("User-Agent"))
-            .orElse("Unknown user agent"));
-    session.setIfUnmodifiedSince(
-        readIfUnmodifiedSince(isUnmodifiedSinceMandatory, httpServletRequestJaxRS));
+        Optional.ofNullable(httpServletRequest.getHeader("User-Agent")).orElse("Unknown user agent"));
+    session.setIfUnmodifiedSince(readIfUnmodifiedSince(isUnmodifiedSinceMandatory, httpServletRequestJaxRS));
     session.setRoles(getRoles());
     return session;
   }
 
-  private static Optional<String> readIfUnmodifiedSince(
-      boolean isUnmodifiedSinceMandatory, HttpServletRequest httpServletRequestJaxRS) {
-    Optional<String> isUnmodifiedSinceHeader =
-        Optional.ofNullable(request(httpServletRequestJaxRS).getHeader("If-Unmodified-Since"));
+  private static Optional<String> readIfUnmodifiedSince(boolean isUnmodifiedSinceMandatory,
+      HttpServletRequest httpServletRequestJaxRS) {
+    Optional<String> isUnmodifiedSinceHeader = Optional
+        .ofNullable(request(httpServletRequestJaxRS).getHeader("If-Unmodified-Since"));
     if (isUnmodifiedSinceMandatory && !isUnmodifiedSinceHeader.isPresent()) {
       throw new IllegalArgumentException("If-Unmodified-Since on pakollinen otsake.");
     } else if (isUnmodifiedSinceMandatory) {
@@ -77,9 +77,7 @@ public class AuthorizationUtil {
     if (null == authentication) {
       return new ArrayList<>();
     }
-    return authentication.getAuthorities().stream()
-        .map(a -> a.getAuthority())
-        .map(r -> r.replace("ROLE_", ""))
+    return authentication.getAuthorities().stream().map(a -> a.getAuthority()).map(r -> r.replace("ROLE_", ""))
         .collect(Collectors.toList());
   }
 

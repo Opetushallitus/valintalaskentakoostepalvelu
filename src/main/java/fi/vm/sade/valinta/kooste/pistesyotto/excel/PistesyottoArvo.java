@@ -10,8 +10,7 @@ public class PistesyottoArvo {
   private final String tunniste;
   private final String osallistuminenTunniste;
 
-  public PistesyottoArvo(
-      String arvo, String tila, boolean validi, String tunniste, String osallistuminenTunniste) {
+  public PistesyottoArvo(String arvo, String tila, boolean validi, String tunniste, String osallistuminenTunniste) {
     this.tila = tila;
     this.arvo = arvo;
     this.validi = validi;

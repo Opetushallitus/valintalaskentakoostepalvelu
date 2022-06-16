@@ -11,8 +11,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * Camelin versiossa 2.12.2 on viela splitterin kanssa bugi jonka seurauksena
- * AbstractListAggregationStrategy:n onCompletion-metodia ei kutsuta aggregoinnin lopussa. Tehdaan
- * EXCHANGE.GROUPED_AGGREGATION propertyn siirto bodyyn prosessorilla splittauksen jalkeen.
+ * AbstractListAggregationStrategy:n onCompletion-metodia ei kutsuta
+ * aggregoinnin lopussa. Tehdaan EXCHANGE.GROUPED_AGGREGATION propertyn siirto
+ * bodyyn prosessorilla splittauksen jalkeen.
  */
 @Component("aggregateInBody")
 public class AggregateInBodyProcessor implements Processor {
@@ -32,9 +33,8 @@ public class AggregateInBodyProcessor implements Processor {
           exchange.getOut().setBody(list); // not
           // List<DefaultExchange>
         }
-        LOG.info(
-            "Setting collection with size {} as grouped exchange body. Collection type List<{}>.",
-            new Object[] {list.size(), list.get(0).getClass()});
+        LOG.info("Setting collection with size {} as grouped exchange body. Collection type List<{}>.",
+            new Object[] { list.size(), list.get(0).getClass() });
       } else {
         LOG.info("Setting empty collection as grouped exchange body!");
         exchange.getOut().setBody(list);

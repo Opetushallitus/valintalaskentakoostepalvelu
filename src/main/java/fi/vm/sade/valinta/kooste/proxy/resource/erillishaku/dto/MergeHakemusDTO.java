@@ -48,8 +48,7 @@ public class MergeHakemusDTO {
   private Date hyvaksymiskirjeLahetetty;
 
   // Laskennan tiedot
-  private SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit =
-      new TreeSet<JarjestyskriteeritulosDTO>();
+  private SortedSet<JarjestyskriteeritulosDTO> jarjestyskriteerit = new TreeSet<JarjestyskriteeritulosDTO>();
   private boolean harkinnanvarainen = false;
   private boolean muokattu = false;
   private boolean hylattyValisijoittelussa = false;

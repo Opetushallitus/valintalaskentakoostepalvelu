@@ -22,25 +22,15 @@ public class PostitoimipaikkaMemoize {
 
   @Autowired
   public PostitoimipaikkaMemoize(KoodiService koodiService) {
-    postitoimipaikka =
-        kielityyppi ->
-            Memoizer.memoize(
-                koodiUri -> {
-                  List<KoodiType> koodiTypes =
-                      koodiService.searchKoodis(
-                          KoodiServiceSearchCriteriaBuilder.latestKoodisByUris(koodiUri));
-                  Optional<String> postitoimipaikka =
-                      koodiTypes.stream()
-                          .filter(type -> type.getMetadata() != null)
-                          .map(checkKuvausAndNimi(kielityyppi))
-                          .flatMap(opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty())
-                          .findFirst();
-                  return postitoimipaikka
-                      .flatMap(ptp -> Optional.of(StringUtils.capitalize(ptp.toLowerCase())))
-                      .orElse(StringUtils.EMPTY);
-                },
-                12,
-                TimeUnit.HOURS);
+    postitoimipaikka = kielityyppi -> Memoizer.memoize(koodiUri -> {
+      List<KoodiType> koodiTypes = koodiService
+          .searchKoodis(KoodiServiceSearchCriteriaBuilder.latestKoodisByUris(koodiUri));
+      Optional<String> postitoimipaikka = koodiTypes.stream().filter(type -> type.getMetadata() != null)
+          .map(checkKuvausAndNimi(kielityyppi))
+          .flatMap(opt -> opt.isPresent() ? Stream.of(opt.get()) : Stream.empty()).findFirst();
+      return postitoimipaikka.flatMap(ptp -> Optional.of(StringUtils.capitalize(ptp.toLowerCase())))
+          .orElse(StringUtils.EMPTY);
+    }, 12, TimeUnit.HOURS);
   }
 
   private Function<KoodiType, Optional<String>> checkKuvausAndNimi(KieliType kielityyppi) {
@@ -59,9 +49,7 @@ public class PostitoimipaikkaMemoize {
   }
 
   private static Optional<String> getKuvaus(List<KoodiMetadataType> meta, KieliType kieli) {
-    return meta.stream()
-        .filter(data -> kieli.equals(data.getKieli()))
-        .findFirst()
+    return meta.stream().filter(data -> kieli.equals(data.getKieli())).findFirst()
         .map(KoodiMetadataType::getKuvaus);
   }
 }

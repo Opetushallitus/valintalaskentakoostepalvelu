@@ -20,10 +20,8 @@ import org.slf4j.LoggerFactory;
 @ApiModel
 public class ErillishakuRivi {
   private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
-  public static final DateTimeFormatter SYNTYMAAIKAFORMAT =
-      DateTimeFormatter.ofPattern("dd.MM.yyyy");
-  public static final DateTimeFormatter SYNTYMAAIKAFORMAT_JSON =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd");
+  public static final DateTimeFormatter SYNTYMAAIKAFORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+  public static final DateTimeFormatter SYNTYMAAIKAFORMAT_JSON = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   private final String etunimi;
   private final String sukunimi;
@@ -74,82 +72,24 @@ public class ErillishakuRivi {
   private final Boolean toisenAsteenSuoritus;
   private final String toisenAsteenSuoritusmaa;
 
-  // Empty constructor for Jackson JSON library. Deserialization fails without this!
+  // Empty constructor for Jackson JSON library. Deserialization fails without
+  // this!
   public ErillishakuRivi() {
-    this(
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        Sukupuoli.EI_SUKUPUOLTA,
-        null,
-        null,
-        null,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
+    this(null, null, null, null, null, null, Sukupuoli.EI_SUKUPUOLTA, null, null, null, false, null, null, null,
+        null, null, null, null, null, null, null, false, false, null, null, null, null, null, null, null, null,
+        null, null, null, null);
   }
 
-  public ErillishakuRivi(
-      String hakemusOid,
-      String sukunimi,
-      String etunimi,
-      String henkilotunnus,
-      String sahkoposti,
-      String syntymaAika,
-      Sukupuoli sukupuoli,
-      String personOid,
-      String aidinkieli,
-      String hakemuksenTila,
-      boolean ehdollisestiHyvaksyttavissa,
-      String ehdollisenHyvaksymisenEhtoKoodi,
-      String ehdollisenHyvaksymisenEhtoFI,
-      String ehdollisenHyvaksymisenEhtoSV,
-      String ehdollisenHyvaksymisenEhtoEN,
-      String valinnantilanKuvauksenTekstiFI,
-      String valinnantilanKuvauksenTekstiSV,
-      String valinnantilanKuvauksenTekstiEN,
-      Date hyvaksymiskirjeLahetetty,
-      String vastaanottoTila,
-      String ilmoittautumisTila,
-      boolean julkaistaankoTiedot,
-      boolean poistetaankoRivi,
-      String asiointikieli,
-      String puhelinnumero,
-      String osoite,
-      String postinumero,
-      String postitoimipaikka,
-      String asuinmaa,
-      String kansalaisuus,
-      String kotikunta,
-      Boolean toisenAsteenSuoritus,
-      String toisenAsteenSuoritusmaa,
-      String maksuvelvollisuus,
-      Maksuntila maksuntila) {
+  public ErillishakuRivi(String hakemusOid, String sukunimi, String etunimi, String henkilotunnus, String sahkoposti,
+      String syntymaAika, Sukupuoli sukupuoli, String personOid, String aidinkieli, String hakemuksenTila,
+      boolean ehdollisestiHyvaksyttavissa, String ehdollisenHyvaksymisenEhtoKoodi,
+      String ehdollisenHyvaksymisenEhtoFI, String ehdollisenHyvaksymisenEhtoSV,
+      String ehdollisenHyvaksymisenEhtoEN, String valinnantilanKuvauksenTekstiFI,
+      String valinnantilanKuvauksenTekstiSV, String valinnantilanKuvauksenTekstiEN, Date hyvaksymiskirjeLahetetty,
+      String vastaanottoTila, String ilmoittautumisTila, boolean julkaistaankoTiedot, boolean poistetaankoRivi,
+      String asiointikieli, String puhelinnumero, String osoite, String postinumero, String postitoimipaikka,
+      String asuinmaa, String kansalaisuus, String kotikunta, Boolean toisenAsteenSuoritus,
+      String toisenAsteenSuoritusmaa, String maksuvelvollisuus, Maksuntila maksuntila) {
     this.hakemusOid = hakemusOid;
     this.etunimi = etunimi;
     this.sukunimi = sukunimi;
@@ -333,57 +273,14 @@ public class ErillishakuRivi {
 
   @Override
   public String toString() {
-    return etunimi
-        + ", "
-        + sukunimi
-        + ", "
-        + sahkoposti
-        + ", "
-        + hakemuksenTila
-        + ", "
-        + ErillishakuDataRivi.getTotuusarvoString(ehdollisestiHyvaksyttavissa)
-        + ", "
-        + suojaaHenkilotunnusLogeilta(henkilotunnus)
-        + ", "
-        + syntymaAika
-        + ", "
-        + sukupuoli
-        + ", "
-        + aidinkieli
-        + ", "
-        + ilmoittautumisTila
-        + ", "
-        + ehdollisestiHyvaksyttavissa
-        + ", "
-        + hyvaksymiskirjeLahetetty
-        + ", "
-        + vastaanottoTila
-        + ", "
-        + maksuvelvollisuus
-        + ", "
-        + maksuntila
-        + ", "
-        + julkaistaankoTiedot
-        + ", "
-        + asiointikieli
-        + ", "
-        + puhelinnumero
-        + ", "
-        + osoite
-        + ", "
-        + postinumero
-        + ", "
-        + postitoimipaikka
-        + ", "
-        + asuinmaa
-        + ", "
-        + kansalaisuus
-        + ", "
-        + kotikunta
-        + ", "
-        + ErillishakuDataRivi.getTotuusarvoString(toisenAsteenSuoritus)
-        + ", "
-        + toisenAsteenSuoritusmaa;
+    return etunimi + ", " + sukunimi + ", " + sahkoposti + ", " + hakemuksenTila + ", "
+        + ErillishakuDataRivi.getTotuusarvoString(ehdollisestiHyvaksyttavissa) + ", "
+        + suojaaHenkilotunnusLogeilta(henkilotunnus) + ", " + syntymaAika + ", " + sukupuoli + ", " + aidinkieli
+        + ", " + ilmoittautumisTila + ", " + ehdollisestiHyvaksyttavissa + ", " + hyvaksymiskirjeLahetetty
+        + ", " + vastaanottoTila + ", " + maksuvelvollisuus + ", " + maksuntila + ", " + julkaistaankoTiedot
+        + ", " + asiointikieli + ", " + puhelinnumero + ", " + osoite + ", " + postinumero + ", "
+        + postitoimipaikka + ", " + asuinmaa + ", " + kansalaisuus + ", " + kotikunta + ", "
+        + ErillishakuDataRivi.getTotuusarvoString(toisenAsteenSuoritus) + ", " + toisenAsteenSuoritusmaa;
   }
 
   public ErillishakuRivi withAidinkieli(String aidinkieli) {
@@ -395,17 +292,9 @@ public class ErillishakuRivi {
   }
 
   public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
-    return new HenkiloCreateDTO(
-        getAidinkieli(),
-        Sukupuoli.toHenkiloString(getSukupuoli()),
-        getEtunimi(),
-        getSukunimi(),
-        getHenkilotunnus(),
-        formatSyntymaAikaAsString(),
-        getPersonOid(),
-        HenkiloTyyppi.OPPIJA,
-        getAsiointikieli(),
-        kansalaisuus);
+    return new HenkiloCreateDTO(getAidinkieli(), Sukupuoli.toHenkiloString(getSukupuoli()), getEtunimi(),
+        getSukunimi(), getHenkilotunnus(), formatSyntymaAikaAsString(), getPersonOid(), HenkiloTyyppi.OPPIJA,
+        getAsiointikieli(), kansalaisuus);
   }
 
   public Date formatSyntymaAikaAsDate() {

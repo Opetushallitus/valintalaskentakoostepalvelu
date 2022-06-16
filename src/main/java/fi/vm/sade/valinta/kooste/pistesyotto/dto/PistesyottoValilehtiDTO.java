@@ -6,10 +6,10 @@ public class PistesyottoValilehtiDTO {
   private String lastmodified;
   private List<HakemuksenKoetulosYhteenveto> valintapisteet;
 
-  public PistesyottoValilehtiDTO() {}
+  public PistesyottoValilehtiDTO() {
+  }
 
-  public PistesyottoValilehtiDTO(
-      String lastmodified, List<HakemuksenKoetulosYhteenveto> valintapisteet) {
+  public PistesyottoValilehtiDTO(String lastmodified, List<HakemuksenKoetulosYhteenveto> valintapisteet) {
     this.lastmodified = lastmodified;
     this.valintapisteet = valintapisteet;
   }

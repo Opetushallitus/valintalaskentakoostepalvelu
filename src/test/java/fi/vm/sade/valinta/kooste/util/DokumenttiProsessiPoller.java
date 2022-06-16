@@ -13,17 +13,15 @@ public class DokumenttiProsessiPoller {
   private static final Duration REQUEST_INTERVAL = Duration.ofMillis(100);
   private static Logger LOG = LoggerFactory.getLogger(DokumenttiProsessiPoller.class);
 
-  public static Prosessi pollDokumenttiProsessi(
-      String rootUrl, ProsessiId prosessiId, Function<Prosessi, Boolean> responseProcessor) {
-    final HttpResourceBuilder.WebClientExposingHttpResource dokumenttiProsessiResource =
-        new HttpResourceBuilder(DokumenttiProsessiPoller.class.getName())
-            .address(rootUrl + "/dokumenttiprosessi/" + prosessiId.getId())
+  public static Prosessi pollDokumenttiProsessi(String rootUrl, ProsessiId prosessiId,
+      Function<Prosessi, Boolean> responseProcessor) {
+    final HttpResourceBuilder.WebClientExposingHttpResource dokumenttiProsessiResource = new HttpResourceBuilder(
+        DokumenttiProsessiPoller.class.getName()).address(rootUrl + "/dokumenttiprosessi/" + prosessiId.getId())
             .buildExposingWebClientDangerously();
     long pollStarted = System.currentTimeMillis();
     sleep(REQUEST_INTERVAL.multipliedBy(8)); // give the server some time to get started
     while (System.currentTimeMillis() < pollStarted + TIME_TO_WAIT_IN_TOTAL.toMillis()) {
-      Prosessi prosessiStatusResponse =
-          dokumenttiProsessiResource.getWebClient().get(Prosessi.class);
+      Prosessi prosessiStatusResponse = dokumenttiProsessiResource.getWebClient().get(Prosessi.class);
       LOG.info("prosessiStatusResponse = " + prosessiStatusResponse);
       if (responseProcessor.apply(prosessiStatusResponse)) {
         return prosessiStatusResponse;
@@ -31,11 +29,7 @@ public class DokumenttiProsessiPoller {
       sleepOneInterval();
     }
     throw new RuntimeException(
-        "Did not complete within "
-            + TIME_TO_WAIT_IN_TOTAL.toMillis()
-            + " ms ("
-            + TIME_TO_WAIT_IN_TOTAL
-            + ").");
+        "Did not complete within " + TIME_TO_WAIT_IN_TOTAL.toMillis() + " ms (" + TIME_TO_WAIT_IN_TOTAL + ").");
   }
 
   private static void sleepOneInterval() {
@@ -51,16 +45,12 @@ public class DokumenttiProsessiPoller {
   }
 
   public static String odotaProsessiaPalautaDokumenttiId(String root, final ProsessiId prosessiId) {
-    Prosessi valmisProsessi =
-        pollDokumenttiProsessi(
-            root,
-            prosessiId,
-            prosessi -> {
-              if (prosessi.poikkeuksia()) {
-                throw new RuntimeException(prosessi.poikkeukset.toString());
-              }
-              return prosessi.valmis();
-            });
+    Prosessi valmisProsessi = pollDokumenttiProsessi(root, prosessiId, prosessi -> {
+      if (prosessi.poikkeuksia()) {
+        throw new RuntimeException(prosessi.poikkeukset.toString());
+      }
+      return prosessi.valmis();
+    });
     return valmisProsessi.dokumenttiId;
   }
 }

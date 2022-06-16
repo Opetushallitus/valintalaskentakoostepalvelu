@@ -16,15 +16,8 @@ public class LaskentaParams {
   private final Optional<Maski> maski;
   private final boolean isErillishaku;
 
-  public LaskentaParams(
-      String userOID,
-      String haunNimi,
-      String nimi,
-      LaskentaTyyppi laskentatyyppi,
-      Boolean isValintakoelaskenta,
-      Integer valinnanvaihe,
-      String hakuOid,
-      Optional<Maski> maski,
+  public LaskentaParams(String userOID, String haunNimi, String nimi, LaskentaTyyppi laskentatyyppi,
+      Boolean isValintakoelaskenta, Integer valinnanvaihe, String hakuOid, Optional<Maski> maski,
       boolean isErillishaku) {
     this.userOID = userOID;
     this.haunNimi = haunNimi;

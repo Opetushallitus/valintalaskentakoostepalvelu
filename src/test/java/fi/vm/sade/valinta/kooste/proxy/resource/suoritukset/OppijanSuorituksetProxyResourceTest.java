@@ -48,23 +48,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 public class OppijanSuorituksetProxyResourceTest {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(OppijanSuorituksetProxyResourceTest.class);
-  private static final String URL =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+  private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResourceTest.class);
+  private static final String URL = "http://localhost:" + ValintaKoosteJetty.port
+      + "/valintalaskentakoostepalvelu/resources";
   private static final String opiskelijaOid = "1.2.246.562.24.71943835646";
   private static final String hakemusOid = "1.2.246.562.11.00000000615";
   private static final String hakuOid = "1.2.246.562.29.90697286251";
-  final HttpResourceBuilder.WebClientExposingHttpResource proxyResource =
-      new HttpResourceBuilder(getClass().getName())
-          .address(
-              URL
-                  + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/"
-                  + hakuOid
-                  + "/opiskeljaOid/"
-                  + opiskelijaOid
-                  + "/hakemusOid/"
-                  + hakemusOid)
+  final HttpResourceBuilder.WebClientExposingHttpResource proxyResource = new HttpResourceBuilder(
+      getClass().getName())
+          .address(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid + "/opiskeljaOid/"
+              + opiskelijaOid + "/hakemusOid/" + hakemusOid)
           .buildExposingWebClientDangerously();
 
   private static String classpathResourceAsString(String path) throws Exception {
@@ -87,17 +80,15 @@ public class OppijanSuorituksetProxyResourceTest {
   @Test
   public void peruskoulunSuoritusProxyResourceTest() throws Exception {
 
-    initMocks(
-        "/proxy/suoritukset/peruskoulun-oppija.json",
-        "/proxy/hakemus/peruskoulun-hakemus.json",
+    initMocks("/proxy/suoritukset/peruskoulun-oppija.json", "/proxy/hakemus/peruskoulun-hakemus.json",
         "/proxy/tarjonta/tarjonta.json");
 
     Response response = proxyResource.getWebClient().get();
     assertEquals(200, response.getStatus());
 
-    Map<String, String> oppijanSuoritukset =
-        GSON.fromJson(
-            getJsonFromResponse(response), new TypeToken<Map<String, String>>() {}.getType());
+    Map<String, String> oppijanSuoritukset = GSON.fromJson(getJsonFromResponse(response),
+        new TypeToken<Map<String, String>>() {
+        }.getType());
     assertEquals("9", oppijanSuoritukset.get("PK_GE"));
     assertEquals("10", oppijanSuoritukset.get("PK_AI"));
     assertEquals("10", oppijanSuoritukset.get("PK_A1"));
@@ -116,17 +107,15 @@ public class OppijanSuorituksetProxyResourceTest {
   @Test
   public void lukionSuoritusProxyResourceTest() throws Exception {
 
-    initMocks(
-        "/proxy/suoritukset/lukion-oppija.json",
-        "/proxy/hakemus/lukion-hakemus.json",
+    initMocks("/proxy/suoritukset/lukion-oppija.json", "/proxy/hakemus/lukion-hakemus.json",
         "/proxy/tarjonta/tarjonta.json");
 
     Response response = proxyResource.getWebClient().get();
     assertEquals(200, response.getStatus());
 
-    Map<String, String> oppijanSuoritukset =
-        GSON.fromJson(
-            getJsonFromResponse(response), new TypeToken<Map<String, String>>() {}.getType());
+    Map<String, String> oppijanSuoritukset = GSON.fromJson(getJsonFromResponse(response),
+        new TypeToken<Map<String, String>>() {
+        }.getType());
     assertEquals("8", oppijanSuoritukset.get("LK_MA"));
     assertEquals("8", oppijanSuoritukset.get("LK_PS"));
     assertEquals("S", oppijanSuoritukset.get("LK_LI"));
@@ -143,22 +132,16 @@ public class OppijanSuorituksetProxyResourceTest {
 
   @Test
   public void lukionSuoritusBatchProxyResourceTest() throws Exception {
-    initMocksList(
-        "/proxy/suoritukset/lukion-oppijoita.json",
-        "/proxy/hakemus/lukion-hakemuksia.json",
+    initMocksList("/proxy/suoritukset/lukion-oppijoita.json", "/proxy/hakemus/lukion-hakemuksia.json",
         "/proxy/tarjonta/tarjonta.json");
 
     List<HakemusHakija> allHakemus = new ArrayList<>();
 
-    String[] personoids =
-        new String[] {
-          "1.2.246.562.24.17552525783", "1.2.246.562.24.17552525784", "1.2.246.562.24.17552525785"
-        };
+    String[] personoids = new String[] { "1.2.246.562.24.17552525783", "1.2.246.562.24.17552525784",
+        "1.2.246.562.24.17552525785" };
 
-    String[] applicationoids =
-        new String[] {
-          "1.2.246.562.11.00000000576", "1.2.246.562.11.00000000577", "1.2.246.562.11.00000000578"
-        };
+    String[] applicationoids = new String[] { "1.2.246.562.11.00000000576", "1.2.246.562.11.00000000577",
+        "1.2.246.562.11.00000000578" };
 
     for (int i = 0; i < personoids.length; i++) {
       String personoid = personoids[i];
@@ -183,30 +166,26 @@ public class OppijanSuorituksetProxyResourceTest {
       allHakemus.add(hakemusHakija);
     }
 
-    final HttpResourceBuilder.WebClientExposingHttpResource proxyBatchResource =
-        new HttpResourceBuilder(getClass().getName())
-            .address(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid)
-            .timeoutMillis(1000 * 100)
-            .buildExposingWebClientDangerously();
+    final HttpResourceBuilder.WebClientExposingHttpResource proxyBatchResource = new HttpResourceBuilder(
+        getClass().getName()).address(URL + "/proxy/suoritukset/suorituksetByOpiskelijaOid/hakuOid/" + hakuOid)
+            .timeoutMillis(1000 * 100).buildExposingWebClientDangerously();
 
-    Response response =
-        proxyBatchResource.getWebClient().type(MediaType.APPLICATION_JSON_TYPE).post(allHakemus);
+    Response response = proxyBatchResource.getWebClient().type(MediaType.APPLICATION_JSON_TYPE).post(allHakemus);
     assertEquals(200, response.getStatus());
     assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
     String json = getJsonFromResponse(response);
 
-    Map<String, Map<String, String>> oppijanSuoritukset =
-        GSON.fromJson(json, new TypeToken<Map<String, Map<String, String>>>() {}.getType());
+    Map<String, Map<String, String>> oppijanSuoritukset = GSON.fromJson(json,
+        new TypeToken<Map<String, Map<String, String>>>() {
+        }.getType());
     oppijanSuoritukset.entrySet().forEach(entry -> LOG.info(entry.toString()));
     assertTrue(!oppijanSuoritukset.isEmpty());
 
     List<String> poids = Arrays.asList(personoids);
     assertTrue(oppijanSuoritukset.keySet().stream().allMatch(poids::contains));
 
-    assertTrue(
-        "At least some of the response answers should contain 9 as POHJAKOULUTUS",
-        oppijanSuoritukset.values().stream()
-            .anyMatch(stringStringMap -> "9".equals(stringStringMap.get("POHJAKOULUTUS"))));
+    assertTrue("At least some of the response answers should contain 9 as POHJAKOULUTUS", oppijanSuoritukset
+        .values().stream().anyMatch(stringStringMap -> "9".equals(stringStringMap.get("POHJAKOULUTUS"))));
 
     MockSuoritusrekisteriAsyncResource.clear();
   }
@@ -217,79 +196,59 @@ public class OppijanSuorituksetProxyResourceTest {
     return s;
   }
 
-  public void initMocks(
-      String oppilajanSuorituksetFile, String oppijanHakemusFile, String tarjontaFile)
+  public void initMocks(String oppilajanSuorituksetFile, String oppijanHakemusFile, String tarjontaFile)
       throws Exception {
     Mocks.reset();
 
-    Oppija expectedOppijanSuoritukset =
-        GSON.fromJson(
-            classpathResourceAsString(oppilajanSuorituksetFile),
-            new TypeToken<Oppija>() {}.getType());
-    Hakemus expectedHakemus =
-        GSON.fromJson(
-            classpathResourceAsString(oppijanHakemusFile), new TypeToken<Hakemus>() {}.getType());
+    Oppija expectedOppijanSuoritukset = GSON.fromJson(classpathResourceAsString(oppilajanSuorituksetFile),
+        new TypeToken<Oppija>() {
+        }.getType());
+    Hakemus expectedHakemus = GSON.fromJson(classpathResourceAsString(oppijanHakemusFile),
+        new TypeToken<Hakemus>() {
+        }.getType());
 
-    Haku expectedHaku =
-        new Haku(
-            GSON.<HakuV1RDTO>fromJson(
-                classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {}.getType()));
+    Haku expectedHaku = new Haku(
+        GSON.<HakuV1RDTO>fromJson(classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {
+        }.getType()));
 
     HakemusWrapper expectedWrapper = new HakuappHakemusWrapper(expectedHakemus);
 
-    Valintapisteet v =
-        new Valintapisteet(
-            expectedWrapper.getOid(),
-            expectedWrapper.getPersonOid(),
-            "",
-            "",
-            Collections.emptyList());
+    Valintapisteet v = new Valintapisteet(expectedWrapper.getOid(), expectedWrapper.getPersonOid(), "", "",
+        Collections.emptyList());
 
-    Mockito.when(
-            Mocks.getValintapisteAsyncResource()
-                .getValintapisteetWithHakemusOidsAsFuture(Mockito.anyList(), Mockito.any()))
-        .thenReturn(
-            CompletableFuture.completedFuture(
-                new PisteetWithLastModified(Optional.empty(), singletonList(v))));
+    Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteetWithHakemusOidsAsFuture(Mockito.anyList(),
+        Mockito.any()))
+        .thenReturn(CompletableFuture
+            .completedFuture(new PisteetWithLastModified(Optional.empty(), singletonList(v))));
 
     MockTarjontaAsyncService.setMockHaku(expectedHaku);
     MockApplicationAsyncResource.setResultByOid(Collections.singletonList(expectedWrapper));
     MockSuoritusrekisteriAsyncResource.setResult(expectedOppijanSuoritukset);
   }
 
-  public void initMocksList(
-      String oppilajanSuorituksetFile, String oppijanHakemusFile, String tarjontaFile)
+  public void initMocksList(String oppilajanSuorituksetFile, String oppijanHakemusFile, String tarjontaFile)
       throws Exception {
     Mocks.reset();
-    List<Oppija> expectedOppijanSuoritukset =
-        GSON.fromJson(
-            classpathResourceAsString(oppilajanSuorituksetFile),
-            new TypeToken<List<Oppija>>() {}.getType());
-    List<Hakemus> expectedHakemukset =
-        GSON.fromJson(
-            classpathResourceAsString(oppijanHakemusFile),
-            new TypeToken<List<Hakemus>>() {}.getType());
+    List<Oppija> expectedOppijanSuoritukset = GSON.fromJson(classpathResourceAsString(oppilajanSuorituksetFile),
+        new TypeToken<List<Oppija>>() {
+        }.getType());
+    List<Hakemus> expectedHakemukset = GSON.fromJson(classpathResourceAsString(oppijanHakemusFile),
+        new TypeToken<List<Hakemus>>() {
+        }.getType());
 
-    List<HakemusWrapper> expectedWrappers =
-        expectedHakemukset.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
+    List<HakemusWrapper> expectedWrappers = expectedHakemukset.stream().map(HakuappHakemusWrapper::new)
+        .collect(Collectors.toList());
 
-    Haku expectedHaku =
-        new Haku(
-            GSON.<HakuV1RDTO>fromJson(
-                classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {}.getType()));
-    List<Valintapisteet> v =
-        expectedWrappers.stream()
-            .map(
-                h ->
-                    new Valintapisteet(
-                        h.getOid(), h.getPersonOid(), "", "", Collections.emptyList()))
-            .collect(Collectors.toList());
+    Haku expectedHaku = new Haku(
+        GSON.<HakuV1RDTO>fromJson(classpathResourceAsString(tarjontaFile), new TypeToken<HakuV1RDTO>() {
+        }.getType()));
+    List<Valintapisteet> v = expectedWrappers.stream()
+        .map(h -> new Valintapisteet(h.getOid(), h.getPersonOid(), "", "", Collections.emptyList()))
+        .collect(Collectors.toList());
 
-    Mockito.when(
-            Mocks.getValintapisteAsyncResource()
-                .getValintapisteetWithHakemusOidsAsFuture(Mockito.anyList(), Mockito.any()))
-        .thenReturn(
-            CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), v)));
+    Mockito.when(Mocks.getValintapisteAsyncResource().getValintapisteetWithHakemusOidsAsFuture(Mockito.anyList(),
+        Mockito.any()))
+        .thenReturn(CompletableFuture.completedFuture(new PisteetWithLastModified(Optional.empty(), v)));
 
     MockTarjontaAsyncService.setMockHaku(expectedHaku);
     MockApplicationAsyncResource.setResultByOid(expectedWrappers);

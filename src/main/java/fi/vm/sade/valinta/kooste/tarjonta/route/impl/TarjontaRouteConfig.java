@@ -15,23 +15,22 @@ import org.springframework.context.annotation.Profile;
 public class TarjontaRouteConfig {
 
   @Bean
-  public LinjakoodiRoute getLinjakoodiRoute(@Qualifier("javaDslCamelContext") CamelContext context)
+  public LinjakoodiRoute getLinjakoodiRoute(@Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
+    return ProxyWithAnnotationHelper.createProxy(context.getEndpoint("direct:linjakoodiReitti"),
+        LinjakoodiRoute.class);
+  }
+
+  @Bean
+  public OrganisaatioRoute getOrganisaatioRoute(@Qualifier("javaDslCamelContext") CamelContext context)
       throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint("direct:linjakoodiReitti"), LinjakoodiRoute.class);
+    return ProxyWithAnnotationHelper.createProxy(context.getEndpoint("direct:organisaatioReitti"),
+        OrganisaatioRoute.class);
   }
 
   @Bean
-  public OrganisaatioRoute getOrganisaatioRoute(
-      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint("direct:organisaatioReitti"), OrganisaatioRoute.class);
-  }
-
-  @Bean
-  public TarjontaHakuRoute getTarjontaHakuRoute(
-      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint("direct:tarjontaHakuReitti"), TarjontaHakuRoute.class);
+  public TarjontaHakuRoute getTarjontaHakuRoute(@Qualifier("javaDslCamelContext") CamelContext context)
+      throws Exception {
+    return ProxyWithAnnotationHelper.createProxy(context.getEndpoint("direct:tarjontaHakuReitti"),
+        TarjontaHakuRoute.class);
   }
 }

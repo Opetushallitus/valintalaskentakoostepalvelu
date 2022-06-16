@@ -51,16 +51,7 @@ public class Replacement {
 
   @Override
   public String toString() {
-    return "Replacement [name="
-        + name
-        + ", defaultValue="
-        + defaultValue
-        + ", mandatory="
-        + mandatory
-        + ", timestamp="
-        + timestamp
-        + ", id="
-        + id
-        + "]";
+    return "Replacement [name=" + name + ", defaultValue=" + defaultValue + ", mandatory=" + mandatory
+        + ", timestamp=" + timestamp + ", id=" + id + "]";
   }
 }

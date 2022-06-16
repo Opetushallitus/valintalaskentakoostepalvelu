@@ -9,11 +9,9 @@ import java.util.concurrent.CompletableFuture;
 public interface TarjontaAsyncResource {
   CompletableFuture<Haku> haeHaku(String hakuOid);
 
-  CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(
-      Iterable<String> organizationGroupOids);
+  CompletableFuture<Set<String>> hakukohdeSearchByOrganizationGroupOids(Iterable<String> organizationGroupOids);
 
-  CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
-      Iterable<String> organizationOids);
+  CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(Iterable<String> organizationOids);
 
   CompletableFuture<AbstractHakukohde> haeHakukohde(String hakukohdeOid);
 

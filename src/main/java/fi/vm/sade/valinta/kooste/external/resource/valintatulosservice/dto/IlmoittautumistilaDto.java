@@ -17,19 +17,11 @@ public class IlmoittautumistilaDto {
   private scala.Option<Date> varasijojaTaytetaanAsti;
   private scala.Option<Integer> varasijanumero;
 
-  public IlmoittautumistilaDto(
-      String hakukohdeOid,
-      String tarjoajaOid,
-      String valintatila,
-      Option<String> vastaanottotila,
-      Option<IlmoittautumistilaDto> hakuToiveenIlmoittautumisTilaDto,
-      String vastaanotettavuustila,
-      Option<Date> vastaanottoDeadline,
-      Option<Integer> jonosija,
-      Option<Date> varasijojaKaytetaanAlkaen,
-      Option<Date> varasijojaTaytetaanAsti,
-      Option<Integer> varasijanumero,
-      Map<String, String> tilanKuvaukset) {
+  public IlmoittautumistilaDto(String hakukohdeOid, String tarjoajaOid, String valintatila,
+      Option<String> vastaanottotila, Option<IlmoittautumistilaDto> hakuToiveenIlmoittautumisTilaDto,
+      String vastaanotettavuustila, Option<Date> vastaanottoDeadline, Option<Integer> jonosija,
+      Option<Date> varasijojaKaytetaanAlkaen, Option<Date> varasijojaTaytetaanAsti,
+      Option<Integer> varasijanumero, Map<String, String> tilanKuvaukset) {
     this.hakukohdeOid = hakukohdeOid;
     this.tarjoajaOid = tarjoajaOid;
     this.valintatila = valintatila;

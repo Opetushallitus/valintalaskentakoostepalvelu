@@ -11,8 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 /** @author Jussi Jartamo */
 public class KoosteAudit {
-  public static final Audit AUDIT =
-      new Audit(new AuditLogger(), "valintalaskentakoostepalvelu", ApplicationType.VIRKAILIJA);
+  public static final Audit AUDIT = new Audit(new AuditLogger(), "valintalaskentakoostepalvelu",
+      ApplicationType.VIRKAILIJA);
 
   public static Optional<String> uid() {
     Optional<String> uid = uidFromCasAuthenticationToken();
@@ -24,8 +24,8 @@ public class KoosteAudit {
 
   private static Optional<String> uidFromCasAuthenticationToken() {
     if (SecurityContextHolder.getContext().getAuthentication() instanceof CasAuthenticationToken) {
-      CasAuthenticationToken casAuthenticationToken =
-          (CasAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+      CasAuthenticationToken casAuthenticationToken = (CasAuthenticationToken) SecurityContextHolder.getContext()
+          .getAuthentication();
       if (null != casAuthenticationToken.getAssertion()
           && null != casAuthenticationToken.getAssertion().getPrincipal()) {
         return Optional.ofNullable(casAuthenticationToken.getAssertion().getPrincipal().getName());

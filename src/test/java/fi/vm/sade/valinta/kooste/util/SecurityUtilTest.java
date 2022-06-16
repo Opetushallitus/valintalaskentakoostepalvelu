@@ -29,10 +29,9 @@ public class SecurityUtilTest {
 
   @Test
   public void TestParseOrganizationOidFromSecurityRole() {
-    Optional<String> result1 =
-        parseOrganizationOidFromSecurityRole("auth_crud_ei.organisaatio.oid");
-    Optional<String> result2 =
-        parseOrganizationOidFromSecurityRole("auth_crud_" + ORGANIZATION_OID_PREFIX + "111.222");
+    Optional<String> result1 = parseOrganizationOidFromSecurityRole("auth_crud_ei.organisaatio.oid");
+    Optional<String> result2 = parseOrganizationOidFromSecurityRole(
+        "auth_crud_" + ORGANIZATION_OID_PREFIX + "111.222");
 
     assertFalse(result1.isPresent());
     assertTrue(result2.isPresent());
@@ -41,11 +40,9 @@ public class SecurityUtilTest {
 
   @Test
   public void TestParseOrganizationGroupOidFromSecurityRole() {
-    Optional<String> result1 =
-        parseOrganizationGroupOidFromSecurityRole("auth_crud_ei.organisaatio.group.oid");
-    Optional<String> result2 =
-        parseOrganizationGroupOidFromSecurityRole(
-            "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "222.333");
+    Optional<String> result1 = parseOrganizationGroupOidFromSecurityRole("auth_crud_ei.organisaatio.group.oid");
+    Optional<String> result2 = parseOrganizationGroupOidFromSecurityRole(
+        "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "222.333");
 
     assertFalse(result1.isPresent());
     assertTrue(result2.isPresent());
@@ -54,34 +51,26 @@ public class SecurityUtilTest {
 
   @Test
   public void TestParseOrganizationOidsFromSecurityRoles() {
-    Set<String> oids =
-        Stream.of(ORGANIZATION_OID_PREFIX + "222.333", ORGANIZATION_OID_PREFIX + "111.222")
-            .collect(Collectors.toSet());
+    Set<String> oids = Stream.of(ORGANIZATION_OID_PREFIX + "222.333", ORGANIZATION_OID_PREFIX + "111.222")
+        .collect(Collectors.toSet());
 
-    Set<String> result =
-        parseOrganizationOidsFromSecurityRoles(
-            Arrays.asList(
-                "auth_crud_" + ORGANIZATION_OID_PREFIX + "222.333",
-                "auth_crud_" + ORGANIZATION_OID_PREFIX + "111.222",
-                "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "444.555"));
+    Set<String> result = parseOrganizationOidsFromSecurityRoles(Arrays.asList(
+        "auth_crud_" + ORGANIZATION_OID_PREFIX + "222.333", "auth_crud_" + ORGANIZATION_OID_PREFIX + "111.222",
+        "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "444.555"));
 
     assertEquals(oids, result);
   }
 
   @Test
   public void TestParseOrganizationGroupOidsFromSecurityRoles() {
-    Set<String> oids =
-        Stream.of(
-                ORGANIZATION_GROUP_OID_PREFIX + "111.222",
-                ORGANIZATION_GROUP_OID_PREFIX + "444.555")
-            .collect(Collectors.toSet());
+    Set<String> oids = Stream
+        .of(ORGANIZATION_GROUP_OID_PREFIX + "111.222", ORGANIZATION_GROUP_OID_PREFIX + "444.555")
+        .collect(Collectors.toSet());
 
-    Set<String> result =
-        parseOrganizationGroupOidsFromSecurityRoles(
-            Arrays.asList(
-                "auth_crud_" + ORGANIZATION_OID_PREFIX + "222.333",
-                "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "111.222",
-                "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "444.555"));
+    Set<String> result = parseOrganizationGroupOidsFromSecurityRoles(
+        Arrays.asList("auth_crud_" + ORGANIZATION_OID_PREFIX + "222.333",
+            "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "111.222",
+            "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "444.555"));
 
     assertEquals(oids, result);
   }
@@ -101,19 +90,14 @@ public class SecurityUtilTest {
 
   @Test
   public void TestContainsOphRole() {
-    Set<GrantedAuthority> oids1 =
-        Stream.of(
-                "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "111.222",
-                "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "444.555")
-            .map(TestAuthority::new)
-            .collect(Collectors.toSet());
-    Set<GrantedAuthority> oids2 =
-        Stream.of(
-                "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "111.222",
-                "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "444.555",
-                "1.2.246.562.10.00000000001")
-            .map(TestAuthority::new)
-            .collect(Collectors.toSet());
+    Set<GrantedAuthority> oids1 = Stream
+        .of("auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "111.222",
+            "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "444.555")
+        .map(TestAuthority::new).collect(Collectors.toSet());
+    Set<GrantedAuthority> oids2 = Stream
+        .of("auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "111.222",
+            "auth_crud_" + ORGANIZATION_GROUP_OID_PREFIX + "444.555", "1.2.246.562.10.00000000001")
+        .map(TestAuthority::new).collect(Collectors.toSet());
 
     boolean result1 = containsOphRole(oids1);
     boolean result2 = containsOphRole(oids2);

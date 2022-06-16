@@ -11,26 +11,18 @@ public class DiskreettiDataArvo extends TilaDataArvo {
   private final String tunniste;
   private final String osallistuminenTunniste;
 
-  public DiskreettiDataArvo(
-      Collection<String> arvot,
-      Map<String, String> tilaKonvertteri,
-      String tunniste,
-      String asetettuTila,
-      String osallistuminenTunniste) {
+  public DiskreettiDataArvo(Collection<String> arvot, Map<String, String> tilaKonvertteri, String tunniste,
+      String asetettuTila, String osallistuminenTunniste) {
     super(tilaKonvertteri, asetettuTila);
     this.arvot = Sets.newHashSet(arvot);
-    this.konversio =
-        arvot.stream()
-            .filter(
-                a -> {
-                  try {
-                    Double.parseDouble(a);
-                    return true;
-                  } catch (NumberFormatException e) {
-                    return false;
-                  }
-                })
-            .collect(Collectors.toMap(a -> Double.parseDouble(a), a -> a));
+    this.konversio = arvot.stream().filter(a -> {
+      try {
+        Double.parseDouble(a);
+        return true;
+      } catch (NumberFormatException e) {
+        return false;
+      }
+    }).collect(Collectors.toMap(a -> Double.parseDouble(a), a -> a));
     this.tunniste = tunniste;
     this.osallistuminenTunniste = osallistuminenTunniste;
   }
@@ -69,11 +61,7 @@ public class DiskreettiDataArvo extends TilaDataArvo {
         }
       }
     }
-    return new PistesyottoArvo(
-        konvertoi(arvo),
-        lopullinenTila,
-        isValidi(arvo) && isValidiTila(tila),
-        tunniste,
+    return new PistesyottoArvo(konvertoi(arvo), lopullinenTila, isValidi(arvo) && isValidiTila(tila), tunniste,
         osallistuminenTunniste);
   }
 

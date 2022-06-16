@@ -34,8 +34,7 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
   }
 
   @Override
-  public Observable<List<Muutoshistoria>> getMuutoshistoria(
-      String hakemusOid, String valintatapajonoOid) {
+  public Observable<List<Muutoshistoria>> getMuutoshistoria(String hakemusOid, String valintatapajonoOid) {
     return Observable.just(emptyList());
   }
 
@@ -50,70 +49,65 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
   }
 
   @Override
-  public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(
-      String hakukohdeOid, AuditSession session) {
+  public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(String hakukohdeOid, AuditSession session) {
     return Observable.just(Lists.newArrayList());
   }
 
   @Override
-  public Observable<String> saveLukuvuosimaksut(
-      String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
+  public Observable<String> saveLukuvuosimaksut(String hakukohdeOid, AuditSession session,
+      List<LukuvuosimaksuMuutos> muutokset) {
     return Observable.empty();
   }
 
   @Override
-  public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(
-      String hakuOid, String hakukohdeOid) {
+  public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(String hakuOid, String hakukohdeOid) {
     return Observable.just(Lists.newArrayList());
   }
 
   @Override
-  public Observable<List<Valintatulos>> findValintatuloksetByHakemus(
-      String hakuOid, String hakemusOid) {
+  public Observable<List<Valintatulos>> findValintatuloksetByHakemus(String hakuOid, String hakemusOid) {
     return Observable.just(Lists.newArrayList());
   }
 
   @Override
-  public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(
-      String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
+  public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(String hakuOid,
+      String hakukohdeOid, Set<String> hakemusOids) {
     return Observable.just(Lists.newArrayList());
   }
 
   @Override
-  public Observable<List<TilaHakijalleDto>> findTilahakijalle(
-      String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids) {
+  public Observable<List<TilaHakijalleDto>> findTilahakijalle(String hakuOid, String hakukohdeOid,
+      String valintatapajonoOid, Set<String> hakemusOids) {
     return Observable.just(Lists.newArrayList());
   }
 
   public Map<String, List<Valinnantulos>> erillishaunValinnantulokset = new HashMap<>();
 
   @Override
-  public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(
-      AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
+  public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(AuditSession auditSession,
+      String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
     erillishaunValinnantulokset.put(valintatapajonoOid, valinnantulokset);
     return Observable.just(Lists.newArrayList());
-    /*return Observable.just(
-        valinnantulokset.stream().map(v -> {
-            return new ValintatulosUpdateStatus(200, "Kaikki ok", valintatapajonoOid, v.getHakemusOid());
-        }).collect(Collectors.toList())
-    );*/
+    /*
+     * return Observable.just( valinnantulokset.stream().map(v -> { return new
+     * ValintatulosUpdateStatus(200, "Kaikki ok", valintatapajonoOid,
+     * v.getHakemusOid()); }).collect(Collectors.toList()) );
+     */
   }
 
   @Override
-  public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(
-      AuditSession auditSession, String valintatapajonoOid) {
+  public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(AuditSession auditSession,
+      String valintatapajonoOid) {
     return Observable.just(Lists.newArrayList());
   }
 
   @Override
-  public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(
-      String hakuOid, String hakukohdeOid) {
+  public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(String hakuOid, String hakukohdeOid) {
     return Observable.just(new HakukohdeDTO());
   }
 
   @Override
-  public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(
-      String hakuOid, String hakukohdeOid) {
+  public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid, String hakukohdeOid) {
     return CompletableFuture.completedFuture(new ArrayList<>());
   }
 

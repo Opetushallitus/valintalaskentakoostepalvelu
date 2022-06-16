@@ -51,8 +51,7 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
       SessionToken session = (SessionToken) message.getExchange().get(EXCHANGE_SESSION_TOKEN);
       LOGGER.info(String.format("Authentication failed using session %s", session));
       this.applicationSession.invalidateSession(session);
-      OphCxfMessageUtil.addHeader(
-          message, CAS_302_REDIRECT_MARKER.getKey(), CAS_302_REDIRECT_MARKER.getValue());
+      OphCxfMessageUtil.addHeader(message, CAS_302_REDIRECT_MARKER.getKey(), CAS_302_REDIRECT_MARKER.getValue());
     }
   }
 
@@ -62,15 +61,13 @@ public class CasKoosteInterceptor extends AbstractPhaseInterceptor<Message> {
     message.getExchange().put(EXCHANGE_SESSION_TOKEN, session);
     LOGGER.debug(String.format("Using session %s", session));
     if (this.legacySpringFilter) {
-      LOGGER.debug(
-          String.format("Using header CasSecurityTicket=%s", session.serviceTicket.serviceTicket));
-      OphCxfMessageUtil.addHeader(
-          message, "CasSecurityTicket", session.serviceTicket.serviceTicket);
+      LOGGER.debug(String.format("Using header CasSecurityTicket=%s", session.serviceTicket.serviceTicket));
+      OphCxfMessageUtil.addHeader(message, "CasSecurityTicket", session.serviceTicket.serviceTicket);
     }
     OphCxfMessageUtil.addHeader(message, "CSRF", CSRF_VALUE);
     OphCxfMessageUtil.appendToHeader(message, "Cookie", "CSRF=" + CSRF_VALUE, ";");
-    OphCxfMessageUtil.appendToHeader(
-        message, "Cookie", session.cookie.getName() + "=" + session.cookie.getValue(), ";");
+    OphCxfMessageUtil.appendToHeader(message, "Cookie", session.cookie.getName() + "=" + session.cookie.getValue(),
+        ";");
   }
 
   private boolean isRedirectToCas(Message message) {

@@ -15,9 +15,9 @@ public class ExcelPalveluTest {
   public void testaaXlsTiedostonLuontia() throws IOException {
     final String RANDOM_DATAA = "RANDOM DATAA!";
     List<Object[]> rivit = new ArrayList<Object[]>();
-    rivit.add(new Object[] {RANDOM_DATAA, RANDOM_DATAA, RANDOM_DATAA});
-    rivit.add(new Object[] {RANDOM_DATAA, RANDOM_DATAA, RANDOM_DATAA, RANDOM_DATAA});
-    rivit.add(new Object[] {RANDOM_DATAA, RANDOM_DATAA});
+    rivit.add(new Object[] { RANDOM_DATAA, RANDOM_DATAA, RANDOM_DATAA });
+    rivit.add(new Object[] { RANDOM_DATAA, RANDOM_DATAA, RANDOM_DATAA, RANDOM_DATAA });
+    rivit.add(new Object[] { RANDOM_DATAA, RANDOM_DATAA });
 
     InputStream xlsData = ExcelExportUtil.exportGridAsXls(rivit.toArray(new Object[][] {}));
     Assert.assertTrue(IOUtils.toByteArray(xlsData).length >= 0);

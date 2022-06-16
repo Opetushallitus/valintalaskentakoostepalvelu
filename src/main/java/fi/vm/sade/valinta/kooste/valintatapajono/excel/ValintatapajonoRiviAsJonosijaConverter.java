@@ -9,8 +9,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class ValintatapajonoRiviAsJonosijaConverter {
 
-  public static JonosijaDTO convert(
-      String hakukohdeOid, ValintatapajonoRivi rivi, HakemusWrapper hakemus) {
+  public static JonosijaDTO convert(String hakukohdeOid, ValintatapajonoRivi rivi, HakemusWrapper hakemus) {
     JonosijaDTO j = new JonosijaDTO();
     j.setEtunimi(hakemus.getEtunimi());
     j.setSukunimi(hakemus.getSukunimi());
@@ -21,10 +20,9 @@ public class ValintatapajonoRiviAsJonosijaConverter {
     j.setHarkinnanvarainen(false);
     Integer prioriteetti = hakemus.getHakutoiveenPrioriteetti(hakukohdeOid);
     if (prioriteetti == null) {
-      throw new RuntimeException(
-          String.format(
-              "Hakemuspalvelu palautti hakemuksen %s hakukohteelle %s vaikka hakija ei ole siihen hakenut!",
-              hakemus.getOid(), hakukohdeOid));
+      throw new RuntimeException(String.format(
+          "Hakemuspalvelu palautti hakemuksen %s hakukohteelle %s vaikka hakija ei ole siihen hakenut!",
+          hakemus.getOid(), hakukohdeOid));
     }
     j.setPrioriteetti(prioriteetti);
     JarjestyskriteeritulosDTO kriteeri = new JarjestyskriteeritulosDTO();
@@ -33,8 +31,7 @@ public class ValintatapajonoRiviAsJonosijaConverter {
     } else {
       kriteeri.setArvo(new BigDecimal(rivi.asJonosija()).negate());
     }
-    kriteeri.setTila(
-        rivi.isMaarittelematon() ? JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA : rivi.asTila());
+    kriteeri.setTila(rivi.isMaarittelematon() ? JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA : rivi.asTila());
     kriteeri.setNimi(StringUtils.EMPTY);
     kriteeri.setKuvaus(rivi.getKuvaus());
     kriteeri.setPrioriteetti(0);

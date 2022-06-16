@@ -25,7 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @Configuration
-@ContextConfiguration(classes = {KoostepalveluContext.CamelConfig.class, KelaFtpRouteTest.class})
+@ContextConfiguration(classes = { KoostepalveluContext.CamelConfig.class, KelaFtpRouteTest.class })
 @RunWith(SpringJUnit4ClassRunner.class)
 public class KelaFtpRouteTest {
   private String HOST = "localhost";
@@ -35,18 +35,15 @@ public class KelaFtpRouteTest {
   private String PASSWORD = "Testi123";
 
   @Rule
-  public final FakeSftpServerRule sftpServer =
-      new FakeSftpServerRule().setPort(Integer.parseInt(PORT)).addUser(USERNAME, PASSWORD);
+  public final FakeSftpServerRule sftpServer = new FakeSftpServerRule().setPort(Integer.parseInt(PORT))
+      .addUser(USERNAME, PASSWORD);
 
-  private HttpClient client =
-      new HttpClient(
-          java.net.http.HttpClient.newBuilder().build(),
-          null,
-          DateDeserializer.gsonBuilder().create());
+  private HttpClient client = new HttpClient(java.net.http.HttpClient.newBuilder().build(), null,
+      DateDeserializer.gsonBuilder().create());
 
   private DokumenttiAsyncResource dokumenttiAsyncResource = new DokumenttiAsyncResourceImpl(client);
-  private KelaFtpRoute kelaFtpRoute =
-      new KelaFtpRouteImpl(HOST, PORT, PATH, USERNAME, PASSWORD, dokumenttiAsyncResource);
+  private KelaFtpRoute kelaFtpRoute = new KelaFtpRouteImpl(HOST, PORT, PATH, USERNAME, PASSWORD,
+      dokumenttiAsyncResource);
 
   @Bean(name = "kelaValvomo")
   public ValvomoServiceImpl<KelaProsessi> getValvomoServiceImpl() {
@@ -56,8 +53,8 @@ public class KelaFtpRouteTest {
   @Before
   public void init() {
     startShared();
-    MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
-        "ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
+    MockOpintopolkuCasAuthenticationFilter
+        .setRolesToReturnInFakeAuthentication("ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
   }
 
   @Test
@@ -65,8 +62,8 @@ public class KelaFtpRouteTest {
     String dokumenttiId = "dokumenttiId";
 
     byte[] bytes = dokumenttiId.getBytes();
-    mockToReturnInputStreamAndHeaders(
-        GET, "/dokumenttipalvelu-service/resources/dokumentit/lataa/.*", "kela.txt", bytes);
+    mockToReturnInputStreamAndHeaders(GET, "/dokumenttipalvelu-service/resources/dokumentit/lataa/.*", "kela.txt",
+        bytes);
     Boolean done;
 
     try {

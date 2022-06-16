@@ -9,22 +9,17 @@ import org.apache.camel.Property;
 public interface KelaRoute {
 
   /** Aloittaa Kela-siirtodokumentin luonnin. */
-  void aloitaKelaLuonti(
-      @Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) KelaProsessi prosessi,
+  void aloitaKelaLuonti(@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI) KelaProsessi prosessi,
       @Body KelaLuonti luonti);
 
   /** Camel route description. */
-  final String SEDA_KELA_LUONTI =
-      "seda:kela_luonti?"
-          +
-          // jos palvelin sammuu niin ei suorita loppuun tyojonoa
-          "purgeWhenStopping=true"
-          +
-          // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
-          "&waitForTaskToComplete=Never"
-          +
-          // tyojonossa on yksi tyostaja
-          "&concurrentConsumers=1";
+  final String SEDA_KELA_LUONTI = "seda:kela_luonti?" +
+  // jos palvelin sammuu niin ei suorita loppuun tyojonoa
+      "purgeWhenStopping=true" +
+      // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
+      "&waitForTaskToComplete=Never" +
+      // tyojonossa on yksi tyostaja
+      "&concurrentConsumers=1";
   /** Camel route description. */
   final String DIRECT_KELA_FAILED = "direct:kela_failed";
   /** Property hakuOid */

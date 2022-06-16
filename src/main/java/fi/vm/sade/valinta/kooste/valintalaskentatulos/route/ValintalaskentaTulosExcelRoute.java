@@ -6,8 +6,7 @@ import org.apache.camel.Property;
 
 public interface ValintalaskentaTulosExcelRoute {
 
-  final String DIRECT_VALINTALASKENTA_EXCEL =
-      "direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti";
+  final String DIRECT_VALINTALASKENTA_EXCEL = "direct:kaynnistaValintalaskennanTulostenLuontiXlsMuodossaReitti";
 
   InputStream luoXls(@Property(OPH.HAKUKOHDEOID) String hakukohdeOid);
 }

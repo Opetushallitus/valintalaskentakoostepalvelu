@@ -32,58 +32,29 @@ public class ValintatapajonoExcel {
   public static final String VAKIO_MAARITTELEMATON = "MAARITTELEMATON";
   public static final String VAKIO_HYVAKSYTTAVISSA = "HYVAKSYTTAVISSA";
   public static final String VAKIO_HYLATTY = "HYLATTY";
-  public static final String VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI =
-      "HYVAKSYTTY_HARKINNANVARAISESTI";
+  public static final String VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI = "HYVAKSYTTY_HARKINNANVARAISESTI";
 
-  private static final Collection<String> VAIHTOEHDOT =
-      Arrays.asList(MAARITTELEMATON, HYVAKSYTTAVISSA, HYLATTY);
-  public static final Map<String, String> VAIHTOEHDOT_KONVERSIO =
-      new KonversioBuilder()
-          .addKonversio(StringUtils.EMPTY, MAARITTELEMATON)
-          .addKonversio(VAKIO_MAARITTELEMATON, MAARITTELEMATON)
-          .addKonversio(VAKIO_HYVAKSYTTAVISSA, HYVAKSYTTAVISSA)
-          .addKonversio(VAKIO_HYLATTY, HYLATTY)
-          .addKonversio(VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI, HYVAKSYTTY_HARKINNANVARAISESTI)
-          .build();
-  public static final Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO =
-      new KonversioBuilder()
-          .addKonversio(StringUtils.EMPTY, VAKIO_MAARITTELEMATON)
-          .addKonversio(MAARITTELEMATON, VAKIO_MAARITTELEMATON)
-          .addKonversio(HYVAKSYTTAVISSA, VAKIO_HYVAKSYTTAVISSA)
-          .addKonversio(HYLATTY, VAKIO_HYLATTY)
-          .addKonversio(HYVAKSYTTY_HARKINNANVARAISESTI, VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI)
-          .build();
+  private static final Collection<String> VAIHTOEHDOT = Arrays.asList(MAARITTELEMATON, HYVAKSYTTAVISSA, HYLATTY);
+  public static final Map<String, String> VAIHTOEHDOT_KONVERSIO = new KonversioBuilder()
+      .addKonversio(StringUtils.EMPTY, MAARITTELEMATON).addKonversio(VAKIO_MAARITTELEMATON, MAARITTELEMATON)
+      .addKonversio(VAKIO_HYVAKSYTTAVISSA, HYVAKSYTTAVISSA).addKonversio(VAKIO_HYLATTY, HYLATTY)
+      .addKonversio(VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI, HYVAKSYTTY_HARKINNANVARAISESTI).build();
+  public static final Map<String, String> VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO = new KonversioBuilder()
+      .addKonversio(StringUtils.EMPTY, VAKIO_MAARITTELEMATON).addKonversio(MAARITTELEMATON, VAKIO_MAARITTELEMATON)
+      .addKonversio(HYVAKSYTTAVISSA, VAKIO_HYVAKSYTTAVISSA).addKonversio(HYLATTY, VAKIO_HYLATTY)
+      .addKonversio(HYVAKSYTTY_HARKINNANVARAISESTI, VAKIO_HYVAKSYTTY_HARKINNANVARAISESTI).build();
 
   private final Excel excel;
 
-  public ValintatapajonoExcel(
-      String hakuOid,
-      String hakukohdeOid,
-      String valintatapajonoOid,
-      String hakuNimi,
-      String hakukohdeNimi,
-      List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
-      List<HakemusWrapper> hakemukset) {
-    this(
-        hakuOid,
-        hakukohdeOid,
-        valintatapajonoOid,
-        hakuNimi,
-        hakukohdeNimi,
-        valinnanvaihe,
-        hakemukset,
+  public ValintatapajonoExcel(String hakuOid, String hakukohdeOid, String valintatapajonoOid, String hakuNimi,
+      String hakukohdeNimi, List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<HakemusWrapper> hakemukset) {
+    this(hakuOid, hakukohdeOid, valintatapajonoOid, hakuNimi, hakukohdeNimi, valinnanvaihe, hakemukset,
         Collections.<ValintatapajonoDataRiviKuuntelija>emptyList());
   }
 
   @SuppressWarnings("unchecked")
-  public ValintatapajonoExcel(
-      String hakuOid,
-      String hakukohdeOid,
-      String valintatapajonoOid,
-      String hakuNimi,
-      String hakukohdeNimi,
-      List<ValintatietoValinnanvaiheDTO> valinnanvaihe,
-      List<HakemusWrapper> hakemukset,
+  public ValintatapajonoExcel(String hakuOid, String hakukohdeOid, String valintatapajonoOid, String hakuNimi,
+      String hakukohdeNimi, List<ValintatietoValinnanvaiheDTO> valinnanvaihe, List<HakemusWrapper> hakemukset,
       Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
     // Jonosija (13) Hakija Valintatieto Kuvaus (FI) Kuvaus (SV) Kuvaus (EN)
     List<Rivi> rivit = Lists.newArrayList();
@@ -91,16 +62,11 @@ public class ValintatapajonoExcel {
     rivit.add(new RiviBuilder().addOid(hakukohdeOid).addTeksti(hakukohdeNimi, 4).build());
     rivit.add(Rivi.tyhjaRivi());
 
-    final RiviBuilder otsikkoRiviBuilder =
-        new RiviBuilder()
-            .addKeskitettyTeksti("Hakemus OID")
-            .addKeskitettyTeksti("Jonosija (" + hakemukset.size() + ")")
-            .addKeskitettyTeksti("Hakija")
-            .addKeskitettyTeksti("Valintatieto")
-            .addKeskitettyTeksti("Kokonaispisteet")
-            .addKeskitettyTeksti("Kuvaus (FI)")
-            .addKeskitettyTeksti("Kuvaus (SV)")
-            .addKeskitettyTeksti("Kuvaus (EN)");
+    final RiviBuilder otsikkoRiviBuilder = new RiviBuilder().addKeskitettyTeksti("Hakemus OID")
+        .addKeskitettyTeksti("Jonosija (" + hakemukset.size() + ")").addKeskitettyTeksti("Hakija")
+        .addKeskitettyTeksti("Valintatieto").addKeskitettyTeksti("Kokonaispisteet")
+        .addKeskitettyTeksti("Kuvaus (FI)").addKeskitettyTeksti("Kuvaus (SV)")
+        .addKeskitettyTeksti("Kuvaus (EN)");
 
     rivit.add(otsikkoRiviBuilder.build());
 
@@ -117,8 +83,7 @@ public class ValintatapajonoExcel {
             valintatiedot.put(hakemusOid, jonosija.getTuloksenTila().toString());
             if (!jonosija.getJarjestyskriteerit().isEmpty()) {
               avaimet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getKuvaus());
-              if (null != jono.getKaytetaanKokonaispisteita()
-                  && jono.getKaytetaanKokonaispisteita()) {
+              if (null != jono.getKaytetaanKokonaispisteita() && jono.getKaytetaanKokonaispisteita()) {
                 kokonaispisteet.put(hakemusOid, jonosija.getJarjestyskriteerit().last().getArvo());
               }
             }
@@ -126,20 +91,17 @@ public class ValintatapajonoExcel {
         }
       }
     }
-    ComparatorChain jonosijaAndHakijaNameComparator =
-        new ComparatorChain(
-            (Comparator<HakemusWrapper>)
-                (o1, o2) -> {
-                  Integer i1 = jonosijat.get(o1.getOid());
-                  Integer i2 = jonosijat.get(o2.getOid());
-                  if (i1 == null) {
-                    i1 = Integer.MAX_VALUE;
-                  }
-                  if (i2 == null) {
-                    i2 = Integer.MAX_VALUE;
-                  }
-                  return i1.compareTo(i2);
-                });
+    ComparatorChain jonosijaAndHakijaNameComparator = new ComparatorChain((Comparator<HakemusWrapper>) (o1, o2) -> {
+      Integer i1 = jonosijat.get(o1.getOid());
+      Integer i2 = jonosijat.get(o2.getOid());
+      if (i1 == null) {
+        i1 = Integer.MAX_VALUE;
+      }
+      if (i2 == null) {
+        i2 = Integer.MAX_VALUE;
+      }
+      return i1.compareTo(i2);
+    });
     jonosijaAndHakijaNameComparator.addComparator(HakemusComparator.DEFAULT);
     hakemukset.sort(jonosijaAndHakijaNameComparator);
 
@@ -154,14 +116,11 @@ public class ValintatapajonoExcel {
       } else {
         s.add(new NumeroArvo(null, 0, hakemukset.size()));
       }
-      Osoite osoite =
-          OsoiteHakemukseltaUtil.osoiteHakemuksesta(
-              hakemus, Maps.newHashMap(), Maps.newHashMap(), new NimiPaattelyStrategy());
+      Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, Maps.newHashMap(), Maps.newHashMap(),
+          new NimiPaattelyStrategy());
       s.add(new TekstiArvo(osoite.getLastName() + " " + osoite.getFirstName()));
-      s.add(
-          new MonivalintaArvo(
-              VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))),
-              VAIHTOEHDOT));
+      s.add(new MonivalintaArvo(VAIHTOEHDOT_KONVERSIO.get(StringUtils.trimToEmpty(valintatiedot.get(hakemusOid))),
+          VAIHTOEHDOT));
       if (kokonaispisteet.containsKey(hakemusOid) && null != kokonaispisteet.get(hakemusOid)) {
         s.add(new NumeroArvo(kokonaispisteet.get(hakemusOid)));
       } else {
@@ -180,13 +139,8 @@ public class ValintatapajonoExcel {
       sx.add(s);
     }
     rivit.add(new ValintatapajonoDataRivi(sx, kuuntelijat));
-    this.excel =
-        new Excel(
-            "Valintatapajono",
-            rivit,
-            new int[] {0} // piilottaa ensimmaisen pysty sarakkeen
-            ,
-            new int[] {});
+    this.excel = new Excel("Valintatapajono", rivit, new int[] { 0 } // piilottaa ensimmaisen pysty sarakkeen
+        , new int[] {});
   }
 
   public Excel getExcel() {

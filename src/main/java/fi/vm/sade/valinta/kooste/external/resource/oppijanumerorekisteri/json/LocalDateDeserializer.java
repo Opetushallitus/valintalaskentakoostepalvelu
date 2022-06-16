@@ -12,8 +12,7 @@ import java.time.format.DateTimeParseException;
 
 public class LocalDateDeserializer extends JsonDeserializer {
   @Override
-  public Object deserialize(JsonParser p, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+  public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
     if (!p.hasToken(JsonToken.VALUE_STRING)) {
       throw ctxt.wrongTokenException(p, JsonToken.VALUE_STRING, null);
     }

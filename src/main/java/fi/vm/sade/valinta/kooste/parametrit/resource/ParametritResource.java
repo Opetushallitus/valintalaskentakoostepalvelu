@@ -29,8 +29,10 @@ public class ParametritResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(ParametritResource.class);
 
-  @Autowired private HakuParametritService hakuParametritService;
-  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
+  @Autowired
+  private HakuParametritService hakuParametritService;
+  @Autowired
+  private TarjontaAsyncResource tarjontaAsyncResource;
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
@@ -60,8 +62,7 @@ public class ParametritResource {
   @ApiOperation(value = "Hakukohteen hakukohderyhmät", response = Response.class)
   public Response listHakukohderyhmat(@PathParam("hakukohdeOid") String hakukohdeOid) {
 
-    CompletableFuture<List<String>> resultF =
-        tarjontaAsyncResource.hakukohdeRyhmasForHakukohde(hakukohdeOid);
+    CompletableFuture<List<String>> resultF = tarjontaAsyncResource.hakukohdeRyhmasForHakukohde(hakukohdeOid);
     try {
       List<String> result = resultF.get(1, TimeUnit.MINUTES);
       return Response.ok(result).build();

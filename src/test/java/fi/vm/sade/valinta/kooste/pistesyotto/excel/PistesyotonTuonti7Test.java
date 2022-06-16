@@ -9,23 +9,18 @@ import org.junit.Test;
 public class PistesyotonTuonti7Test extends PistesyotonTuontiTestBase {
   @Test
   public void testaaOutput() throws Exception {
-    List<ValintakoeOsallistuminenDTO> osallistumistiedot =
-        lueOsallistumisTiedot("7/List_ValintakoeOsallistuminenDTO.json");
+    List<ValintakoeOsallistuminenDTO> osallistumistiedot = lueOsallistumisTiedot(
+        "7/List_ValintakoeOsallistuminenDTO.json");
     List<ValintaperusteDTO> valintaperusteet = lueValintaperusteet("7/List_ValintaperusteDTO.json");
-    List<ApplicationAdditionalDataDTO> pistetiedot =
-        luePistetiedot("7/List_ApplicationAdditionalDataDTO.json");
+    List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("7/List_ApplicationAdditionalDataDTO.json");
 
-    tuoExcel(
-        osallistumistiedot,
-        valintaperusteet,
-        pistetiedot,
-        "7/muplattu.xlsx",
-        "1.2.246.562.29.173465377510",
+    tuoExcel(osallistumistiedot, valintaperusteet, pistetiedot, "7/muplattu.xlsx", "1.2.246.562.29.173465377510",
         "1.2.246.562.20.17162646719");
 
     /*
-    ApplicationAdditionalDataDTO dada = pistetiedot.stream().filter(h -> h.getLastName().equals("Andelin")).findFirst().get();
-    System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(dada));
-    */
+     * ApplicationAdditionalDataDTO dada = pistetiedot.stream().filter(h ->
+     * h.getLastName().equals("Andelin")).findFirst().get(); System.out.println(new
+     * GsonBuilder().setPrettyPrinting().create().toJson(dada));
+     */
   }
 }

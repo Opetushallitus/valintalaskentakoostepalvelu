@@ -44,15 +44,17 @@ public class Oppija {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
 
     Oppija oppija = (Oppija) o;
 
-    if (ensikertalainen != oppija.ensikertalainen) return false;
-    if (oppijanumero != null
-        ? !oppijanumero.equals(oppija.oppijanumero)
-        : oppija.oppijanumero != null) return false;
+    if (ensikertalainen != oppija.ensikertalainen)
+      return false;
+    if (oppijanumero != null ? !oppijanumero.equals(oppija.oppijanumero) : oppija.oppijanumero != null)
+      return false;
     if (opiskelu != null ? !opiskelu.equals(oppija.opiskelu) : oppija.opiskelu != null)
       return false;
     return !(opiskeluoikeudet != null
@@ -72,18 +74,7 @@ public class Oppija {
 
   @Override
   public String toString() {
-    return "Oppija{"
-        + "oppijanumero='"
-        + oppijanumero
-        + '\''
-        + ", opiskelu="
-        + opiskelu
-        + ", suoritukset="
-        + suoritukset
-        + ", opiskeluoikeudet="
-        + opiskeluoikeudet
-        + ", ensikertalainen="
-        + ensikertalainen
-        + '}';
+    return "Oppija{" + "oppijanumero='" + oppijanumero + '\'' + ", opiskelu=" + opiskelu + ", suoritukset="
+        + suoritukset + ", opiskeluoikeudet=" + opiskeluoikeudet + ", ensikertalainen=" + ensikertalainen + '}';
   }
 }

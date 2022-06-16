@@ -26,7 +26,6 @@ public class KoskiOppijaTest {
   }
 
   public LocalDateTime aikaleima(String opiskeluoikeusJson) {
-    return KoskiOppija.OpiskeluoikeusJsonUtil.aikaleima(
-        GSON.fromJson(opiskeluoikeusJson, JsonElement.class));
+    return KoskiOppija.OpiskeluoikeusJsonUtil.aikaleima(GSON.fromJson(opiskeluoikeusJson, JsonElement.class));
   }
 }

@@ -45,57 +45,47 @@ import org.springframework.stereotype.Controller;
 @Api(value = "/erillishaku", description = "Resurssi erillishaun tietojen tuontiin ja vientiin")
 public class ErillishakuResource {
   private static final Logger LOG = LoggerFactory.getLogger(ErillishakuResource.class);
-  private static final String ROLE_TULOSTENTUONTI =
-      "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
+  private static final String ROLE_TULOSTENTUONTI = "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
 
-  public static final String POIKKEUS_TYHJA_DATAJOUKKO =
-      "Syötteestä ei saatu poimittua yhtään hakijaa sijoitteluun tuotavaksi!";
-  public static final String RIVIN_TUNNISTE_KAYTTOLIITTYMAAN =
-      "Syöte"; // Datarivin tunniste käyttöliittymään
+  public static final String POIKKEUS_TYHJA_DATAJOUKKO = "Syötteestä ei saatu poimittua yhtään hakijaa sijoitteluun tuotavaksi!";
+  public static final String RIVIN_TUNNISTE_KAYTTOLIITTYMAAN = "Syöte"; // Datarivin tunniste käyttöliittymään
   public static final String POIKKEUS_VIALLINEN_DATAJOUKKO = "Syötteessä oli virheitä!";
-  public static final String POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE =
-      "Oppijanumerorekisterikutsu epäonnistui!";
+  public static final String POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE = "Oppijanumerorekisterikutsu epäonnistui!";
   public static final String POIKKEUS_HAKEMUSPALVELUN_VIRHE = "Hakemuspalvelukutsu epäonnistui!";
-  public static final String POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE =
-      "Erillishakurivin hakeminen henkilön tiedoilla epäonnistui!";
+  public static final String POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE = "Erillishakurivin hakeminen henkilön tiedoilla epäonnistui!";
 
-  @Autowired private Authorizer authorizer;
+  @Autowired
+  private Authorizer authorizer;
 
-  @Autowired private DokumenttiProsessiKomponentti dokumenttiKomponentti;
+  @Autowired
+  private DokumenttiProsessiKomponentti dokumenttiKomponentti;
 
-  @Autowired private ErillishaunTuontiService tuontiService;
+  @Autowired
+  private ErillishaunTuontiService tuontiService;
 
-  @Autowired private ErillishaunVientiService vientiService;
-  @Autowired private TarjontaAsyncResource tarjontaResource;
+  @Autowired
+  private ErillishaunVientiService vientiService;
+  @Autowired
+  private TarjontaAsyncResource tarjontaResource;
 
-  @Context private HttpServletRequest httpServletRequestJaxRS;
+  @Context
+  private HttpServletRequest httpServletRequestJaxRS;
 
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
   @POST
   @Path("/vienti")
   @Consumes("application/json")
   @Produces("application/json")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Erillishaun hakukohteen vienti taulukkolaskentaan",
-      response = ProsessiId.class)
-  public ProsessiId vienti(
-      @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
-      @QueryParam("hakuOid") String hakuOid,
+  @ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen vienti taulukkolaskentaan", response = ProsessiId.class)
+  public ProsessiId vienti(@QueryParam("hakutyyppi") Hakutyyppi tyyppi, @QueryParam("hakuOid") String hakuOid,
       @QueryParam("hakukohdeOid") String hakukohdeOid,
       @QueryParam("valintatapajonoOid") String valintatapajonoOid) {
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-    vientiService.vie(
-        createAuditSession(httpServletRequestJaxRS),
-        prosessi,
-        new ErillishakuDTO(
-            tyyppi,
-            hakuOid,
-            hakukohdeOid,
-            tarjoajaOid,
+    vientiService.vie(createAuditSession(httpServletRequestJaxRS), prosessi,
+        new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid,
             Optional.ofNullable(trimToNull(valintatapajonoOid))
                 .orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))));
     return prosessi.toProsessiId();
@@ -106,23 +96,11 @@ public class ErillishakuResource {
   @Path("/tuonti")
   @Consumes("application/octet-stream")
   @Produces("application/json")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Erillishaun hakukohteen tuonti taulukkolaskennalla",
-      response = ProsessiId.class)
-  public ProsessiId tuonti(
-      @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
-      @QueryParam("hakuOid") String hakuOid,
+  @ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti taulukkolaskennalla", response = ProsessiId.class)
+  public ProsessiId tuonti(@QueryParam("hakutyyppi") Hakutyyppi tyyppi, @QueryParam("hakuOid") String hakuOid,
       @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-      InputStream file)
-      throws Exception {
-    LOG.info(
-        "Käyttäjä "
-            + AuditLog.loggedInUserOid()
-            + " tuo excelillä hakuun "
-            + hakuOid
-            + " hakemuksia");
+      @QueryParam("valintatapajonoOid") String valintatapajonoOid, InputStream file) throws Exception {
+    LOG.info("Käyttäjä " + AuditLog.loggedInUserOid() + " tuo excelillä hakuun " + hakuOid + " hakemuksia");
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
     ByteArrayOutputStream b;
@@ -130,14 +108,8 @@ public class ErillishakuResource {
     IOUtils.closeQuietly(file);
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-    tuontiService.tuoExcelistä(
-        createAuditSession(httpServletRequestJaxRS),
-        prosessi,
-        new ErillishakuDTO(
-            tyyppi,
-            hakuOid,
-            hakukohdeOid,
-            tarjoajaOid,
+    tuontiService.tuoExcelistä(createAuditSession(httpServletRequestJaxRS), prosessi,
+        new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid,
             Optional.ofNullable(trimToNull(valintatapajonoOid))
                 .orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))),
         new ByteArrayInputStream(b.toByteArray()));
@@ -149,53 +121,34 @@ public class ErillishakuResource {
   @Path("/tuonti/json")
   @Consumes("application/json")
   @Produces("application/json")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Erillishaun hakukohteen tuonti JSON-tietueella",
-      response = ProsessiId.class)
+  @ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti JSON-tietueella", response = ProsessiId.class)
   public ProsessiId tuontiJson(
-      @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU") @QueryParam("hakutyyppi")
-          Hakutyyppi tyyppi,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
+      @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU") @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
+      @QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid,
       @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-      @ApiParam(
-              "maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>"
-                  + "maksuntila=[MAKSAMATTA|MAKSETTU|VAPAUTETTU]<br>"
-                  + "hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>"
-                  + "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>"
-                  + "ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]<br>"
-                  + "sukupuoli=[MIES|NAINEN|1|2]<br>"
-                  + "aidinkieli=[fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|<br>"
-                  + "ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|<br>"
-                  + "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>"
-                  + "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>"
-                  + "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
-          ErillishakuJson json) {
-    LOG.info(
-        "Käyttäjä "
-            + AuditLog.loggedInUserOid()
-            + " päivittää "
-            + json.getRivit().size()
-            + " kpl haun "
-            + hakuOid
-            + " hakemusta");
+      @ApiParam("maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>"
+          + "maksuntila=[MAKSAMATTA|MAKSETTU|VAPAUTETTU]<br>"
+          + "hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>"
+          + "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>"
+          + "ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]<br>"
+          + "sukupuoli=[MIES|NAINEN|1|2]<br>"
+          + "aidinkieli=[fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|<br>"
+          + "ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|<br>"
+          + "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>"
+          + "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>"
+          + "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>") ErillishakuJson json) {
+    LOG.info("Käyttäjä " + AuditLog.loggedInUserOid() + " päivittää " + json.getRivit().size() + " kpl haun "
+        + hakuOid + " hakemusta");
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-    tuontiService.tuoJson(
-        createAuditSession(httpServletRequestJaxRS),
-        prosessi,
-        new ErillishakuDTO(
-            tyyppi,
-            hakuOid,
-            hakukohdeOid,
-            tarjoajaOid,
-            Optional.ofNullable(trimToNull(valintatapajonoOid))
-                .orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))),
-        json.getRivit(),
-        true);
+    tuontiService
+        .tuoJson(createAuditSession(httpServletRequestJaxRS), prosessi,
+            new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid,
+                Optional.ofNullable(trimToNull(valintatapajonoOid))
+                    .orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))),
+            json.getRivit(), true);
     return prosessi.toProsessiId();
   }
 
@@ -204,64 +157,40 @@ public class ErillishakuResource {
   @Path("/tuonti/ui")
   @Consumes("application/json")
   @Produces("application/json")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Erillishaun hakukohteen tuonti JSON-tietueella",
-      response = ProsessiId.class)
+  @ApiOperation(consumes = "application/json", value = "Erillishaun hakukohteen tuonti JSON-tietueella", response = ProsessiId.class)
   public ProsessiId tuontiJsonFromUI(
-      @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU") @QueryParam("hakutyyppi")
-          Hakutyyppi tyyppi,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
+      @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU") @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
+      @QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid,
       @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-      @ApiParam(
-              "maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>"
-                  + "maksuntila=[MAKSAMATTA|MAKSETTU|VAPAUTETTU]<br>"
-                  + "hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>"
-                  + "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>"
-                  + "ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]<br>"
-                  + "sukupuoli=[MIES|NAINEN|1|2]<br>"
-                  + "aidinkieli=[fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|<br>"
-                  + "ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|<br>"
-                  + "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>"
-                  + "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>"
-                  + "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
-          ErillishakuJson json) {
-    LOG.info(
-        "Käyttäjä "
-            + AuditLog.loggedInUserOid()
-            + " päivittää "
-            + json.getRivit().size()
-            + " kpl haun "
-            + hakuOid
-            + " hakemusta");
+      @ApiParam("maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>"
+          + "maksuntila=[MAKSAMATTA|MAKSETTU|VAPAUTETTU]<br>"
+          + "hakemuksenTila=[HYLATTY|VARALLA|PERUUNTUNUT|HYVAKSYTTY|VARASIJALTA_HYVAKSYTTY|HARKINNANVARAISESTI_HYVAKSYTTY|PERUNUT|PERUUTETTU]<br>"
+          + "vastaanottoTila=[PERUNUT|KESKEN|EI_VASTAANOTTANUT_MAARA_AIKANA|VASTAANOTTANUT_SITOVASTI|PERUUTETTU]<br>"
+          + "ilmoittautumisTila=[EI_TEHTY|LASNA_KOKO_LUKUVUOSI|POISSA_KOKO_LUKUVUOSI|EI_ILMOITTAUTUNUT|LASNA_SYKSY|POISSA_SYKSY|LASNA|POISSA]<br>"
+          + "sukupuoli=[MIES|NAINEN|1|2]<br>"
+          + "aidinkieli=[fi|en|sv|ae|lo|sl|bm|mo|nr|kn|ga|tl|la|nv|ti|gl|to|sa|lv|hi|ke|ty|ho|cv|ts|kj|xx|vo|ro|mr|sd|ak|kv|98|fj|su|sq|<br>"
+          + "ie|ab|ug|hr|my|hy|is|gd|ko|tg|am|bi|so|te|lg|dz|wo|az|oc|kl|kw|sk|uz|oj|ng|uk|gg|se|gu|ii|ne|ce|ee|ur|hu|mt|mg|je|zu|pa|sg|<br>"
+          + "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>"
+          + "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>"
+          + "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>") ErillishakuJson json) {
+    LOG.info("Käyttäjä " + AuditLog.loggedInUserOid() + " päivittää " + json.getRivit().size() + " kpl haun "
+        + hakuOid + " hakemusta");
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-    tuontiService.tuoJson(
-        createAuditSession(true, httpServletRequestJaxRS),
-        prosessi,
-        new ErillishakuDTO(
-            tyyppi,
-            hakuOid,
-            hakukohdeOid,
-            tarjoajaOid,
-            Optional.ofNullable(trimToNull(valintatapajonoOid))
-                .orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))),
-        json.getRivit(),
-        false);
+    tuontiService
+        .tuoJson(createAuditSession(true, httpServletRequestJaxRS), prosessi,
+            new ErillishakuDTO(tyyppi, hakuOid, hakukohdeOid, tarjoajaOid,
+                Optional.ofNullable(trimToNull(valintatapajonoOid))
+                    .orElse(oidHaustaJaHakukohteesta(hakuOid, hakukohdeOid))),
+            json.getRivit(), false);
     return prosessi.toProsessiId();
   }
 
   private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
     try {
-      return tarjontaResource
-          .haeHakukohde(hakukohdeOid)
-          .get(30, SECONDS)
-          .tarjoajaOids
-          .iterator()
-          .next();
+      return tarjontaResource.haeHakukohde(hakukohdeOid).get(30, SECONDS).tarjoajaOids.iterator().next();
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new RuntimeException(e);
     }

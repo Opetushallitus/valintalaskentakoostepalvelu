@@ -9,8 +9,7 @@ import java.util.concurrent.CompletableFuture;
 public interface OrganisaatioAsyncResource {
   CompletableFuture<Organisaatio> haeOrganisaatio(String organisaatioOid);
 
-  CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(
-      String organisaatioOid);
+  CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(String organisaatioOid);
 
   CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId);
 }

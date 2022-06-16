@@ -75,20 +75,13 @@ public class ParametritParser {
     Date now = Calendar.getInstance().getTime();
     ParametriDTO param = this.parametrit.getPH_OLVVPKE();
 
-    if (param != null
-        && param.getDateStart() != null
-        && param.getDateEnd() != null
-        && now.after(param.getDateStart())
-        && now.before(param.getDateEnd())) {
+    if (param != null && param.getDateStart() != null && param.getDateEnd() != null
+        && now.after(param.getDateStart()) && now.before(param.getDateEnd())) {
       return false;
-    } else if (param != null
-        && param.getDateStart() != null
-        && param.getDateEnd() == null
+    } else if (param != null && param.getDateStart() != null && param.getDateEnd() == null
         && now.after(param.getDateStart())) {
       return false;
-    } else if (param != null
-        && param.getDateEnd() != null
-        && param.getDateStart() == null
+    } else if (param != null && param.getDateEnd() != null && param.getDateStart() == null
         && now.before(param.getDateEnd())) {
       return false;
     }
@@ -129,7 +122,8 @@ public class ParametritParser {
   }
 
   public Date opiskelijanPaikanVastaanottoPaattyy() {
-    if (this.parametrit.getPH_OPVP() == null) return null;
+    if (this.parametrit.getPH_OPVP() == null)
+      return null;
     return this.parametrit.getPH_OPVP().getDate();
   }
 

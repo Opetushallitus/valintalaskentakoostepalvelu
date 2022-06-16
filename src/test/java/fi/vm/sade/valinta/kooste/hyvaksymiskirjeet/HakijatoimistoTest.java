@@ -28,36 +28,23 @@ public class HakijatoimistoTest {
   public void testaaHyvaksymiskirjeetServicenLapi()
       throws InterruptedException, ExecutionException, TimeoutException {
     String tarjoajaOid = "tarjoajaOid";
-    HakutoimistoDTO hakutoimisto =
-        new HakutoimistoDTO(ImmutableMap.of("jee", "jee"), Collections.emptyMap());
-    Integraatiopalvelimet.mockToReturnJson(
-        GET,
-        "/organisaatio-service/rest/organisaatio/v2/" + tarjoajaOid + "/hakutoimisto",
-        hakutoimisto);
+    HakutoimistoDTO hakutoimisto = new HakutoimistoDTO(ImmutableMap.of("jee", "jee"), Collections.emptyMap());
+    Integraatiopalvelimet.mockToReturnJson(GET,
+        "/organisaatio-service/rest/organisaatio/v2/" + tarjoajaOid + "/hakutoimisto", hakutoimisto);
 
-    OrganisaatioAsyncResourceImpl o =
-        new OrganisaatioAsyncResourceImpl(
-            new HttpClient(
-                java.net.http.HttpClient.newBuilder().build(),
-                null,
-                DateDeserializer.gsonBuilder().create()));
-    assertEquals(
-        Optional.of(hakutoimisto), o.haeHakutoimisto(tarjoajaOid).get(10, TimeUnit.SECONDS));
+    OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(new HttpClient(
+        java.net.http.HttpClient.newBuilder().build(), null, DateDeserializer.gsonBuilder().create()));
+    assertEquals(Optional.of(hakutoimisto), o.haeHakutoimisto(tarjoajaOid).get(10, TimeUnit.SECONDS));
   }
 
   @Test
-  public void testaaHakijatoimistonValinnaisuus()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void testaaHakijatoimistonValinnaisuus() throws InterruptedException, ExecutionException, TimeoutException {
     String tarjoajaOid = "tarjoajaOid";
-    Integraatiopalvelimet.mockToNotFound(
-        GET, "/organisaatio-service/rest/organisaatio/v2/" + tarjoajaOid + "/hakutoimisto");
+    Integraatiopalvelimet.mockToNotFound(GET,
+        "/organisaatio-service/rest/organisaatio/v2/" + tarjoajaOid + "/hakutoimisto");
 
-    OrganisaatioAsyncResourceImpl o =
-        new OrganisaatioAsyncResourceImpl(
-            new HttpClient(
-                java.net.http.HttpClient.newBuilder().build(),
-                null,
-                DateDeserializer.gsonBuilder().create()));
+    OrganisaatioAsyncResourceImpl o = new OrganisaatioAsyncResourceImpl(new HttpClient(
+        java.net.http.HttpClient.newBuilder().build(), null, DateDeserializer.gsonBuilder().create()));
     assertEquals(Optional.empty(), o.haeHakutoimisto(tarjoajaOid).get(10, TimeUnit.SECONDS));
   }
 }

@@ -11,8 +11,7 @@ public class JonoPair {
 
   public boolean isMolemmissaValmisSijoiteltavaksiJaSiirretaanSijoitteluun() {
     boolean laskentaOk = fromLaskenta.isValmisSijoiteltavaksiAndSiirretaanSijoitteluun();
-    boolean valintaperusteetOk =
-        fromValintaperusteet.siirretaanSijoitteluun && fromValintaperusteet.isAktiivinen();
+    boolean valintaperusteetOk = fromValintaperusteet.siirretaanSijoitteluun && fromValintaperusteet.isAktiivinen();
     return laskentaOk && valintaperusteetOk;
   }
 }

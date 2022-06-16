@@ -8,7 +8,8 @@ public class KielisyysDto implements Serializable {
   private String kieliKoodi;
   private String kieliTyyppi;
 
-  public KielisyysDto() {}
+  public KielisyysDto() {
+  }
 
   public KielisyysDto(String kieliKoodi) {
     this.kieliKoodi = kieliKoodi;
@@ -37,8 +38,10 @@ public class KielisyysDto implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
 
     KielisyysDto that = (KielisyysDto) o;
 

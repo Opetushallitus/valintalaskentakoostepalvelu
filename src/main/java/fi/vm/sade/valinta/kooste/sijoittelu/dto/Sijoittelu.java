@@ -13,15 +13,13 @@ public class Sijoittelu {
 
   public void setValmis() {
     if (!tila.compareAndSet(0, 1)) {
-      throw new RuntimeException(
-          "Sijoittelu tyon tila oli jo asetettu! Tilaa yritettiin asettaa valmiiksi.");
+      throw new RuntimeException("Sijoittelu tyon tila oli jo asetettu! Tilaa yritettiin asettaa valmiiksi.");
     }
   }
 
   public void setOhitettu() {
     if (!tila.compareAndSet(0, -1)) {
-      throw new RuntimeException(
-          "Sijoittelu tyon tila oli jo asetettu! Tilaa yritettiin asettaa ohitetuksi.");
+      throw new RuntimeException("Sijoittelu tyon tila oli jo asetettu! Tilaa yritettiin asettaa ohitetuksi.");
     }
   }
 

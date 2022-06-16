@@ -11,13 +11,10 @@ public class TokensRequest {
   private Map<String, String> applicationOidToEmailAddress;
   private Long expires;
 
-  public TokensRequest() {}
+  public TokensRequest() {
+  }
 
-  public TokensRequest(
-      String url,
-      String templatename,
-      String lang,
-      Map<String, String> applicationOidToEmailAddress,
+  public TokensRequest(String url, String templatename, String lang, Map<String, String> applicationOidToEmailAddress,
       Long expires) {
     this.url = url;
     this.templatename = templatename;
@@ -84,37 +81,21 @@ public class TokensRequest {
 
   @Override
   public String toString() {
-    return "TokensRequest{"
-        + "url='"
-        + url
-        + '\''
-        + ", hakuOid='"
-        + hakuOid
-        + '\''
-        + ", letterId='"
-        + letterId
-        + '\''
-        + ", templatename='"
-        + templatename
-        + '\''
-        + ", lang='"
-        + lang
-        + '\''
-        + ", applicationOidToEmailAddress="
-        + applicationOidToEmailAddress
-        + ", expires="
-        + expires
-        + '}';
+    return "TokensRequest{" + "url='" + url + '\'' + ", hakuOid='" + hakuOid + '\'' + ", letterId='" + letterId
+        + '\'' + ", templatename='" + templatename + '\'' + ", lang='" + lang + '\''
+        + ", applicationOidToEmailAddress=" + applicationOidToEmailAddress + ", expires=" + expires + '}';
   }
 }
 
 /*
-(s/defschema TokensRequest {:url (rs/describe s/Str "Base URL for secure links.")
-                            :templatename (rs/describe s/Str "Template name for email. Template with this name should exist in Viestintäpalvelu and it must have replacement with name 'securelink'")
-                            :lang (rs/describe s/Str "Email language in ISO-639-1 format. E.g. 'en','fi','sv'.")
-                            :emails (rs/describe [s/Str] "List of recipient email addresses")
-                            (s/optional-key :expires) (rs/describe Long "Expiration date as unix timestamp (long milliseconds).")
-                            (s/optional-key :metadata) (s/conditional map? {s/Keyword s/Keyword})})
-(s/defschema TokensResponse {:recipients [{:email s/Str
-                                           :securelink s/Str}]} )
+ * (s/defschema TokensRequest {:url (rs/describe s/Str
+ * "Base URL for secure links.") :templatename (rs/describe s/Str
+ * "Template name for email. Template with this name should exist in Viestintäpalvelu and it must have replacement with name 'securelink'"
+ * ) :lang (rs/describe s/Str
+ * "Email language in ISO-639-1 format. E.g. 'en','fi','sv'.") :emails
+ * (rs/describe [s/Str] "List of recipient email addresses") (s/optional-key
+ * :expires) (rs/describe Long
+ * "Expiration date as unix timestamp (long milliseconds).") (s/optional-key
+ * :metadata) (s/conditional map? {s/Keyword s/Keyword})}) (s/defschema
+ * TokensResponse {:recipients [{:email s/Str :securelink s/Str}]} )
  */

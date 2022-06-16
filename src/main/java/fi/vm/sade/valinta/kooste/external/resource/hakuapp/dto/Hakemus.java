@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * TODO: Refaktoroi pois haku-paketin alta. Tämä dto ei liity haku-palveluun vaan hakemus-palveluun.
+ * TODO: Refaktoroi pois haku-paketin alta. Tämä dto ei liity haku-palveluun
+ * vaan hakemus-palveluun.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Hakemus {
@@ -20,17 +21,12 @@ public class Hakemus {
   private String state;
   private String personOid;
 
-  public Hakemus() {}
+  public Hakemus() {
+  }
 
-  public Hakemus(
-      final String type,
-      final String applicationSystemId,
-      final Answers answers,
-      final Map<String, String> additionalInfo,
-      final List<Eligibility> preferenceEligibilities,
-      final String oid,
-      final String state,
-      final String personOid) {
+  public Hakemus(final String type, final String applicationSystemId, final Answers answers,
+      final Map<String, String> additionalInfo, final List<Eligibility> preferenceEligibilities, final String oid,
+      final String state, final String personOid) {
     this.type = type;
     this.applicationSystemId = applicationSystemId;
     this.answers = answers;

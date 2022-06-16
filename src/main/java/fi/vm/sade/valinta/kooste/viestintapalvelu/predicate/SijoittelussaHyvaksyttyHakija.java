@@ -16,13 +16,10 @@ public class SijoittelussaHyvaksyttyHakija implements Predicate<HakijaDTO> {
   @Override
   public boolean test(HakijaDTO input) {
     return Optional.ofNullable(input.getHakutoiveet())
-        .map(
-            hakutoiveet ->
-                hakutoiveet.stream()
-                    .filter(hakutoive -> this.hakukohdeOid.equals(hakutoive.getHakukohdeOid()))
-                    .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
-                    .map(HakutoiveenValintatapajonoDTO::getTila)
-                    .anyMatch(HakemuksenTila::isHyvaksytty))
+        .map(hakutoiveet -> hakutoiveet.stream()
+            .filter(hakutoive -> this.hakukohdeOid.equals(hakutoive.getHakukohdeOid()))
+            .flatMap(hakutoive -> hakutoive.getHakutoiveenValintatapajonot().stream())
+            .map(HakutoiveenValintatapajonoDTO::getTila).anyMatch(HakemuksenTila::isHyvaksytty))
         .orElse(false);
   }
 }

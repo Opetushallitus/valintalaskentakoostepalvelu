@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-/** Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti! Proxy provides retries! */
+/**
+ * Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti! Proxy
+ * provides retries!
+ */
 @Component
 public class HaunTyyppiKomponentti {
   private static final Logger LOG = LoggerFactory.getLogger(HaunTyyppiKomponentti.class);
@@ -40,21 +43,15 @@ public class HaunTyyppiKomponentti {
 
   private String getKoodiForUri(String koodiUri) {
     try {
-      return this.client
-          .<List<Koodi>>getJson(
-              this.urlConfiguration.url("koodisto-service.koodiuri", koodiUri),
-              Duration.ofMinutes(1),
-              new TypeToken<List<Koodi>>() {}.getType())
-          .thenApplyAsync(
-              response -> {
-                if (response.iterator().hasNext()) {
-                  return response.iterator().next().getKoodiArvo();
-                } else {
-                  throw new RuntimeException(
-                      "Koodisto-response was empty for koodiuri: " + koodiUri);
-                }
-              })
-          .get();
+      return this.client.<List<Koodi>>getJson(this.urlConfiguration.url("koodisto-service.koodiuri", koodiUri),
+          Duration.ofMinutes(1), new TypeToken<List<Koodi>>() {
+          }.getType()).thenApplyAsync(response -> {
+            if (response.iterator().hasNext()) {
+              return response.iterator().next().getKoodiArvo();
+            } else {
+              throw new RuntimeException("Koodisto-response was empty for koodiuri: " + koodiUri);
+            }
+          }).get();
     } catch (Exception e) {
       LOG.error("Unable to fetch 'koodiuri' {} from koodisto!", koodiUri, e);
       throw new RuntimeException(e);

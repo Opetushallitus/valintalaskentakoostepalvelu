@@ -43,16 +43,13 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
 
   @Autowired
   public HakuImportRouteImpl(
-      @Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}")
-          Integer hakuImportThreadpoolSize,
-      @Value("${valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize:10}")
-          Integer hakukohdeImportThreadpoolSize,
+      @Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}") Integer hakuImportThreadpoolSize,
+      @Value("${valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize:10}") Integer hakukohdeImportThreadpoolSize,
       SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
       ValintaperusteetAsyncResource valintaperusteetRestResource,
       SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
     this.suoritaHakuImportKomponentti = suoritaHakuImportKomponentti;
-    this.tarjontaJaKoodistoHakukohteenHakuKomponentti =
-        tarjontaJaKoodistoHakukohteenHakuKomponentti;
+    this.tarjontaJaKoodistoHakukohteenHakuKomponentti = tarjontaJaKoodistoHakukohteenHakuKomponentti;
     this.valintaperusteetRestResource = valintaperusteetRestResource;
     this.hakuImportThreadPool = Executors.newFixedThreadPool(hakuImportThreadpoolSize);
     LOG.info("Using hakuImportThreadPool thread pool size " + hakuImportThreadpoolSize);
@@ -61,8 +58,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
   }
 
   public static class PrepareHakuImportProcessDescription {
-    public Prosessi prepareProcess(
-        @Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSIKUVAUS) String kuvaus,
+    public Prosessi prepareProcess(@Property(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSIKUVAUS) String kuvaus,
         @Property(OPH.HAKUOID) String hakuOid) {
       return new HakuImportProsessi(kuvaus, hakuOid);
     }
@@ -75,10 +71,8 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         //
         .log(LoggingLevel.ERROR, "Reason ${exception.message} ${exception.stacktrace}")
         //
-        .setHeader(
-            "message",
-            simple(
-                "[${property.authentication.name}] Valintaperusteiden vienti epäonnistui hakukohteelle ${body}"))
+        .setHeader("message", simple(
+            "[${property.authentication.name}] Valintaperusteiden vienti epäonnistui hakukohteelle ${body}"))
         .to(fail())
         //
         .process(logFailedHakuImport())
@@ -88,10 +82,8 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         //
         .log(LoggingLevel.ERROR, "Reason ${exception.message} ${exception.stacktrace}")
         //
-        .setHeader(
-            "message",
-            simple(
-                "[${property.authentication.name}] Valintaperusteiden vienti epäonnistui hakukohteelle ${body}"))
+        .setHeader("message", simple(
+            "[${property.authentication.name}] Valintaperusteiden vienti epäonnistui hakukohteelle ${body}"))
         .to(fail())
         //
         .process(logFailedHakuConvert())
@@ -103,10 +95,8 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         //
         .log(LoggingLevel.ERROR, "Reason ${exception.message} ${exception.stacktrace}")
         //
-        .setHeader(
-            "message",
-            simple(
-                "[${property.authentication.name}] Tarjonnasta ei saatu hakua(${property.hakuOid}) tai haun hakukohteiden prosessointi ei mennyt oikein"))
+        .setHeader("message", simple(
+            "[${property.authentication.name}] Tarjonnasta ei saatu hakua(${property.hakuOid}) tai haun hakukohteiden prosessointi ei mennyt oikein"))
         .to(fail())
         //
         // .process(logFailedHakuConvert())
@@ -115,16 +105,11 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
     /** Erillinen reitti viennille(tuonnille). Reitilla oma errorhandler. */
     from("direct:hakuimport_koostepalvelulta_valinnoille")
         //
-        .errorHandler(
-            deadLetterChannel("direct:tuoHakukohdeDead")
-                .maximumRedeliveries(0)
-                // .redeliveryDelay(200L)
-                //
-                .logExhaustedMessageHistory(true)
-                .logStackTrace(false)
-                .logExhausted(true)
-                .logRetryStackTrace(false)
-                .logHandled(false))
+        .errorHandler(deadLetterChannel("direct:tuoHakukohdeDead").maximumRedeliveries(0)
+            // .redeliveryDelay(200L)
+            //
+            .logExhaustedMessageHistory(true).logStackTrace(false).logExhausted(true)
+            .logRetryStackTrace(false).logHandled(false))
         //
         .process(SecurityPreprocessor.SECURITY)
         //
@@ -132,45 +117,34 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         //
         .executorService(hakukohdeImportThreadPool)
         //
-        .process(
-            new AsyncProcessor() {
-              @Override
-              public boolean process(Exchange exchange, AsyncCallback callback) {
-                HakukohdeImportDTO hki = exchange.getIn().getBody(HakukohdeImportDTO.class);
-                valintaperusteetRestResource
-                    .tuoHakukohde(hki)
-                    .subscribe(
-                        ok -> callback.done(false),
-                        error -> {
-                          callback.done(false);
-                          LOG.error(
-                              "valintaperusteetRestResource.tuoHakukohde palautti virheen", error);
-                        });
-                return false;
-              }
+        .process(new AsyncProcessor() {
+          @Override
+          public boolean process(Exchange exchange, AsyncCallback callback) {
+            HakukohdeImportDTO hki = exchange.getIn().getBody(HakukohdeImportDTO.class);
+            valintaperusteetRestResource.tuoHakukohde(hki).subscribe(ok -> callback.done(false), error -> {
+              callback.done(false);
+              LOG.error("valintaperusteetRestResource.tuoHakukohde palautti virheen", error);
+            });
+            return false;
+          }
 
-              @Override
-              public void process(Exchange exchange) {
-                throw new UnsupportedOperationException(
-                    "Hakukohteiden käsittelyn pitäisi tapahtua asynkronisesti,"
-                        + " tänne ei pitäisi koskaan päätyä.");
-              }
-            })
+          @Override
+          public void process(Exchange exchange) {
+            throw new UnsupportedOperationException(
+                "Hakukohteiden käsittelyn pitäisi tapahtua asynkronisesti,"
+                    + " tänne ei pitäisi koskaan päätyä.");
+          }
+        })
         //
         .process(logSuccessfulHakuImport());
 
     from("direct:hakuimport_tarjonnasta_koostepalvelulle")
         //
         .errorHandler(
-            deadLetterChannel("direct:convertHakukohdeDead")
-                .maximumRedeliveries(0)
-                .redeliveryDelay(200L)
+            deadLetterChannel("direct:convertHakukohdeDead").maximumRedeliveries(0).redeliveryDelay(200L)
                 //
-                .logExhaustedMessageHistory(true)
-                .logStackTrace(false)
-                .logExhausted(true)
-                .logRetryStackTrace(false)
-                .logHandled(false))
+                .logExhaustedMessageHistory(true).logStackTrace(false).logExhausted(true)
+                .logRetryStackTrace(false).logHandled(false))
         //
         .process(SecurityPreprocessor.SECURITY)
         //
@@ -180,8 +154,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         //
         .to("direct:hakuimport_koostepalvelulta_valinnoille");
 
-    from(hakuImport())
-        .errorHandler(deadLetterChannel("direct:hakuimport_epaonnistui"))
+    from(hakuImport()).errorHandler(deadLetterChannel("direct:hakuimport_epaonnistui"))
         // .policy(admin)
         .process(SecurityPreprocessor.SECURITY)
         //
@@ -190,17 +163,13 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
         //
         .to(start())
         //
-        .process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) {
-                exchange
-                    .getOut()
-                    .setBody(
-                        suoritaHakuImportKomponentti.suoritaHakukohdeImport(
-                            exchange.getProperty(OPH.HAKUOID, String.class)));
-              }
-            })
+        .process(new Processor() {
+          @Override
+          public void process(Exchange exchange) {
+            exchange.getOut().setBody(suoritaHakuImportKomponentti
+                .suoritaHakukohdeImport(exchange.getProperty(OPH.HAKUOID, String.class)));
+          }
+        })
         //
         .process(logSuccessfulHakuGet())
         //
@@ -240,8 +209,7 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
   private Processor logSuccessfulHakukohdeGet() {
     return new Processor() {
       public void process(Exchange exchange) {
-        HakuImportProsessi prosessi =
-            exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+        HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
         int i = prosessi.lisaaImportoitu();
         if (i == prosessi.getHakukohteita()) {
           LOG.info("Importointi on valmis! Onnistuneita importointeja {}", i);
@@ -256,11 +224,9 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
   private Processor logSuccessfulHakuGet() {
     return new Processor() {
       public void process(Exchange exchange) {
-        HakuImportProsessi prosessi =
-            exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+        HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
         @SuppressWarnings("unchecked")
-        Collection<String> hakukohdeOids =
-            (Collection<String>) exchange.getIn().getBody(Collection.class);
+        Collection<String> hakukohdeOids = (Collection<String>) exchange.getIn().getBody(Collection.class);
         prosessi.setHakukohteita(hakukohdeOids.size());
         LOG.info("Hakukohteita importoitavana {}", hakukohdeOids.size());
       }
@@ -270,13 +236,11 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
   private Processor logSuccessfulHakuImport() {
     return new Processor() {
       public void process(Exchange exchange) {
-        HakuImportProsessi prosessi =
-            exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+        HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
         int t = prosessi.lisaaTuonti();
         if (t % 25 == 0 || t == prosessi.getHakukohteita()) {
-          LOG.info(
-              "Hakukohde on tuotu onnistuneesti ({}/{}).",
-              new Object[] {t, prosessi.getHakukohteita()});
+          LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).",
+              new Object[] { t, prosessi.getHakukohteita() });
         }
       }
     };
@@ -285,16 +249,14 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
   private Processor logFailedHakuConvert() {
     return new Processor() {
       public void process(Exchange exchange) {
-        HakuImportProsessi prosessi =
-            exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+        HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
         String oid = exchange.getIn().getBody(String.class);
         if (oid != null) {
           prosessi.lisaaVirhe(oid + "_KONVERSIOSSA");
         } else {
           prosessi.lisaaVirhe("<<Tuntematon hakukohde>>_KONVERSIOSSA");
         }
-        LOG.error(
-            "Epaonnistuneita hakukohdeOideja tahan mennessa {}",
+        LOG.error("Epaonnistuneita hakukohdeOideja tahan mennessa {}",
             Arrays.toString(prosessi.getEpaonnistuneetHakukohteet()));
       }
     };
@@ -303,16 +265,14 @@ public class HakuImportRouteImpl extends SpringRouteBuilder {
   private Processor logFailedHakuImport() {
     return new Processor() {
       public void process(Exchange exchange) {
-        HakuImportProsessi prosessi =
-            exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
+        HakuImportProsessi prosessi = exchange.getProperty(PROPERTY_VALVOMO_PROSESSI, HakuImportProsessi.class);
         HakukohdeImportDTO hki = exchange.getIn().getBody(HakukohdeImportDTO.class);
         if (hki != null) {
           prosessi.lisaaVirhe(hki.getHakukohdeOid() + "_VIENNISSA");
         } else {
           prosessi.lisaaVirhe("<<Tuntematon hakukohde>>_VIENNISSA");
         }
-        LOG.error(
-            "Epaonnistuneita hakukohdeOideja tahan mennessa {}",
+        LOG.error("Epaonnistuneita hakukohdeOideja tahan mennessa {}",
             Arrays.toString(prosessi.getEpaonnistuneetHakukohteet()));
       }
     };

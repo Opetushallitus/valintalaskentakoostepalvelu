@@ -18,23 +18,12 @@ public class ValintaTulosServiceAsyncResourceImplTest {
   public void vastaanottoAikarajaMennytDTOsCanBeParsed() {
     String hakemusOid = "1.2.246.562.11.00004697189";
     String vastaanottoDeadline = "2016-07-15T12:00:00Z";
-    VastaanottoAikarajaMennytDTO parsedDto =
-        vtsHttpResource
-            .gson()
-            .fromJson(
-                " {\n"
-                    + "        \"hakemusOid\": \""
-                    + hakemusOid
-                    + "\",\n"
-                    + "        \"mennyt\": true,\n"
-                    + "        \"vastaanottoDeadline\": \""
-                    + vastaanottoDeadline
-                    + "\"\n"
-                    + "    }",
-                VastaanottoAikarajaMennytDTO.class);
+    VastaanottoAikarajaMennytDTO parsedDto = vtsHttpResource.gson().fromJson(
+        " {\n" + "        \"hakemusOid\": \"" + hakemusOid + "\",\n" + "        \"mennyt\": true,\n"
+            + "        \"vastaanottoDeadline\": \"" + vastaanottoDeadline + "\"\n" + "    }",
+        VastaanottoAikarajaMennytDTO.class);
     Assert.assertEquals(hakemusOid, parsedDto.getHakemusOid());
-    Assert.assertEquals(
-        new DateTime(2016, 7, 15, 12, 0, 0, DateTimeZone.UTC), parsedDto.getVastaanottoDeadline());
+    Assert.assertEquals(new DateTime(2016, 7, 15, 12, 0, 0, DateTimeZone.UTC), parsedDto.getVastaanottoDeadline());
     Assert.assertEquals(true, parsedDto.isMennyt());
   }
 }

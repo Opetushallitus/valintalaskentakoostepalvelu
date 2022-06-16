@@ -9,11 +9,10 @@ import java.util.concurrent.CompletableFuture;
 public interface ValintalaskentaValintakoeAsyncResource {
   CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid);
 
-  CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(
-      Collection<String> hakukohdeOids);
+  CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids);
 
   CompletableFuture<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid);
 
-  CompletableFuture<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(
-      String hakukohdeOid, List<String> valintakoeTunnisteet);
+  CompletableFuture<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid,
+      List<String> valintakoeTunnisteet);
 }

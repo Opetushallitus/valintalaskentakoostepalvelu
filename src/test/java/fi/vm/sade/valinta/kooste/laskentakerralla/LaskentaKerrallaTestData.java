@@ -20,8 +20,7 @@ public class LaskentaKerrallaTestData {
     return p;
   }
 
-  public static ValintaperusteetDTO valintaperusteet(
-      String hakuOid, String tarjoajaOid, String hakuKohdeOid) {
+  public static ValintaperusteetDTO valintaperusteet(String hakuOid, String tarjoajaOid, String hakuKohdeOid) {
     ValintaperusteetDTO valintaperusteetDTO = new ValintaperusteetDTO();
     ValintaperusteetValinnanVaiheDTO valinnanVaiheDTO = new ValintaperusteetValinnanVaiheDTO();
     valintaperusteetDTO.setHakuOid(hakuOid);

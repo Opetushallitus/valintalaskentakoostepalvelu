@@ -21,13 +21,8 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
   }
 
   @Override
-  public synchronized Observable<Response> tallenna(
-      String id,
-      String filename,
-      Long expirationDate,
-      List<String> tags,
-      String mimeType,
-      InputStream filedata) {
+  public synchronized Observable<Response> tallenna(String id, String filename, Long expirationDate,
+      List<String> tags, String mimeType, InputStream filedata) {
     docs.put(id, filedata);
     return Observable.just(Response.ok(filedata).build());
   }

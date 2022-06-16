@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto;
 
 public enum Maksuntila {
-  MAKSAMATTA,
-  MAKSETTU,
-  VAPAUTETTU;
+  MAKSAMATTA, MAKSETTU, VAPAUTETTU;
 
   public static Maksuntila fromString(String s) {
     try {

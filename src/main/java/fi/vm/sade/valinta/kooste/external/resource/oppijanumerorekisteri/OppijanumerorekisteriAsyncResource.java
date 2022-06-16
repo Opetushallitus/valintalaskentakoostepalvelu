@@ -10,8 +10,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public interface OppijanumerorekisteriAsyncResource {
-  Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(
-      List<HenkiloCreateDTO> henkiloPrototyypit);
+  Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(List<HenkiloCreateDTO> henkiloPrototyypit);
 
   CompletableFuture<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids);
 

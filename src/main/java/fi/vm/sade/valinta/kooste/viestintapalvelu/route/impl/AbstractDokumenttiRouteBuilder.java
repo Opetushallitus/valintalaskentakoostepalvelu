@@ -22,13 +22,15 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 
-/** Dokumenttiprosessin käsittelyyn valmiit camel dsl:t dokumenttireittejä varten */
+/**
+ * Dokumenttiprosessin käsittelyyn valmiit camel dsl:t dokumenttireittejä varten
+ */
 public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder {
-  public AbstractDokumenttiRouteBuilder() {}
+  public AbstractDokumenttiRouteBuilder() {
+  }
 
   protected DokumenttiProsessi dokumenttiprosessi(Exchange exchange) {
-    return exchange.getProperty(
-        ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, DokumenttiProsessi.class);
+    return exchange.getProperty(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, DokumenttiProsessi.class);
   }
 
   protected List<String> hakemusOids(Exchange exchange) {
@@ -59,11 +61,9 @@ public abstract class AbstractDokumenttiRouteBuilder extends SpringRouteBuilder 
     return UUID.randomUUID().toString();
   }
 
-  protected Exception kasittelePoikkeus(
-      String palvelu, Exchange exchange, Exception exception, Tunniste... oids) {
+  protected Exception kasittelePoikkeus(String palvelu, Exchange exchange, Exception exception, Tunniste... oids) {
     exchange.setException(exception);
-    dokumenttiprosessi(exchange)
-        .getPoikkeukset()
+    dokumenttiprosessi(exchange).getPoikkeukset()
         .add(new Poikkeus(palvelu, StringUtils.EMPTY, exception.getMessage(), oids));
     return exception;
   }

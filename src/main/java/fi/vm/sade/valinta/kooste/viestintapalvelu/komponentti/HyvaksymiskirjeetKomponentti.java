@@ -33,48 +33,35 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * OLETTAA ETTA KAIKILLE VALINTATAPAJONOILLE TEHDAAN HYVAKSYMISKIRJE JOS HAKEMUS ON HYVAKSYTTY
- * YHDESSAKIN! Nykyisellaan hakemukset haetaan tassa komponentissa. Taytyisi refaktoroida niin etta
- * hakemukset tuodaan komponentille.
+ * OLETTAA ETTA KAIKILLE VALINTATAPAJONOILLE TEHDAAN HYVAKSYMISKIRJE JOS HAKEMUS
+ * ON HYVAKSYTTY YHDESSAKIN! Nykyisellaan hakemukset haetaan tassa
+ * komponentissa. Taytyisi refaktoroida niin etta hakemukset tuodaan
+ * komponentille.
  */
 @Component
 public class HyvaksymiskirjeetKomponentti {
   private static final Logger LOG = LoggerFactory.getLogger(HyvaksymiskirjeetKomponentti.class);
 
-  public static LetterBatch teeHyvaksymiskirjeet(
-      Map<String, Koodi> maatjavaltiot1,
-      Map<String, Koodi> postinumerot,
+  public static LetterBatch teeHyvaksymiskirjeet(Map<String, Koodi> maatjavaltiot1, Map<String, Koodi> postinumerot,
       Map<String, Optional<Osoite>> hakukohdeJaHakijapalveluidenOsoite,
-      Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet,
-      Collection<HakijaDTO> hakukohteenHakijat,
-      Map<String, HakemusWrapper> hakemukset,
-      Map<String, Map<String, List<SyotettyArvoDTO>>> syotetytArvot,
-      String hakukohdeOidFromRequest,
-      String hakuOid,
-      Optional<String> asiointikieli,
-      String sisalto,
-      String tag,
-      String templateName,
-      String palautusPvm,
-      String palautusAika,
-      boolean sahkoinenMassaposti,
-      List<ContentStructureType> sisaltotyypit,
-      KirjeenVastaanottaja kirjeenVastaanottaja) {
+      Map<String, MetaHakukohde> hyvaksymiskirjeessaKaytetytHakukohteet, Collection<HakijaDTO> hakukohteenHakijat,
+      Map<String, HakemusWrapper> hakemukset, Map<String, Map<String, List<SyotettyArvoDTO>>> syotetytArvot,
+      String hakukohdeOidFromRequest, String hakuOid, Optional<String> asiointikieli, String sisalto, String tag,
+      String templateName, String palautusPvm, String palautusAika, boolean sahkoinenMassaposti,
+      List<ContentStructureType> sisaltotyypit, KirjeenVastaanottaja kirjeenVastaanottaja) {
     try {
       assert (hakuOid != null);
       int kaikkiHyvaksytyt = hakukohteenHakijat.size();
-      LOG.info(
-          "Aloitetaan {} kpl hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true.",
+      LOG.info("Aloitetaan {} kpl hyväksymiskirjeen luonti. Asetetaan kaikille skipIPosti=true.",
           kaikkiHyvaksytyt);
       final List<Letter> kirjeet = new ArrayList<>();
       LetterBatch viesti = new LetterBatch(kirjeet, sisaltotyypit);
       asiointikieli.ifPresent(viesti::setLanguageCode);
       int count = 0;
       for (HakijaDTO hakija : hakukohteenHakijat) {
-        final String hakukohdeOid =
-            StringUtils.isEmpty(hakukohdeOidFromRequest)
-                ? hyvaksytynHakutoiveenHakukohdeOid(hakija)
-                : hakukohdeOidFromRequest;
+        final String hakukohdeOid = StringUtils.isEmpty(hakukohdeOidFromRequest)
+            ? hyvaksytynHakutoiveenHakukohdeOid(hakija)
+            : hakukohdeOidFromRequest;
         MetaHakukohde hyvaksyttyMeta = hyvaksymiskirjeessaKaytetytHakukohteet.get(hakukohdeOid);
         List<Teksti> koulu = hyvaksyttyMeta.getTarjoajaNimet();
         Teksti koulutus = hyvaksyttyMeta.getHakukohdeNimi();
@@ -82,26 +69,17 @@ public class HyvaksymiskirjeetKomponentti {
         String tarjoajaOid = hyvaksyttyMeta.getTarjoajaOid();
         Teksti ohjeetUudelleOpiskelijalle = hyvaksyttyMeta.getOhjeetUudelleOpiskelijalle();
         final String hakemusOid = hakija.getHakemusOid();
-        final HakemusWrapper hakemus =
-            Objects.requireNonNull(
-                hakemukset.get(hakemusOid), "Hakemusta " + hakemusOid + " ei löydy");
-        final Osoite osoite =
-            OsoiteHakemukseltaUtil.osoiteHakemuksesta(
-                hakemus, maatjavaltiot1, postinumerot, new TuloskirjeNimiPaattelyStrategy());
+        final HakemusWrapper hakemus = Objects.requireNonNull(hakemukset.get(hakemusOid),
+            "Hakemusta " + hakemusOid + " ei löydy");
+        final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maatjavaltiot1, postinumerot,
+            new TuloskirjeNimiPaattelyStrategy());
         final List<Map<String, Object>> tulosList = new ArrayList<>();
 
         for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
-          List<SyotettyArvoDTO> arvot =
-              syotetytArvot
-                  .get(hakutoive.getHakukohdeOid())
-                  .getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
-          Map<String, Object> tulokset =
-              KirjeetUtil.getTuloksetMap(
-                  hyvaksymiskirjeessaKaytetytHakukohteet,
-                  hakukohdeOid,
-                  preferoituKielikoodi,
-                  hakutoive,
-                  arvot);
+          List<SyotettyArvoDTO> arvot = syotetytArvot.get(hakutoive.getHakukohdeOid())
+              .getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
+          Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(hyvaksymiskirjeessaKaytetytHakukohteet,
+              hakukohdeOid, preferoituKielikoodi, hakutoive, arvot);
 
           StringBuilder omatPisteet = new StringBuilder();
           StringBuilder hyvaksytyt = new StringBuilder();
@@ -111,21 +89,19 @@ public class HyvaksymiskirjeetKomponentti {
           List<Sijoitus> sijoitukset = Lists.newArrayList();
           tulokset.put("sijoitukset", sijoitukset);
 
-          final boolean valittuHakukohteeseen =
-              hakutoive.getHakutoiveenValintatapajonot().stream()
-                  .anyMatch((jono) -> jono.getTila().isHyvaksytty());
+          final boolean valittuHakukohteeseen = hakutoive.getHakutoiveenValintatapajonot().stream()
+              .anyMatch((jono) -> jono.getTila().isHyvaksytty());
           tulokset.put("hyvaksytty", valittuHakukohteeseen);
 
-          Collections.sort(
-              hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByPrioriteetti());
-          KirjeetUtil.jononTulokset(
-              osoite, hakutoive, omatPisteet, hyvaksytyt, sijoitukset, preferoituKielikoodi);
+          Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByPrioriteetti());
+          KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, sijoitukset,
+              preferoituKielikoodi);
 
           Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
-          List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot =
-              hakutoive.getHakutoiveenValintatapajonot();
-          KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(
-              preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
+          List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive
+              .getHakutoiveenValintatapajonot();
+          KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset,
+              hakutoiveenValintatapajonot);
           tulokset.put("omatPisteet", omatPisteet.toString());
           tulokset.put("hyvaksytyt", hyvaksytyt.toString());
           tulosList.add(tulokset);
@@ -134,49 +110,32 @@ public class HyvaksymiskirjeetKomponentti {
         replacements.put("palautusAika", StringUtils.trimToNull(palautusAika));
         replacements.put("palautusPvm", StringUtils.trimToNull(palautusPvm));
         replacements.put("tulokset", tulosList);
-        replacements.put(
-            "koulu",
-            koulu.stream()
-                .map(
-                    t ->
-                        t.getTeksti(
-                            preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)))
+        replacements.put("koulu",
+            koulu.stream().map(
+                t -> t.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(hakukohdeOid)))
                 .collect(Collectors.joining(" - ")));
-        Optional<Osoite> hakijapalveluidenOsoite =
-            hakukohdeJaHakijapalveluidenOsoite.get(hakukohdeOid);
+        Optional<Osoite> hakijapalveluidenOsoite = hakukohdeJaHakijapalveluidenOsoite.get(hakukohdeOid);
         if (hakijapalveluidenOsoite != null) {
           hakijapalveluidenOsoite.ifPresent(h -> replacements.put("hakijapalveluidenOsoite", h));
         } else {
           LOG.error(
               "Hakijalle (hakemusOid={},hakijaOid={}) hakutoiveessa={} ei saatu hakijapalveluiden osoitetta tarjoajalle {}",
-              hakija.getHakemusOid(),
-              hakija.getHakijaOid(),
-              hakukohdeOid,
-              tarjoajaOid);
+              hakija.getHakemusOid(), hakija.getHakijaOid(), hakukohdeOid, tarjoajaOid);
         }
         replacements.put("henkilotunnus", hakemus.getHenkilotunnus());
-        replacements.put(
-            "koulutus",
-            koulutus.getTeksti(
-                preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
+        replacements.put("koulutus",
+            koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
         replacements.put("hakemusOid", hakemus.getOid());
         replacements.put("hakijaOid", hakija.getHakijaOid());
 
-        replacements.put(
-            "hakukohde",
-            koulutus.getTeksti(
-                preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
-        replacements.put(
-            "tarjoaja",
-            koulu.stream()
-                .map(
-                    t ->
-                        t.getTeksti(
-                            preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)))
+        replacements.put("hakukohde",
+            koulutus.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioHakukohteenNimi(hakukohdeOid)));
+        replacements.put("tarjoaja",
+            koulu.stream().map(
+                t -> t.getTeksti(preferoituKielikoodi, KirjeetUtil.vakioTarjoajanNimi(tarjoajaOid)))
                 .collect(Collectors.joining(" - ")));
         if (ohjeetUudelleOpiskelijalle != null) {
-          replacements.put(
-              "ohjeetUudelleOpiskelijalle",
+          replacements.put("ohjeetUudelleOpiskelijalle",
               ohjeetUudelleOpiskelijalle.getTeksti(preferoituKielikoodi));
         } else {
           replacements.put("ohjeetUudelleOpiskelijalle", null);
@@ -190,19 +149,12 @@ public class HyvaksymiskirjeetKomponentti {
         } else {
           sahkopostit.add(hakemus.getSahkopostiOsoite());
         }
-        // boolean skipIPosti = sahkoinenMassaposti ? !sendIPosti(hakemusWrapper) : !iPosti;
+        // boolean skipIPosti = sahkoinenMassaposti ? !sendIPosti(hakemusWrapper) :
+        // !iPosti;
         boolean skipIPosti = true;
         for (String sahkoposti : sahkopostit) {
-          kirjeet.add(
-              new Letter(
-                  osoite,
-                  templateName,
-                  preferoituKielikoodi,
-                  replacements,
-                  hakija.getHakijaOid(),
-                  skipIPosti,
-                  sahkoposti,
-                  hakija.getHakemusOid()));
+          kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements,
+              hakija.getHakijaOid(), skipIPosti, sahkoposti, hakija.getHakemusOid()));
         }
 
         viesti.setFetchTarget(hakukohdeOid);
@@ -216,20 +168,14 @@ public class HyvaksymiskirjeetKomponentti {
 
       LOG.info(
           "Yritetään luodaviestintapalvelulle hyvaksymiskirje-erä haulle {} asiointikielellä {} , jossa kirjeitä {} kappaletta!",
-          hakuOid,
-          asiointikieli,
-          kirjeet.size());
-      Collections.sort(
-          kirjeet,
-          (o1, o2) -> {
-            try {
-              return o1.getAddressLabel()
-                  .getLastName()
-                  .compareTo(o2.getAddressLabel().getLastName());
-            } catch (Exception e) {
-              return 0;
-            }
-          });
+          hakuOid, asiointikieli, kirjeet.size());
+      Collections.sort(kirjeet, (o1, o2) -> {
+        try {
+          return o1.getAddressLabel().getLastName().compareTo(o2.getAddressLabel().getLastName());
+        } catch (Exception e) {
+          return 0;
+        }
+      });
       viesti.setApplicationPeriod(hakuOid);
       viesti.setTag(tag);
       viesti.setTemplateName(templateName);
@@ -246,12 +192,7 @@ public class HyvaksymiskirjeetKomponentti {
 
   private static String hyvaksytynHakutoiveenHakukohdeOid(HakijaDTO hakija) {
     return hakija.getHakutoiveet().stream()
-        .filter(
-            h ->
-                h.getHakutoiveenValintatapajonot().stream()
-                    .anyMatch(j -> j.getTila().isHyvaksytty()))
-        .findAny()
-        .get()
-        .getHakukohdeOid();
+        .filter(h -> h.getHakutoiveenValintatapajonot().stream().anyMatch(j -> j.getTila().isHyvaksytty()))
+        .findAny().get().getHakukohdeOid();
   }
 }

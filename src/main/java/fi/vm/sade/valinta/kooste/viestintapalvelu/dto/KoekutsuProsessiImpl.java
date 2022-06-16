@@ -54,11 +54,9 @@ public class KoekutsuProsessiImpl extends DokumenttiProsessi implements KirjePro
   public void keskeyta(String syy, Map<String, String> virheet) {
     if (getDokumenttiId() == null) {
       getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, syy));
-      virheet.keySet().stream()
-          .forEach(
-              key -> {
-                getVaroitukset().add(new Varoitus(key, virheet.get(key)));
-              });
+      virheet.keySet().stream().forEach(key -> {
+        getVaroitukset().add(new Varoitus(key, virheet.get(key)));
+      });
     }
   }
 

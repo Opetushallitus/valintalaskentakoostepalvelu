@@ -4,7 +4,10 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
 
-/** Yhteinen utiliteetti tarjonnasta tulevan kielikoodien transformointiin ja preferointiin. */
+/**
+ * Yhteinen utiliteetti tarjonnasta tulevan kielikoodien transformointiin ja
+ * preferointiin.
+ */
 public class Kieli {
 
   private final String kieli;

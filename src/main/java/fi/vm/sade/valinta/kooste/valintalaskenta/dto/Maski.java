@@ -48,45 +48,31 @@ public class Maski {
     return whiteList && isMask();
   }
 
-  public Collection<HakukohdeJaOrganisaatio> maskaa(
-      Collection<HakukohdeJaOrganisaatio> originalHjaO) {
+  public Collection<HakukohdeJaOrganisaatio> maskaa(Collection<HakukohdeJaOrganisaatio> originalHjaO) {
     Set<String> lopulliset = Collections.emptySet();
-    Set<String> original =
-        originalHjaO.stream()
-            .map(HakukohdeJaOrganisaatio::getHakukohdeOid)
-            .collect(Collectors.toSet());
+    Set<String> original = originalHjaO.stream().map(HakukohdeJaOrganisaatio::getHakukohdeOid)
+        .collect(Collectors.toSet());
     Set<String> hakukohdeOidsMask = Sets.newHashSet(hakukohteet);
     if (isMask()) {
       if (isWhitelist()) {
-        lopulliset =
-            applyWhitelist(
-                hakukohdeOidsMask,
-                original,
-                (s ->
-                    LOG.error(
-                        "Haku ei taysin vastaa syotetyn whitelistin hakukohteita! Puuttuvat hakukohteet \r\n{}",
-                        Arrays.toString(s.toArray()))));
+        lopulliset = applyWhitelist(hakukohdeOidsMask, original,
+            (s -> LOG.error(
+                "Haku ei taysin vastaa syotetyn whitelistin hakukohteita! Puuttuvat hakukohteet \r\n{}",
+                Arrays.toString(s.toArray()))));
       } else if (isBlacklist()) {
-        lopulliset =
-            applyBlacklist(
-                hakukohdeOidsMask,
-                original,
-                (s ->
-                    LOG.error(
-                        "Haku ei taysin vastaa syotetyn blacklistin hakukohteita! Ylimaaraiset hakukohteet \r\n{}",
-                        Arrays.toString(s.toArray()))));
+        lopulliset = applyBlacklist(hakukohdeOidsMask, original, (s -> LOG.error(
+            "Haku ei taysin vastaa syotetyn blacklistin hakukohteita! Ylimaaraiset hakukohteet \r\n{}",
+            Arrays.toString(s.toArray()))));
       }
     }
     final Set<String> lopullisetFilter = lopulliset;
-    return originalHjaO.stream()
-        .filter(hk -> lopullisetFilter.contains(hk.getHakukohdeOid()))
+    return originalHjaO.stream().filter(hk -> lopullisetFilter.contains(hk.getHakukohdeOid()))
         .collect(Collectors.toList());
   }
 
   public String toString() {
     String maskTypeAsString = isWhitelist() ? "Whitelist" : "Blacklist";
-    String hakukohteetAsString =
-        hakukohteet != null ? Arrays.toString(hakukohteet.toArray()) : StringUtils.EMPTY;
+    String hakukohteetAsString = hakukohteet != null ? Arrays.toString(hakukohteet.toArray()) : StringUtils.EMPTY;
     return String.format(maskTypeAsString + " Maski {}", hakukohteetAsString);
   }
 

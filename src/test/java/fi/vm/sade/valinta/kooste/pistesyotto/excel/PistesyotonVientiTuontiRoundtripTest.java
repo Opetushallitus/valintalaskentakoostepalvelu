@@ -18,36 +18,22 @@ import org.slf4j.LoggerFactory;
 
 public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestBase {
 
-  private static final Logger LOG =
-      LoggerFactory.getLogger(PistesyotonVientiTuontiRoundtripTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PistesyotonVientiTuontiRoundtripTest.class);
 
   @Test
   public void testaaOutput()
       throws FileNotFoundException, IOException, JsonIOException, JsonSyntaxException, Exception {
-    List<ValintakoeOsallistuminenDTO> osallistumistiedot =
-        lueOsallistumisTiedot("List_ValintakoeOsallistuminenDTO.json");
+    List<ValintakoeOsallistuminenDTO> osallistumistiedot = lueOsallistumisTiedot(
+        "List_ValintakoeOsallistuminenDTO.json");
     List<ValintaperusteDTO> valintaperusteet = lueValintaperusteet("List_ValintaperusteDTO.json");
-    List<ApplicationAdditionalDataDTO> pistetiedot =
-        luePistetiedot("List_ApplicationAdditionalDataDTO.json");
-    PistesyottoExcel pistesyottoExcel =
-        new PistesyottoExcel(
-            "testioidi1",
-            "1.2.246.562.5.85532589612",
-            "jep",
-            "",
-            "",
-            "",
-            Optional.empty(),
-            createHakemukset(pistetiedot),
-            Collections.<String>emptySet(),
-            Arrays.asList(
-                "1_2_246_562_5_85532589612_urheilija_lisapiste",
-                "Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe",
-                "kielikoe_fi"),
-            osallistumistiedot,
-            valintaperusteet,
-            pistetiedot,
-            Collections.singletonList(new PistesyottoDataRiviListAdapter()));
+    List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("List_ApplicationAdditionalDataDTO.json");
+    PistesyottoExcel pistesyottoExcel = new PistesyottoExcel("testioidi1", "1.2.246.562.5.85532589612", "jep", "",
+        "", "", Optional.empty(), createHakemukset(pistetiedot), Collections.<String>emptySet(),
+        Arrays.asList("1_2_246_562_5_85532589612_urheilija_lisapiste",
+            "Eläintenhoidon koulutusohjelma, pk (Maatalousalan perustutkinto), pääsy- ja soveltuvuuskoe",
+            "kielikoe_fi"),
+        osallistumistiedot, valintaperusteet, pistetiedot,
+        Collections.singletonList(new PistesyottoDataRiviListAdapter()));
     Excel excel = pistesyottoExcel.getExcel();
 
     excel.tuoXlsx(excel.vieXlsx());
@@ -55,8 +41,7 @@ public class PistesyotonVientiTuontiRoundtripTest extends PistesyotonTuontiTestB
     // tallenna(excel);
   }
 
-  private Collection<HakemusWrapper> createHakemukset(
-      List<ApplicationAdditionalDataDTO> pistetiedot) {
+  private Collection<HakemusWrapper> createHakemukset(List<ApplicationAdditionalDataDTO> pistetiedot) {
     List<HakemusWrapper> hakemukset = new ArrayList<>();
     for (int i = 0; i < pistetiedot.size(); i++) {
       hakemukset.add(createHakemus(pistetiedot.get(i), i));

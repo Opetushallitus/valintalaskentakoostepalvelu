@@ -14,17 +14,14 @@ public class Reititys {
   private static final Logger LOG = LoggerFactory.getLogger(Reititys.class);
 
   public static Predicate vaadi(final Class<?> c) {
-    return new KoostepalveluEhto<Object>(
-        t -> {
-          boolean onko = t.getClass().isInstance(c);
-          if (!onko) {
-            LOG.error(
-                "Reittia ei voida kaynnistaa ilman tyyppia {}. Reitti kaynnistettiin tyypilla {}",
-                c,
-                t.getClass());
-          }
-          return onko;
-        });
+    return new KoostepalveluEhto<Object>(t -> {
+      boolean onko = t.getClass().isInstance(c);
+      if (!onko) {
+        LOG.error("Reittia ei voida kaynnistaa ilman tyyppia {}. Reitti kaynnistettiin tyypilla {}", c,
+            t.getClass());
+      }
+      return onko;
+    });
   }
 
   public static <T> Predicate ehto(java.util.function.Predicate<T> ehto) {
@@ -39,8 +36,8 @@ public class Reititys {
     return new KoostepalveluKuluttaja<I>(c, virhekasittelija);
   }
 
-  public static <I> Processor kuluttaja(
-      Consumer<I> c, BiPredicate<I, Exception> virhekasittelija, int retries, int delay) {
+  public static <I> Processor kuluttaja(Consumer<I> c, BiPredicate<I, Exception> virhekasittelija, int retries,
+      int delay) {
     return new KoostepalveluKuluttaja<I>(c, virhekasittelija, retries, delay);
   }
 
@@ -48,13 +45,11 @@ public class Reititys {
     return new KoostepalveluLauseke<I, O>(f);
   }
 
-  public static <I, O> Expression lauseke(
-      Function<I, O> f, BiPredicate<I, Exception> virhekasittelija, O vakio) {
+  public static <I, O> Expression lauseke(Function<I, O> f, BiPredicate<I, Exception> virhekasittelija, O vakio) {
     return new KoostepalveluLauseke<I, O>(f, virhekasittelija, vakio);
   }
 
-  public static <I, O> Expression lauseke(
-      Function<I, O> f, BiConsumer<I, Exception> virhekasittelija) {
+  public static <I, O> Expression lauseke(Function<I, O> f, BiConsumer<I, Exception> virhekasittelija) {
     return new KoostepalveluLauseke<I, O>(f, virhekasittelija);
   }
 
@@ -62,8 +57,8 @@ public class Reititys {
     return new KoostepalveluFunktio<I, O>(f);
   }
 
-  public static <I, O> Processor funktio(
-      Function<I, O> f, BiPredicate<I, Exception> virhekasittelija, Function<I, O> oletusluoja) {
+  public static <I, O> Processor funktio(Function<I, O> f, BiPredicate<I, Exception> virhekasittelija,
+      Function<I, O> oletusluoja) {
     return new KoostepalveluFunktio<I, O>(f, virhekasittelija, oletusluoja);
   }
 }

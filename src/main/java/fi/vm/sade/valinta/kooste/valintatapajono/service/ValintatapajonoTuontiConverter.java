@@ -21,29 +21,19 @@ import org.slf4j.LoggerFactory;
 public class ValintatapajonoTuontiConverter {
   private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoTuontiConverter.class);
 
-  public static ValinnanvaiheDTO konvertoi(
-      String hakuOid,
-      String hakukohdeOid,
-      String valintatapajonoOid,
-      List<ValinnanVaiheJonoillaDTO> valintaperusteet,
-      List<HakemusWrapper> hakemukset,
-      List<ValintatietoValinnanvaiheDTO> valinnanvaiheet,
-      Collection<ValintatapajonoRivi> rivit) {
+  public static ValinnanvaiheDTO konvertoi(String hakuOid, String hakukohdeOid, String valintatapajonoOid,
+      List<ValinnanVaiheJonoillaDTO> valintaperusteet, List<HakemusWrapper> hakemukset,
+      List<ValintatietoValinnanvaiheDTO> valinnanvaiheet, Collection<ValintatapajonoRivi> rivit) {
     ValintatietoValinnanvaiheDTO vaihe = haeValinnanVaihe(valintatapajonoOid, valinnanvaiheet);
     if (vaihe == null) {
-      vaihe =
-          luoValinnanVaihe(
-              valintaperusteet, hakukohdeOid, hakuOid, Optional.ofNullable(valintatapajonoOid));
+      vaihe = luoValinnanVaihe(valintaperusteet, hakukohdeOid, hakuOid, Optional.ofNullable(valintatapajonoOid));
     }
     ValintatietoValintatapajonoDTO jono = haeValintatapajono(valintatapajonoOid, vaihe);
     if (jono == null) {
-      throw new RuntimeException(
-          "Valintatapajono == null. JonoId=" + valintatapajonoOid + ", vaihe=" + vaihe);
+      throw new RuntimeException("Valintatapajono == null. JonoId=" + valintatapajonoOid + ", vaihe=" + vaihe);
     }
-    boolean hasJonosijoja =
-        rivit.stream().anyMatch(rivi -> StringUtils.isNotBlank(rivi.getJonosija()));
-    boolean hasKokonaispisteita =
-        rivit.stream().anyMatch(rivi -> StringUtils.isNotBlank(rivi.getPisteet()));
+    boolean hasJonosijoja = rivit.stream().anyMatch(rivi -> StringUtils.isNotBlank(rivi.getJonosija()));
+    boolean hasKokonaispisteita = rivit.stream().anyMatch(rivi -> StringUtils.isNotBlank(rivi.getPisteet()));
     if (hasJonosijoja && hasKokonaispisteita) {
       throw new RuntimeException(
           "Samassa valintatapajonossa ei voida käyttää sekä jonosijoja että kokonaispisteitä.");
@@ -54,9 +44,8 @@ public class ValintatapajonoTuontiConverter {
     Map<String, HakemusWrapper> hakemusmappaus = mapHakemukset(hakemukset);
     for (ValintatapajonoRivi rivi : rivit) {
       if (rivi.isValidi()) {
-        jonosijat.add(
-            ValintatapajonoRiviAsJonosijaConverter.convert(
-                hakukohdeOid, rivi, hakemusmappaus.get(rivi.getOid())));
+        jonosijat.add(ValintatapajonoRiviAsJonosijaConverter.convert(hakukohdeOid, rivi,
+            hakemusmappaus.get(rivi.getOid())));
       } else {
         LOG.warn("Rivi ei ole validi {} {} {}", rivi.getOid(), rivi.getJonosija(), rivi.getNimi());
       }
@@ -67,8 +56,8 @@ public class ValintatapajonoTuontiConverter {
     return vaihe;
   }
 
-  private static ValintatietoValinnanvaiheDTO haeValinnanVaihe(
-      String valintatapajonoOid, Collection<ValintatietoValinnanvaiheDTO> v) {
+  private static ValintatietoValinnanvaiheDTO haeValinnanVaihe(String valintatapajonoOid,
+      Collection<ValintatietoValinnanvaiheDTO> v) {
     for (ValintatietoValinnanvaiheDTO v0 : v) {
       if (haeValintatapajono(valintatapajonoOid, v0) != null) {
         return v0;
@@ -77,8 +66,8 @@ public class ValintatapajonoTuontiConverter {
     return null;
   }
 
-  private static ValintatietoValintatapajonoDTO haeValintatapajono(
-      String valintatapajonoOid, ValintatietoValinnanvaiheDTO v) {
+  private static ValintatietoValintatapajonoDTO haeValintatapajono(String valintatapajonoOid,
+      ValintatietoValinnanvaiheDTO v) {
     for (ValintatietoValintatapajonoDTO vx : v.getValintatapajonot()) {
       if (valintatapajonoOid.equals(vx.getValintatapajonooid())) {
         return vx;
@@ -88,17 +77,13 @@ public class ValintatapajonoTuontiConverter {
   }
 
   private static ValintatietoValinnanvaiheDTO luoValinnanVaihe(
-      final List<ValinnanVaiheJonoillaDTO> ilmanLaskentaaVaiheet,
-      String hakukohdeOid,
-      String hakuOid,
+      final List<ValinnanVaiheJonoillaDTO> ilmanLaskentaaVaiheet, String hakukohdeOid, String hakuOid,
       Optional<String> valintatapajonoOid) {
     List<fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO> ilmanLaskentaaJonot;
     String jonoOid;
     if (!valintatapajonoOid.isPresent()) {
-      ilmanLaskentaaJonot =
-          ilmanLaskentaaVaiheet.stream()
-              .flatMap(v -> v.getJonot().stream())
-              .collect(Collectors.toList());
+      ilmanLaskentaaJonot = ilmanLaskentaaVaiheet.stream().flatMap(v -> v.getJonot().stream())
+          .collect(Collectors.toList());
       if (ilmanLaskentaaJonot.isEmpty()) {
         throw new RuntimeException("Yhtään valintatapajonoa ilman laskentaa ei löytynyt");
       }
@@ -113,19 +98,15 @@ public class ValintatapajonoTuontiConverter {
 
     ValinnanVaiheJonoillaDTO vaihe = haeVaihe(jonoOid, ilmanLaskentaaVaiheet);
     if (vaihe == null) {
-      throw new RuntimeException(
-          "Tälle valintatapajonolle ei löydy valintaperusteista valinnanvaihetta!");
+      throw new RuntimeException("Tälle valintatapajonolle ei löydy valintaperusteista valinnanvaihetta!");
     }
     fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO jono = haeJono(jonoOid, vaihe);
     if (jono == null) {
-      throw new RuntimeException(
-          "Valintatapajono == null. JonoId=" + valintatapajonoOid + ", vaihe=" + vaihe);
+      throw new RuntimeException("Valintatapajono == null. JonoId=" + valintatapajonoOid + ", vaihe=" + vaihe);
     }
 
     // luodaan uusi
-    LOG.warn(
-        "Valinnanvaihetta ei löytynyt valintatapajonolle({}) joten luodaan uusi!",
-        valintatapajonoOid);
+    LOG.warn("Valinnanvaihetta ei löytynyt valintatapajonolle({}) joten luodaan uusi!", valintatapajonoOid);
     ValintatietoValinnanvaiheDTO v0 = new ValintatietoValinnanvaiheDTO();
     v0.setCreatedAt(new Date());
     v0.setHakuOid(hakuOid);
@@ -157,8 +138,7 @@ public class ValintatapajonoTuontiConverter {
     return tmp;
   }
 
-  private static ValinnanVaiheJonoillaDTO haeVaihe(
-      String oid, List<ValinnanVaiheJonoillaDTO> jonot) {
+  private static ValinnanVaiheJonoillaDTO haeVaihe(String oid, List<ValinnanVaiheJonoillaDTO> jonot) {
     for (ValinnanVaiheJonoillaDTO jonoilla : jonot) {
       for (fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO v : jonoilla.getJonot()) {
         if (oid.equals(v.getOid())) {
@@ -169,8 +149,8 @@ public class ValintatapajonoTuontiConverter {
     return null;
   }
 
-  private static fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO haeJono(
-      String oid, ValinnanVaiheJonoillaDTO vaihe) {
+  private static fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO haeJono(String oid,
+      ValinnanVaiheJonoillaDTO vaihe) {
     for (fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO v : vaihe.getJonot()) {
       if (oid.equals(v.getOid())) {
         return v;

@@ -24,8 +24,7 @@ public class LaskentaStarterActorTest {
   @Before
   public void setUp() {
     Props props = props(laskentaSupervisor, MAX_WORKER_COUNT);
-    ActorSystem actorSystem =
-        ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
+    ActorSystem actorSystem = ActorSystem.create("ValintalaskentaActorSystem", ConfigFactory.defaultOverrides());
     this.ref = TestActorRef.create(actorSystem, props, "testA");
     this.actor = ref.underlyingActor();
   }
@@ -80,7 +79,6 @@ public class LaskentaStarterActorTest {
   }
 
   private void signalWorkAvailableTimes(int count) {
-    IntStream.rangeClosed(1, count)
-        .forEach(i -> ref.tell(new WorkAvailable(), ActorRef.noSender()));
+    IntStream.rangeClosed(1, count).forEach(i -> ref.tell(new WorkAvailable(), ActorRef.noSender()));
   }
 }

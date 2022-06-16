@@ -37,232 +37,156 @@ import org.springframework.stereotype.Service;
 public class ValintatapajonoTuontiService {
   private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoTuontiService.class);
   private static final String VALMIS = "valmis";
-  @Autowired private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
-  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
-  @Autowired private ApplicationAsyncResource applicationAsyncResource;
-  @Autowired private AtaruAsyncResource ataruAsyncResource;
-  @Autowired private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
-  @Autowired private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
+  @Autowired
+  private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
+  @Autowired
+  private TarjontaAsyncResource tarjontaAsyncResource;
+  @Autowired
+  private ApplicationAsyncResource applicationAsyncResource;
+  @Autowired
+  private AtaruAsyncResource ataruAsyncResource;
+  @Autowired
+  private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
+  @Autowired
+  private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
 
   public void tuo(
-      BiFunction<
-              List<ValintatietoValinnanvaiheDTO>,
-              List<HakemusWrapper>,
-              Collection<ValintatapajonoRivi>>
-          riviFunction,
-      final String hakuOid,
-      final String hakukohdeOid,
-      final String tarjoajaOid,
-      final String valintatapajonoOid,
-      AsyncResponse asyncResponse,
-      User user) {
+      BiFunction<List<ValintatietoValinnanvaiheDTO>, List<HakemusWrapper>, Collection<ValintatapajonoRivi>> riviFunction,
+      final String hakuOid, final String hakukohdeOid, final String tarjoajaOid, final String valintatapajonoOid,
+      AsyncResponse asyncResponse, User user) {
     AtomicReference<String> dokumenttiIdRef = new AtomicReference<>(null);
-    AtomicInteger counter =
-        new AtomicInteger(
-            1 // valinnanvaiheet
-                + 1 // valintaperusteet
-                + 1 // hakemukset
-                + 1 // dokumentti
-            // +1 // org oikeuksien tarkistus
-            );
-    AtomicReference<List<ValintatietoValinnanvaiheDTO>> valinnanvaiheetRef =
-        new AtomicReference<>();
+    AtomicInteger counter = new AtomicInteger(1 // valinnanvaiheet
+        + 1 // valintaperusteet
+        + 1 // hakemukset
+        + 1 // dokumentti
+    // +1 // org oikeuksien tarkistus
+    );
+    AtomicReference<List<ValintatietoValinnanvaiheDTO>> valinnanvaiheetRef = new AtomicReference<>();
     AtomicReference<List<ValinnanVaiheJonoillaDTO>> valintaperusteetRef = new AtomicReference<>();
     AtomicReference<List<HakemusWrapper>> hakemuksetRef = new AtomicReference<>();
 
-    final Supplier<Void> mergeSuplier =
-        () -> {
-          if (counter.decrementAndGet() == 0) {
-            Collection<ValintatapajonoRivi> rivit;
-            try {
-              rivit = riviFunction.apply(valinnanvaiheetRef.get(), hakemuksetRef.get());
-            } catch (Throwable t) {
-              poikkeusKasittelija(
-                      "Rivien lukeminen annetuista tiedoista epäonnistui",
-                      asyncResponse,
-                      dokumenttiIdRef)
-                  .accept(t);
-              return null;
-            }
-            try {
-              ValinnanvaiheDTO valinnanvaihe =
-                  ValintatapajonoTuontiConverter.konvertoi(
-                      hakuOid,
-                      hakukohdeOid,
-                      valintatapajonoOid,
-                      valintaperusteetRef.get(),
-                      hakemuksetRef.get(),
-                      valinnanvaiheetRef.get(),
-                      rivit);
-              LOG.info("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
-              Observable.fromFuture(
-                      valintalaskentaAsyncResource.lisaaTuloksia(
-                          hakuOid, hakukohdeOid, tarjoajaOid, valinnanvaihe))
-                  .subscribe(
-                      ok -> {
-                        try {
-                          valinnanvaihe
-                              .getValintatapajonot()
-                              .forEach(
-                                  v ->
-                                      v.getJonosijat()
-                                          .forEach(
-                                              jonosija -> {
-                                                Map<String, String> additionalAuditFields =
-                                                    new HashMap<>();
-                                                additionalAuditFields.put("hakuOid", hakuOid);
-                                                additionalAuditFields.put(
-                                                    "hakukohdeOid", hakukohdeOid);
-                                                additionalAuditFields.put(
-                                                    "valinnanvaiheOid",
-                                                    valinnanvaihe.getValinnanvaiheoid());
-                                                additionalAuditFields.put(
-                                                    "valintatapajonoOid",
-                                                    v.getValintatapajonooid());
-                                                AuditLog.log(
-                                                    KoosteAudit.AUDIT,
-                                                    user,
-                                                    ValintaperusteetOperation
-                                                        .VALINNANVAIHE_TUONTI_EXCEL,
-                                                    ValintaResource.VALINTATAPAJONOSERVICE,
-                                                    jonosija.getHakijaOid(),
-                                                    Changes.addedDto(jonosija),
-                                                    additionalAuditFields);
-                                              }));
-                        } catch (Throwable t) {
-                          LOG.error("Audit logitus epäonnistui", t);
-                        }
-                        dokumentinSeurantaAsyncResource
-                            .paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS)
-                            .subscribe(
-                                dontcare -> LOG.error("Saatiin paivitettya dokId"),
-                                dontcare -> LOG.error("Ei saatu paivitettya!", dontcare));
-                      },
-                      poikkeusKasittelija(
-                          "Tallennus valintapalveluun epäonnistui",
-                          asyncResponse,
-                          dokumenttiIdRef));
-              LOG.info(
-                  "Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.",
-                  hakukohdeOid,
-                  hakuOid);
-              dokumentinSeurantaAsyncResource
-                  .paivitaKuvaus(
-                      dokumenttiIdRef.get(),
-                      "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...")
-                  .subscribe(
-                      dontcare -> {},
-                      dontcare -> {
-                        LOG.error("Onnistumisen ilmoittamisessa virhe!", dontcare);
-                      });
-            } catch (Throwable t) {
-              poikkeusKasittelija(
-                      "Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef)
-                  .accept(t);
-              return null;
-            }
-          }
+    final Supplier<Void> mergeSuplier = () -> {
+      if (counter.decrementAndGet() == 0) {
+        Collection<ValintatapajonoRivi> rivit;
+        try {
+          rivit = riviFunction.apply(valinnanvaiheetRef.get(), hakemuksetRef.get());
+        } catch (Throwable t) {
+          poikkeusKasittelija("Rivien lukeminen annetuista tiedoista epäonnistui", asyncResponse,
+              dokumenttiIdRef).accept(t);
           return null;
-        };
-    valintalaskentaAsyncResource
-        .laskennantulokset(hakukohdeOid)
-        .whenComplete(
-            (valinnanvaiheet, t) -> {
-              if (t != null) {
-                poikkeusKasittelija(
-                        "Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef)
-                    .accept(t);
-              } else {
-                valinnanvaiheetRef.set(valinnanvaiheet);
-                mergeSuplier.get();
-              }
-            });
-    valintaperusteetAsyncResource
-        .haeIlmanlaskentaa(hakukohdeOid)
-        .subscribe(
-            valintaperusteet -> {
-              valintaperusteetRef.set(valintaperusteet);
-              mergeSuplier.get();
-            },
-            poikkeusKasittelija(
-                "Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
-    Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
-        .flatMap(
-            haku -> {
-              if (haku.isHakemuspalvelu()) {
-                return Observable.fromFuture(
-                    ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
-              } else {
-                return Observable.fromFuture(
-                    applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid));
-              }
-            })
-        .subscribe(
-            hakemukset -> {
-              if (hakemukset == null || hakemukset.isEmpty()) {
-                poikkeusKasittelija(
-                        "Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef)
-                    .accept(null);
-              } else {
-                hakemuksetRef.set(hakemukset);
-                mergeSuplier.get();
-              }
-            },
-            poikkeusKasittelija(
-                "Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
+        }
+        try {
+          ValinnanvaiheDTO valinnanvaihe = ValintatapajonoTuontiConverter.konvertoi(hakuOid, hakukohdeOid,
+              valintatapajonoOid, valintaperusteetRef.get(), hakemuksetRef.get(),
+              valinnanvaiheetRef.get(), rivit);
+          LOG.info("{}", new GsonBuilder().setPrettyPrinting().create().toJson(valinnanvaihe));
+          Observable.fromFuture(valintalaskentaAsyncResource.lisaaTuloksia(hakuOid, hakukohdeOid, tarjoajaOid,
+              valinnanvaihe)).subscribe(ok -> {
+                try {
+                  valinnanvaihe.getValintatapajonot()
+                      .forEach(v -> v.getJonosijat().forEach(jonosija -> {
+                        Map<String, String> additionalAuditFields = new HashMap<>();
+                        additionalAuditFields.put("hakuOid", hakuOid);
+                        additionalAuditFields.put("hakukohdeOid", hakukohdeOid);
+                        additionalAuditFields.put("valinnanvaiheOid",
+                            valinnanvaihe.getValinnanvaiheoid());
+                        additionalAuditFields.put("valintatapajonoOid",
+                            v.getValintatapajonooid());
+                        AuditLog.log(KoosteAudit.AUDIT, user,
+                            ValintaperusteetOperation.VALINNANVAIHE_TUONTI_EXCEL,
+                            ValintaResource.VALINTATAPAJONOSERVICE, jonosija.getHakijaOid(),
+                            Changes.addedDto(jonosija), additionalAuditFields);
+                      }));
+                } catch (Throwable t) {
+                  LOG.error("Audit logitus epäonnistui", t);
+                }
+                dokumentinSeurantaAsyncResource.paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS)
+                    .subscribe(dontcare -> LOG.error("Saatiin paivitettya dokId"),
+                        dontcare -> LOG.error("Ei saatu paivitettya!", dontcare));
+              }, poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse,
+                  dokumenttiIdRef));
+          LOG.info(
+              "Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.",
+              hakukohdeOid, hakuOid);
+          dokumentinSeurantaAsyncResource
+              .paivitaKuvaus(dokumenttiIdRef.get(),
+                  "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...")
+              .subscribe(dontcare -> {
+              }, dontcare -> {
+                LOG.error("Onnistumisen ilmoittamisessa virhe!", dontcare);
+              });
+        } catch (Throwable t) {
+          poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef)
+              .accept(t);
+          return null;
+        }
+      }
+      return null;
+    };
+    valintalaskentaAsyncResource.laskennantulokset(hakukohdeOid).whenComplete((valinnanvaiheet, t) -> {
+      if (t != null) {
+        poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef)
+            .accept(t);
+      } else {
+        valinnanvaiheetRef.set(valinnanvaiheet);
+        mergeSuplier.get();
+      }
+    });
+    valintaperusteetAsyncResource.haeIlmanlaskentaa(hakukohdeOid).subscribe(valintaperusteet -> {
+      valintaperusteetRef.set(valintaperusteet);
+      mergeSuplier.get();
+    }, poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
+    Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid)).flatMap(haku -> {
+      if (haku.isHakemuspalvelu()) {
+        return Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid));
+      } else {
+        return Observable.fromFuture(applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid));
+      }
+    }).subscribe(hakemukset -> {
+      if (hakemukset == null || hakemukset.isEmpty()) {
+        poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef).accept(null);
+      } else {
+        hakemuksetRef.set(hakemukset);
+        mergeSuplier.get();
+      }
+    }, poikkeusKasittelija("Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
 
-    dokumentinSeurantaAsyncResource
-        .luoDokumentti("Valintatapajonon tuonti")
-        .subscribe(
-            dokumenttiId -> {
-              try {
-                asyncResponse.resume(
-                    Response.ok()
-                        .header("Content-Type", "text/plain")
-                        .entity(dokumenttiId)
-                        .build());
-                dokumenttiIdRef.set(dokumenttiId);
-                mergeSuplier.get();
-              } catch (Throwable t) {
-                LOG.error(
-                    "Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla.", t);
-              }
-            },
-            poikkeusKasittelija(
-                "Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef));
+    dokumentinSeurantaAsyncResource.luoDokumentti("Valintatapajonon tuonti").subscribe(dokumenttiId -> {
+      try {
+        asyncResponse.resume(Response.ok().header("Content-Type", "text/plain").entity(dokumenttiId).build());
+        dokumenttiIdRef.set(dokumenttiId);
+        mergeSuplier.get();
+      } catch (Throwable t) {
+        LOG.error("Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla.", t);
+      }
+    }, poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef));
   }
 
-  private PoikkeusKasittelijaSovitin poikkeusKasittelija(
-      String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
-    return new PoikkeusKasittelijaSovitin(
-        poikkeus -> {
-          if (poikkeus == null) {
-            LOG.error("###Poikkeus tuonnissa {}\r\n###", viesti);
-          } else {
-            LOG.error("###Poikkeus tuonnissa :" + viesti + "###", poikkeus);
-          }
-          try {
-            asyncResponse.resume(
-                Response.serverError()
-                    .entity(
-                        viesti + (poikkeus != null ? " poikkeus: " + poikkeus.getMessage() : ""))
-                    .build());
-          } catch (Throwable t) {
-            // ei väliä vaikka response jos tehty
-          }
-          try {
-            String dokumenttiId = dokumenttiIdRef.get();
-            if (dokumenttiId != null) {
-              dokumentinSeurantaAsyncResource
-                  .lisaaVirheilmoituksia(
-                      dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti)))
-                  .subscribe(
-                      dontcare -> {},
-                      dontcare -> LOG.error("Virheen ilmoittamisessa virhe!", dontcare));
-            }
-          } catch (Throwable t) {
-            LOG.error("Odottamaton virhe", t);
-          }
-        });
+  private PoikkeusKasittelijaSovitin poikkeusKasittelija(String viesti, AsyncResponse asyncResponse,
+      AtomicReference<String> dokumenttiIdRef) {
+    return new PoikkeusKasittelijaSovitin(poikkeus -> {
+      if (poikkeus == null) {
+        LOG.error("###Poikkeus tuonnissa {}\r\n###", viesti);
+      } else {
+        LOG.error("###Poikkeus tuonnissa :" + viesti + "###", poikkeus);
+      }
+      try {
+        asyncResponse.resume(Response.serverError()
+            .entity(viesti + (poikkeus != null ? " poikkeus: " + poikkeus.getMessage() : "")).build());
+      } catch (Throwable t) {
+        // ei väliä vaikka response jos tehty
+      }
+      try {
+        String dokumenttiId = dokumenttiIdRef.get();
+        if (dokumenttiId != null) {
+          dokumentinSeurantaAsyncResource
+              .lisaaVirheilmoituksia(dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti)))
+              .subscribe(dontcare -> {
+              }, dontcare -> LOG.error("Virheen ilmoittamisessa virhe!", dontcare));
+        }
+      } catch (Throwable t) {
+        LOG.error("Odottamaton virhe", t);
+      }
+    });
   }
 }

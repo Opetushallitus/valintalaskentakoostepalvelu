@@ -8,8 +8,7 @@ public class PisteetWithLastModified {
   public final Optional<String> lastModified;
   public final List<Valintapisteet> valintapisteet;
 
-  public PisteetWithLastModified(
-      Optional<String> lastModified, List<Valintapisteet> valintapisteet) {
+  public PisteetWithLastModified(Optional<String> lastModified, List<Valintapisteet> valintapisteet) {
     this.lastModified = lastModified;
     this.valintapisteet = valintapisteet;
   }

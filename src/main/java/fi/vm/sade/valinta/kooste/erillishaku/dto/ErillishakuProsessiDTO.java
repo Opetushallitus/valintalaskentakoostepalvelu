@@ -57,11 +57,9 @@ public class ErillishakuProsessiDTO extends DokumenttiProsessi implements KirjeP
     if (getDokumenttiId() == null) {
       getPoikkeukset().add(new Poikkeus(Poikkeus.KOOSTEPALVELU, syy));
 
-      virheet.keySet().stream()
-          .forEach(
-              key -> {
-                getVaroitukset().add(new Varoitus(key, virheet.get(key)));
-              });
+      virheet.keySet().stream().forEach(key -> {
+        getVaroitukset().add(new Varoitus(key, virheet.get(key)));
+      });
     }
   }
 

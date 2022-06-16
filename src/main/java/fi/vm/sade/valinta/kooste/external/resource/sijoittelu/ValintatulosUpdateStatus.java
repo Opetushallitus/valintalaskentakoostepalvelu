@@ -9,10 +9,10 @@ public class ValintatulosUpdateStatus {
   public String valintatapajonoOid;
   public String hakemusOid;
 
-  public ValintatulosUpdateStatus() {}
+  public ValintatulosUpdateStatus() {
+  }
 
-  public ValintatulosUpdateStatus(
-      int status, String message, String valintatapajonoOid, String hakemusOid) {
+  public ValintatulosUpdateStatus(int status, String message, String valintatapajonoOid, String hakemusOid) {
     this.status = status;
     this.message = message;
     this.valintatapajonoOid = valintatapajonoOid;
@@ -21,13 +21,7 @@ public class ValintatulosUpdateStatus {
 
   @Override
   public String toString() {
-    return "status:"
-        + status
-        + " message:"
-        + message
-        + " valintatapajonoOid:"
-        + valintatapajonoOid
-        + " hakemusOid:"
+    return "status:" + status + " message:" + message + " valintatapajonoOid:" + valintatapajonoOid + " hakemusOid:"
         + hakemusOid;
   }
 }

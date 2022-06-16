@@ -11,13 +11,10 @@ import org.springframework.stereotype.Service;
 
 /** @author Jussi Jartamo */
 @Service
-public class MockValintalaskentaValintakoeAsyncResource
-    implements ValintalaskentaValintakoeAsyncResource {
+public class MockValintalaskentaValintakoeAsyncResource implements ValintalaskentaValintakoeAsyncResource {
 
-  private static final AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedot =
-      new AtomicReference<>();
-  private static final AtomicReference<List<HakemusOsallistuminenDTO>> hakemusOsallistuminen =
-      new AtomicReference<>();
+  private static final AtomicReference<List<ValintakoeOsallistuminenDTO>> osallistumistiedot = new AtomicReference<>();
+  private static final AtomicReference<List<HakemusOsallistuminenDTO>> hakemusOsallistuminen = new AtomicReference<>();
 
   public static void setHakemusOsallistuminenResult(List<HakemusOsallistuminenDTO> res) {
     hakemusOsallistuminen.set(res);
@@ -33,8 +30,8 @@ public class MockValintalaskentaValintakoeAsyncResource
   }
 
   @Override
-  public CompletableFuture<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(
-      String hakukohdeOid, List<String> valintakoeOid) {
+  public CompletableFuture<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(String hakukohdeOid,
+      List<String> valintakoeOid) {
     return CompletableFuture.completedFuture(hakemusOsallistuminen.get());
   }
 
@@ -44,14 +41,12 @@ public class MockValintalaskentaValintakoeAsyncResource
   }
 
   @Override
-  public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(
-      String hakukohdeOid) {
+  public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(String hakukohdeOid) {
     return CompletableFuture.completedFuture(osallistumistiedot.get());
   }
 
   @Override
-  public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(
-      Collection<String> hakukohdeOids) {
+  public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(Collection<String> hakukohdeOids) {
     return CompletableFuture.completedFuture(osallistumistiedot.get());
   }
 }

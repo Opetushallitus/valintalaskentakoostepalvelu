@@ -81,18 +81,14 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   @Override
   public String getSukupuoli() {
     getHenkilotiedot();
-    return Stream.of(Optional.ofNullable(henkilotiedot.get(SUKUPUOLI)).orElse(StringUtils.EMPTY))
-        .map(
-            s -> {
-              if (NAINEN.equals(s)) {
-                return "Nainen";
-              } else if (MIES.equals(s)) {
-                return "Mies";
-              }
-              return s;
-            })
-        .findAny()
-        .get();
+    return Stream.of(Optional.ofNullable(henkilotiedot.get(SUKUPUOLI)).orElse(StringUtils.EMPTY)).map(s -> {
+      if (NAINEN.equals(s)) {
+        return "Nainen";
+      } else if (MIES.equals(s)) {
+        return "Mies";
+      }
+      return s;
+    }).findAny().get();
   }
 
   @Override
@@ -122,8 +118,7 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   @Override
   public String getUlkomainenPostitoimipaikka() {
     getHenkilotiedot();
-    return Optional.ofNullable(henkilotiedot.get(ULKOMAA_POSTITOIMIPAIKKA))
-        .orElse(StringUtils.EMPTY);
+    return Optional.ofNullable(henkilotiedot.get(ULKOMAA_POSTITOIMIPAIKKA)).orElse(StringUtils.EMPTY);
   }
 
   @Override
@@ -135,8 +130,7 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   @Override
   public String getSuomalainenPostinumero() {
     getHenkilotiedot();
-    return Optional.ofNullable(henkilotiedot.get(SUOMALAINEN_POSTINUMERO))
-        .orElse(StringUtils.EMPTY);
+    return Optional.ofNullable(henkilotiedot.get(SUOMALAINEN_POSTINUMERO)).orElse(StringUtils.EMPTY);
   }
 
   @Override
@@ -179,12 +173,10 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
 
   @Override
   public Collection<String> getPuhelinnumerot() {
-    TreeMap<String, String> henkilotiedot =
-        new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+    TreeMap<String, String> henkilotiedot = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
     henkilotiedot.putAll(hakemus.getAnswers().getHenkilotiedot());
     Collection<String> nums = Lists.newArrayList();
-    for (Entry<String, String> e :
-        henkilotiedot.tailMap(Yhteystiedot.MATKAPUHELINNUMERO, true).entrySet()) {
+    for (Entry<String, String> e : henkilotiedot.tailMap(Yhteystiedot.MATKAPUHELINNUMERO, true).entrySet()) {
       if (e.getKey().startsWith(Yhteystiedot.MATKAPUHELINNUMERO)) {
         nums.add(e.getValue());
       } else {
@@ -196,15 +188,11 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
 
   @Override
   public boolean isMaksuvelvollinen(String hakukohdeOid) {
-    List<Eligibility> eligibilities =
-        Optional.ofNullable(hakemus)
-            .map(Hakemus::getPreferenceEligibilities)
-            .filter(Objects::nonNull)
-            .orElse(emptyList());
-    Optional<Eligibility> eligibilityForHakukohde =
-        eligibilities.stream().filter(e -> hakukohdeOid.equals(e.getAoId())).findAny();
-    return eligibilityForHakukohde
-        .filter(e -> Maksuvelvollisuus.REQUIRED.equals(e.getMaksuvelvollisuus()))
+    List<Eligibility> eligibilities = Optional.ofNullable(hakemus).map(Hakemus::getPreferenceEligibilities)
+        .filter(Objects::nonNull).orElse(emptyList());
+    Optional<Eligibility> eligibilityForHakukohde = eligibilities.stream()
+        .filter(e -> hakukohdeOid.equals(e.getAoId())).findAny();
+    return eligibilityForHakukohde.filter(e -> Maksuvelvollisuus.REQUIRED.equals(e.getMaksuvelvollisuus()))
         .isPresent();
   }
 
@@ -359,15 +347,10 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   }
 
   /*
-  @Override
-  public boolean getLupaSahkoiseenAsiointiin() {
-      getLisatiedot(); // lazy load lisatiedot
-      if (lisatiedot.containsKey(LUPA_SAHKOISEEN_VIESTINTAAN)) {
-          String lupa = lisatiedot.get(LUPA_SAHKOISEEN_VIESTINTAAN);
-          return Boolean.TRUE.equals(Boolean.valueOf(lupa));
-      }
-      return false;
-  }
+   * @Override public boolean getLupaSahkoiseenAsiointiin() { getLisatiedot(); //
+   * lazy load lisatiedot if (lisatiedot.containsKey(LUPA_SAHKOISEEN_VIESTINTAAN))
+   * { String lupa = lisatiedot.get(LUPA_SAHKOISEEN_VIESTINTAAN); return
+   * Boolean.TRUE.equals(Boolean.valueOf(lupa)); } return false; }
    */
 
   @Override
@@ -393,11 +376,8 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   @Override
   public Collection<String> getHakutoiveOids() {
     return getHakutoiveet().entrySet().stream()
-        .filter(
-            entry ->
-                entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
-        .map(entry -> StringUtils.trimToNull(entry.getValue()))
-        .filter(Objects::nonNull)
+        .filter(entry -> entry.getKey().startsWith("preference") && entry.getKey().endsWith("-Koulutus-id"))
+        .map(entry -> StringUtils.trimToNull(entry.getValue())).filter(Objects::nonNull)
         .collect(Collectors.toSet());
   }
 
@@ -418,12 +398,10 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   @Override
   public boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt() {
     if (hakemus.getAnswers().getKoulutustausta() != null) {
-      Map<String, String> koulutustausta =
-          new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+      Map<String, String> koulutustausta = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
       koulutustausta.putAll(hakemus.getAnswers().getKoulutustausta());
       String pohjakoulutus = koulutustausta.get(POHJAKOULUTUS);
-      return POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus)
-          || POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus);
+      return POHJAKOULUTUS_ULKOMAILLA.equals(pohjakoulutus) || POHJAKOULUTUS_KESKEYTETTY.equals(pohjakoulutus);
     }
     return false;
   }
@@ -457,10 +435,8 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
-  public HakemusDTO toHakemusDto(
-      Valintapisteet valintapisteet,
-      Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
-      boolean shouldUseApplicationPersonOid) {
+  public HakemusDTO toHakemusDto(Valintapisteet valintapisteet,
+      Map<String, List<String>> hakukohdeRyhmasForHakukohdes, boolean shouldUseApplicationPersonOid) {
     HakemusDTO hakemusTyyppi = new HakemusDTO();
     hakemusTyyppi.setHakemusoid(getOid());
     hakemusTyyppi.setHakijaOid(getPersonOid());
@@ -483,15 +459,10 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
 
       try {
         try {
-          hakemus
-              .getAnswers()
-              .getHakutoiveet()
-              .putAll(
-                  mapEligibilityAndStatus(
-                      hakemus.getPreferenceEligibilities(), hakemus.getAnswers().getHakutoiveet()));
+          hakemus.getAnswers().getHakutoiveet().putAll(mapEligibilityAndStatus(
+              hakemus.getPreferenceEligibilities(), hakemus.getAnswers().getHakutoiveet()));
         } catch (Exception e) {
-          throw new RuntimeException(
-              "Eligibilities statusten mappaus preferensseihin epaonnistui!", e);
+          throw new RuntimeException("Eligibilities statusten mappaus preferensseihin epaonnistui!", e);
         }
         Map<Integer, Converter.Hakutoive> hakutoiveet = new HashMap<>();
         if (hakemus.getAnswers().getHakutoiveet() != null) {
@@ -533,8 +504,7 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
           for (Map.Entry<Integer, Converter.Hakutoive> e : hakutoiveet.entrySet()) {
             Converter.Hakutoive hakutoive = e.getValue();
             if (hakutoive != null) {
-              if (hakutoive.getHakukohdeOid() != null
-                  && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
+              if (hakutoive.getHakukohdeOid() != null && !hakutoive.getHakukohdeOid().trim().isEmpty()) {
                 HakukohdeDTO hk = new HakukohdeDTO();
                 hk.setOid(hakutoive.getHakukohdeOid());
                 hk.setHarkinnanvaraisuus(Boolean.TRUE.equals(hakutoive.getHarkinnanvaraisuus()));
@@ -578,19 +548,15 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
 
       try {
         if (hakemus.getAnswers().getOsaaminen() != null) {
-          final List<AvainArvoDTO> osaaminenIlmanArvosanoja =
-              hakemus.getAnswers().getOsaaminen().entrySet().stream()
-                  .filter(
-                      entry ->
-                          !entry.getKey().startsWith("PK_") && !entry.getKey().startsWith("LK_"))
-                  .map(
-                      e -> {
-                        AvainArvoDTO aa = new AvainArvoDTO();
-                        aa.setAvain(e.getKey());
-                        aa.setArvo(sanitizeArvo(e.getValue()));
-                        return aa;
-                      })
-                  .collect(Collectors.toList());
+          final List<AvainArvoDTO> osaaminenIlmanArvosanoja = hakemus.getAnswers().getOsaaminen().entrySet()
+              .stream()
+              .filter(entry -> !entry.getKey().startsWith("PK_") && !entry.getKey().startsWith("LK_"))
+              .map(e -> {
+                AvainArvoDTO aa = new AvainArvoDTO();
+                aa.setAvain(e.getKey());
+                aa.setArvo(sanitizeArvo(e.getValue()));
+                return aa;
+              }).collect(Collectors.toList());
           hakemusTyyppi.getAvaimet().addAll(osaaminenIlmanArvosanoja);
         }
       } catch (Exception e) {

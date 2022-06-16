@@ -34,25 +34,21 @@ import org.mockito.Mockito;
 
 /** @author Jussi Jartamo */
 public class OsoitetarratServiceTest {
-  final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-  final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource =
-      new HttpResourceBuilder(getClass().getName())
-          .address(root + "/viestintapalvelu/osoitetarrat/aktivoi")
+  final String root = "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+  final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource = new HttpResourceBuilder(
+      getClass().getName()).address(root + "/viestintapalvelu/osoitetarrat/aktivoi")
           .buildExposingWebClientDangerously();
-  final HttpResourceBuilder.WebClientExposingHttpResource
-      osoitetarratSijoittelussaHyvaksytyilleResource =
-          new HttpResourceBuilder(getClass().getName())
-              .address(root + "/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
-              .buildExposingWebClientDangerously();
+  final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratSijoittelussaHyvaksytyilleResource = new HttpResourceBuilder(
+      getClass().getName()).address(root + "/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
+          .buildExposingWebClientDangerously();
   final String HAKU1 = "HAKU1";
   final String HAKUKOHDE1 = "HAKUKOHDE1";
   final String VALINTAKOE1 = "VALINTAKOE1";
   final String HAKEMUS1 = "HAKEMUS1";
   final String ATARUHAKEMUS1 = "1.2.246.562.11.00000000000000000063";
   final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
-  private final Observable<Response> byteArrayResponse =
-      Observable.just(Response.ok(new ByteArrayInputStream("lol".getBytes())).build());
+  private final Observable<Response> byteArrayResponse = Observable
+      .just(Response.ok(new ByteArrayInputStream("lol".getBytes())).build());
 
   @Before
   public void startServer() {
@@ -65,12 +61,9 @@ public class OsoitetarratServiceTest {
     try {
       String HAKU2 = "1.2.246.562.5.2013080813081926341927";
       String HAKUKOHDE2 = "1.2.246.562.5.39836447563";
-      Response r =
-          osoitetarratSijoittelussaHyvaksytyilleResource
-              .getWebClient()
-              .query("hakuOid", HAKU2)
-              .query("hakukohdeOid", HAKUKOHDE2)
-              .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
+      Response r = osoitetarratSijoittelussaHyvaksytyilleResource.getWebClient().query("hakuOid", HAKU2)
+          .query("hakukohdeOid", HAKUKOHDE2)
+          .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
       Assert.assertEquals(200, r.getStatus());
     } finally {
       Mocks.reset();
@@ -83,45 +76,24 @@ public class OsoitetarratServiceTest {
     try {
       Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString()))
           .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
-      MockValintaperusteetAsyncResource.setValintakokeetResult(
-          Arrays.asList(
-              valintakoe()
-                  .setTunniste(VALINTAKOE1)
-                  .setSelvitettyTunniste(SELVITETTY_TUNNISTE1)
-                  .setKaikkiKutsutaan()
-                  .build()));
+      MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(valintakoe().setTunniste(VALINTAKOE1)
+          .setSelvitettyTunniste(SELVITETTY_TUNNISTE1).setKaikkiKutsutaan().build()));
       MockValintalaskentaValintakoeAsyncResource.setResult(
-          Arrays.asList(
-              osallistuminen()
-                  .setHakemusOid(HAKEMUS1)
-                  .hakutoive()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .valinnanvaihe()
-                  .valintakoe()
-                  .setOsallistuu()
-                  .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
-                  .setKutsutaankoKaikki(true)
-                  .build()
-                  .build()
-                  .build()
-                  .build()));
-      MockApplicationAsyncResource.setResult(
-          Arrays.asList(hakemus().addHakutoive(HAKUKOHDE1).setOid(HAKEMUS1).build()));
+          Arrays.asList(osallistuminen().setHakemusOid(HAKEMUS1).hakutoive().setHakukohdeOid(HAKUKOHDE1)
+              .valinnanvaihe().valintakoe().setOsallistuu().setValintakoeTunniste(SELVITETTY_TUNNISTE1)
+              .setKutsutaankoKaikki(true).build().build().build().build()));
+      MockApplicationAsyncResource
+          .setResult(Arrays.asList(hakemus().addHakutoive(HAKUKOHDE1).setOid(HAKEMUS1).build()));
       ArgumentCaptor<Osoitteet> osoitteetArgumentCaptor = ArgumentCaptor.forClass(Osoitteet.class);
       Mockito.reset(Mocks.getViestintapalveluAsyncResource());
-      Mockito.when(
-              Mocks.getViestintapalveluAsyncResource()
-                  .haeOsoitetarrat(osoitteetArgumentCaptor.capture()))
+      Mockito.when(Mocks.getViestintapalveluAsyncResource().haeOsoitetarrat(osoitteetArgumentCaptor.capture()))
           .thenReturn(byteArrayResponse);
-      Response r =
-          osoitetarratResource
-              .getWebClient()
-              .query("hakuOid", HAKU1)
-              .query("hakukohdeOid", HAKUKOHDE1)
-              .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
-              .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
+      Response r = osoitetarratResource.getWebClient().query("hakuOid", HAKU1).query("hakukohdeOid", HAKUKOHDE1)
+          .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
+          .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
       Assert.assertEquals(200, r.getStatus());
-      // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
+      // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti
+      // mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))
@@ -141,58 +113,26 @@ public class OsoitetarratServiceTest {
     try {
       Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString()))
           .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
-      MockValintaperusteetAsyncResource.setValintakokeetResult(
-          Arrays.asList(
-              valintakoe()
-                  .setTunniste(VALINTAKOE1)
-                  .setSelvitettyTunniste(SELVITETTY_TUNNISTE1)
-                  .setKaikkiKutsutaan()
-                  .build()));
+      MockValintaperusteetAsyncResource.setValintakokeetResult(Arrays.asList(valintakoe().setTunniste(VALINTAKOE1)
+          .setSelvitettyTunniste(SELVITETTY_TUNNISTE1).setKaikkiKutsutaan().build()));
       MockValintalaskentaValintakoeAsyncResource.setResult(
-          Arrays.asList(
-              osallistuminen()
-                  .setHakemusOid(ATARUHAKEMUS1)
-                  .hakutoive()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .valinnanvaihe()
-                  .valintakoe()
-                  .setOsallistuu()
-                  .setValintakoeTunniste(SELVITETTY_TUNNISTE1)
-                  .setKutsutaankoKaikki(true)
-                  .build()
-                  .build()
-                  .build()
-                  .build()));
-      MockTarjontaAsyncService.setMockHaku(
-          new Haku(
-              HAKU1,
-              new HashMap<>(),
-              new HashSet<>(),
-              "AtaruLomakeAvain",
-              null,
-              null,
-              null,
-              null,
-              null));
-      MockAtaruAsyncResource.setByHakukohdeResult(
-          Collections.singletonList(
-              MockAtaruAsyncResource.getAtaruHakemusWrapper(
-                  "1.2.246.562.11.00000000000000000063")));
+          Arrays.asList(osallistuminen().setHakemusOid(ATARUHAKEMUS1).hakutoive().setHakukohdeOid(HAKUKOHDE1)
+              .valinnanvaihe().valintakoe().setOsallistuu().setValintakoeTunniste(SELVITETTY_TUNNISTE1)
+              .setKutsutaankoKaikki(true).build().build().build().build()));
+      MockTarjontaAsyncService.setMockHaku(new Haku(HAKU1, new HashMap<>(), new HashSet<>(), "AtaruLomakeAvain",
+          null, null, null, null, null));
+      MockAtaruAsyncResource.setByHakukohdeResult(Collections.singletonList(
+          MockAtaruAsyncResource.getAtaruHakemusWrapper("1.2.246.562.11.00000000000000000063")));
       ArgumentCaptor<Osoitteet> osoitteetArgumentCaptor = ArgumentCaptor.forClass(Osoitteet.class);
       Mockito.reset(Mocks.getViestintapalveluAsyncResource());
-      Mockito.when(
-              Mocks.getViestintapalveluAsyncResource()
-                  .haeOsoitetarrat(osoitteetArgumentCaptor.capture()))
+      Mockito.when(Mocks.getViestintapalveluAsyncResource().haeOsoitetarrat(osoitteetArgumentCaptor.capture()))
           .thenReturn(byteArrayResponse);
-      Response r =
-          osoitetarratResource
-              .getWebClient()
-              .query("hakuOid", HAKU1)
-              .query("hakukohdeOid", HAKUKOHDE1)
-              .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
-              .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
+      Response r = osoitetarratResource.getWebClient().query("hakuOid", HAKU1).query("hakukohdeOid", HAKUKOHDE1)
+          .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
+          .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
       Assert.assertEquals(200, r.getStatus());
-      // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
+      // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti
+      // mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))
@@ -212,44 +152,28 @@ public class OsoitetarratServiceTest {
     try {
       Mockito.when(Mocks.getKoodistoAsyncResource().haeKoodisto(Mockito.anyString()))
           .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
-      MockValintaperusteetAsyncResource.setValintakokeetResult(
-          Arrays.asList(valintakoe().setTunniste(VALINTAKOE1).build()));
-      List<ValintakoeOsallistuminenDTO> osallistumistiedot =
-          Arrays.asList(
-              osallistuminen()
-                  .setHakemusOid(HAKEMUS1)
-                  .hakutoive()
-                  .setHakukohdeOid(HAKUKOHDE1)
-                  .valinnanvaihe()
-                  .valintakoe()
-                  .setOsallistuu()
-                  .setValintakoeTunniste(VALINTAKOE1)
-                  .setKutsutaankoKaikki(true)
-                  .build()
-                  .build()
-                  .build()
-                  .build());
+      MockValintaperusteetAsyncResource
+          .setValintakokeetResult(Arrays.asList(valintakoe().setTunniste(VALINTAKOE1).build()));
+      List<ValintakoeOsallistuminenDTO> osallistumistiedot = Arrays
+          .asList(osallistuminen().setHakemusOid(HAKEMUS1).hakutoive().setHakukohdeOid(HAKUKOHDE1)
+              .valinnanvaihe().valintakoe().setOsallistuu().setValintakoeTunniste(VALINTAKOE1)
+              .setKutsutaankoKaikki(true).build().build().build().build());
       MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
-      MockApplicationAsyncResource.setResult(
-          Arrays.asList(hakemus().addHakutoive(HAKUKOHDE1).setOid(HAKEMUS1).build()));
-      MockApplicationAsyncResource.setResultByOid(
-          Arrays.asList(hakemus().addHakutoive(HAKUKOHDE1).setOid(HAKEMUS1).build()));
+      MockApplicationAsyncResource
+          .setResult(Arrays.asList(hakemus().addHakutoive(HAKUKOHDE1).setOid(HAKEMUS1).build()));
+      MockApplicationAsyncResource
+          .setResultByOid(Arrays.asList(hakemus().addHakutoive(HAKUKOHDE1).setOid(HAKEMUS1).build()));
       ArgumentCaptor<Osoitteet> osoitteetArgumentCaptor = ArgumentCaptor.forClass(Osoitteet.class);
       Mockito.reset(Mocks.getViestintapalveluAsyncResource());
-      Mockito.when(
-              Mocks.getViestintapalveluAsyncResource()
-                  .haeOsoitetarrat(osoitteetArgumentCaptor.capture()))
+      Mockito.when(Mocks.getViestintapalveluAsyncResource().haeOsoitetarrat(osoitteetArgumentCaptor.capture()))
           .thenReturn(byteArrayResponse);
 
-      Response r =
-          osoitetarratResource
-              .getWebClient()
-              .query("hakuOid", HAKU1)
-              .query("hakukohdeOid", HAKUKOHDE1)
-              .query("valintakoeTunnisteet", VALINTAKOE1)
-              .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
+      Response r = osoitetarratResource.getWebClient().query("hakuOid", HAKU1).query("hakukohdeOid", HAKUKOHDE1)
+          .query("valintakoeTunnisteet", VALINTAKOE1)
+          .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
       Assert.assertEquals(200, r.getStatus());
-      // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
+      // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti
+      // mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))

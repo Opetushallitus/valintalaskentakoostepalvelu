@@ -30,8 +30,8 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(
-      String hakukohdeOid, boolean withHarkinnanvaraisuustieto) {
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid,
+      boolean withHarkinnanvaraisuustieto) {
     return CompletableFuture.completedFuture(byHakukohdeRes);
   }
 
@@ -41,8 +41,7 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(
-      List<String> oids) {
+  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(List<String> oids) {
     return CompletableFuture.completedFuture(byOidsResult); // todo add harkinnanvaraisuustietos
   }
 
@@ -61,18 +60,15 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
   public static List<AtaruHakemus> getAtaruHakemukset(Set<String> oids) {
     try {
-      List<AtaruHakemus> hakemukset =
-          new Gson()
-              .fromJson(
-                  IOUtils.toString(new ClassPathResource("ataruhakemukset.json").getInputStream()),
-                  new TypeToken<List<AtaruHakemus>>() {}.getType());
+      List<AtaruHakemus> hakemukset = new Gson().fromJson(
+          IOUtils.toString(new ClassPathResource("ataruhakemukset.json").getInputStream()),
+          new TypeToken<List<AtaruHakemus>>() {
+          }.getType());
 
       if (oids == null) {
         return hakemukset;
       } else {
-        return hakemukset.stream()
-            .filter(h -> oids.contains(h.getHakemusOid()))
-            .collect(Collectors.toList());
+        return hakemukset.stream().filter(h -> oids.contains(h.getHakemusOid())).collect(Collectors.toList());
       }
     } catch (Exception e) {
       throw new RuntimeException("Couldn't fetch mock ataru application", e);

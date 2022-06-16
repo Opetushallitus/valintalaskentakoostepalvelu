@@ -45,69 +45,50 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
 public class PistesyotonTuontiTestBase {
-  public static final Function<ApplicationAdditionalDataDTO, Valintapisteet>
-      APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET =
-          p ->
-              new Valintapisteet(
-                  p.getOid(),
-                  p.getPersonOid(),
-                  p.getFirstNames(),
-                  p.getLastName(),
-                  Collections.emptyList());
+  public static final Function<ApplicationAdditionalDataDTO, Valintapisteet> APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET = p -> new Valintapisteet(
+      p.getOid(), p.getPersonOid(), p.getFirstNames(), p.getLastName(), Collections.emptyList());
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   private String pistesyottoResurssi(String resurssi) throws IOException {
     InputStream i;
-    String s =
-        IOUtils.toString(
-            i = new ClassPathResource("pistesyotto/" + resurssi).getInputStream(), "UTF-8");
+    String s = IOUtils.toString(i = new ClassPathResource("pistesyotto/" + resurssi).getInputStream(), "UTF-8");
     IOUtils.closeQuietly(i);
     return s;
   }
 
   List<Hakemus> lueHakemukset(final String tiedosto) throws IOException {
-    return new Gson()
-        .fromJson(pistesyottoResurssi(tiedosto), new TypeToken<ArrayList<Hakemus>>() {}.getType());
+    return new Gson().fromJson(pistesyottoResurssi(tiedosto), new TypeToken<ArrayList<Hakemus>>() {
+    }.getType());
   }
 
   List<ApplicationAdditionalDataDTO> luePistetiedot(final String tiedosto) throws IOException {
-    return new Gson()
-        .fromJson(
-            pistesyottoResurssi(tiedosto),
-            new TypeToken<ArrayList<ApplicationAdditionalDataDTO>>() {}.getType());
+    return new Gson().fromJson(pistesyottoResurssi(tiedosto),
+        new TypeToken<ArrayList<ApplicationAdditionalDataDTO>>() {
+        }.getType());
   }
 
   List<ValintaperusteDTO> lueValintaperusteet(final String tiedosto) throws IOException {
-    return new Gson()
-        .fromJson(
-            pistesyottoResurssi(tiedosto),
-            new TypeToken<ArrayList<ValintaperusteDTO>>() {}.getType());
+    return new Gson().fromJson(pistesyottoResurssi(tiedosto), new TypeToken<ArrayList<ValintaperusteDTO>>() {
+    }.getType());
   }
 
-  List<ValintakoeOsallistuminenDTO> lueOsallistumisTiedot(final String tiedostonimi)
-      throws IOException {
+  List<ValintakoeOsallistuminenDTO> lueOsallistumisTiedot(final String tiedostonimi) throws IOException {
     List<ValintakoeOsallistuminenDTO> osallistumistiedot;
     String s = null;
     try {
       s = pistesyottoResurssi(tiedostonimi);
-      osallistumistiedot =
-          new GsonBuilder()
-              .registerTypeAdapter(
-                  Date.class,
-                  new JsonDeserializer() {
-                    @Override
-                    public Object deserialize(
-                        JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                        throws JsonParseException {
-                      try {
-                        return new Date(json.getAsJsonPrimitive().getAsLong());
-                      } catch (Exception e) {
-                        return new Gson().fromJson(json, Date.class);
-                      }
-                    }
-                  })
-              .create()
-              .fromJson(s, new TypeToken<ArrayList<ValintakoeOsallistuminenDTO>>() {}.getType());
+      osallistumistiedot = new GsonBuilder().registerTypeAdapter(Date.class, new JsonDeserializer() {
+        @Override
+        public Object deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
+          try {
+            return new Date(json.getAsJsonPrimitive().getAsLong());
+          } catch (Exception e) {
+            return new Gson().fromJson(json, Date.class);
+          }
+        }
+      }).create().fromJson(s, new TypeToken<ArrayList<ValintakoeOsallistuminenDTO>>() {
+      }.getType());
     } catch (Exception e) {
       LOG.error("\r\n{}\r\n", s);
       throw e;
@@ -116,49 +97,26 @@ public class PistesyotonTuontiTestBase {
   }
 
   Collection<String> getValintakoeTunnisteet(final List<ValintaperusteDTO> valintaperusteet) {
-    return valintaperusteet.stream()
-        .map(ValintaperusteDTO::getTunniste)
-        .collect(Collectors.toList());
+    return valintaperusteet.stream().map(ValintaperusteDTO::getTunniste).collect(Collectors.toList());
   }
 
-  void tuoExcel(
-      final List<ValintakoeOsallistuminenDTO> osallistumistiedot,
-      final List<ValintaperusteDTO> valintaperusteet,
-      final List<ApplicationAdditionalDataDTO> pistetiedot,
-      final String tiedosto,
-      final String hakuOid,
-      final String hakukohdeOid)
+  void tuoExcel(final List<ValintakoeOsallistuminenDTO> osallistumistiedot,
+      final List<ValintaperusteDTO> valintaperusteet, final List<ApplicationAdditionalDataDTO> pistetiedot,
+      final String tiedosto, final String hakuOid, final String hakukohdeOid)
       throws IOException, ExcelValidointiPoikkeus {
-    List<HakemusWrapper> hakemukset =
-        convertToHakemusSkeletons(pistetiedot).stream()
-            .map(HakuappHakemusWrapper::new)
-            .collect(Collectors.toList());
+    List<HakemusWrapper> hakemukset = convertToHakemusSkeletons(pistetiedot).stream()
+        .map(HakuappHakemusWrapper::new).collect(Collectors.toList());
     Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
     PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri = new PistesyottoDataRiviListAdapter();
-    PistesyottoExcel pistesyottoExcel =
-        new PistesyottoExcel(
-            hakuOid,
-            hakukohdeOid,
-            null,
-            "Haku",
-            "hakukohdeNimi",
-            "tarjoajaNimi",
-            Optional.empty(),
-            hakemukset,
-            Collections.emptySet(),
-            valintakoeTunnisteet,
-            osallistumistiedot,
-            valintaperusteet,
-            pistetiedot,
-            Collections.singletonList(pistesyottoTuontiAdapteri));
-    pistesyottoExcel
-        .getExcel()
-        .tuoXlsx(new ClassPathResource("pistesyotto/" + tiedosto).getInputStream());
+    PistesyottoExcel pistesyottoExcel = new PistesyottoExcel(hakuOid, hakukohdeOid, null, "Haku", "hakukohdeNimi",
+        "tarjoajaNimi", Optional.empty(), hakemukset, Collections.emptySet(), valintakoeTunnisteet,
+        osallistumistiedot, valintaperusteet, pistetiedot,
+        Collections.singletonList(pistesyottoTuontiAdapteri));
+    pistesyottoExcel.getExcel().tuoXlsx(new ClassPathResource("pistesyotto/" + tiedosto).getInputStream());
     muplaa(pistesyottoTuontiAdapteri, pistetiedot);
   }
 
-  private void muplaa(
-      final PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri,
+  private void muplaa(final PistesyottoDataRiviListAdapter pistesyottoTuontiAdapteri,
       final List<ApplicationAdditionalDataDTO> pistetiedot) {
     Map<String, ApplicationAdditionalDataDTO> pistetiedotMapping = mapByOid(pistetiedot);
     List<ApplicationAdditionalDataDTO> uudetPistetiedot = Lists.newArrayList();
@@ -177,16 +135,8 @@ public class PistesyotonTuontiTestBase {
         } else {
           for (PistesyottoArvo arvo : rivi.getArvot()) {
             if (!arvo.isValidi()) {
-              throw new RuntimeException(
-                  "Henkilöllä "
-                      + rivi.getNimi()
-                      + " ("
-                      + rivi.getOid()
-                      + ")"
-                      + " oli virheellinen arvo '"
-                      + arvo.getArvo()
-                      + "' kohdassa "
-                      + arvo.getTunniste());
+              throw new RuntimeException("Henkilöllä " + rivi.getNimi() + " (" + rivi.getOid() + ")"
+                  + " oli virheellinen arvo '" + arvo.getArvo() + "' kohdassa " + arvo.getTunniste());
             }
           }
         }
@@ -194,8 +144,7 @@ public class PistesyotonTuontiTestBase {
     }
   }
 
-  private Map<String, ApplicationAdditionalDataDTO> mapByOid(
-      Collection<ApplicationAdditionalDataDTO> datas) {
+  private Map<String, ApplicationAdditionalDataDTO> mapByOid(Collection<ApplicationAdditionalDataDTO> datas) {
     Map<String, ApplicationAdditionalDataDTO> mapping = Maps.newHashMap();
     for (ApplicationAdditionalDataDTO data : datas) {
       mapping.put(data.getOid(), data);
@@ -209,22 +158,16 @@ public class PistesyotonTuontiTestBase {
 
   protected List<Hakemus> convertToHakemusSkeletons(
       List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos) {
-    return applicationAdditionalDataDtos.stream()
-        .map(
-            applicationAdditionalDataDTO -> {
-              Hakemus h = new Hakemus();
-              h.setOid(applicationAdditionalDataDTO.getOid());
-              h.setPersonOid(applicationAdditionalDataDTO.getPersonOid());
-              h.getAnswers()
-                  .getHenkilotiedot()
-                  .put(HakuappHakemusWrapper.SUKUNIMI, applicationAdditionalDataDTO.getLastName());
-              h.getAnswers()
-                  .getHenkilotiedot()
-                  .put(
-                      HakuappHakemusWrapper.ETUNIMET, applicationAdditionalDataDTO.getFirstNames());
-              return h;
-            })
-        .collect(Collectors.toList());
+    return applicationAdditionalDataDtos.stream().map(applicationAdditionalDataDTO -> {
+      Hakemus h = new Hakemus();
+      h.setOid(applicationAdditionalDataDTO.getOid());
+      h.setPersonOid(applicationAdditionalDataDTO.getPersonOid());
+      h.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.SUKUNIMI,
+          applicationAdditionalDataDTO.getLastName());
+      h.getAnswers().getHenkilotiedot().put(HakuappHakemusWrapper.ETUNIMET,
+          applicationAdditionalDataDTO.getFirstNames());
+      return h;
+    }).collect(Collectors.toList());
   }
 
   public static class Result<T> {
@@ -239,50 +182,37 @@ public class PistesyotonTuontiTestBase {
     }
   }
 
-  public static void mockSuoritusrekisteri(
-      final Semaphore suoritusCounter, final Semaphore arvosanaCounter) {
+  public static void mockSuoritusrekisteri(final Semaphore suoritusCounter, final Semaphore arvosanaCounter) {
     MockServer fakeSure = new MockServer();
-    mockForward(
-        POST,
-        fakeSure
-            .addHandler(
-                "/suoritusrekisteri/rest/v1/suoritukset",
-                exchange -> {
-                  try {
-                    Suoritus suoritus =
-                        new Gson()
-                            .fromJson(
-                                IOUtils.toString(exchange.getRequestBody()),
-                                new TypeToken<Suoritus>() {}.getType());
-                    suoritus.setId("suoritus" + suoritus.getHenkiloOid());
-                    exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(200, 0);
-                    OutputStream responseBody = exchange.getResponseBody();
-                    IOUtils.write(new Gson().toJson(suoritus), responseBody);
-                    responseBody.close();
-                    suoritusCounter.release();
-                  } catch (Throwable t) {
-                    t.printStackTrace();
-                  }
-                })
-            .addHandler(
-                "/suoritusrekisteri/rest/v1/arvosanat",
-                exchange -> {
-                  try {
-                    Arvosana arvosana =
-                        new Gson()
-                            .fromJson(
-                                IOUtils.toString(exchange.getRequestBody()),
-                                new TypeToken<Arvosana>() {}.getType());
-                    exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(200, 0);
-                    OutputStream responseBody = exchange.getResponseBody();
-                    IOUtils.write(new Gson().toJson(arvosana), responseBody);
-                    responseBody.close();
-                    arvosanaCounter.release();
-                  } catch (Throwable t) {
-                    t.printStackTrace();
-                  }
-                }));
+    mockForward(POST, fakeSure.addHandler("/suoritusrekisteri/rest/v1/suoritukset", exchange -> {
+      try {
+        Suoritus suoritus = new Gson().fromJson(IOUtils.toString(exchange.getRequestBody()),
+            new TypeToken<Suoritus>() {
+            }.getType());
+        suoritus.setId("suoritus" + suoritus.getHenkiloOid());
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, 0);
+        OutputStream responseBody = exchange.getResponseBody();
+        IOUtils.write(new Gson().toJson(suoritus), responseBody);
+        responseBody.close();
+        suoritusCounter.release();
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
+    }).addHandler("/suoritusrekisteri/rest/v1/arvosanat", exchange -> {
+      try {
+        Arvosana arvosana = new Gson().fromJson(IOUtils.toString(exchange.getRequestBody()),
+            new TypeToken<Arvosana>() {
+            }.getType());
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, 0);
+        OutputStream responseBody = exchange.getResponseBody();
+        IOUtils.write(new Gson().toJson(arvosana), responseBody);
+        responseBody.close();
+        arvosanaCounter.release();
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
+    }));
   }
 }

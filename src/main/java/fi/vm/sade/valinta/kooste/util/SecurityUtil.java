@@ -22,8 +22,7 @@ public class SecurityUtil {
   private static final String ORGANIZATION_GROUP_OID_PREFIX = "1.2.246.562.28";
   private static final Logger LOG = LoggerFactory.getLogger(SecurityUtil.class);
 
-  public static Collection<String> getAuthoritiesFromAuthenticationStartingWith(
-      Collection<String> prefixes) {
+  public static Collection<String> getAuthoritiesFromAuthenticationStartingWith(Collection<String> prefixes) {
     return getAuthoritiesFromAuthentication().stream()
         .filter(auth -> prefixes.stream().anyMatch(prefix -> auth.startsWith(prefix)))
         .collect(Collectors.toSet());
@@ -37,8 +36,7 @@ public class SecurityUtil {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication instanceof CasAuthenticationToken) {
       CasAuthenticationToken casAuthenticationToken = (CasAuthenticationToken) authentication;
-      return casAuthenticationToken.getAuthorities().stream()
-          .map(a -> a.getAuthority())
+      return casAuthenticationToken.getAuthorities().stream().map(a -> a.getAuthority())
           .collect(Collectors.toList());
     } else {
       LOG.error(
@@ -71,21 +69,13 @@ public class SecurityUtil {
 
   public static Set<String> parseOrganizationOidsFromSecurityRoles(Collection<String> roles) {
     return roles.stream()
-        .flatMap(
-            r ->
-                parseOrganizationOidFromSecurityRole(r)
-                    .map(org -> Stream.of(org))
-                    .orElse(Stream.empty()))
+        .flatMap(r -> parseOrganizationOidFromSecurityRole(r).map(org -> Stream.of(org)).orElse(Stream.empty()))
         .collect(Collectors.toSet());
   }
 
   public static Set<String> parseOrganizationGroupOidsFromSecurityRoles(Collection<String> roles) {
-    return roles.stream()
-        .flatMap(
-            r ->
-                parseOrganizationGroupOidFromSecurityRole(r)
-                    .map(org -> Stream.of(org))
-                    .orElse(Stream.empty()))
+    return roles.stream().flatMap(
+        r -> parseOrganizationGroupOidFromSecurityRole(r).map(org -> Stream.of(org)).orElse(Stream.empty()))
         .collect(Collectors.toSet());
   }
 
@@ -108,7 +98,8 @@ public class SecurityUtil {
   public static boolean containsOphRole(Collection<? extends GrantedAuthority> userRoles) {
     for (GrantedAuthority auth : userRoles) {
       Optional<String> optionalOID = parseOrganizationOidFromSecurityRole(auth.getAuthority());
-      if (optionalOID.isPresent() && isRootOrganizationOID(optionalOID.get())) return true;
+      if (optionalOID.isPresent() && isRootOrganizationOID(optionalOID.get()))
+        return true;
     }
 
     return false;

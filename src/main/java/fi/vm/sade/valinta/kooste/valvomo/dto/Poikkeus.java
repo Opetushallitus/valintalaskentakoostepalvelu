@@ -38,14 +38,10 @@ public class Poikkeus {
   public boolean equals(Object obj) {
     if (obj instanceof Poikkeus) {
       Poikkeus p = (Poikkeus) obj;
-      return Optional.ofNullable(this.palvelukutsu)
-              .orElse(StringUtils.EMPTY)
-              .equals(p.getPalvelukutsu())
+      return Optional.ofNullable(this.palvelukutsu).orElse(StringUtils.EMPTY).equals(p.getPalvelukutsu())
           && Optional.ofNullable(this.viesti).orElse(StringUtils.EMPTY).equals(p.getViesti())
           && Optional.ofNullable(this.palvelu).orElse(StringUtils.EMPTY).equals(p.getPalvelu())
-          && Optional.ofNullable(this.tunnisteet)
-              .orElse(Collections.emptyList())
-              .equals(p.getTunnisteet());
+          && Optional.ofNullable(this.tunnisteet).orElse(Collections.emptyList()).equals(p.getTunnisteet());
     } else {
       return false;
     }
@@ -72,8 +68,7 @@ public class Poikkeus {
     this.palvelukutsu = palvelukutsu;
   }
 
-  public Poikkeus(
-      String palvelu, String palvelukutsu, String viesti, Collection<Tunniste> tunnisteet) {
+  public Poikkeus(String palvelu, String palvelukutsu, String viesti, Collection<Tunniste> tunnisteet) {
     this.tunnisteet = new CopyOnWriteArrayList<>(tunnisteet);
     this.palvelu = palvelu;
     this.viesti = viesti;
@@ -146,8 +141,7 @@ public class Poikkeus {
 
   @Override
   public String toString() {
-    StringBuilder sb =
-        new StringBuilder().append("[Palvelu:").append(palvelu).append(",viesti:").append(viesti);
+    StringBuilder sb = new StringBuilder().append("[Palvelu:").append(palvelu).append(",viesti:").append(viesti);
     for (Tunniste tunniste : tunnisteet) {
       sb.append("\r\n\t").append(tunniste);
     }

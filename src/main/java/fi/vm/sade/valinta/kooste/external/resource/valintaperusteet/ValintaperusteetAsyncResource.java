@@ -28,10 +28,11 @@ public interface ValintaperusteetAsyncResource {
   // @GET /valintaperusteet-service/resources/hakukohde/haku/{}
   Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid);
 
-  CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
-      String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
+  CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid,
+      Integer valinnanVaiheJarjestysluku);
 
-  // @GET /valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
+  // @GET
+  // /valintaperusteet-service/resources/hakukohde/{hakukohdeOid}/ilmanlaskentaa/
   Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid);
 
   // @POST /valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
@@ -46,11 +47,9 @@ public interface ValintaperusteetAsyncResource {
   Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
 
   // @POST /valintaperusteet-service/resources/hakukohde/valintakoe
-  Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
-      Collection<String> hakukohdeOids);
+  Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids);
 
-  Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
-      Collection<String> hakukohdeOids);
+  Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids);
 
   // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
   Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);

@@ -24,37 +24,19 @@ public class ErillishakuExcel {
   public static final String HEADER_HYVAKSYMISKIRJE_LAHETETTY = "Hyväksymiskirje lähetetty";
   private final Excel excel;
 
-  public ErillishakuExcel(
-      Hakutyyppi tyyppi,
-      ErillishakuRiviKuuntelija kuuntelija,
+  public ErillishakuExcel(Hakutyyppi tyyppi, ErillishakuRiviKuuntelija kuuntelija,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
     this(tyyppi, "", "", "", Collections.emptyList(), kuuntelija, koodistoCachedAsyncResource);
   }
 
-  public ErillishakuExcel(
-      Hakutyyppi tyyppi,
-      String hakuNimi,
-      String hakukohdeNimi,
-      String tarjoajaNimi,
-      List<ErillishakuRivi> erillishakurivit,
-      KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
-    this(
-        tyyppi,
-        hakuNimi,
-        hakukohdeNimi,
-        tarjoajaNimi,
-        erillishakurivit,
-        rivi -> {},
-        koodistoCachedAsyncResource);
+  public ErillishakuExcel(Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi, String tarjoajaNimi,
+      List<ErillishakuRivi> erillishakurivit, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+    this(tyyppi, hakuNimi, hakukohdeNimi, tarjoajaNimi, erillishakurivit, rivi -> {
+    }, koodistoCachedAsyncResource);
   }
 
-  ErillishakuExcel(
-      final Hakutyyppi tyyppi,
-      String hakuNimi,
-      String hakukohdeNimi,
-      String tarjoajaNimi,
-      List<ErillishakuRivi> erillishakurivit,
-      ErillishakuRiviKuuntelija kuuntelija,
+  ErillishakuExcel(final Hakutyyppi tyyppi, String hakuNimi, String hakukohdeNimi, String tarjoajaNimi,
+      List<ErillishakuRivi> erillishakurivit, ErillishakuRiviKuuntelija kuuntelija,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
     erillishakurivit = Lists.newArrayList(erillishakurivit);
     List<Rivi> rivit = Lists.newArrayList();
@@ -103,32 +85,24 @@ public class ErillishakuExcel {
     }
     esittelyt.add(builder.build());
 
-    Collections.sort(
-        erillishakurivit,
-        (h1, h2) -> {
-          ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(new ErillishakuRiviBuilder().build());
-          ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(new ErillishakuRiviBuilder().build());
-          String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
-          String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
-          int i = s1.compareTo(s2);
-          if (i != 0) {
-            return i;
-          } else {
-            String ee1 =
-                Optional.ofNullable(e1.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
-            String ee2 =
-                Optional.ofNullable(e2.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
-            return ee1.compareTo(ee2);
-          }
-        });
-    ErillishakuDataRivi dataRivit =
-        new ErillishakuDataRivi(
-            tyyppi,
-            kuuntelija,
-            Stream.concat(
-                    esittelyt.stream(),
-                    arvoRivit(erillishakurivit).map(luoArvot(tyyppi, koodistoCachedAsyncResource)))
-                .collect(Collectors.toList()));
+    Collections.sort(erillishakurivit, (h1, h2) -> {
+      ErillishakuRivi e1 = Optional.ofNullable(h1).orElse(new ErillishakuRiviBuilder().build());
+      ErillishakuRivi e2 = Optional.ofNullable(h2).orElse(new ErillishakuRiviBuilder().build());
+      String s1 = Optional.ofNullable(e1.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+      String s2 = Optional.ofNullable(e2.getSukunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+      int i = s1.compareTo(s2);
+      if (i != 0) {
+        return i;
+      } else {
+        String ee1 = Optional.ofNullable(e1.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+        String ee2 = Optional.ofNullable(e2.getEtunimi()).orElse(StringUtils.EMPTY).toUpperCase();
+        return ee1.compareTo(ee2);
+      }
+    });
+    ErillishakuDataRivi dataRivit = new ErillishakuDataRivi(tyyppi, kuuntelija,
+        Stream.concat(esittelyt.stream(),
+            arvoRivit(erillishakurivit).map(luoArvot(tyyppi, koodistoCachedAsyncResource)))
+            .collect(Collectors.toList()));
 
     rivit.add(dataRivit);
     this.excel = new Excel("Erillishaku", rivit);
@@ -136,43 +110,23 @@ public class ErillishakuExcel {
 
   private Stream<ErillishakuRivi> arvoRivit(List<ErillishakuRivi> erillishakurivit) {
     if (erillishakurivit.isEmpty()) {
-      return ImmutableList.of(
-          new ErillishakuRiviBuilder()
-              .sukunimi("Esimerkki")
-              .etunimi("Rivi")
-              .henkilotunnus("123456-7890")
-              .sahkoposti("esimerkki.rivi@example.com")
-              .syntymaAika("01.01.1901")
-              .sukupuoli(Sukupuoli.NAINEN)
-              .personOid("")
-              .aidinkieli("FI")
-              .hakemuksenTila(HakemuksenTila.HYVAKSYTTY.toString())
-              .ehdollisestiHyvaksyttavissa(false)
-              .hyvaksymiskirjeLahetetty(new Date())
-              .vastaanottoTila("KESKEN")
-              .ilmoittautumisTila("EI_TEHTY")
-              .julkaistaankoTiedot(false)
-              .poistetaankoRivi(false)
-              .asiointikieli("FI")
-              .puhelinnumero("040123456789")
-              .osoite("Esimerkkitie 2")
-              .postinumero("00100")
-              .postitoimipaikka("HELSINKI")
-              .asuinmaa("FIN")
-              .kansalaisuus("FIN")
-              .kotikunta("HELSINKI")
-              .toisenAsteenSuoritus(true)
-              .toisenAsteenSuoritusmaa("FIN")
-              .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
-              .build())
-          .stream();
+      return ImmutableList.of(new ErillishakuRiviBuilder().sukunimi("Esimerkki").etunimi("Rivi")
+          .henkilotunnus("123456-7890").sahkoposti("esimerkki.rivi@example.com").syntymaAika("01.01.1901")
+          .sukupuoli(Sukupuoli.NAINEN).personOid("").aidinkieli("FI")
+          .hakemuksenTila(HakemuksenTila.HYVAKSYTTY.toString()).ehdollisestiHyvaksyttavissa(false)
+          .hyvaksymiskirjeLahetetty(new Date()).vastaanottoTila("KESKEN").ilmoittautumisTila("EI_TEHTY")
+          .julkaistaankoTiedot(false).poistetaankoRivi(false).asiointikieli("FI")
+          .puhelinnumero("040123456789").osoite("Esimerkkitie 2").postinumero("00100")
+          .postitoimipaikka("HELSINKI").asuinmaa("FIN").kansalaisuus("FIN").kotikunta("HELSINKI")
+          .toisenAsteenSuoritus(true).toisenAsteenSuoritusmaa("FIN")
+          .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED).build()).stream();
     } else {
       return erillishakurivit.stream();
     }
   }
 
-  private Function<ErillishakuRivi, Collection<Arvo>> luoArvot(
-      Hakutyyppi tyyppi, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+  private Function<ErillishakuRivi, Collection<Arvo>> luoArvot(Hakutyyppi tyyppi,
+      KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
     return rivi -> {
       Collection<Arvo> a = Lists.newArrayList();
       a.add(new TekstiArvo(rivi.getSukunimi(), true, true));
@@ -180,25 +134,17 @@ public class ErillishakuExcel {
       a.add(new TekstiArvo(rivi.getHenkilotunnus(), true, true));
       a.add(new TekstiArvo(rivi.getSahkoposti(), true, true));
       a.add(new TekstiArvo(rivi.getSyntymaAika(), true, true));
-      a.add(
-          new MonivalintaArvo(
-              rivi.getSukupuoli().toString(), ErillishakuDataRivi.SUKUPUOLEN_ARVOT));
+      a.add(new MonivalintaArvo(rivi.getSukupuoli().toString(), ErillishakuDataRivi.SUKUPUOLEN_ARVOT));
       a.add(new TekstiArvo(rivi.getPersonOid(), true, true));
       a.add(ErillishakuDataRivi.aidinkieli(rivi.getAidinkieli(), koodistoCachedAsyncResource));
       a.add(ErillishakuDataRivi.hakemuksenTila(tyyppi, rivi.getHakemuksenTila()));
       if (tyyppi == Hakutyyppi.KORKEAKOULU) {
-        a.add(
-            new BooleanArvo(
-                rivi.getEhdollisestiHyvaksyttavissa(),
-                ErillishakuDataRivi.TOTUUSARVO,
-                ErillishakuDataRivi.TOSI,
-                ErillishakuDataRivi.EPATOSI,
-                ErillishakuDataRivi.EPATOSI));
+        a.add(new BooleanArvo(rivi.getEhdollisestiHyvaksyttavissa(), ErillishakuDataRivi.TOTUUSARVO,
+            ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ErillishakuDataRivi.EPATOSI));
 
         if (rivi.getEhdollisestiHyvaksyttavissa() == true) {
-          a.add(
-              ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(
-                  rivi.getEhdollisenHyvaksymisenEhtoKoodi(), koodistoCachedAsyncResource));
+          a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi(rivi.getEhdollisenHyvaksymisenEhtoKoodi(),
+              koodistoCachedAsyncResource));
           if (StringUtils.equals(rivi.getEhdollisenHyvaksymisenEhtoKoodi(), "muu")) {
             a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoFI(), true, true));
             a.add(new TekstiArvo(rivi.getEhdollisenHyvaksymisenEhtoSV(), true, true));
@@ -209,26 +155,21 @@ public class ErillishakuExcel {
             a.add(new TekstiArvo("", true, true));
           }
         } else {
-          a.add(
-              ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi("", koodistoCachedAsyncResource));
+          a.add(ErillishakuDataRivi.ehdollisenHyvaksymisenEhtoKoodi("", koodistoCachedAsyncResource));
           a.add(new TekstiArvo("", true, true));
           a.add(new TekstiArvo("", true, true));
           a.add(new TekstiArvo("", true, true));
         }
       }
-      a.add(
-          new TekstiArvo(
-              rivi.getHyvaksymiskirjeLahetetty() == null
-                  ? ""
-                  : ErillishakuDataRivi.LAHETETTYFORMAT.print(
-                      rivi.getHyvaksymiskirjeLahetetty().getTime())));
+      a.add(new TekstiArvo(rivi.getHyvaksymiskirjeLahetetty() == null
+          ? ""
+          : ErillishakuDataRivi.LAHETETTYFORMAT.print(rivi.getHyvaksymiskirjeLahetetty().getTime())));
       a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
       a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
       if (tyyppi == Hakutyyppi.KORKEAKOULU) {
         a.add(ErillishakuDataRivi.maksuvelvollisuus(rivi.getMaksuvelvollisuus()));
-        a.add(
-            ErillishakuDataRivi.maksuntila(
-                rivi.getMaksuntila() != null ? rivi.getMaksuntila().toString() : ""));
+        a.add(ErillishakuDataRivi
+            .maksuntila(rivi.getMaksuntila() != null ? rivi.getMaksuntila().toString() : ""));
       }
       a.add(ErillishakuDataRivi.julkaisuLupa(rivi.isJulkaistaankoTiedot()));
       a.add(ErillishakuDataRivi.asiointiKieli(rivi.getAsiointikieli()));
@@ -240,13 +181,8 @@ public class ErillishakuExcel {
       a.add(new TekstiArvo(rivi.getKansalaisuus(), true, true));
       a.add(new TekstiArvo(rivi.getKotikunta(), true, true));
       if (tyyppi == Hakutyyppi.KORKEAKOULU) {
-        a.add(
-            new BooleanArvo(
-                rivi.getToisenAsteenSuoritus(),
-                ErillishakuDataRivi.TOTUUSARVO,
-                ErillishakuDataRivi.TOSI,
-                ErillishakuDataRivi.EPATOSI,
-                ""));
+        a.add(new BooleanArvo(rivi.getToisenAsteenSuoritus(), ErillishakuDataRivi.TOTUUSARVO,
+            ErillishakuDataRivi.TOSI, ErillishakuDataRivi.EPATOSI, ""));
         a.add(new TekstiArvo(rivi.getToisenAsteenSuoritusmaa(), true, true));
       }
       return a;

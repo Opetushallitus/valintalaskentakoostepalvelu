@@ -3,13 +3,12 @@ package fi.vm.sade.valinta.kooste.util;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import java.util.Comparator;
 
-public class ApplicationAdditionalDataComparator
-    implements Comparator<ApplicationAdditionalDataDTO> {
+public class ApplicationAdditionalDataComparator implements Comparator<ApplicationAdditionalDataDTO> {
 
-  public static final ApplicationAdditionalDataComparator ASCENDING =
-      new ApplicationAdditionalDataComparator();
+  public static final ApplicationAdditionalDataComparator ASCENDING = new ApplicationAdditionalDataComparator();
 
-  private ApplicationAdditionalDataComparator() {}
+  private ApplicationAdditionalDataComparator() {
+  }
 
   @Override
   public int compare(ApplicationAdditionalDataDTO o1, ApplicationAdditionalDataDTO o2) {

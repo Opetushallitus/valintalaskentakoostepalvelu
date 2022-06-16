@@ -19,9 +19,7 @@ public class KoostepalveluFunktio<IN, OUT> implements Processor {
     this.oletusluoja = null;
   }
 
-  public KoostepalveluFunktio(
-      Function<IN, OUT> tyo,
-      BiPredicate<IN, Exception> virhekasittelija,
+  public KoostepalveluFunktio(Function<IN, OUT> tyo, BiPredicate<IN, Exception> virhekasittelija,
       Function<IN, OUT> oletusluoja) {
     this.tyo = tyo;
     this.virhekasittelija = virhekasittelija;

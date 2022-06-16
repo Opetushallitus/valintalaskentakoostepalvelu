@@ -42,8 +42,8 @@ public class OsaTyo extends Tyo {
   }
 
   /**
-   * Inkrementoi -1:stä suoraan 1:een. Olettaen että -1 tarkoittaa ettei työmääräarviota ollut vielä
-   * tehty
+   * Inkrementoi -1:stä suoraan 1:een. Olettaen että -1 tarkoittaa ettei
+   * työmääräarviota ollut vielä tehty
    */
   public void inkrementoiKokonaismaaraa() {
     if (!this.kokonaismaara.compareAndSet(-1, 1)) {

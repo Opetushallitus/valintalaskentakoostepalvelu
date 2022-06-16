@@ -13,13 +13,9 @@ public class PseudoSatunnainenOID {
   }
 
   public static String oidHaustaJaHakukohteesta(String hakuOID, String hakukohdeOID) {
-    String hakukohdeOIDIlmanPisteita =
-        Optional.ofNullable(hakukohdeOID).orElse("").replace(".", "");
-    String hakuOIDReversedIlmanPisteita =
-        new StringBuilder(Optional.ofNullable(hakuOID).orElse(""))
-            .reverse()
-            .toString()
-            .replace(".", "");
+    String hakukohdeOIDIlmanPisteita = Optional.ofNullable(hakukohdeOID).orElse("").replace(".", "");
+    String hakuOIDReversedIlmanPisteita = new StringBuilder(Optional.ofNullable(hakuOID).orElse("")).reverse()
+        .toString().replace(".", "");
     return StringUtils.substring(hakukohdeOIDIlmanPisteita + hakuOIDReversedIlmanPisteita, 0, 32);
   }
 }

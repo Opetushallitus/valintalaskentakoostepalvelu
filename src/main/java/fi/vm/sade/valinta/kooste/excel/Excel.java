@@ -55,10 +55,8 @@ public class Excel {
     try {
       workbook = new XSSFWorkbook(input);
     } catch (POIXMLException e) {
-      throw new RuntimeException(
-          "Excelin lukemisessa tapahtui poikkeus ("
-              + e.getMessage()
-              + "). Onhan Excel Workbook -muodossa (.xlsx)?");
+      throw new RuntimeException("Excelin lukemisessa tapahtui poikkeus (" + e.getMessage()
+          + "). Onhan Excel Workbook -muodossa (.xlsx)?");
     }
     XSSFSheet sheet = workbook.getSheetAt(workbook.getActiveSheetIndex());
     int lastRowIndex = sheet.getLastRowNum();
@@ -97,11 +95,10 @@ public class Excel {
     int hiddenSheetCount = 0;
     XSSFDataFormat fmt = workbook.createDataFormat();
     OphXssfCellStyles defaultStyles = new OphXssfCellStyles(workbook);
-    defaultStyles.visit(
-        s -> {
-          s.setDataFormat(fmt.getFormat("@"));
-          s.setAlignment(LEFT);
-        });
+    defaultStyles.visit(s -> {
+      s.setDataFormat(fmt.getFormat("@"));
+      s.setAlignment(LEFT);
+    });
     for (int i = 0; i < 22; ++i) {
       sheet.setDefaultColumnStyle(i, defaultStyles.getUnsafeStyle());
     }
@@ -111,27 +108,24 @@ public class Excel {
     OphXssfCellStyles alignRightStyles = new OphXssfCellStyles(workbook);
     alignRightStyles.visit(alignRightStyle -> alignRightStyle.setDataFormat(fmt.getFormat("@")));
     OphXssfCellStyles alignCenterStyles = new OphXssfCellStyles(workbook);
-    alignCenterStyles.visit(
-        alignCenterStyle -> {
-          alignCenterStyle.setDataFormat(fmt.getFormat("@"));
-          alignCenterStyle.setAlignment(CENTER);
-        });
+    alignCenterStyles.visit(alignCenterStyle -> {
+      alignCenterStyle.setDataFormat(fmt.getFormat("@"));
+      alignCenterStyle.setAlignment(CENTER);
+    });
     OphXssfCellStyles lockedStyles = new OphXssfCellStyles(workbook);
-    lockedStyles.visit(
-        lockedStyle -> {
-          lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
-          lockedStyle.setFillPattern(SOLID_FOREGROUND);
-          lockedStyle.setDataFormat(fmt.getFormat("@"));
-        });
+    lockedStyles.visit(lockedStyle -> {
+      lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
+      lockedStyle.setFillPattern(SOLID_FOREGROUND);
+      lockedStyle.setDataFormat(fmt.getFormat("@"));
+    });
     OphXssfCellStyles editableStyles = new OphXssfCellStyles(workbook);
-    editableStyles.visit(
-        editableStyle -> {
-          editableStyle.setDataFormat(fmt.getFormat("@"));
-          editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)));
-          editableStyle.setFillPattern(SOLID_FOREGROUND);
-          editableStyle.setAlignment(LEFT);
-          editableStyle.setLocked(false);
-        });
+    editableStyles.visit(editableStyle -> {
+      editableStyle.setDataFormat(fmt.getFormat("@"));
+      editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)));
+      editableStyle.setFillPattern(SOLID_FOREGROUND);
+      editableStyle.setAlignment(LEFT);
+      editableStyle.setLocked(false);
+    });
     List<Integer> leveysPreferenssit = Lists.newArrayList();
     int rowIndex = 0;
     int maxCellNum = 0;
@@ -155,8 +149,7 @@ public class Excel {
               ArvovaliJoukko joukko;
               Collection<Number> numberSet = numero.asArvovali();
               if (!numberConstraintSets.containsKey(numberSet)) {
-                numberConstraintSets.put(
-                    numberSet,
+                numberConstraintSets.put(numberSet,
                     joukko = new ArvovaliJoukko(numero.getMin(), numero.getMax(), sheet, dvHelper));
               } else {
                 joukko = numberConstraintSets.get(numberSet);
@@ -197,17 +190,11 @@ public class Excel {
                 // column.
               }
               workbook.setSheetHidden(hiddenSheetCount, true);
-              constraintSets.put(
-                  monivalinta.getVaihtoehdot(),
-                  joukko =
-                      new MonivalintaJoukko(
-                          monivalinta.getVaihtoehdot(),
-                          sheet,
-                          dvHelper,
-                          sheetName + "!$A$1:$A$" + monivalinta.getVaihtoehdot().size()));
+              constraintSets.put(monivalinta.getVaihtoehdot(),
+                  joukko = new MonivalintaJoukko(monivalinta.getVaihtoehdot(), sheet, dvHelper,
+                      sheetName + "!$A$1:$A$" + monivalinta.getVaihtoehdot().size()));
             } else if (!constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
-              constraintSets.put(
-                  monivalinta.getVaihtoehdot(),
+              constraintSets.put(monivalinta.getVaihtoehdot(),
                   joukko = new MonivalintaJoukko(monivalinta.getVaihtoehdot(), sheet, dvHelper));
             } else {
               joukko = constraintSets.get(monivalinta.getVaihtoehdot());
@@ -228,16 +215,14 @@ public class Excel {
           }
           asetaPreferenssi(cellNum, solu.preferoituLeveys(), leveysPreferenssit);
           if (solu.ulottuvuus() != 1) {
-            sheet.addMergedRegion(
-                new CellRangeAddress(
-                    rowIndex, // first
-                    // row
-                    // (0-based)
-                    rowIndex, // last row (0-based)
-                    cellNum, // first column (0-based)
-                    cellNum + solu.ulottuvuus() - 1 // last column
-                    // (0-based)
-                    ));
+            sheet.addMergedRegion(new CellRangeAddress(rowIndex, // first
+                // row
+                // (0-based)
+                rowIndex, // last row (0-based)
+                cellNum, // first column (0-based)
+                cellNum + solu.ulottuvuus() - 1 // last column
+            // (0-based)
+            ));
             cellNum += solu.ulottuvuus();
           } else {
             ++cellNum;

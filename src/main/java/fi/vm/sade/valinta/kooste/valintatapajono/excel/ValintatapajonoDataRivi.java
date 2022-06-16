@@ -8,8 +8,7 @@ import java.util.Collection;
 public class ValintatapajonoDataRivi extends DataRivi {
   final Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat;
 
-  public ValintatapajonoDataRivi(
-      Collection<Collection<Arvo>> arvot,
+  public ValintatapajonoDataRivi(Collection<Collection<Arvo>> arvot,
       Collection<? extends ValintatapajonoDataRiviKuuntelija> kuuntelijat) {
     super(arvot);
     this.kuuntelijat = kuuntelijat;
@@ -24,8 +23,8 @@ public class ValintatapajonoDataRivi extends DataRivi {
     String fi = rivi.getArvoAt(5);
     String sv = rivi.getArvoAt(6);
     String en = rivi.getArvoAt(7);
-    ValintatapajonoRivi valintatapajonoRivi =
-        new ValintatapajonoRivi(oid, jonosija, nimi, tila, pisteet, fi, sv, en);
+    ValintatapajonoRivi valintatapajonoRivi = new ValintatapajonoRivi(oid, jonosija, nimi, tila, pisteet, fi, sv,
+        en);
     for (ValintatapajonoDataRiviKuuntelija kuuntelija : kuuntelijat) {
       kuuntelija.valintatapajonoDataRiviTapahtuma(valintatapajonoRivi);
     }

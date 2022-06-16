@@ -32,21 +32,16 @@ public class KoosteTestProfileConfiguration {
   public static AtomicReference<String> PROXY_SERVER = new AtomicReference<>();
 
   @Bean(name = "testProps")
-  public static org.springframework.context.support.PropertySourcesPlaceholderConfigurer
-      getPropertyPlaceholderConfigurer() {
+  public static org.springframework.context.support.PropertySourcesPlaceholderConfigurer getPropertyPlaceholderConfigurer() {
     final String proxyServer = PROXY_SERVER.get();
     Properties p0 = new Properties();
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.jatkuvasijoittelu.timer",
+    p0.setProperty("valintalaskentakoostepalvelu.jatkuvasijoittelu.timer",
         "time=2018-12-12 10:12:12&delay=10000000");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.valintalaskenta.rest.url",
+    p0.setProperty("valintalaskentakoostepalvelu.valintalaskenta.rest.url",
         "http://" + proxyServer + "/valintalaskenta-laskenta-service/resources");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.viestintapalvelu.url",
+    p0.setProperty("valintalaskentakoostepalvelu.viestintapalvelu.url",
         "http://" + proxyServer + "/viestintapalvelu");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.hakemus.rest.url", "http://" + proxyServer + "/haku-app");
+    p0.setProperty("valintalaskentakoostepalvelu.hakemus.rest.url", "http://" + proxyServer + "/haku-app");
     p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
     p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
     p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
@@ -54,27 +49,20 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("valintalaskentakoostepalvelu.koski.username", "koostepalvelu2koski");
     p0.setProperty("valintalaskentakoostepalvelu.koski.password", "secret");
     p0.setProperty("valintalaskentakoostepalvelu.koski.max.oppijat.post.size", "1000");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta",
+    p0.setProperty("valintalaskentakoostepalvelu.laskenta.funktionimet.joille.haetaan.tiedot.koskesta",
         "HAEAMMATILLINENYTOARVOSANA,HAEAMMATILLINENYTOARVIOINTIASTEIKKO,ITEROIAMMATILLISETTUTKINNOT,ITEROIAMMATILLISETOSAT,ITEROIAMMATILLISETYTOOSAALUEET,HAEAMMATILLISENOSANLAAJUUS,HAEAMMATILLISENOSANARVOSANA,HAEAMMATILLISENYTOOSAALUEENLAAJUUS,HAEAMMATILLISENYTOOSAALUEENARVOSANA,HAEAMMATILLISENTUTKINNONKESKIARVO,HAEAMMATILLISENTUTKINNONSUORITUSTAPA");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot.koskesta",
+    p0.setProperty("valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot.koskesta",
         "ammatillinenkoulutus");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.laskenta.kosken.historiapyyntojen.rinnakkaisuus", "9");
+    p0.setProperty("valintalaskentakoostepalvelu.laskenta.kosken.historiapyyntojen.rinnakkaisuus", "9");
 
     p0.setProperty("valintalaskentakoostepalvelu.seuranta.rest.url", "http://localhost");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.organisaatioService.rest.url",
+    p0.setProperty("valintalaskentakoostepalvelu.organisaatioService.rest.url",
         "http://" + proxyServer + "/organisaatio-service/rest");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.organisaatio-service-url",
+    p0.setProperty("valintalaskentakoostepalvelu.organisaatio-service-url",
         "http://" + proxyServer + "/organisaatio-service");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.tarjonta.rest.url",
+    p0.setProperty("valintalaskentakoostepalvelu.tarjonta.rest.url",
         "http://" + proxyServer + "/tarjonta-service/rest");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.koodisto.url", "https://itest-virkailija.oph.ware.fi/");
+    p0.setProperty("valintalaskentakoostepalvelu.koodisto.url", "https://itest-virkailija.oph.ware.fi/");
     p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
     p0.setProperty("valintalaskentakoostepalvelu.kirjeet.polling.interval.millis", "50");
     p0.setProperty("root.organisaatio.oid", "");
@@ -96,8 +84,7 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("cas.service.valintaperusteet-service", "");
     p0.setProperty("cas.service.valintapiste-service", "");
     p0.setProperty("cas.service.dokumenttipalvelu", "");
-    p0.setProperty(
-        "valintalaskentakoostepalvelu.swagger.basepath", "/valintalaskentakoostepalvelu/resources");
+    p0.setProperty("valintalaskentakoostepalvelu.swagger.basepath", "/valintalaskentakoostepalvelu/resources");
     p0.setProperty("host.scheme", "http");
     p0.setProperty("host.virkailija", "" + proxyServer);
     p0.setProperty("cas.service.valintalaskentakoostepalvelu", "");
@@ -122,33 +109,33 @@ public class KoosteTestProfileConfiguration {
 
     LOG.info(String.format("Lisätään testiajoa varten propertyjä: %s", p0));
 
-    org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps =
-        new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
+    org.springframework.context.support.PropertySourcesPlaceholderConfigurer defaultProps = new org.springframework.context.support.PropertySourcesPlaceholderConfigurer();
     defaultProps.setProperties(p0);
     defaultProps.setOrder(0);
     defaultProps.setLocalOverride(true);
     return defaultProps;
   }
 
-  private static final AbstractPhaseInterceptor<Message> INTERCEPTOR =
-      new AbstractPhaseInterceptor<Message>(Phase.PRE_PROTOCOL) {
-        @Override
-        public void handleMessage(Message message) throws Fault {}
-      };
+  private static final AbstractPhaseInterceptor<Message> INTERCEPTOR = new AbstractPhaseInterceptor<Message>(
+      Phase.PRE_PROTOCOL) {
+    @Override
+    public void handleMessage(Message message) throws Fault {
+    }
+  };
 
-  private static ApplicationSession APPLICATION_SESSION =
-      new ApplicationSession(null, null, null, null, null, null, null) {
-        @Override
-        public CompletableFuture<SessionToken> getSessionToken() {
-          return CompletableFuture.completedFuture(
-              new SessionToken(
-                  new ServiceTicket("http://localhost/service", "service-ticket"),
-                  new HttpCookie("session", "session-uuid")));
-        }
+  private static ApplicationSession APPLICATION_SESSION = new ApplicationSession(null, null, null, null, null, null,
+      null) {
+    @Override
+    public CompletableFuture<SessionToken> getSessionToken() {
+      return CompletableFuture
+          .completedFuture(new SessionToken(new ServiceTicket("http://localhost/service", "service-ticket"),
+              new HttpCookie("session", "session-uuid")));
+    }
 
-        @Override
-        public void invalidateSession(SessionToken session) {}
-      };
+    @Override
+    public void invalidateSession(SessionToken session) {
+    }
+  };
 
   @Bean(name = "AtaruApplicationSession")
   public ApplicationSession getAtaruApplicationSession() {
@@ -204,17 +191,18 @@ public class KoosteTestProfileConfiguration {
   public static Filter getFilter() {
     return new Filter() {
       @Override
-      public void init(FilterConfig filterConfig) {}
+      public void init(FilterConfig filterConfig) {
+      }
 
       @Override
-      public void doFilter(
-          ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-          throws IOException, ServletException {
+      public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
+          FilterChain filterChain) throws IOException, ServletException {
         filterChain.doFilter(servletRequest, servletResponse);
       }
 
       @Override
-      public void destroy() {}
+      public void destroy() {
+      }
     };
   }
 
@@ -234,8 +222,7 @@ public class KoosteTestProfileConfiguration {
   }
 
   @Bean(name = "OppijanumerorekisteriServiceRestClientCasInterceptor")
-  public AbstractPhaseInterceptor<Message>
-      getOppijanumerorekisteriServiceRestClientCasInterceptor() {
+  public AbstractPhaseInterceptor<Message> getOppijanumerorekisteriServiceRestClientCasInterceptor() {
     return INTERCEPTOR;
   }
 

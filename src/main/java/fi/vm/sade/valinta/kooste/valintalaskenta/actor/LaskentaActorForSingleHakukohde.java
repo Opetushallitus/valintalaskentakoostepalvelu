@@ -33,22 +33,18 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
   private final AtomicInteger retryTotal = new AtomicInteger(0);
   private final AtomicInteger failedTotal = new AtomicInteger(0);
   private final LaskentaActorParams actorParams;
-  private final Function<? super HakukohdeJaOrganisaatio, ? extends Observable<?>>
-      hakukohteenLaskenta;
+  private final Function<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta;
   private final LaskentaSupervisor laskentaSupervisor;
   private final LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource;
   private final int splittaus;
   private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> hakukohdeQueue;
-  private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue =
-      new ConcurrentLinkedQueue<>();
+  private final ConcurrentLinkedQueue<HakukohdeJaOrganisaatio> retryQueue = new ConcurrentLinkedQueue<>();
   private final boolean isValintaryhmalaskenta;
   private Optional<IlmoitusDto> valintaryhmalaskennanTulos;
 
-  public LaskentaActorForSingleHakukohde(
-      LaskentaActorParams actorParams,
+  public LaskentaActorForSingleHakukohde(LaskentaActorParams actorParams,
       Function<? super HakukohdeJaOrganisaatio, ? extends Observable<?>> hakukohteenLaskenta,
-      LaskentaSupervisor laskentaSupervisor,
-      LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
+      LaskentaSupervisor laskentaSupervisor, LaskentaSeurantaAsyncResource laskentaSeurantaAsyncResource,
       int splittaus) {
     this.actorParams = actorParams;
     this.hakukohteenLaskenta = hakukohteenLaskenta;
@@ -61,10 +57,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
   }
 
   public void start() {
-    LOG.info(
-        "(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {} ",
-        uuid(),
-        getHakuOid(),
+    LOG.info("(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {} ", uuid(), getHakuOid(),
         totalKohteet());
     final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
     IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> laskeSeuraavaHakukohde());
@@ -88,17 +81,10 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
       try {
         HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio = hkJaOrg.get();
         String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
-        Observable<Object> laskentaTimer =
-            Observable.timer(3L, TimeUnit.HOURS)
-                .switchMap(
-                    t ->
-                        Observable.error(
-                            new TimeoutException(
-                                "Laskentaa odotettiin 90 minuuttia ja ohitettiin")));
-        Observable.amb(
-                Arrays.asList(hakukohteenLaskenta.apply(hakukohdeJaOrganisaatio), laskentaTimer))
-            .subscribe(
-                s -> handleSuccessfulLaskentaResult(fromRetryQueue, hakukohdeOid),
+        Observable<Object> laskentaTimer = Observable.timer(3L, TimeUnit.HOURS).switchMap(
+            t -> Observable.error(new TimeoutException("Laskentaa odotettiin 90 minuuttia ja ohitettiin")));
+        Observable.amb(Arrays.asList(hakukohteenLaskenta.apply(hakukohdeJaOrganisaatio), laskentaTimer))
+            .subscribe(s -> handleSuccessfulLaskentaResult(fromRetryQueue, hakukohdeOid),
                 e -> handleFailedLaskentaResult(fromRetryQueue, hakukohdeJaOrganisaatio, e));
       } catch (Exception e) {
         throw new RuntimeException(e);
@@ -112,101 +98,62 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     if (fromRetryQueue) {
       LOG.info(
           "(Uuid={}) Hakukohteen ({}) laskenta onnistui uudelleenyrityksellä. Valmiita kohteita laskennassa yhteensä {}/{}",
-          uuid(),
-          hakukohdeOid,
-          successTotal.incrementAndGet(),
-          totalKohteet());
+          uuid(), hakukohdeOid, successTotal.incrementAndGet(), totalKohteet());
     } else {
-      LOG.info(
-          "(Uuid={}) Hakukohteen ({}) laskenta onnistui. Valmiita kohteita laskennassa yhteensä {}/{}",
-          uuid(),
-          hakukohdeOid,
-          successTotal.incrementAndGet(),
-          totalKohteet());
+      LOG.info("(Uuid={}) Hakukohteen ({}) laskenta onnistui. Valmiita kohteita laskennassa yhteensä {}/{}",
+          uuid(), hakukohdeOid, successTotal.incrementAndGet(), totalKohteet());
     }
     if (!isValintaryhmalaskenta) {
       HakukohdeTila tila = HakukohdeTila.VALMIS;
-      laskentaSeurantaAsyncResource
-          .merkkaaHakukohteenTila(uuid(), hakukohdeOid, tila, Optional.empty())
-          .subscribe(
-              ok ->
-                  LOG.info(
-                      "(Uuid={}) Hakukohteen ({}) laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.",
-                      uuid(),
-                      hakukohdeOid),
-              t ->
-                  LOG.error(
-                      String.format(
-                          "(UUID = %s) Hakukohteen (%s) tilan (%s) merkkaaminen epaonnistui!",
-                          uuid(), hakukohdeOid, tila),
-                      t));
+      laskentaSeurantaAsyncResource.merkkaaHakukohteenTila(uuid(), hakukohdeOid, tila, Optional.empty())
+          .subscribe(ok -> LOG.info(
+              "(Uuid={}) Hakukohteen ({}) laskenta on valmis, hakukohteen tila saatiin merkattua seurantaan.",
+              uuid(), hakukohdeOid),
+              t -> LOG.error(
+                  String.format("(UUID = %s) Hakukohteen (%s) tilan (%s) merkkaaminen epaonnistui!",
+                      uuid(), hakukohdeOid, tila),
+                  t));
     } else {
-      LOG.info(
-          "Ei merkitä valintaryhmälaskennan hakukohteiden tilaa seurantaan. (Onnistunut laskenta)");
+      LOG.info("Ei merkitä valintaryhmälaskennan hakukohteiden tilaa seurantaan. (Onnistunut laskenta)");
     }
     laskeSeuraavaHakukohde();
   }
 
-  private void handleFailedLaskentaResult(
-      boolean fromRetryQueue, HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio, Throwable failure) {
+  private void handleFailedLaskentaResult(boolean fromRetryQueue, HakukohdeJaOrganisaatio hakukohdeJaOrganisaatio,
+      Throwable failure) {
     String hakukohdeOid = hakukohdeJaOrganisaatio.getHakukohdeOid();
     if (!fromRetryQueue) {
       LOG.warn(
           "(Uuid={}) Lisätään hakukohde ({}) epäonnistuneiden jonoon uudelleenyritystä varten. Uudelleenyritettäviä kohteita laskennassa yhteensä {}/{}",
-          uuid(),
-          hakukohdeOid,
-          retryTotal.incrementAndGet(),
-          totalKohteet(),
-          failure);
+          uuid(), hakukohdeOid, retryTotal.incrementAndGet(), totalKohteet(), failure);
       retryQueue.add(hakukohdeJaOrganisaatio);
     } else {
       LOG.error(
           "(Uuid={}) Hakukohteen ({}) laskenta epäonnistui myös uudelleenyrityksellä. Lopullisesti epäonnistuneita kohteita laskennassa yhteensä {}/{}",
-          uuid(),
-          hakukohdeOid,
-          failedTotal.incrementAndGet(),
-          totalKohteet(),
-          failure);
+          uuid(), hakukohdeOid, failedTotal.incrementAndGet(), totalKohteet(), failure);
       if (!isValintaryhmalaskenta) {
         try {
           HakukohdeTila tila = HakukohdeTila.KESKEYTETTY;
           laskentaSeurantaAsyncResource
-              .merkkaaHakukohteenTila(
-                  uuid(),
-                  hakukohdeOid,
-                  tila,
-                  Optional.of(
-                      virheilmoitus(
-                          failure.getMessage(), Arrays.toString(failure.getStackTrace()))))
-              .subscribe(
-                  ok ->
-                      LOG.error(
-                          "(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tila merkattu onnistuneesti seurantaan ",
-                          uuid(),
-                          hakukohdeOid),
-                  t ->
-                      LOG.error(
-                          String.format(
-                              "(UUID = %s) Hakukohteen (%s) tilan (%s) merkkaaminen epaonnistui!",
-                              uuid(), hakukohdeOid, tila),
-                          t));
+              .merkkaaHakukohteenTila(uuid(), hakukohdeOid, tila,
+                  Optional.of(virheilmoitus(failure.getMessage(),
+                      Arrays.toString(failure.getStackTrace()))))
+              .subscribe(ok -> LOG.error(
+                  "(Uuid={}) Laskenta epäonnistui hakukohteelle {}, tila merkattu onnistuneesti seurantaan ",
+                  uuid(), hakukohdeOid),
+                  t -> LOG.error(String.format(
+                      "(UUID = %s) Hakukohteen (%s) tilan (%s) merkkaaminen epaonnistui!", uuid(),
+                      hakukohdeOid, tila), t));
         } catch (Throwable e1) {
-          LOG.error(
-              "(Uuid={}) Hakukohteen ({}) laskenta epäonnistui mutta ei saatu merkattua ",
-              uuid(),
-              hakukohdeOid,
-              e1);
+          LOG.error("(Uuid={}) Hakukohteen ({}) laskenta epäonnistui mutta ei saatu merkattua ", uuid(),
+              hakukohdeOid, e1);
         }
       } else {
-        LOG.error(
-            "(Uuid={}) Valintaryhmälaskenta on lopullisesti epäonnistunut: {}.",
-            uuid(),
+        LOG.error("(Uuid={}) Valintaryhmälaskenta on lopullisesti epäonnistunut: {}.", uuid(),
             failure.getMessage());
-        this.valintaryhmalaskennanTulos =
-            Optional.of(
-                virheilmoitus(
-                    "Valintaryhmälaskenta epäonnistui: " + failure.getMessage(),
-                    Arrays.toString(failure.getStackTrace())));
+        this.valintaryhmalaskennanTulos = Optional
+            .of(virheilmoitus("Valintaryhmälaskenta epäonnistui: " + failure.getMessage(),
+                Arrays.toString(failure.getStackTrace())));
       }
     }
     laskeSeuraavaHakukohde();
@@ -217,21 +164,17 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
       if (retryQueue.peek() != null) {
         LOG.info(
             "Laskenta (uuid={}) olisi päättynyt, mutta sisältää keskeytettyjä hakukohteita. Yritetään epäonnistuneita kohteita ({} kpl) uudelleen.",
-            uuid(),
-            retryTotal.get());
+            uuid(), retryTotal.get());
         final boolean splitRetry = retryQueue.size() > 20;
         IntStream.range(0, splitRetry ? splittaus : 1).forEach(i -> laskeSeuraavaHakukohde());
         return;
       } else {
-        LOG.info(
-            "Laskennassa (uuid={}) ei ole epäonnistuneita hakukohteita uudelleenyritettäviksi.",
-            uuid());
+        LOG.info("Laskennassa (uuid={}) ei ole epäonnistuneita hakukohteita uudelleenyritettäviksi.", uuid());
       }
     }
     if (totalKohteet() == (successTotal.get() + failedTotal.get())) {
       if (COMPLETE.equals(state.getAndSet(COMPLETE))) {
-        LOG.error(
-            "state == " + state + " but it is being set to that again! Looks like a bug!",
+        LOG.error("state == " + state + " but it is being set to that again! Looks like a bug!",
             new Exception());
       }
       lopeta();
@@ -242,28 +185,21 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
     final Observable<Response> tilanmerkkausObservable;
     if (!COMPLETE.equals(state.get())) {
       LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid());
-      tilanmerkkausObservable =
-          laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
-              uuid(), LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
+      tilanmerkkausObservable = laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(),
+          LaskentaTila.PERUUTETTU, Optional.of(ilmoitus("Laskenta on peruutettu")));
     } else if (valintaryhmalaskennanTulos.isPresent()) {
       LOG.error("#### (Uuid={}) Valintaryhmälaskenta on epäonnistunut.", uuid());
-      tilanmerkkausObservable =
-          laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
-              uuid(), LaskentaTila.PERUUTETTU, valintaryhmalaskennanTulos);
+      tilanmerkkausObservable = laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(),
+          LaskentaTila.PERUUTETTU, valintaryhmalaskennanTulos);
     } else {
       LOG.info(
           "#### (Uuid={}) Laskenta valmis koska ei enää hakukohteita käsiteltävänä. "
               + "Onnistuneita {}, Uudelleenyrityksiä {}, Lopullisesti epäonnistuneita {}",
-          uuid(),
-          successTotal.get(),
-          retryTotal.get(),
-          failedTotal.get());
-      tilanmerkkausObservable =
-          laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
-              uuid(), LaskentaTila.VALMIS, Optional.empty());
+          uuid(), successTotal.get(), retryTotal.get(), failedTotal.get());
+      tilanmerkkausObservable = laskentaSeurantaAsyncResource.merkkaaLaskennanTila(uuid(), LaskentaTila.VALMIS,
+          Optional.empty());
     }
-    tilanmerkkausObservable.subscribe(
-        response -> laskentaSupervisor.ready(uuid()),
+    tilanmerkkausObservable.subscribe(response -> laskentaSupervisor.ready(uuid()),
         e -> LOG.error("Ongelma laskennan merkkaamisessa loppuneeksi", e));
   }
 
@@ -289,8 +225,6 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
   }
 
   public enum State {
-    FIRST_ATTEMPTS,
-    RERUNS,
-    COMPLETE
+    FIRST_ATTEMPTS, RERUNS, COMPLETE
   }
 }

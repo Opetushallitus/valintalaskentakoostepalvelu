@@ -10,7 +10,8 @@ public interface HarkinnanvaraisuusAsyncResource {
   CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> getHarkinnanvaraisuudetForHakemukses(
       List<String> hakemusOids);
 
-  // Kutsutaan atarun tiedoilla, palauttaa samanmuotoista dataa mutta synkattuna hakijan
+  // Kutsutaan atarun tiedoilla, palauttaa samanmuotoista dataa mutta synkattuna
+  // hakijan
   // sure-suoritusten kanssa.
   CompletableFuture<List<HakemuksenHarkinnanvaraisuus>> getSyncedHarkinnanvaraisuudes(
       List<HakemuksenHarkinnanvaraisuus> atarunTiedot);

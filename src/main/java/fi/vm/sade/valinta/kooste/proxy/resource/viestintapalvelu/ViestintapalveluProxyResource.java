@@ -37,167 +37,105 @@ public class ViestintapalveluProxyResource {
   private final RyhmasahkopostiAsyncResource ryhmasahkopostiAsyncResource;
 
   @Autowired
-  public ViestintapalveluProxyResource(
-      ViestintapalveluAsyncResource viestintapalveluAsyncResource,
+  public ViestintapalveluProxyResource(ViestintapalveluAsyncResource viestintapalveluAsyncResource,
       RyhmasahkopostiAsyncResource ryhmasahkopostiAsyncResource) {
     this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
     this.ryhmasahkopostiAsyncResource = ryhmasahkopostiAsyncResource;
   }
 
   @POST
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
+  @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
   @Path("/publish/haku/{hakuOid}")
   @Consumes("application/json")
   @Produces("text/plain")
-  public void julkaiseKirjeetOmillaSivuilla(
-      @PathParam("hakuOid") String hakuOid,
-      @QueryParam("asiointikieli") String asiointikieli,
-      @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
+  public void julkaiseKirjeetOmillaSivuilla(@PathParam("hakuOid") String hakuOid,
+      @QueryParam("asiointikieli") String asiointikieli, @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
       @Suspended AsyncResponse asyncResponse) {
-    viestintapalveluAsyncResource
-        .haeKirjelahetysJulkaistavaksi(hakuOid, kirjeenTyyppi, asiointikieli)
-        .flatMap(
-            batchIdOptional -> {
-              if (batchIdOptional.isPresent()) {
-                return viestintapalveluAsyncResource.julkaiseKirjelahetys(batchIdOptional.get());
-              } else {
-                throw new RuntimeException("Kirjelähetyksen ID:tä ei löytynyt.");
-              }
-            })
-        .subscribe(
-            batchIdOptional -> asyncResponse.resume(Response.ok(batchIdOptional.get()).build()),
-            throwable ->
-                errorResponse(
-                    String.format("Viestintäpalvelukutsu epäonnistui! %s", throwable.getMessage()),
-                    asyncResponse));
+    viestintapalveluAsyncResource.haeKirjelahetysJulkaistavaksi(hakuOid, kirjeenTyyppi, asiointikieli)
+        .flatMap(batchIdOptional -> {
+          if (batchIdOptional.isPresent()) {
+            return viestintapalveluAsyncResource.julkaiseKirjelahetys(batchIdOptional.get());
+          } else {
+            throw new RuntimeException("Kirjelähetyksen ID:tä ei löytynyt.");
+          }
+        }).subscribe(batchIdOptional -> asyncResponse.resume(Response.ok(batchIdOptional.get()).build()),
+            throwable -> errorResponse(
+                String.format("Viestintäpalvelukutsu epäonnistui! %s", throwable.getMessage()),
+                asyncResponse));
   }
 
   private LetterBatchCountDto haeRyhmasahkopostiId(LetterBatchCountDto countDto) {
     if (countDto.letterBatchId == null) {
       return countDto;
     }
-    Optional<Long> groupEmailId =
-        ryhmasahkopostiAsyncResource
-            .haeRyhmasahkopostiIdByLetterObservable(countDto.letterBatchId)
-            .timeout(5, MINUTES)
-            .blockingFirst();
-    return groupEmailId
-        .map(
-            aLong ->
-                new LetterBatchCountDto(
-                    countDto.letterBatchId,
-                    countDto.letterTotalCount,
-                    countDto.letterReadyCount,
-                    countDto.letterErrorCount,
-                    countDto.letterPublishedCount,
-                    countDto.readyForPublish,
-                    false,
-                    aLong))
-        .orElse(countDto);
+    Optional<Long> groupEmailId = ryhmasahkopostiAsyncResource
+        .haeRyhmasahkopostiIdByLetterObservable(countDto.letterBatchId).timeout(5, MINUTES).blockingFirst();
+    return groupEmailId.map(aLong -> new LetterBatchCountDto(countDto.letterBatchId, countDto.letterTotalCount,
+        countDto.letterReadyCount, countDto.letterErrorCount, countDto.letterPublishedCount,
+        countDto.readyForPublish, false, aLong)).orElse(countDto);
   }
 
   @GET
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
+  @PreAuthorize("hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
   @Path("/count/haku/{hakuOid}")
   @Consumes("application/json")
-  public void countLettersForHaku(
-      @PathParam("hakuOid") String hakuOid, @Suspended AsyncResponse asyncResponse) {
-    setAsyncTimeout(
-        asyncResponse,
-        String.format(
-            "ViestintapalveluProxyResource -palvelukutsu on aikakatkaistu: /viestintapalvelu/haku/%s/tyyppi/--/kieli/--",
-            hakuOid));
+  public void countLettersForHaku(@PathParam("hakuOid") String hakuOid, @Suspended AsyncResponse asyncResponse) {
+    setAsyncTimeout(asyncResponse, String.format(
+        "ViestintapalveluProxyResource -palvelukutsu on aikakatkaistu: /viestintapalvelu/haku/%s/tyyppi/--/kieli/--",
+        hakuOid));
 
-    Observable<LetterBatchCountDto> hyvaksymiskirjeFi =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "fi")
-            .map(this::haeRyhmasahkopostiId);
-    Observable<LetterBatchCountDto> hyvaksymiskirjeSv =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "sv")
-            .map(this::haeRyhmasahkopostiId);
-    Observable<LetterBatchCountDto> hyvaksymiskirjeEn =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "en")
-            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeFi = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "fi").map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeSv = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "sv").map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeEn = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje", "en").map(this::haeRyhmasahkopostiId);
 
-    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleFi =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "fi")
-            .map(this::haeRyhmasahkopostiId);
-    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleSv =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "sv")
-            .map(this::haeRyhmasahkopostiId);
-    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleEn =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "en")
-            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleFi = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "fi")
+        .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleSv = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "sv")
+        .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> hyvaksymiskirjeHuoltajilleEn = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "hyvaksymiskirje_huoltajille", "en")
+        .map(this::haeRyhmasahkopostiId);
 
-    Observable<LetterBatchCountDto> jalkiohjauskirjeFi =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "fi")
-            .map(this::haeRyhmasahkopostiId);
-    Observable<LetterBatchCountDto> jalkiohjauskirjeSv =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "sv")
-            .map(this::haeRyhmasahkopostiId);
-    Observable<LetterBatchCountDto> jalkiohjauskirjeEn =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "en")
-            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> jalkiohjauskirjeFi = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "fi").map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> jalkiohjauskirjeSv = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "sv").map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> jalkiohjauskirjeEn = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje", "en").map(this::haeRyhmasahkopostiId);
 
-    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleFi =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "fi")
-            .map(this::haeRyhmasahkopostiId);
-    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleSv =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "sv")
-            .map(this::haeRyhmasahkopostiId);
-    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleEn =
-        viestintapalveluAsyncResource
-            .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "en")
-            .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleFi = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "fi")
+        .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleSv = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "sv")
+        .map(this::haeRyhmasahkopostiId);
+    Observable<LetterBatchCountDto> jalkiohjauskirjeHuoltajilleEn = viestintapalveluAsyncResource
+        .haeTuloskirjeenMuodostuksenTilanne(hakuOid, "jalkiohjauskirje_huoltajille", "en")
+        .map(this::haeRyhmasahkopostiId);
 
-    List<Observable<LetterBatchCountDto>> observables =
-        Arrays.asList(
-            hyvaksymiskirjeFi,
-            hyvaksymiskirjeSv,
-            hyvaksymiskirjeEn,
-            hyvaksymiskirjeHuoltajilleFi,
-            hyvaksymiskirjeHuoltajilleSv,
-            hyvaksymiskirjeHuoltajilleEn,
-            jalkiohjauskirjeFi,
-            jalkiohjauskirjeSv,
-            jalkiohjauskirjeEn,
-            jalkiohjauskirjeHuoltajilleFi,
-            jalkiohjauskirjeHuoltajilleSv,
-            jalkiohjauskirjeHuoltajilleEn);
-    combineLatest(
-            observables,
-            (args) ->
-                ImmutableMap.of(
-                    "hyvaksymiskirje",
-                    ImmutableMap.of("fi", args[0], "sv", args[1], "en", args[2]),
-                    "hyvaksymiskirje_huoltajille",
-                    ImmutableMap.of("fi", args[3], "sv", args[4], "en", args[5]),
-                    "jalkiohjauskirje",
-                    ImmutableMap.of("fi", args[6], "sv", args[7], "en", args[8]),
-                    "jalkiohjauskirje_huoltajille",
-                    ImmutableMap.of("fi", args[9], "sv", args[10], "en", args[11])))
-        .subscribe(
-            letterCount ->
-                asyncResponse.resume(
-                    Response.ok(letterCount, MediaType.APPLICATION_JSON_TYPE).build()),
-            error -> {
-              LOG.error("Viestintäpalvelukutsu epäonnistui!", error);
-              errorResponse(
-                  String.format("Viestintäpalvelukutsu epäonnistui! %s", error.getMessage()),
-                  asyncResponse);
-            });
+    List<Observable<LetterBatchCountDto>> observables = Arrays.asList(hyvaksymiskirjeFi, hyvaksymiskirjeSv,
+        hyvaksymiskirjeEn, hyvaksymiskirjeHuoltajilleFi, hyvaksymiskirjeHuoltajilleSv,
+        hyvaksymiskirjeHuoltajilleEn, jalkiohjauskirjeFi, jalkiohjauskirjeSv, jalkiohjauskirjeEn,
+        jalkiohjauskirjeHuoltajilleFi, jalkiohjauskirjeHuoltajilleSv, jalkiohjauskirjeHuoltajilleEn);
+    combineLatest(observables,
+        (args) -> ImmutableMap.of("hyvaksymiskirje",
+            ImmutableMap.of("fi", args[0], "sv", args[1], "en", args[2]), "hyvaksymiskirje_huoltajille",
+            ImmutableMap.of("fi", args[3], "sv", args[4], "en", args[5]), "jalkiohjauskirje",
+            ImmutableMap.of("fi", args[6], "sv", args[7], "en", args[8]), "jalkiohjauskirje_huoltajille",
+            ImmutableMap.of("fi", args[9], "sv", args[10], "en", args[11])))
+                .subscribe(
+                    letterCount -> asyncResponse.resume(
+                        Response.ok(letterCount, MediaType.APPLICATION_JSON_TYPE).build()),
+                    error -> {
+                      LOG.error("Viestintäpalvelukutsu epäonnistui!", error);
+                      errorResponse(String.format("Viestintäpalvelukutsu epäonnistui! %s",
+                          error.getMessage()), asyncResponse);
+                    });
   }
 
   private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
@@ -206,10 +144,7 @@ public class ViestintapalveluProxyResource {
   }
 
   private void errorResponse(String timeoutMessage, AsyncResponse asyncResponse) {
-    asyncResponse.resume(
-        Response.serverError()
-            .entity(ImmutableMap.of("error", timeoutMessage))
-            .type(MediaType.APPLICATION_JSON_TYPE)
-            .build());
+    asyncResponse.resume(Response.serverError().entity(ImmutableMap.of("error", timeoutMessage))
+        .type(MediaType.APPLICATION_JSON_TYPE).build());
   }
 }

@@ -23,28 +23,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class MockOppijanumerorekisteriAsyncResource implements OppijanumerorekisteriAsyncResource {
   public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
-  private static final Logger LOG =
-      LoggerFactory.getLogger(MockOppijanumerorekisteriAsyncResource.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MockOppijanumerorekisteriAsyncResource.class);
   public List<HenkiloCreateDTO> henkiloPrototyypit = null;
   private final Function<List<HenkiloCreateDTO>, Future<List<HenkiloPerustietoDto>>> futureSupplier;
 
   public MockOppijanumerorekisteriAsyncResource() {
-    this.futureSupplier =
-        hp -> {
-          if (hp == null) {
-            LOG.error("Null-prototyyppi lista!");
-            throw new RuntimeException("Null-prototyyppi lista!");
-          }
-          // this.henkiloPrototyypit = henkiloPrototyypit;
-          LOG.info(
-              "MockOppijanumerorekisteriAsyncResource sai {} kpl henkilöitä. Tehdään konversio ja palautetaan immediate future.",
-              hp.size());
-          henkiloPrototyypit = hp;
-          return Futures.immediateFuture(
-              henkiloPrototyypit.stream()
-                  .map(MockOppijanumerorekisteriAsyncResource::toHenkiloPerustietoDto)
-                  .collect(Collectors.toList()));
-        };
+    this.futureSupplier = hp -> {
+      if (hp == null) {
+        LOG.error("Null-prototyyppi lista!");
+        throw new RuntimeException("Null-prototyyppi lista!");
+      }
+      // this.henkiloPrototyypit = henkiloPrototyypit;
+      LOG.info(
+          "MockOppijanumerorekisteriAsyncResource sai {} kpl henkilöitä. Tehdään konversio ja palautetaan immediate future.",
+          hp.size());
+      henkiloPrototyypit = hp;
+      return Futures.immediateFuture(henkiloPrototyypit.stream()
+          .map(MockOppijanumerorekisteriAsyncResource::toHenkiloPerustietoDto).collect(Collectors.toList()));
+    };
   }
 
   public MockOppijanumerorekisteriAsyncResource(
@@ -54,11 +50,9 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
 
   @Override
   public Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(final List<HenkiloCreateDTO> hp) {
-    return Observable.fromFuture(
-        Optional.ofNullable(
-                MockOppijanumerorekisteriAsyncResource
-                    .<List<HenkiloPerustietoDto>>serviceAvailableCheck())
-            .orElseGet(() -> futureSupplier.apply(hp)));
+    return Observable.fromFuture(Optional
+        .ofNullable(MockOppijanumerorekisteriAsyncResource.<List<HenkiloPerustietoDto>>serviceAvailableCheck())
+        .orElseGet(() -> futureSupplier.apply(hp)));
   }
 
   @Override

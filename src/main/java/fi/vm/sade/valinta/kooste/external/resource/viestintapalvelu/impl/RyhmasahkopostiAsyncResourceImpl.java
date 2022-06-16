@@ -14,8 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RyhmasahkopostiAsyncResourceImpl extends UrlConfiguredResource
-    implements RyhmasahkopostiAsyncResource {
+public class RyhmasahkopostiAsyncResourceImpl extends UrlConfiguredResource implements RyhmasahkopostiAsyncResource {
 
   @Autowired
   public RyhmasahkopostiAsyncResourceImpl(
@@ -25,23 +24,18 @@ public class RyhmasahkopostiAsyncResourceImpl extends UrlConfiguredResource
 
   @Override
   public Observable<Optional<Long>> haeRyhmasahkopostiIdByLetterObservable(Long letterId) {
-    return getAsObservableLazily(
-            getUrl("viestintapalvelu.reportMessages", letterId),
-            (idAsString) -> Optional.of(Long.parseLong(idAsString)),
-            client -> {
-              client.accept(MediaType.TEXT_PLAIN_TYPE);
-              return client;
-            })
-        .onErrorReturn(
-            error -> {
-              if (HttpExceptionWithResponse.isResponseWithStatus(
-                  Response.Status.NOT_FOUND, error)) {
-                return Optional.empty();
-              }
-              if (error instanceof RuntimeException) {
-                throw (RuntimeException) error;
-              }
-              throw new RuntimeException(error);
-            });
+    return getAsObservableLazily(getUrl("viestintapalvelu.reportMessages", letterId),
+        (idAsString) -> Optional.of(Long.parseLong(idAsString)), client -> {
+          client.accept(MediaType.TEXT_PLAIN_TYPE);
+          return client;
+        }).onErrorReturn(error -> {
+          if (HttpExceptionWithResponse.isResponseWithStatus(Response.Status.NOT_FOUND, error)) {
+            return Optional.empty();
+          }
+          if (error instanceof RuntimeException) {
+            throw (RuntimeException) error;
+          }
+          throw new RuntimeException(error);
+        });
   }
 }

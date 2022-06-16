@@ -20,7 +20,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class LaskentaKerrallaContext {
 
-  public LaskentaKerrallaContext() {}
+  public LaskentaKerrallaContext() {
+  }
 
   @Bean
   public ApplicationAsyncResource orderService() {

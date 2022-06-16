@@ -9,8 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
- * Asentaa autentikaation workerille jos tarpeen ja taltioi autentikaation propertyyn workeria
- * varten.
+ * Asentaa autentikaation workerille jos tarpeen ja taltioi autentikaation
+ * propertyyn workeria varten.
  */
 @Component
 public class SecurityPreprocessor implements Processor {
@@ -18,7 +18,8 @@ public class SecurityPreprocessor implements Processor {
 
   public static final SecurityPreprocessor SECURITY = new SecurityPreprocessor();
 
-  private SecurityPreprocessor() {}
+  private SecurityPreprocessor() {
+  }
 
   private static final Logger LOG = LoggerFactory.getLogger(SecurityPreprocessor.class);
 
@@ -28,8 +29,8 @@ public class SecurityPreprocessor implements Processor {
     Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
     if (currentAuth == null) {
       // should current auth be null
-      Authentication newAuth =
-          (Authentication) exchange.getProperty(SecurityPreprocessor.SECURITY_CONTEXT_HEADER);
+      Authentication newAuth = (Authentication) exchange
+          .getProperty(SecurityPreprocessor.SECURITY_CONTEXT_HEADER);
       assert (newAuth != null); // <- should never be null!
       SecurityContextHolder.getContext().setAuthentication(newAuth);
     } else {

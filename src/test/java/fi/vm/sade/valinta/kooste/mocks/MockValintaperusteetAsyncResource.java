@@ -24,20 +24,13 @@ import org.springframework.stereotype.Service;
 /** @author Jussi Jartamo */
 @Service
 public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncResource {
-  private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference =
-      new AtomicReference<>();
-  private static AtomicReference<Set<String>> hakukohteetValinnanvaiheelleResultReference =
-      new AtomicReference<>();
-  private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference =
-      new AtomicReference<>();
-  private static AtomicReference<List<HakukohdeJaValintaperusteDTO>>
-      hakukohdeJaValintaperusteetResultReference = new AtomicReference<>();
-  private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference =
-      new AtomicReference<>();
-  private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference =
-      new AtomicReference<>();
-  private static AtomicReference<List<ValintaperusteetDTO>> hakukohteenValintaperusteetReference =
-      new AtomicReference<>();
+  private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference = new AtomicReference<>();
+  private static AtomicReference<Set<String>> hakukohteetValinnanvaiheelleResultReference = new AtomicReference<>();
+  private static AtomicReference<List<ValinnanVaiheJonoillaDTO>> resultReference = new AtomicReference<>();
+  private static AtomicReference<List<HakukohdeJaValintaperusteDTO>> hakukohdeJaValintaperusteetResultReference = new AtomicReference<>();
+  private static AtomicReference<List<ValintaperusteDTO>> valintaperusteetResultReference = new AtomicReference<>();
+  private static AtomicReference<List<ValintakoeDTO>> valintakokeetResultReference = new AtomicReference<>();
+  private static AtomicReference<List<ValintaperusteetDTO>> hakukohteenValintaperusteetReference = new AtomicReference<>();
 
   public static void setValintaperusteetResult(List<ValintaperusteDTO> result) {
     valintaperusteetResultReference.set(result);
@@ -53,21 +46,19 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
   }
 
   @Override
-  public CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(
-      String hakukohdeOid) {
+  public CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid) {
     return null;
   }
 
   @Override
-  public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
-      String hakukohdeOid, Integer valinnanVaiheJarjestysluku) {
+  public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(String hakukohdeOid,
+      Integer valinnanVaiheJarjestysluku) {
     return CompletableFuture.completedFuture(hakukohteenValintaperusteetReference.get());
   }
 
   public static void setHakukohteenValintaperusteetResult(
       List<ValintaperusteetDTO> hakukohteenValintaperusteetResult) {
-    MockValintaperusteetAsyncResource.hakukohteenValintaperusteetReference.set(
-        hakukohteenValintaperusteetResult);
+    MockValintaperusteetAsyncResource.hakukohteenValintaperusteetReference.set(hakukohteenValintaperusteetResult);
   }
 
   public static void setHakukohdeValintaperusteResult(List<HakukohdeJaValintaperusteDTO> result) {
@@ -115,8 +106,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
   }
 
   @Override
-  public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(
-      Collection<String> hakukohdeOids) {
+  public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(Collection<String> hakukohdeOids) {
     return Observable.just(hakukohdeJaValintaperusteetResultReference.get());
   }
 
@@ -131,14 +121,12 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
   }
 
   @Override
-  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
-      Collection<String> hakukohdeOids) {
+  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(Collection<String> hakukohdeOids) {
     return Observable.just(hakukohdeResultReference.get());
   }
 
   @Override
-  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
-      Collection<String> hakukohdeOids) {
+  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(Collection<String> hakukohdeOids) {
     return Observable.just(hakukohdeResultReference.get());
   }
 

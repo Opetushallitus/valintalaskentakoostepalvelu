@@ -33,15 +33,10 @@ public class EligibilitiesKonvertointiTest {
   public void t() throws JsonSyntaxException, IOException {
     // List<String> sq = Arrays.asList("s", "s");
     // sq.stream().collect(Collectors.toMap(s -> s, s -> 6));
-    Hakemus h =
-        new Gson()
-            .fromJson(
-                IOUtils.toString(
-                    new ClassPathResource("1.2.246.562.11.00001038440").getInputStream()),
-                Hakemus.class);
-    Map<String, String> s =
-        Converter.mapEligibilityAndStatus(
-            h.getPreferenceEligibilities(), h.getAnswers().getHakutoiveet());
+    Hakemus h = new Gson().fromJson(
+        IOUtils.toString(new ClassPathResource("1.2.246.562.11.00001038440").getInputStream()), Hakemus.class);
+    Map<String, String> s = Converter.mapEligibilityAndStatus(h.getPreferenceEligibilities(),
+        h.getAnswers().getHakutoiveet());
     for (Entry<String, String> e : s.entrySet()) {
       System.err.println(e);
     }
@@ -51,46 +46,32 @@ public class EligibilitiesKonvertointiTest {
   @Test
   public void te() throws JsonSyntaxException, IOException {
     String hakukohdeOid = "";
-    List<Hakemus> hakemukset =
-        new Gson()
-            .fromJson(
-                IOUtils.toString(new ClassPathResource("xxlistfull").getInputStream()),
-                new TypeToken<List<Hakemus>>() {}.getType());
+    List<Hakemus> hakemukset = new Gson().fromJson(
+        IOUtils.toString(new ClassPathResource("xxlistfull").getInputStream()), new TypeToken<List<Hakemus>>() {
+        }.getType());
     Map<String, Exception> epaonnistuneetKonversiot = Maps.newConcurrentMap();
     try {
-      hakemukset.parallelStream()
-          .filter(Objects::nonNull)
-          .map(
-              h -> {
-                try {
-                  HakemusWrapper hakemus = new HakuappHakemusWrapper(h);
-                  return hakemus.toHakemusDto(new Valintapisteet(), Maps.newHashMap(), false);
-                } catch (Exception e) {
-                  epaonnistuneetKonversiot.put(h.getOid(), e);
-                  return null;
-                }
-              })
-          .collect(Collectors.toList());
+      hakemukset.parallelStream().filter(Objects::nonNull).map(h -> {
+        try {
+          HakemusWrapper hakemus = new HakuappHakemusWrapper(h);
+          return hakemus.toHakemusDto(new Valintapisteet(), Maps.newHashMap(), false);
+        } catch (Exception e) {
+          epaonnistuneetKonversiot.put(h.getOid(), e);
+          return null;
+        }
+      }).collect(Collectors.toList());
     } catch (Exception e) {
-      LOG.error(
-          "Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle "
-              + hakukohdeOid
-              + " +  ja null hakemukselle",
-          e);
+      LOG.error("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle " + hakukohdeOid
+          + " +  ja null hakemukselle", e);
       throw e;
     }
     if (!epaonnistuneetKonversiot.isEmpty()) {
       LOG.error(
           "Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle {} ja hakemuksille {}. Esimerkiksi {}!",
-          hakukohdeOid,
-          Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()),
+          hakukohdeOid, Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()),
           epaonnistuneetKonversiot.values().iterator().next().getMessage());
-      throw new RuntimeException(
-          "Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle "
-              + hakukohdeOid
-              + " ja hakemuksille "
-              + Arrays.toString(epaonnistuneetKonversiot.keySet().toArray())
-              + "!");
+      throw new RuntimeException("Hakemukset to hakemusDTO mappauksessa virhe hakukohteelle " + hakukohdeOid
+          + " ja hakemuksille " + Arrays.toString(epaonnistuneetKonversiot.keySet().toArray()) + "!");
     }
   }
 
@@ -98,18 +79,15 @@ public class EligibilitiesKonvertointiTest {
   @Test
   public void testaaEligibilities() throws JsonSyntaxException, IOException {
 
-    List<Eligibility> eligibilities =
-        new Gson()
-            .fromJson(
-                IOUtils.toString(
-                    new ClassPathResource("valintalaskenta/eligibilities.json").getInputStream()),
-                new TypeToken<List<Eligibility>>() {}.getType());
+    List<Eligibility> eligibilities = new Gson().fromJson(
+        IOUtils.toString(new ClassPathResource("valintalaskenta/eligibilities.json").getInputStream()),
+        new TypeToken<List<Eligibility>>() {
+        }.getType());
 
-    List<Hakemus> obj =
-        new Gson()
-            .fromJson(
-                IOUtils.toString(new ClassPathResource("listfull.json").getInputStream()),
-                new TypeToken<List<Hakemus>>() {}.getType());
+    List<Hakemus> obj = new Gson().fromJson(
+        IOUtils.toString(new ClassPathResource("listfull.json").getInputStream()),
+        new TypeToken<List<Hakemus>>() {
+        }.getType());
     Map<String, String> hakutoiveet = obj.iterator().next().getAnswers().getHakutoiveet();
     Converter.mapEligibilityAndStatus(eligibilities, hakutoiveet);
   }

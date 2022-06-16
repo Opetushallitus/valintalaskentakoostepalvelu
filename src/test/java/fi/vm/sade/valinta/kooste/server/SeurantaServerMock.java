@@ -24,75 +24,47 @@ import org.apache.http.client.utils.URLEncodedUtils;
 public class SeurantaServerMock extends MockServer {
 
   private static final int mockSeurantaPort = PortChecker.findFreeLocalPort();
-  private static final ConcurrentLinkedQueue<LaskentaDto> laskentaQueue =
-      new ConcurrentLinkedQueue<>();
+  private static final ConcurrentLinkedQueue<LaskentaDto> laskentaQueue = new ConcurrentLinkedQueue<>();
 
   public SeurantaServerMock() {
     super();
-    addHandler(
-        "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/facecafe-testbeef",
-        httpExchange -> {
-          if (laskentaQueue.isEmpty()) {
-            httpExchange.sendResponseHeaders(204, -1);
-            httpExchange.getResponseBody().close();
-          } else {
-            String resp = new Gson().toJson(laskentaQueue.poll());
-            httpExchange.sendResponseHeaders(200, resp.length());
-            httpExchange.getResponseBody().write(resp.getBytes());
-            httpExchange.getResponseBody().close();
-          }
-        });
-    addHandler(
-        "/seuranta-service/resources/seuranta/laskenta/otaSeuraavaLaskentaTyonAlle",
-        httpExchange -> {
-          if (laskentaQueue.isEmpty()) {
-            httpExchange.sendResponseHeaders(204, -1);
-            httpExchange.getResponseBody().close();
-          } else {
-            String resp = laskentaQueue.peek().getUuid();
-            httpExchange.sendResponseHeaders(200, resp.length());
-            httpExchange.getResponseBody().write(resp.getBytes());
-            httpExchange.getResponseBody().close();
-          }
-        });
-    addHandler(
-        "/seuranta-service/resources/seuranta/kuormantasaus/laskenta/HAKUOID1/tyyppi/HAKU",
-        httpExchange -> {
-          // erillishaku valinnanvaihe
-          Map<String, String> queryParams =
-              URLEncodedUtils.parse(httpExchange.getRequestURI(), "UTF-8").stream()
-                  .collect(Collectors.toMap(nvp -> nvp.getName(), nvp -> nvp.getValue()));
-          List<HakukohdeDto> ll =
-              new Gson()
-                  .fromJson(
-                      IOUtils.toString(httpExchange.getRequestBody()),
-                      new TypeToken<List<HakukohdeDto>>() {}.getType());
-          Boolean valintakoelaskenta =
-              Boolean.parseBoolean(
-                  Optional.ofNullable(queryParams.get("valintakoelaskenta"))
-                      .map(Object::toString)
-                      .orElse("false"));
-          LaskentaDto l =
-              new LaskentaDto(
-                  UUID1,
-                  "",
-                  "",
-                  "",
-                  HAKU1,
-                  0,
-                  LaskentaTila.ALOITTAMATTA,
-                  LaskentaTyyppi.HAKU,
-                  null,
-                  ll,
-                  false,
-                  null,
-                  valintakoelaskenta,
-                  null,
-                  true);
-          laskentaQueue.add(l);
-          httpExchange.sendResponseHeaders(200, UUID1.length());
-          httpExchange.getResponseBody().write(UUID1.getBytes());
-          httpExchange.getResponseBody().close();
-        });
+    addHandler("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/facecafe-testbeef", httpExchange -> {
+      if (laskentaQueue.isEmpty()) {
+        httpExchange.sendResponseHeaders(204, -1);
+        httpExchange.getResponseBody().close();
+      } else {
+        String resp = new Gson().toJson(laskentaQueue.poll());
+        httpExchange.sendResponseHeaders(200, resp.length());
+        httpExchange.getResponseBody().write(resp.getBytes());
+        httpExchange.getResponseBody().close();
+      }
+    });
+    addHandler("/seuranta-service/resources/seuranta/laskenta/otaSeuraavaLaskentaTyonAlle", httpExchange -> {
+      if (laskentaQueue.isEmpty()) {
+        httpExchange.sendResponseHeaders(204, -1);
+        httpExchange.getResponseBody().close();
+      } else {
+        String resp = laskentaQueue.peek().getUuid();
+        httpExchange.sendResponseHeaders(200, resp.length());
+        httpExchange.getResponseBody().write(resp.getBytes());
+        httpExchange.getResponseBody().close();
+      }
+    });
+    addHandler("/seuranta-service/resources/seuranta/kuormantasaus/laskenta/HAKUOID1/tyyppi/HAKU", httpExchange -> {
+      // erillishaku valinnanvaihe
+      Map<String, String> queryParams = URLEncodedUtils.parse(httpExchange.getRequestURI(), "UTF-8").stream()
+          .collect(Collectors.toMap(nvp -> nvp.getName(), nvp -> nvp.getValue()));
+      List<HakukohdeDto> ll = new Gson().fromJson(IOUtils.toString(httpExchange.getRequestBody()),
+          new TypeToken<List<HakukohdeDto>>() {
+          }.getType());
+      Boolean valintakoelaskenta = Boolean.parseBoolean(
+          Optional.ofNullable(queryParams.get("valintakoelaskenta")).map(Object::toString).orElse("false"));
+      LaskentaDto l = new LaskentaDto(UUID1, "", "", "", HAKU1, 0, LaskentaTila.ALOITTAMATTA, LaskentaTyyppi.HAKU,
+          null, ll, false, null, valintakoelaskenta, null, true);
+      laskentaQueue.add(l);
+      httpExchange.sendResponseHeaders(200, UUID1.length());
+      httpExchange.getResponseBody().write(UUID1.getBytes());
+      httpExchange.getResponseBody().close();
+    });
   }
 }

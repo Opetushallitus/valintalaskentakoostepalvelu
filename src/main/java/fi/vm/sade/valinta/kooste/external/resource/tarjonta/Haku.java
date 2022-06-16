@@ -18,15 +18,8 @@ public class Haku {
   public final Integer koulutuksenAlkamisvuosi;
   public final String ataruLomakeAvain;
 
-  public Haku(
-      String oid,
-      Map<String, String> nimi,
-      Set<String> tarjoajaOids,
-      String ataruLomakeAvain,
-      String kohdejoukkoUri,
-      String hakukausiUri,
-      Integer hakukausiVuosi,
-      String koulutuksenAlkamiskausiUri,
+  public Haku(String oid, Map<String, String> nimi, Set<String> tarjoajaOids, String ataruLomakeAvain,
+      String kohdejoukkoUri, String hakukausiUri, Integer hakukausiVuosi, String koulutuksenAlkamiskausiUri,
       Integer koulutuksenAlkamisvuosi) {
     this.oid = oid;
     this.nimi = nimi;
@@ -63,14 +56,9 @@ public class Haku {
     this.kohdejoukkoUri = dto.kohdejoukkoKoodiUri;
 
     if (dto.hakuajat != null && !dto.hakuajat.isEmpty()) {
-      OptionalInt tuorein =
-          dto.hakuajat.stream()
-              .map(kh -> Arrays.asList(kh.alkaa, kh.paattyy))
-              .flatMap(Collection::stream)
-              .filter(Objects::nonNull)
-              .map(aikaleima -> DateTime.parse(aikaleima, fmt).getYear())
-              .mapToInt(v -> v)
-              .max();
+      OptionalInt tuorein = dto.hakuajat.stream().map(kh -> Arrays.asList(kh.alkaa, kh.paattyy))
+          .flatMap(Collection::stream).filter(Objects::nonNull)
+          .map(aikaleima -> DateTime.parse(aikaleima, fmt).getYear()).mapToInt(v -> v).max();
       if (tuorein.isPresent()) {
         this.hakukausiVuosi = tuorein.getAsInt();
       } else {
@@ -82,8 +70,7 @@ public class Haku {
     this.hakukausiUri = null; // TODO
 
     this.koulutuksenAlkamiskausiUri = dto.alkamiskausiKoodiUri;
-    this.koulutuksenAlkamisvuosi =
-        dto.alkamisvuosi != null ? Integer.parseInt(dto.alkamisvuosi) : null;
+    this.koulutuksenAlkamisvuosi = dto.alkamisvuosi != null ? Integer.parseInt(dto.alkamisvuosi) : null;
     this.ataruLomakeAvain = dto.hakulomakeAtaruId;
   }
 
@@ -106,8 +93,10 @@ public class Haku {
   }
 
   public boolean isKoutaHaku() {
-    if (this.oid.startsWith("1.2.246.562.29.") && this.oid.length() >= 35) return true;
-    else return false;
+    if (this.oid.startsWith("1.2.246.562.29.") && this.oid.length() >= 35)
+      return true;
+    else
+      return false;
   }
 
   public String getAtaruLomakeAvain() {

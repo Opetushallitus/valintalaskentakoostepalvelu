@@ -38,20 +38,18 @@ public class AtaruAsyncResourceTest {
   private final String hakemusOid3 = "1.2.246.562.11.00000000000000000065";
 
   private final HttpClient httpClient = mock(HttpClient.class);
-  private final OppijanumerorekisteriAsyncResource mockOnr =
-      mock(OppijanumerorekisteriAsyncResource.class);
+  private final OppijanumerorekisteriAsyncResource mockOnr = mock(OppijanumerorekisteriAsyncResource.class);
   private final KoodistoCachedAsyncResource mockKoodisto = mock(KoodistoCachedAsyncResource.class);
-  private final AtaruAsyncResourceImpl ataruAsyncResource =
-      new AtaruAsyncResourceImpl(httpClient, mockOnr, mockKoodisto);
+  private final AtaruAsyncResourceImpl ataruAsyncResource = new AtaruAsyncResourceImpl(httpClient, mockOnr,
+      mockKoodisto);
   private final String applicationsUrl = "/url/to/applications";
 
-  private final UrlConfiguration urlConfiguration =
-      new UrlConfiguration() {
-        @Override
-        public String url(String key, Object... params) {
-          return applicationsUrl;
-        }
-      };
+  private final UrlConfiguration urlConfiguration = new UrlConfiguration() {
+    @Override
+    public String url(String key, Object... params) {
+      return applicationsUrl;
+    }
+  };
 
   @Before
   public void setMockInsideResourceUnderTest() {
@@ -75,14 +73,11 @@ public class AtaruAsyncResourceTest {
     kansalaisuus.setKansalaisuusKoodi("246");
     onrHenkilo.setKansalaisuus(Sets.newHashSet(kansalaisuus));
 
-    when(httpClient.postJson(
-            eq(applicationsUrl),
-            any(Duration.class),
-            eq(Lists.newArrayList(hakemusOid1, hakemusOid2, hakemusOid3)),
-            eq(new TypeToken<List<String>>() {}.getType()),
-            eq(new TypeToken<List<AtaruHakemus>>() {}.getType())))
-        .thenReturn(
-            CompletableFuture.completedFuture(MockAtaruAsyncResource.getAtaruHakemukset(null)));
+    when(httpClient.postJson(eq(applicationsUrl), any(Duration.class),
+        eq(Lists.newArrayList(hakemusOid1, hakemusOid2, hakemusOid3)), eq(new TypeToken<List<String>>() {
+        }.getType()), eq(new TypeToken<List<AtaruHakemus>>() {
+        }.getType())))
+            .thenReturn(CompletableFuture.completedFuture(MockAtaruAsyncResource.getAtaruHakemukset(null)));
 
     when(mockKoodisto.maatjavaltiot2ToMaatjavaltiot1(eq("maatjavaltiot2_246")))
         .thenReturn(CompletableFuture.completedFuture(suomiKoodi));
@@ -94,10 +89,8 @@ public class AtaruAsyncResourceTest {
     when(mockOnr.haeHenkilot(Collections.singletonList("1.2.246.562.24.86368188549")))
         .thenReturn(CompletableFuture.completedFuture(henkiloResponse));
 
-    List<HakemusWrapper> applications =
-        ataruAsyncResource
-            .getApplicationsByOids(Lists.newArrayList(hakemusOid1, hakemusOid2, hakemusOid3))
-            .get(1, SECONDS);
+    List<HakemusWrapper> applications = ataruAsyncResource
+        .getApplicationsByOids(Lists.newArrayList(hakemusOid1, hakemusOid2, hakemusOid3)).get(1, SECONDS);
     assertEquals(3, applications.size());
     assertEquals("FIN", applications.get(0).getAsuinmaa());
     assertEquals("MAF", applications.get(1).getAsuinmaa());

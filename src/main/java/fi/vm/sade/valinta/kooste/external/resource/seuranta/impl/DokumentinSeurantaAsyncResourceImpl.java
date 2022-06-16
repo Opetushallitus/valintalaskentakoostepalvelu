@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DokumentinSeurantaAsyncResourceImpl extends UrlConfiguredResource
-    implements DokumentinSeurantaAsyncResource {
+    implements
+    DokumentinSeurantaAsyncResource {
 
   @Autowired
   public DokumentinSeurantaAsyncResourceImpl(
@@ -25,31 +26,22 @@ public class DokumentinSeurantaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   public Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId) {
-    return postAsObservableLazily(
-        getUrl("seuranta-service.dokumentinseuranta.paivitadokumenttiid", uuid),
-        DokumenttiDto.class,
-        Entity.entity(dokumenttiId, MediaType.TEXT_PLAIN));
+    return postAsObservableLazily(getUrl("seuranta-service.dokumentinseuranta.paivitadokumenttiid", uuid),
+        DokumenttiDto.class, Entity.entity(dokumenttiId, MediaType.TEXT_PLAIN));
   }
 
   public Observable<String> luoDokumentti(String kuvaus) {
-    return postAsObservableLazily(
-        getUrl("seuranta-service.dokumentinseuranta"),
-        String.class,
+    return postAsObservableLazily(getUrl("seuranta-service.dokumentinseuranta"), String.class,
         Entity.entity(kuvaus, MediaType.TEXT_PLAIN));
   }
 
   public Observable<DokumenttiDto> paivitaKuvaus(String uuid, String kuvaus) {
-    return postAsObservableLazily(
-        getUrl("seuranta-service.dokumentinseuranta.paivitakuvaus", uuid),
-        DokumenttiDto.class,
-        Entity.entity(kuvaus, MediaType.TEXT_PLAIN));
+    return postAsObservableLazily(getUrl("seuranta-service.dokumentinseuranta.paivitakuvaus", uuid),
+        DokumenttiDto.class, Entity.entity(kuvaus, MediaType.TEXT_PLAIN));
   }
 
-  public Observable<DokumenttiDto> lisaaVirheilmoituksia(
-      String uuid, List<VirheilmoitusDto> virheilmoitukset) {
-    return postAsObservableLazily(
-        getUrl("seuranta-service.dokumentinseuranta.lisaavirheita", uuid),
-        DokumenttiDto.class,
-        Entity.json(virheilmoitukset));
+  public Observable<DokumenttiDto> lisaaVirheilmoituksia(String uuid, List<VirheilmoitusDto> virheilmoitukset) {
+    return postAsObservableLazily(getUrl("seuranta-service.dokumentinseuranta.lisaavirheita", uuid),
+        DokumenttiDto.class, Entity.json(virheilmoitukset));
   }
 }

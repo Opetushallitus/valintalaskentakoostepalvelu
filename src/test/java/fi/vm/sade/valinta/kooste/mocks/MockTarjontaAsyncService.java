@@ -35,26 +35,15 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
-  public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(
-      Iterable<String> organizationOids) {
+  public CompletableFuture<Set<String>> hakukohdeSearchByOrganizationOids(Iterable<String> organizationOids) {
     return null;
   }
 
   @Override
   public CompletableFuture<AbstractHakukohde> haeHakukohde(String hakukohdeOid) {
     return CompletableFuture.completedFuture(
-        new TarjontaHakukohde(
-            hakukohdeOid,
-            null,
-            new HashMap<>(),
-            hakuOid,
-            ImmutableSet.of("1.2.3.44444.5"),
-            ImmutableSet.of("mocktoteutusoid"),
-            null,
-            new HashSet<>(),
-            null,
-            Collections.emptySet(),
-            null));
+        new TarjontaHakukohde(hakukohdeOid, null, new HashMap<>(), hakuOid, ImmutableSet.of("1.2.3.44444.5"),
+            ImmutableSet.of("mocktoteutusoid"), null, new HashSet<>(), null, Collections.emptySet(), null));
   }
 
   @Override
@@ -68,8 +57,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
       Set<String> kielet = new HashSet<>();
       kielet.add("kieli_fi");
       kielet.add("kieli_sv");
-      return CompletableFuture.completedFuture(
-          new Toteutus(toteutusOid, null, null, null, kielet, new HashSet<>()));
+      return CompletableFuture
+          .completedFuture(new Toteutus(toteutusOid, null, null, null, kielet, new HashSet<>()));
     }
     return null;
   }
@@ -98,8 +87,7 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
-  public CompletableFuture<HakukohdeValintaperusteetDTO> findValintaperusteetByOid(
-      String hakukohdeOid) {
+  public CompletableFuture<HakukohdeValintaperusteetDTO> findValintaperusteetByOid(String hakukohdeOid) {
     return null;
   }
 

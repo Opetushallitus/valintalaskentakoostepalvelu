@@ -21,8 +21,7 @@ public final class LaskentaStarterActor extends UntypedActor {
   }
 
   public static Props props(final LaskentaSupervisor laskentaSupervisor, final int maxWorkers) {
-    return Props.create(
-        LaskentaStarterActor.class, () -> new LaskentaStarterActor(laskentaSupervisor, maxWorkers));
+    return Props.create(LaskentaStarterActor.class, () -> new LaskentaStarterActor(laskentaSupervisor, maxWorkers));
   }
 
   @Override
@@ -52,15 +51,13 @@ public final class LaskentaStarterActor extends UntypedActor {
   }
 
   private void startLaskentaIfWorkersAvailable() {
-    int wasNumberOfWorkers =
-        workerCount.getAndUpdate(
-            current -> {
-              if (current < maxWorkers) {
-                return ++current;
-              } else {
-                return current;
-              }
-            });
+    int wasNumberOfWorkers = workerCount.getAndUpdate(current -> {
+      if (current < maxWorkers) {
+        return ++current;
+      } else {
+        return current;
+      }
+    });
     LOG.info("Process; maxWorkers: {}, workerCount: {}", maxWorkers, wasNumberOfWorkers);
     if (wasNumberOfWorkers < maxWorkers) { // if it was less than maxWorkers then it was incremented
       LOG.info("Reserving a new worker, workerCount: {}", (wasNumberOfWorkers + 1));
@@ -77,15 +74,20 @@ public final class LaskentaStarterActor extends UntypedActor {
     LOG.info("Releasing worker, workerCount: {}", workerCount);
   }
 
-  public static class WorkAvailable {}
+  public static class WorkAvailable {
+  }
 
-  public static class NoWorkAvailable {}
+  public static class NoWorkAvailable {
+  }
 
-  public static class WorkerAvailable {}
+  public static class WorkerAvailable {
+  }
 
-  public static class ResetWorkerCount {}
+  public static class ResetWorkerCount {
+  }
 
-  public static class StartAllWorkers {}
+  public static class StartAllWorkers {
+  }
 
   public static class MaxWorkerCount {
     public final int maxWorkerCount;

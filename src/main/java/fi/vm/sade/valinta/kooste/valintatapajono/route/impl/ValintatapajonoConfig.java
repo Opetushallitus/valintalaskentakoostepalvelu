@@ -16,8 +16,7 @@ public class ValintatapajonoConfig {
   @Bean
   public ValintatapajonoVientiRoute getValintatapajonoVientiRoute(
       @Value(ValintatapajonoVientiRoute.SEDA_VALINTATAPAJONO_VIENTI) String valintatapajonoVienti,
-      @Qualifier("javaDslCamelContext") CamelContext context)
-      throws Exception {
+      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
     return ProxyWithAnnotationHelper.createProxy(
         context.getEndpoint(ValintatapajonoVientiRoute.SEDA_VALINTATAPAJONO_VIENTI),
         ValintatapajonoVientiRoute.class);

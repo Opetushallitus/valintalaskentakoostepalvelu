@@ -24,11 +24,14 @@ import org.springframework.security.core.GrantedAuthority;
 
 public class AuthorityCheckServiceTest {
 
-  @InjectMocks private AuthorityCheckService authorityCheckService;
+  @InjectMocks
+  private AuthorityCheckService authorityCheckService;
 
-  @Mock private OrganisaatioResource organisaatioResource;
+  @Mock
+  private OrganisaatioResource organisaatioResource;
 
-  @Mock private TarjontaAsyncResource tarjontaAsyncResource;
+  @Mock
+  private TarjontaAsyncResource tarjontaAsyncResource;
 
   @Before
   public void initMocks() throws Exception {
@@ -36,19 +39,8 @@ public class AuthorityCheckServiceTest {
     Mockito.when(organisaatioResource.parentoids("oid.1")).thenReturn("parent.oid.1/oid.1");
     Mockito.when(organisaatioResource.parentoids("oid.2")).thenReturn("parent.oid.2/oid.2");
     Mockito.when(organisaatioResource.parentoids("oid.3")).thenReturn("parent.oid.3/oid.3");
-    Mockito.when(tarjontaAsyncResource.haeHaku("haku.oid"))
-        .thenReturn(
-            CompletableFuture.completedFuture(
-                new Haku(
-                    "haku.oid",
-                    new HashMap<>(),
-                    new HashSet<>(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null)));
+    Mockito.when(tarjontaAsyncResource.haeHaku("haku.oid")).thenReturn(CompletableFuture.completedFuture(
+        new Haku("haku.oid", new HashMap<>(), new HashSet<>(), null, null, null, null, null, null)));
   }
 
   private class TestAuthority implements GrantedAuthority {
@@ -70,22 +62,20 @@ public class AuthorityCheckServiceTest {
     organisaatioOids.add("oid.1");
     organisaatioOids.add("oid.2");
     organisaatioOids.add("oid.3");
-    Collection<? extends GrantedAuthority> userRoles =
-        Collections.singleton(new TestAuthority("authorized_parent.oid.3"));
+    Collection<? extends GrantedAuthority> userRoles = Collections
+        .singleton(new TestAuthority("authorized_parent.oid.3"));
     Collection<String> requiredRoles = Collections.singleton("authorized");
 
-    boolean authorized =
-        authorityCheckService.isAuthorizedForAnyParentOid(
-            organisaatioOids, userRoles, requiredRoles);
+    boolean authorized = authorityCheckService.isAuthorizedForAnyParentOid(organisaatioOids, userRoles,
+        requiredRoles);
     assertTrue(authorized);
 
     Set<String> organisaatioOids2 = new HashSet<>();
     organisaatioOids2.add("oid.1");
     organisaatioOids2.add("oid.2");
 
-    boolean authorized2 =
-        authorityCheckService.isAuthorizedForAnyParentOid(
-            organisaatioOids2, userRoles, requiredRoles);
+    boolean authorized2 = authorityCheckService.isAuthorizedForAnyParentOid(organisaatioOids2, userRoles,
+        requiredRoles);
     assertFalse(authorized2);
   }
 

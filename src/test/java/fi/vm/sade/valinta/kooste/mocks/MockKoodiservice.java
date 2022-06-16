@@ -14,24 +14,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class MockKoodiservice implements KoodiService {
   @Override
-  public List<KoodiType> listKoodiByRelation(
-      final KoodiUriAndVersioType koodiUriAndVersioType,
-      final boolean b,
-      final SuhteenTyyppiType suhteenTyyppiType)
-      throws GenericFault {
+  public List<KoodiType> listKoodiByRelation(final KoodiUriAndVersioType koodiUriAndVersioType, final boolean b,
+      final SuhteenTyyppiType suhteenTyyppiType) throws GenericFault {
     return Arrays.asList();
   }
 
   @Override
   public List<KoodiType> searchKoodisByKoodisto(
-      final SearchKoodisByKoodistoCriteriaType searchKoodisByKoodistoCriteriaType)
-      throws GenericFault {
+      final SearchKoodisByKoodistoCriteriaType searchKoodisByKoodistoCriteriaType) throws GenericFault {
     return Arrays.asList();
   }
 
   @Override
-  public List<KoodiType> searchKoodis(final SearchKoodisCriteriaType searchKoodisCriteriaType)
-      throws GenericFault {
+  public List<KoodiType> searchKoodis(final SearchKoodisCriteriaType searchKoodisCriteriaType) throws GenericFault {
     return Arrays.asList();
   }
 }

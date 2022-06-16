@@ -21,10 +21,8 @@ public class KelaRouteConfig {
   }
 
   @Bean
-  public KelaRoute getKelaRoute(
-      @Value(KelaRoute.SEDA_KELA_LUONTI) String kelaluonti,
-      @Qualifier("javaDslCamelContext") CamelContext context)
-      throws Exception {
+  public KelaRoute getKelaRoute(@Value(KelaRoute.SEDA_KELA_LUONTI) String kelaluonti,
+      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
     return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(kelaluonti), KelaRoute.class);
   }
 }

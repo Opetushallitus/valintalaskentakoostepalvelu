@@ -8,8 +8,7 @@ import java.util.function.Function;
 
 public class Memoizer {
 
-  private static <T, U> Function<T, U> doMemoize(
-      final Function<T, U> function, int time, TimeUnit timeunit) {
+  private static <T, U> Function<T, U> doMemoize(final Function<T, U> function, int time, TimeUnit timeunit) {
     Cache<T, U> cache = CacheBuilder.<T, U>newBuilder().expireAfterWrite(time, timeunit).build();
     return input -> {
       try {
@@ -20,8 +19,7 @@ public class Memoizer {
     };
   }
 
-  public static <T, U> Function<T, U> memoize(
-      final Function<T, U> function, int time, TimeUnit timeunit) {
+  public static <T, U> Function<T, U> memoize(final Function<T, U> function, int time, TimeUnit timeunit) {
     return doMemoize(function, time, timeunit);
   }
 }

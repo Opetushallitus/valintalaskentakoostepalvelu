@@ -11,10 +11,10 @@ public class HakemuksenHarkinnanvaraisuus {
   private String henkiloOid;
   private List<HakutoiveenHarkinnanvaraisuus> hakutoiveet;
 
-  public HakemuksenHarkinnanvaraisuus() {}
+  public HakemuksenHarkinnanvaraisuus() {
+  }
 
-  public HakemuksenHarkinnanvaraisuus(
-      String hakemusOid, List<HakutoiveenHarkinnanvaraisuus> hakutoiveet) {
+  public HakemuksenHarkinnanvaraisuus(String hakemusOid, List<HakutoiveenHarkinnanvaraisuus> hakutoiveet) {
     this.hakemusOid = hakemusOid;
     this.hakutoiveet = hakutoiveet;
   }
@@ -44,12 +44,8 @@ public class HakemuksenHarkinnanvaraisuus {
   }
 
   public boolean hasYksilollistettyMatAi() {
-    return this.hakutoiveet.stream()
-        .anyMatch(
-            ht ->
-                List.of(
-                        HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI,
-                        HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
-                    .contains(ht.getHarkinnanvaraisuudenSyy()));
+    return this.hakutoiveet.stream().anyMatch(
+        ht -> List.of(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI, HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
+            .contains(ht.getHarkinnanvaraisuudenSyy()));
   }
 }

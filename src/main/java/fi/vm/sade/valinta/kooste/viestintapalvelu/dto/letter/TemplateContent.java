@@ -51,17 +51,8 @@ public class TemplateContent implements Comparable<TemplateContent> {
 
   @Override
   public String toString() {
-    return "TemplateContent [order="
-        + order
-        + ", name="
-        + name
-        + ", content="
-        + content
-        + ", timestamp="
-        + timestamp
-        + ", id="
-        + id
-        + "]";
+    return "TemplateContent [order=" + order + ", name=" + name + ", content=" + content + ", timestamp="
+        + timestamp + ", id=" + id + "]";
   }
 
   @Override

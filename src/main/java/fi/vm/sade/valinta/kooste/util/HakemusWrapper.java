@@ -99,10 +99,8 @@ public abstract class HakemusWrapper {
 
   public abstract boolean equals(Object o);
 
-  public abstract HakemusDTO toHakemusDto(
-      Valintapisteet valintapisteet,
-      Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
-      boolean shouldUseApplicationPersonOid);
+  public abstract HakemusDTO toHakemusDto(Valintapisteet valintapisteet,
+      Map<String, List<String>> hakukohdeRyhmasForHakukohdes, boolean shouldUseApplicationPersonOid);
 
   public abstract List<AtaruHakutoive> ataruHakutoiveet();
 

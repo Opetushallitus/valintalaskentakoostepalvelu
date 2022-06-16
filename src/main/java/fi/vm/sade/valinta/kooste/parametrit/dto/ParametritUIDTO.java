@@ -13,5 +13,6 @@ public class ParametritUIDTO {
   public boolean koekutsujenmuodostaminen;
   public boolean harkinnanvarainenpaatostallennus;
 
-  public ParametritUIDTO() {}
+  public ParametritUIDTO() {
+  }
 }

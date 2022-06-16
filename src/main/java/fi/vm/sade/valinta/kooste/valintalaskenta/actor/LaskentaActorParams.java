@@ -15,18 +15,15 @@ public class LaskentaActorParams {
   private boolean isValintaryhmalaskenta;
 
   public LaskentaActorParams(LaskentaStartParams laskentaStartParams, ParametritDTO parametritDTO) {
-    this(
-        laskentaStartParams,
+    this(laskentaStartParams,
         laskentaStartParams.getHakukohdeDtos().stream()
             .map(hk -> new HakukohdeJaOrganisaatio(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
             .collect(Collectors.toList()),
         parametritDTO);
   }
 
-  public LaskentaActorParams(
-      LaskentaStartParams laskentaStartParams,
-      Collection<HakukohdeJaOrganisaatio> hakukohdeOids,
-      ParametritDTO parametritDTO) {
+  public LaskentaActorParams(LaskentaStartParams laskentaStartParams,
+      Collection<HakukohdeJaOrganisaatio> hakukohdeOids, ParametritDTO parametritDTO) {
     this.laskentaStartParams = laskentaStartParams;
     this.parametritDTO = parametritDTO;
     this.hakukohdeOids = hakukohdeOids;
@@ -82,8 +79,7 @@ public class LaskentaActorParams {
 
   /** Tilapainen workaround resurssin valinnanvaiheen normalisointiin. */
   public LaskentaTyyppi getLaskentaTyyppi() {
-    if (fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi.VALINTARYHMA.equals(
-        laskentaStartParams.getTyyppi())) {
+    if (fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi.VALINTARYHMA.equals(laskentaStartParams.getTyyppi())) {
       return LaskentaTyyppi.VALINTARYHMALASKENTA;
     }
     if (Boolean.TRUE.equals(laskentaStartParams.getValintakoelaskenta())) {

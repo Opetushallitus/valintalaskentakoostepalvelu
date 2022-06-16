@@ -25,13 +25,9 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   private final HenkiloPerustietoDto henkilo;
   private List<String> kansalaisuudet;
   private static final String PREFERENCE_REGEX = "preference\\d-Koulutus-id-eligibility";
-  private static final ImmutableMap<String, String> ELIGIBILITIES =
-      new ImmutableMap.Builder<String, String>()
-          .put("eligible", "ELIGIBLE")
-          .put("uneligible", "INELIGIBLE")
-          .put("unreviewed", "NOT_CHECKED")
-          .put("conditionally-eligible", "CONDITIONALLY_ELIGIBLE")
-          .build();
+  private static final ImmutableMap<String, String> ELIGIBILITIES = new ImmutableMap.Builder<String, String>()
+      .put("eligible", "ELIGIBLE").put("uneligible", "INELIGIBLE").put("unreviewed", "NOT_CHECKED")
+      .put("conditionally-eligible", "CONDITIONALLY_ELIGIBLE").build();
 
   public AtaruHakemusWrapper(AtaruHakemus ataruHakemus, HenkiloPerustietoDto onrHenkilo) {
     hakemus = Objects.requireNonNull(ataruHakemus, "Ataruhakemus oli null.");
@@ -51,18 +47,14 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public String getSukupuoli() {
-    return Stream.of(Optional.ofNullable(henkilo.getSukupuoli()).orElse(StringUtils.EMPTY))
-        .map(
-            s -> {
-              if (NAINEN.equals(s)) {
-                return "Nainen";
-              } else if (MIES.equals(s)) {
-                return "Mies";
-              }
-              return s;
-            })
-        .findAny()
-        .get();
+    return Stream.of(Optional.ofNullable(henkilo.getSukupuoli()).orElse(StringUtils.EMPTY)).map(s -> {
+      if (NAINEN.equals(s)) {
+        return "Nainen";
+      } else if (MIES.equals(s)) {
+        return "Mies";
+      }
+      return s;
+    }).findAny().get();
   }
 
   @Override
@@ -72,10 +64,8 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public String getAidinkieli() {
-    if (null == henkilo.getAidinkieli()
-        || StringUtils.isBlank(henkilo.getAidinkieli().getKieliKoodi())) {
-      throw new IllegalStateException(
-          String.format("Henkilöllä %s ei ole äidinkieltä", henkilo.getOidHenkilo()));
+    if (null == henkilo.getAidinkieli() || StringUtils.isBlank(henkilo.getAidinkieli().getKieliKoodi())) {
+      throw new IllegalStateException(String.format("Henkilöllä %s ei ole äidinkieltä", henkilo.getOidHenkilo()));
     }
     return henkilo.getAidinkieli().getKieliKoodi();
   }
@@ -119,8 +109,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   public String getKansalaisuus() {
     return kansalaisuudet != null
         ? kansalaisuudet.iterator().next()
-        : StringUtils.trimToEmpty(
-            henkilo.getKansalaisuus().iterator().next().getKansalaisuusKoodi());
+        : StringUtils.trimToEmpty(henkilo.getKansalaisuus().iterator().next().getKansalaisuusKoodi());
   }
 
   public void setKansalaisuus(List<String> kansalaisuudet) {
@@ -178,11 +167,8 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public Integer getHakutoiveenPrioriteetti(String hakukohdeOid) {
-    int i =
-        hakemus.getHakutoiveet().stream()
-            .map(ht -> ht.getHakukohdeOid())
-            .collect(Collectors.toList())
-            .indexOf(hakukohdeOid);
+    int i = hakemus.getHakutoiveet().stream().map(ht -> ht.getHakukohdeOid()).collect(Collectors.toList())
+        .indexOf(hakukohdeOid);
     return i < 0 ? null : i + 1;
   }
 
@@ -233,9 +219,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public boolean getLupaTulosEmail() {
-    return "Kyllä"
-            .equals(
-                StringUtils.trimToEmpty(keyvalues.get("paatos-opiskelijavalinnasta-sahkopostiin")))
+    return "Kyllä".equals(StringUtils.trimToEmpty(keyvalues.get("paatos-opiskelijavalinnasta-sahkopostiin")))
         || "Kyllä".equals(StringUtils.trimToEmpty(keyvalues.get("sahkoisen-asioinnin-lupa")));
   }
 
@@ -266,9 +250,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public Collection<String> getHakutoiveOids() {
-    return hakemus.getHakutoiveet().stream()
-        .map(AtaruHakutoive::getHakukohdeOid)
-        .collect(Collectors.toSet());
+    return hakemus.getHakutoiveet().stream().map(AtaruHakutoive::getHakukohdeOid).collect(Collectors.toSet());
   }
 
   @Override
@@ -337,75 +319,55 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
-  public HakemusDTO toHakemusDto(
-      Valintapisteet valintapisteet,
-      Map<String, List<String>> hakukohdeRyhmasForHakukohdes,
-      boolean shouldUseApplicationPersonOid) {
+  public HakemusDTO toHakemusDto(Valintapisteet valintapisteet,
+      Map<String, List<String>> hakukohdeRyhmasForHakukohdes, boolean shouldUseApplicationPersonOid) {
     HakemusDTO hakemusDto = new HakemusDTO();
     hakemusDto.setHakemusoid(getOid());
-    hakemusDto.setHakijaOid(
-        shouldUseApplicationPersonOid ? getApplicationPersonOid() : getPersonOid());
+    hakemusDto.setHakijaOid(shouldUseApplicationPersonOid ? getApplicationPersonOid() : getPersonOid());
     hakemusDto.setHakuoid(getHakuoid());
 
     if (hakemus.getKeyValues() != null) {
-      hakemus
-          .getKeyValues()
-          .forEach(
-              (key, value) -> {
-                if (!"language"
-                    .equals(key)) { // FIXME Hakemuspalvelun ei tulisi palauttaa ONR dataa
-                  AvainArvoDTO aa = new AvainArvoDTO();
-                  aa.setAvain(key);
-                  aa.setArvo(value);
-                  hakemusDto.getAvaimet().add(aa);
-                }
-              });
+      hakemus.getKeyValues().forEach((key, value) -> {
+        if (!"language".equals(key)) { // FIXME Hakemuspalvelun ei tulisi palauttaa ONR dataa
+          AvainArvoDTO aa = new AvainArvoDTO();
+          aa.setAvain(key);
+          aa.setArvo(value);
+          hakemusDto.getAvaimet().add(aa);
+        }
+      });
     }
 
     hakemusDto.getAvaimet().add(new AvainArvoDTO("language", getAidinkieli()));
 
-    IntStream.range(0, hakemus.getHakutoiveet().size())
-        .forEach(
-            i -> {
-              HakukohdeDTO hk = new HakukohdeDTO();
-              final AtaruHakutoive ataruHakutoive = hakemus.getHakutoiveet().get(i);
-              String oid = ataruHakutoive.getHakukohdeOid();
-              hk.setOid(oid);
-              hk.setHakuoid(hakemus.getHakuOid());
-              hk.setPrioriteetti(i + 1);
-              hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(oid));
-              hk.setHarkinnanvaraisuus(false);
-              hakemusDto.getHakukohteet().add(hk);
+    IntStream.range(0, hakemus.getHakutoiveet().size()).forEach(i -> {
+      HakukohdeDTO hk = new HakukohdeDTO();
+      final AtaruHakutoive ataruHakutoive = hakemus.getHakutoiveet().get(i);
+      String oid = ataruHakutoive.getHakukohdeOid();
+      hk.setOid(oid);
+      hk.setHakuoid(hakemus.getHakuOid());
+      hk.setPrioriteetti(i + 1);
+      hk.setHakukohdeRyhmatOids(hakukohdeRyhmasForHakukohdes.get(oid));
+      hk.setHarkinnanvaraisuus(false);
+      hakemusDto.getHakukohteet().add(hk);
 
-              final String eligibilityState = ataruHakutoive.getEligibilityState();
-              if (!ELIGIBILITIES.containsKey(eligibilityState)) {
-                throw new IllegalArgumentException(
-                    String.format(
-                        "Could not parse hakemus preference value: %s", eligibilityState));
-              }
+      final String eligibilityState = ataruHakutoive.getEligibilityState();
+      if (!ELIGIBILITIES.containsKey(eligibilityState)) {
+        throw new IllegalArgumentException(
+            String.format("Could not parse hakemus preference value: %s", eligibilityState));
+      }
 
-              addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id", oid);
-              addAvainArvo(
-                  hakemusDto,
-                  "preference" + hk.getPrioriteetti() + "-Koulutus-id-eligibility",
-                  ELIGIBILITIES.get(eligibilityState));
-              addAvainArvo(
-                  hakemusDto,
-                  "preference" + hk.getPrioriteetti() + "-Koulutus-id-processingState",
-                  upperCase(ataruHakutoive.getProcessingState()));
-              addAvainArvo(
-                  hakemusDto,
-                  "preference" + hk.getPrioriteetti() + "-Koulutus-id-paymentObligation",
-                  upperCase(ataruHakutoive.getPaymentObligation()));
-              addAvainArvo(
-                  hakemusDto,
-                  "preference" + hk.getPrioriteetti() + "-Koulutus-id-languageRequirement",
-                  upperCase(ataruHakutoive.getLanguageRequirement()));
-              addAvainArvo(
-                  hakemusDto,
-                  "preference" + hk.getPrioriteetti() + "-Koulutus-id-degreeRequirement",
-                  upperCase(ataruHakutoive.getDegreeRequirement()));
-            });
+      addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id", oid);
+      addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-eligibility",
+          ELIGIBILITIES.get(eligibilityState));
+      addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-processingState",
+          upperCase(ataruHakutoive.getProcessingState()));
+      addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-paymentObligation",
+          upperCase(ataruHakutoive.getPaymentObligation()));
+      addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-languageRequirement",
+          upperCase(ataruHakutoive.getLanguageRequirement()));
+      addAvainArvo(hakemusDto, "preference" + hk.getPrioriteetti() + "-Koulutus-id-degreeRequirement",
+          upperCase(ataruHakutoive.getDegreeRequirement()));
+    });
 
     setHakemusDTOvalintapisteet(valintapisteet, hakemusDto);
 
@@ -421,12 +383,14 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   }
 
   private String getIfSuomalainenOsoiteOrEmpty(String key) {
-    if (keyvalues.get("home-town") == null) return "";
+    if (keyvalues.get("home-town") == null)
+      return "";
     return StringUtils.trimToEmpty(keyvalues.get(key));
   }
 
   private String getIfUlkomainenOsoiteOrEmpty(String key) {
-    if (keyvalues.get("home-town") != null) return "";
+    if (keyvalues.get("home-town") != null)
+      return "";
     return StringUtils.trimToEmpty(keyvalues.get(key));
   }
 }

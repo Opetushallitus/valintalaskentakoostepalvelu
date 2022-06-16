@@ -35,8 +35,7 @@ public class DelayedSijoittelu implements Delayed {
   }
 
   public int compareTo(Delayed o) {
-    return new Long(getDelay(TimeUnit.MILLISECONDS))
-        .compareTo(new Long(o.getDelay(TimeUnit.MILLISECONDS)));
+    return new Long(getDelay(TimeUnit.MILLISECONDS)).compareTo(new Long(o.getDelay(TimeUnit.MILLISECONDS)));
   }
 
   @Override

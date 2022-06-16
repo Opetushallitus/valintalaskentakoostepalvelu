@@ -15,16 +15,9 @@ public abstract class AbstractHakukohde {
   public final Integer valintojenAloituspaikat;
   public final Map<String, String> ohjeetUudelleOpiskelijalle;
 
-  protected AbstractHakukohde(
-      String oid,
-      Tila tila,
-      Map<String, String> nimi,
-      String hakuOid,
-      Set<String> tarjoajaOids,
-      Set<String> toteutusOids,
-      String hakukohteetUri,
-      Set<String> pohjakoulutusvaatimusUrit,
-      Integer valintojenAloituspaikat,
+  protected AbstractHakukohde(String oid, Tila tila, Map<String, String> nimi, String hakuOid,
+      Set<String> tarjoajaOids, Set<String> toteutusOids, String hakukohteetUri,
+      Set<String> pohjakoulutusvaatimusUrit, Integer valintojenAloituspaikat,
       Map<String, String> ohjeetUudelleOpiskelijalle) {
     this.oid = oid;
     this.tila = tila;
@@ -39,12 +32,6 @@ public abstract class AbstractHakukohde {
   }
 
   public enum Tila {
-    POISTETTU,
-    LUONNOS,
-    VALMIS,
-    JULKAISTU,
-    PERUTTU,
-    KOPIOITU,
-    PUUTTEELLINEN;
+    POISTETTU, LUONNOS, VALMIS, JULKAISTU, PERUTTU, KOPIOITU, PUUTTEELLINEN;
   }
 }

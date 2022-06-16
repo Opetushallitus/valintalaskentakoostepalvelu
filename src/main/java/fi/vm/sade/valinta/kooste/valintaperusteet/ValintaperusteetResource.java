@@ -38,49 +38,29 @@ public class ValintaperusteetResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/hakukohde/{hakukohdeOid}/kayttaaValintalaskentaa")
-  @ApiOperation(
-      value = "Käyttääkö hakukohde valintalaskentaa",
-      response = ValintaperusteetResourceResult.class)
-  public void kayttaaValintalaskentaa(
-      @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
+  @ApiOperation(value = "Käyttääkö hakukohde valintalaskentaa", response = ValintaperusteetResourceResult.class)
+  public void kayttaaValintalaskentaa(@PathParam("hakukohdeOid") String hakukohdeOid,
+      @Suspended AsyncResponse asyncResponse) {
     try {
       asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-      asyncResponse.setTimeoutHandler(
-          asyncResponse1 -> {
-            LOG.error("Valintaperusteet -kutsu aikakatkaistiin hakukohteelle {}", hakukohdeOid);
-            asyncResponse1.resume(
-                Response.serverError().entity("Valintaperusteet -kutsu aikakatkaistiin").build());
-          });
-      Observable.fromFuture(resource.haeValintaperusteet(hakukohdeOid, null))
-          .subscribe(
-              valintaperusteetDTOs -> {
-                boolean kayttaaValintalaskentaa =
-                    !valintaperusteetDTOs.stream()
-                        .filter(
-                            v ->
-                                v.getViimeinenValinnanvaihe()
-                                    == v.getValinnanVaihe().getValinnanVaiheJarjestysluku())
-                        .filter(
-                            v ->
-                                v.getValinnanVaihe().getValintatapajono().stream()
-                                    .anyMatch(
-                                        ValintatapajonoJarjestyskriteereillaDTO
-                                            ::getKaytetaanValintalaskentaa))
-                        .collect(Collectors.toList())
-                        .isEmpty();
+      asyncResponse.setTimeoutHandler(asyncResponse1 -> {
+        LOG.error("Valintaperusteet -kutsu aikakatkaistiin hakukohteelle {}", hakukohdeOid);
+        asyncResponse1.resume(Response.serverError().entity("Valintaperusteet -kutsu aikakatkaistiin").build());
+      });
+      Observable.fromFuture(resource.haeValintaperusteet(hakukohdeOid, null)).subscribe(valintaperusteetDTOs -> {
+        boolean kayttaaValintalaskentaa = !valintaperusteetDTOs.stream().filter(
+            v -> v.getViimeinenValinnanvaihe() == v.getValinnanVaihe().getValinnanVaiheJarjestysluku())
+            .filter(v -> v.getValinnanVaihe().getValintatapajono().stream()
+                .anyMatch(ValintatapajonoJarjestyskriteereillaDTO::getKaytetaanValintalaskentaa))
+            .collect(Collectors.toList()).isEmpty();
 
-                asyncResponse.resume(
-                    Response.ok()
-                        .entity(new ValintaperusteetResourceResult(kayttaaValintalaskentaa))
-                        .build());
-              },
-              e -> {
-                LOG.error("Valintaperusteet -kutsu epäonnistui hakukohteelle " + hakukohdeOid, e);
-                asyncResponse.resume(
-                    Response.serverError()
-                        .entity("Valintaperusteet -kutsu epäonnistui" + e.getMessage())
-                        .build());
-              });
+        asyncResponse.resume(
+            Response.ok().entity(new ValintaperusteetResourceResult(kayttaaValintalaskentaa)).build());
+      }, e -> {
+        LOG.error("Valintaperusteet -kutsu epäonnistui hakukohteelle " + hakukohdeOid, e);
+        asyncResponse.resume(
+            Response.serverError().entity("Valintaperusteet -kutsu epäonnistui" + e.getMessage()).build());
+      });
     } catch (Exception e) {
       String msg = "Odottamaton virhe valintalaskentapäättelyssä hakukohteelle " + hakukohdeOid;
       LOG.error(msg, e);
@@ -91,7 +71,8 @@ public class ValintaperusteetResource {
   public static class ValintaperusteetResourceResult {
     public boolean kayttaaValintalaskentaa;
 
-    public ValintaperusteetResourceResult() {}
+    public ValintaperusteetResourceResult() {
+    }
 
     public ValintaperusteetResourceResult(boolean kayttaaValintalaskentaa) {
       this.kayttaaValintalaskentaa = kayttaaValintalaskentaa;

@@ -21,17 +21,16 @@ public class HakuImportRouteConfig {
   }
 
   @Bean
-  public HakuImportRoute getHakuImportAktivointiRoute(
-      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint(HakuImportRoute.DIRECT_HAKU_IMPORT), HakuImportRoute.class);
+  public HakuImportRoute getHakuImportAktivointiRoute(@Qualifier("javaDslCamelContext") CamelContext context)
+      throws Exception {
+    return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(HakuImportRoute.DIRECT_HAKU_IMPORT),
+        HakuImportRoute.class);
   }
 
   @Bean
   public HakukohdeImportRoute getHakukohdeImportAktivointiRoute(
       @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint(HakukohdeImportRoute.DIRECT_HAKUKOHDE_IMPORT),
+    return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(HakukohdeImportRoute.DIRECT_HAKUKOHDE_IMPORT),
         HakukohdeImportRoute.class);
   }
 }

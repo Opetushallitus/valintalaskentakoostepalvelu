@@ -12,16 +12,8 @@ import javax.ws.rs.core.Response;
 
 public interface ApplicationAsyncResource {
 
-  List<String> DEFAULT_KEYS =
-      Arrays.asList(
-          "applicationSystemId",
-          "oid",
-          "personOid",
-          "answers.henkilotiedot",
-          "answers.lisatiedot",
-          "answers.hakutoiveet",
-          "hakutapa",
-          "maxApplicationOptions");
+  List<String> DEFAULT_KEYS = Arrays.asList("applicationSystemId", "oid", "personOid", "answers.henkilotiedot",
+      "answers.lisatiedot", "answers.hakutoiveet", "hakutapa", "maxApplicationOptions");
   List<String> DEFAULT_STATES = Arrays.asList("ACTIVE", "INCOMPLETE");
   int DEFAULT_ROW_LIMIT = 100000;
 
@@ -29,21 +21,16 @@ public interface ApplicationAsyncResource {
 
   Observable<Set<String>> getApplicationOids(String hakuOid, String hakukohdeOid);
 
-  CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(
-      String hakuOid, Collection<String> hakukohdeOids);
+  CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(String hakuOid, Collection<String> hakukohdeOids);
 
-  CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithPOST(
-      String hakuOid, List<String> hakukohdeOids);
+  CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithPOST(String hakuOid, List<String> hakukohdeOids);
 
   Observable<List<HakemusWrapper>> getApplicationsByHakemusOids(List<String> hakemusOids);
 
-  CompletableFuture<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(
-      String hakuOid, List<String> hakemusOids, List<String> keys);
+  CompletableFuture<List<HakemusWrapper>> getApplicationsByhakemusOidsInParts(String hakuOid,
+      List<String> hakemusOids, List<String> keys);
 
-  Observable<List<HakemusWrapper>> putApplicationPrototypes(
-      String hakuOid,
-      String hakukohdeOid,
-      String tarjoajaOid,
+  Observable<List<HakemusWrapper>> putApplicationPrototypes(String hakuOid, String hakukohdeOid, String tarjoajaOid,
       Collection<HakemusPrototyyppi> hakemusPrototyypit);
 
   Observable<HakemusWrapper> getApplication(String hakemusOid);

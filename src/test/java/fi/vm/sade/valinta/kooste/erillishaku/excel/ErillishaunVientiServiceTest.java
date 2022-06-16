@@ -33,17 +33,14 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 public class ErillishaunVientiServiceTest {
-  final MockApplicationAsyncResource mockApplicationAsyncResource =
-      new MockApplicationAsyncResource();
+  final MockApplicationAsyncResource mockApplicationAsyncResource = new MockApplicationAsyncResource();
   final MockAtaruAsyncResource mockAtaruAsyncResource = new MockAtaruAsyncResource();
   final MockTarjontaAsyncService mockTarjontaAsyncService = new MockTarjontaAsyncService();
-  final MockOrganisaationAsyncResource mockOrganisaationAsyncResource =
-      new MockOrganisaationAsyncResource();
+  final MockOrganisaationAsyncResource mockOrganisaationAsyncResource = new MockOrganisaationAsyncResource();
   final MockDokumenttiAsyncResource mockDokumenttiAsyncResource = new MockDokumenttiAsyncResource();
-  final ValintaTulosServiceAsyncResource mockTilaAsyncResource =
-      Mockito.mock(ValintaTulosServiceAsyncResource.class);
-  final MockKoodistoCachedAsyncResource mockKoodistoCachedAsyncResource =
-      new MockKoodistoCachedAsyncResource(mock(KoodistoAsyncResource.class));
+  final ValintaTulosServiceAsyncResource mockTilaAsyncResource = Mockito.mock(ValintaTulosServiceAsyncResource.class);
+  final MockKoodistoCachedAsyncResource mockKoodistoCachedAsyncResource = new MockKoodistoCachedAsyncResource(
+      mock(KoodistoAsyncResource.class));
 
   @Test
   public void suoritaVientiTest() {
@@ -54,18 +51,11 @@ public class ErillishaunVientiServiceTest {
         .thenReturn(Observable.just(Lists.newArrayList()));
     when(mockTilaAsyncResource.getErillishaunValinnantulokset(any(), anyString()))
         .thenReturn(Observable.just(Lists.newArrayList()));
-    final ErillishakuDTO erillishaku =
-        new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
+    final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
     final KirjeProsessi prosessi = mock(KirjeProsessi.class);
-    final ErillishaunVientiService erillishaunVientiService =
-        new ErillishaunVientiService(
-            mockTilaAsyncResource,
-            mockApplicationAsyncResource,
-            mockAtaruAsyncResource,
-            mockTarjontaAsyncService,
-            mockDokumenttiAsyncResource,
-            mockKoodistoCachedAsyncResource,
-            mockOrganisaationAsyncResource);
+    final ErillishaunVientiService erillishaunVientiService = new ErillishaunVientiService(mockTilaAsyncResource,
+        mockApplicationAsyncResource, mockAtaruAsyncResource, mockTarjontaAsyncService,
+        mockDokumenttiAsyncResource, mockKoodistoCachedAsyncResource, mockOrganisaationAsyncResource);
 
     erillishaunVientiService.vie(auditSession, prosessi, erillishaku);
     verify(prosessi, timeout(10000).times(1)).valmistui(anyString());
@@ -77,24 +67,14 @@ public class ErillishaunVientiServiceTest {
         .thenReturn(Observable.just(Lists.newArrayList()));
     when(mockTilaAsyncResource.fetchLukuvuosimaksut(anyString(), any()))
         .thenReturn(Observable.just(Lists.newArrayList()));
-    final ErillishakuDTO erillishaku =
-        new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
+    final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "1", "1", "1");
     final KirjeProsessi prosessi = mock(KirjeProsessi.class);
     final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
-    final ErillishaunVientiService erillishaunVientiService =
-        new ErillishaunVientiService(
-            mockTilaAsyncResource,
-            failingResource,
-            mockAtaruAsyncResource,
-            mockTarjontaAsyncService,
-            mockDokumenttiAsyncResource,
-            mockKoodistoCachedAsyncResource,
-            mockOrganisaationAsyncResource);
-    when(failingResource.getApplicationsByOid(
-            erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()))
-        .thenReturn(
-            CompletableFuture.failedFuture(
-                new RuntimeException("Vienti epäonnistuu tarkoituksella")));
+    final ErillishaunVientiService erillishaunVientiService = new ErillishaunVientiService(mockTilaAsyncResource,
+        failingResource, mockAtaruAsyncResource, mockTarjontaAsyncService, mockDokumenttiAsyncResource,
+        mockKoodistoCachedAsyncResource, mockOrganisaationAsyncResource);
+    when(failingResource.getApplicationsByOid(erillishaku.getHakuOid(), erillishaku.getHakukohdeOid()))
+        .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Vienti epäonnistuu tarkoituksella")));
 
     erillishaunVientiService.vie(new AuditSession(), prosessi, erillishaku);
     verify(prosessi, timeout(10000).times(1)).keskeyta();
@@ -102,8 +82,7 @@ public class ErillishaunVientiServiceTest {
 
   @Test
   public void suoritaVientiIlmanhakemuksia() {
-    final ErillishakuDTO erillishaku =
-        new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "2", "1", "1");
+    final ErillishakuDTO erillishaku = new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "1", "2", "1", "1");
     final ErillishakuProsessiDTO prosessi = spy(new ErillishakuProsessiDTO(1));
 
     ApplicationAsyncResource applicationMock = mock(ApplicationAsyncResource.class);
@@ -115,24 +94,16 @@ public class ErillishaunVientiServiceTest {
     when(mockTilaAsyncResource.fetchLukuvuosimaksut(anyString(), any()))
         .thenReturn(Observable.just(Lists.newArrayList()));
 
-    final ErillishaunVientiService erillishaunVientiService =
-        new ErillishaunVientiService(
-            mockTilaAsyncResource,
-            applicationMock,
-            mockAtaruAsyncResource,
-            mockTarjontaAsyncService,
-            mockDokumenttiAsyncResource,
-            mockKoodistoCachedAsyncResource,
-            mockOrganisaationAsyncResource);
+    final ErillishaunVientiService erillishaunVientiService = new ErillishaunVientiService(mockTilaAsyncResource,
+        applicationMock, mockAtaruAsyncResource, mockTarjontaAsyncService, mockDokumenttiAsyncResource,
+        mockKoodistoCachedAsyncResource, mockOrganisaationAsyncResource);
     erillishaunVientiService.vie(new AuditSession(), prosessi, erillishaku);
 
     verify(prosessi, timeout(5000).times(1)).valmistui(anyString());
 
-    ImportedErillisHakuExcel excel =
-        new ImportedErillisHakuExcel(
-            Hakutyyppi.KORKEAKOULU,
-            MockDokumenttiAsyncResource.getStoredDocument(prosessi.getDokumenttiId()),
-            mockKoodistoCachedAsyncResource);
+    ImportedErillisHakuExcel excel = new ImportedErillisHakuExcel(Hakutyyppi.KORKEAKOULU,
+        MockDokumenttiAsyncResource.getStoredDocument(prosessi.getDokumenttiId()),
+        mockKoodistoCachedAsyncResource);
     assertEquals(1, excel.rivit.size());
     ErillishakuRivi erillishakuRivi = excel.rivit.get(0);
     assertEquals("123456-7890", erillishakuRivi.getHenkilotunnus());

@@ -4,7 +4,8 @@ import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import java.util.List;
 
 /**
- * Wrapperi sijoittelun HakutoiveDTO:lle jossa meta dataa liittyen kaikkiin hakukohteen hakijoihin
+ * Wrapperi sijoittelun HakutoiveDTO:lle jossa meta dataa liittyen kaikkiin
+ * hakukohteen hakijoihin
  */
 public class MetaHakukohde {
   private final Teksti hakukohdeNimi;
@@ -18,13 +19,8 @@ public class MetaHakukohde {
     this(tarjoajaOid, hakukohdeNimi, tarjoajaNimet, null, null, null);
   }
 
-  public MetaHakukohde(
-      String tarjoajaOid,
-      Teksti hakukohdeNimi,
-      List<Teksti> tarjoajaNimet,
-      String hakukohteenKieli,
-      String opetuskieli,
-      Teksti ohjeetUudelleOpiskelijalle) {
+  public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, List<Teksti> tarjoajaNimet, String hakukohteenKieli,
+      String opetuskieli, Teksti ohjeetUudelleOpiskelijalle) {
     this.hakukohdeNimi = hakukohdeNimi;
     this.tarjoajaNimet = tarjoajaNimet;
     this.hakukohteenKieli = hakukohteenKieli;
@@ -33,10 +29,7 @@ public class MetaHakukohde {
     this.ohjeetUudelleOpiskelijalle = ohjeetUudelleOpiskelijalle;
   }
 
-  public MetaHakukohde(
-      String tarjoajaOid,
-      Teksti hakukohdeNimi,
-      List<Teksti> tarjoajaNimet,
+  public MetaHakukohde(String tarjoajaOid, Teksti hakukohdeNimi, List<Teksti> tarjoajaNimet,
       String hakukohteenKieli) {
     this(tarjoajaOid, hakukohdeNimi, tarjoajaNimet, hakukohteenKieli, null, null);
   }

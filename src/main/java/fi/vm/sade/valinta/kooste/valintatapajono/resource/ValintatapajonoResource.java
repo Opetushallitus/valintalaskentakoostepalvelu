@@ -51,39 +51,35 @@ import org.springframework.stereotype.Controller;
 @Controller
 @Path("valintatapajonolaskenta")
 @PreAuthorize("isAuthenticated()")
-@Api(
-    value = "/valintatapajonolaskenta",
-    description = "Valintatapajonon tuonti ja vienti taulukkolaskentaan")
+@Api(value = "/valintatapajonolaskenta", description = "Valintatapajonon tuonti ja vienti taulukkolaskentaan")
 public class ValintatapajonoResource {
-  public static final String ROLE_TULOSTENTUONTI =
-      "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
+  public static final String ROLE_TULOSTENTUONTI = "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
   private final Logger LOG = LoggerFactory.getLogger(ValintatapajonoResource.class);
 
-  @Autowired private Authorizer authorizer;
-  @Autowired private ValintatapajonoTuontiService valintatapajonoTuontiService;
+  @Autowired
+  private Authorizer authorizer;
+  @Autowired
+  private ValintatapajonoTuontiService valintatapajonoTuontiService;
 
   @Autowired(required = false)
   private ValintatapajonoVientiRoute valintatapajonoVienti;
 
-  @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
-  @Autowired private TarjontaAsyncResource tarjontaResource;
+  @Autowired
+  private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
+  @Autowired
+  private TarjontaAsyncResource tarjontaResource;
 
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
   @POST
   @Path("/vienti")
   @Consumes("application/json")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Valintatapajonon vienti taulukkolaskentaan",
-      response = ProsessiId.class)
-  public ProsessiId vienti(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
+  @ApiOperation(consumes = "application/json", value = "Valintatapajonon vienti taulukkolaskentaan", response = ProsessiId.class)
+  public ProsessiId vienti(@QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid,
       @QueryParam("valintatapajonoOid") String valintatapajonoOid) {
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
-    DokumenttiProsessi prosessi =
-        new DokumenttiProsessi("Valintatapajono", "vienti", hakuOid, Arrays.asList(hakukohdeOid));
+    DokumenttiProsessi prosessi = new DokumenttiProsessi("Valintatapajono", "vienti", hakuOid,
+        Arrays.asList(hakukohdeOid));
     valintatapajonoVienti.vie(prosessi, hakuOid, hakukohdeOid, valintatapajonoOid);
     dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
     return prosessi.toProsessiId();
@@ -94,17 +90,10 @@ public class ValintatapajonoResource {
   @Path("/tuonti")
   @Consumes("application/octet-stream")
   @Produces("text/plain")
-  @ApiOperation(
-      consumes = "application/octet-stream",
-      value = "Valintatapajonon tuonti taulukkolaskennasta",
-      response = List.class)
-  public void tuonti(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-      InputStream file,
-      @Suspended AsyncResponse asyncResponse,
-      @Context HttpServletRequest request) {
+  @ApiOperation(consumes = "application/octet-stream", value = "Valintatapajonon tuonti taulukkolaskennasta", response = List.class)
+  public void tuonti(@QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid,
+      @QueryParam("valintatapajonoOid") String valintatapajonoOid, InputStream file,
+      @Suspended AsyncResponse asyncResponse, @Context HttpServletRequest request) {
     final User user = AuditLog.getUser(request);
     asyncResponse.setTimeout(5L, MINUTES);
     asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
@@ -114,39 +103,20 @@ public class ValintatapajonoResource {
     try {
       IOUtils.copy(file, bytes = new ByteArrayOutputStream());
       IOUtils.closeQuietly(file);
-      valintatapajonoTuontiService.tuo(
-          (valinnanvaiheet, hakemukset) -> {
-            ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
-            try {
-              ValintatapajonoExcel valintatapajonoExcel =
-                  new ValintatapajonoExcel(
-                      hakuOid,
-                      hakukohdeOid,
-                      valintatapajonoOid,
-                      "",
-                      "",
-                      valinnanvaiheet,
-                      hakemukset,
-                      Arrays.asList(listaus));
-              valintatapajonoExcel
-                  .getExcel()
-                  .tuoXlsx(new ByteArrayInputStream(bytes.toByteArray()));
-            } catch (Throwable t) {
-              throw new RuntimeException(t);
-            }
-            return listaus.getRivit();
-          },
-          hakuOid,
-          hakukohdeOid,
-          tarjoajaOid,
-          valintatapajonoOid,
-          asyncResponse,
-          user);
+      valintatapajonoTuontiService.tuo((valinnanvaiheet, hakemukset) -> {
+        ValintatapajonoDataRiviListAdapter listaus = new ValintatapajonoDataRiviListAdapter();
+        try {
+          ValintatapajonoExcel valintatapajonoExcel = new ValintatapajonoExcel(hakuOid, hakukohdeOid,
+              valintatapajonoOid, "", "", valinnanvaiheet, hakemukset, Arrays.asList(listaus));
+          valintatapajonoExcel.getExcel().tuoXlsx(new ByteArrayInputStream(bytes.toByteArray()));
+        } catch (Throwable t) {
+          throw new RuntimeException(t);
+        }
+        return listaus.getRivit();
+      }, hakuOid, hakukohdeOid, tarjoajaOid, valintatapajonoOid, asyncResponse, user);
     } catch (Throwable t) {
       asyncResponse.resume(
-          Response.serverError()
-              .entity("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen")
-              .build());
+          Response.serverError().entity("Valintatapajonon tuonti epäonnistui tiedoston lukemiseen").build());
     }
   }
 
@@ -155,49 +125,29 @@ public class ValintatapajonoResource {
   @Path("/tuonti/json")
   @Consumes("application/json")
   @Produces("text/plain")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Valintatapajonon tuonti jsonista",
-      response = List.class)
-  public void tuonti(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-      ValintatapajonoRivit rivit,
-      @Suspended AsyncResponse asyncResponse,
-      @Context HttpServletRequest request) {
+  @ApiOperation(consumes = "application/json", value = "Valintatapajonon tuonti jsonista", response = List.class)
+  public void tuonti(@QueryParam("hakuOid") String hakuOid, @QueryParam("hakukohdeOid") String hakukohdeOid,
+      @QueryParam("valintatapajonoOid") String valintatapajonoOid, ValintatapajonoRivit rivit,
+      @Suspended AsyncResponse asyncResponse, @Context HttpServletRequest request) {
     final User user = AuditLog.getUser(request);
     asyncResponse.setTimeout(5L, MINUTES);
     asyncResponse.setTimeoutHandler(getTimeoutHandler(hakuOid, hakukohdeOid));
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
-    valintatapajonoTuontiService.tuo(
-        (valinnanvaiheet, hakemukset) -> rivit.getRivit(),
-        hakuOid,
-        hakukohdeOid,
-        tarjoajaOid,
-        valintatapajonoOid,
-        asyncResponse,
-        user);
+    valintatapajonoTuontiService.tuo((valinnanvaiheet, hakemukset) -> rivit.getRivit(), hakuOid, hakukohdeOid,
+        tarjoajaOid, valintatapajonoOid, asyncResponse, user);
   }
 
   private TimeoutHandler getTimeoutHandler(String hakuOid, String hakukohdeOid) {
     return asyncResponse1 -> {
-      LOG.error(
-          "Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
-      asyncResponse1.resume(
-          Response.serverError().entity("Valintatapajonon tuonti on aikakatkaistu").build());
+      LOG.error("Valintatapajonon tuonti on aikakatkaistu: /haku/{}/hakukohde/{}", hakuOid, hakukohdeOid);
+      asyncResponse1.resume(Response.serverError().entity("Valintatapajonon tuonti on aikakatkaistu").build());
     };
   }
 
   private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
     try {
-      return tarjontaResource
-          .haeHakukohde(hakukohdeOid)
-          .get(1, MINUTES)
-          .tarjoajaOids
-          .iterator()
-          .next();
+      return tarjontaResource.haeHakukohde(hakukohdeOid).get(1, MINUTES).tarjoajaOids.iterator().next();
     } catch (InterruptedException | ExecutionException | TimeoutException e) {
       throw new RuntimeException(e);
     }

@@ -8,10 +8,10 @@ public class HakutoiveenHarkinnanvaraisuus {
   private String hakukohdeOid;
   private HarkinnanvaraisuudenSyy harkinnanvaraisuudenSyy;
 
-  public HakutoiveenHarkinnanvaraisuus() {}
+  public HakutoiveenHarkinnanvaraisuus() {
+  }
 
-  public HakutoiveenHarkinnanvaraisuus(
-      String hakukohdeOid, HarkinnanvaraisuudenSyy harkinnanvaraisuudenSyy) {
+  public HakutoiveenHarkinnanvaraisuus(String hakukohdeOid, HarkinnanvaraisuudenSyy harkinnanvaraisuudenSyy) {
     this.hakukohdeOid = hakukohdeOid;
     this.harkinnanvaraisuudenSyy = harkinnanvaraisuudenSyy;
   }

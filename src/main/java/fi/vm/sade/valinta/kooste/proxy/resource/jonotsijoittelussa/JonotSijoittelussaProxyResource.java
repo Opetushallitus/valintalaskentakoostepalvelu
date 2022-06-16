@@ -36,79 +36,55 @@ import org.springframework.stereotype.Controller;
 public class JonotSijoittelussaProxyResource {
   private static final Logger LOG = LoggerFactory.getLogger(JonotSijoittelussaProxyResource.class);
 
-  @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
-  @Autowired private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
-  @Autowired private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
+  @Autowired
+  private TarjontaAsyncResource tarjontaAsyncResource;
+  @Autowired
+  private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
+  @Autowired
+  private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+  @PreAuthorize("hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   @GET
   @Path("/hakuOid/{hakuOid}")
-  public void jonotSijoittelussa(
-      @PathParam("hakuOid") String hakuOid, @Suspended final AsyncResponse asyncResponse) {
+  public void jonotSijoittelussa(@PathParam("hakuOid") String hakuOid, @Suspended final AsyncResponse asyncResponse) {
     asyncResponse.setTimeout(5L, TimeUnit.MINUTES);
     asyncResponse.setTimeoutHandler(this::handleTimeout);
-    final Observable<List<JonoDto>> laskennanJonot =
-        valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid);
-    final Observable<Map<String, List<ValintatapajonoDTO>>> valintaperusteidenJonot =
-        Observable.fromFuture(tarjontaAsyncResource.haunHakukohteet(hakuOid))
-            .switchMap(valintaperusteetAsyncResource::haeValintatapajonotSijoittelulle);
-    Observable.combineLatest(
-            laskennanJonot,
-            valintaperusteidenJonot,
-            (jonotLaskennassa, jonotValintaperusteissa) -> {
-              final List<Jono> fromValintaperusteet =
-                  jonotValintaperusteissa.entrySet().stream()
-                      .flatMap(
-                          e ->
-                              e.getValue().stream()
-                                  .map(
-                                      jono ->
-                                          new Jono(
-                                              e.getKey(),
-                                              jono.getOid(),
-                                              Optional.empty(),
-                                              jono.getSiirretaanSijoitteluun(),
-                                              Optional.ofNullable(jono.getAktiivinen()))))
-                      .collect(Collectors.toList());
-              final List<Jono> fromLaskenta =
-                  jonotLaskennassa.stream()
-                      .map(
-                          j ->
-                              new Jono(
-                                  j.getHakukohdeOid(),
-                                  j.getValintatapajonoOid(),
-                                  Optional.of(j.getValmisSijoiteltavaksi()),
-                                  j.getSiirretaanSijoitteluun(),
-                                  Optional.empty()))
-                      .collect(Collectors.toList());
-              List<HakukohdePair> hakukohdePairs =
-                  JonoUtil.pairHakukohteet(fromLaskenta, fromValintaperusteet);
-              return JonoUtil.puutteellisetHakukohteet(hakukohdePairs);
-            })
-        .subscribe(
-            laskennastaPuuttuvatHakukohdeOids ->
-                asyncResponse.resume(
-                    Response.ok(
-                            new Gson().toJson(laskennastaPuuttuvatHakukohdeOids),
-                            MediaType.APPLICATION_JSON_TYPE)
-                        .build()),
-            exception -> {
-              LOG.error(
-                  "Jonojen tarkistus sijoittelussa epaonnistui haulle {}!", hakuOid, exception);
+    final Observable<List<JonoDto>> laskennanJonot = valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid);
+    final Observable<Map<String, List<ValintatapajonoDTO>>> valintaperusteidenJonot = Observable
+        .fromFuture(tarjontaAsyncResource.haunHakukohteet(hakuOid))
+        .switchMap(valintaperusteetAsyncResource::haeValintatapajonotSijoittelulle);
+    Observable
+        .combineLatest(laskennanJonot, valintaperusteidenJonot, (jonotLaskennassa, jonotValintaperusteissa) -> {
+          final List<Jono> fromValintaperusteet = jonotValintaperusteissa.entrySet().stream().flatMap(e -> e
+              .getValue().stream()
+              .map(jono -> new Jono(e.getKey(), jono.getOid(), Optional.empty(),
+                  jono.getSiirretaanSijoitteluun(), Optional.ofNullable(jono.getAktiivinen()))))
+              .collect(Collectors.toList());
+          final List<Jono> fromLaskenta = jonotLaskennassa.stream()
+              .map(j -> new Jono(j.getHakukohdeOid(), j.getValintatapajonoOid(),
+                  Optional.of(j.getValmisSijoiteltavaksi()), j.getSiirretaanSijoitteluun(),
+                  Optional.empty()))
+              .collect(Collectors.toList());
+          List<HakukohdePair> hakukohdePairs = JonoUtil.pairHakukohteet(fromLaskenta, fromValintaperusteet);
+          return JonoUtil.puutteellisetHakukohteet(hakukohdePairs);
+        })
+        .subscribe(laskennastaPuuttuvatHakukohdeOids -> asyncResponse.resume(Response
+            .ok(new Gson().toJson(laskennastaPuuttuvatHakukohdeOids), MediaType.APPLICATION_JSON_TYPE)
+            .build()), exception -> {
+              LOG.error("Jonojen tarkistus sijoittelussa epaonnistui haulle {}!", hakuOid, exception);
               asyncResponse.resume(Response.serverError().entity(exception).build());
             });
   }
 
   private void handleTimeout(AsyncResponse handler) {
-    String explanation =
-        String.format(
-            "JonotSijoittelussaProxyResource -palvelukutsu on aikakatkaistu: /proxy/jonotsijoittelussa/hakuOid/{}");
+    String explanation = String.format(
+        "JonotSijoittelussaProxyResource -palvelukutsu on aikakatkaistu: /proxy/jonotsijoittelussa/hakuOid/{}");
     LOG.error(explanation);
     try {
       handler.resume(Response.serverError().entity(explanation).build());
     } catch (Throwable t) {
-      // dont care! timeout callback is racing with real response. throws when real response is
+      // dont care! timeout callback is racing with real response. throws when real
+      // response is
       // faster.
     }
   }

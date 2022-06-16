@@ -8,6 +8,5 @@ import java.util.concurrent.CompletableFuture;
 public interface KoskiAsyncResource {
   CompletableFuture<Set<KoskiOppija>> findKoskiOppijat(List<String> oppijanumerot);
 
-  CompletableFuture<JsonElement> findVersionOfOpiskeluoikeus(
-      String opiskeluoikeudenOid, int versionumero);
+  CompletableFuture<JsonElement> findVersionOfOpiskeluoikeus(String opiskeluoikeudenOid, int versionumero);
 }

@@ -16,8 +16,7 @@ public class Monivalinta extends Solu {
     this.preferoituleveys = 0;
   }
 
-  public Monivalinta(
-      String teksti, Collection<String> vaihtoehdot, boolean muokattava, int preferoituleveys) {
+  public Monivalinta(String teksti, Collection<String> vaihtoehdot, boolean muokattava, int preferoituleveys) {
     super(null);
     this.vaihtoehdot = vaihtoehdot;
     this.teksti = teksti;

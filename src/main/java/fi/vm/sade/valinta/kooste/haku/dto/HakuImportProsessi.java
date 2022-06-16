@@ -8,8 +8,7 @@ public class HakuImportProsessi extends Prosessi {
   private volatile int hakukohteita = 0;
   private AtomicInteger importoitu = new AtomicInteger();
   private AtomicInteger tuonti = new AtomicInteger();
-  private CopyOnWriteArrayList<String> epaonnistuneetHakukohteet =
-      new CopyOnWriteArrayList<String>();
+  private CopyOnWriteArrayList<String> epaonnistuneetHakukohteet = new CopyOnWriteArrayList<String>();
 
   public HakuImportProsessi(String toiminto, String hakuOid) {
     super("Haku Import", toiminto, hakuOid);

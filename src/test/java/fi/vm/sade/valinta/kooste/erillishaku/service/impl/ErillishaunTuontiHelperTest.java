@@ -25,122 +25,26 @@ public class ErillishaunTuontiHelperTest {
   private static final String PERSON_1_SYNTYMA_AIKA_SUOMALAINEN_MUOTO = "01.01.2000";
   private static final String PERSON_2_SYNTYMA_AIKA_SUOMALAINEN_MUOTO = "02.01.2000";
 
-  private static final ErillishakuRivi ERILLISHAKU_RIVI_1 =
-      new ErillishakuRivi(
-          null,
-          PERSON_1_SUKUNIMI,
-          PERSON_1_ETUNIMI,
-          null,
-          null,
-          PERSON_1_SYNTYMA_AIKA_SUOMALAINEN_MUOTO,
-          Sukupuoli.MIES,
-          PERSON_1_OID,
-          null,
-          null,
-          false,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          false,
-          false,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null);
-  private static final ErillishakuRivi ERILLISHAKU_RIVI_2 =
-      new ErillishakuRivi(
-          null,
-          PERSON_2_SUKUNIMI,
-          PERSON_2_ETUNIMI,
-          null,
-          null,
-          PERSON_2_SYNTYMA_AIKA_SUOMALAINEN_MUOTO,
-          Sukupuoli.NAINEN,
-          PERSON_2_OID,
-          null,
-          null,
-          false,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          false,
-          false,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null);
+  private static final ErillishakuRivi ERILLISHAKU_RIVI_1 = new ErillishakuRivi(null, PERSON_1_SUKUNIMI,
+      PERSON_1_ETUNIMI, null, null, PERSON_1_SYNTYMA_AIKA_SUOMALAINEN_MUOTO, Sukupuoli.MIES, PERSON_1_OID, null,
+      null, false, null, null, null, null, null, null, null, null, null, null, false, false, null, null, null,
+      null, null, null, null, null, null, null, null, null);
+  private static final ErillishakuRivi ERILLISHAKU_RIVI_2 = new ErillishakuRivi(null, PERSON_2_SUKUNIMI,
+      PERSON_2_ETUNIMI, null, null, PERSON_2_SYNTYMA_AIKA_SUOMALAINEN_MUOTO, Sukupuoli.NAINEN, PERSON_2_OID, null,
+      null, false, null, null, null, null, null, null, null, null, null, null, false, false, null, null, null,
+      null, null, null, null, null, null, null, null, null);
 
-  /* Erillinen erillishakurivi jossa hetu mukana, koska hetusta päätellään sukupuoli joka yliajaa parametrina annetun sukupuolen */
-  private static final ErillishakuRivi ERILLISHAKU_RIVI_1_HETULLINEN =
-      new ErillishakuRivi(
-          null,
-          PERSON_1_SUKUNIMI,
-          PERSON_1_ETUNIMI,
-          PERSON_1_HETU,
-          null,
-          PERSON_1_SYNTYMA_AIKA_SUOMALAINEN_MUOTO,
-          null,
-          PERSON_1_OID,
-          null,
-          null,
-          false,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          false,
-          false,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null);
+  /*
+   * Erillinen erillishakurivi jossa hetu mukana, koska hetusta päätellään
+   * sukupuoli joka yliajaa parametrina annetun sukupuolen
+   */
+  private static final ErillishakuRivi ERILLISHAKU_RIVI_1_HETULLINEN = new ErillishakuRivi(null, PERSON_1_SUKUNIMI,
+      PERSON_1_ETUNIMI, PERSON_1_HETU, null, PERSON_1_SYNTYMA_AIKA_SUOMALAINEN_MUOTO, null, PERSON_1_OID, null,
+      null, false, null, null, null, null, null, null, null, null, null, null, false, false, null, null, null,
+      null, null, null, null, null, null, null, null, null);
 
-  private static final List<ErillishakuRivi> ERILLISHAKU_RIVIT =
-      Arrays.asList(ERILLISHAKU_RIVI_1, ERILLISHAKU_RIVI_2, ERILLISHAKU_RIVI_1_HETULLINEN);
+  private static final List<ErillishakuRivi> ERILLISHAKU_RIVIT = Arrays.asList(ERILLISHAKU_RIVI_1, ERILLISHAKU_RIVI_2,
+      ERILLISHAKU_RIVI_1_HETULLINEN);
 
   private HenkiloPerustietoDto henkiloPerustietoDto;
 
@@ -152,8 +56,8 @@ public class ErillishaunTuontiHelperTest {
   @Test
   public void testaaEtsiHenkiloaVastaavaRiviOidinMukaan() {
     henkiloPerustietoDto.setOidHenkilo(PERSON_1_OID);
-    ErillishakuRivi loytynytRivi =
-        ErillishaunTuontiHelper.etsiHenkiloaVastaavaRivi(henkiloPerustietoDto, ERILLISHAKU_RIVIT);
+    ErillishakuRivi loytynytRivi = ErillishaunTuontiHelper.etsiHenkiloaVastaavaRivi(henkiloPerustietoDto,
+        ERILLISHAKU_RIVIT);
 
     assertEquals(PERSON_1_OID, loytynytRivi.getPersonOid());
   }
@@ -161,8 +65,8 @@ public class ErillishaunTuontiHelperTest {
   @Test
   public void testaaEtsiHenkiloaVastaavaRiviHetunMukaan() {
     henkiloPerustietoDto.setHetu(PERSON_1_HETU);
-    ErillishakuRivi loytynytRivi =
-        ErillishaunTuontiHelper.etsiHenkiloaVastaavaRivi(henkiloPerustietoDto, ERILLISHAKU_RIVIT);
+    ErillishakuRivi loytynytRivi = ErillishaunTuontiHelper.etsiHenkiloaVastaavaRivi(henkiloPerustietoDto,
+        ERILLISHAKU_RIVIT);
 
     assertEquals(PERSON_1_OID, loytynytRivi.getPersonOid());
   }
@@ -173,8 +77,8 @@ public class ErillishaunTuontiHelperTest {
     henkiloPerustietoDto.setSukupuoli(Sukupuoli.MIES.toString());
     henkiloPerustietoDto.setEtunimet(PERSON_1_ETUNIMI);
     henkiloPerustietoDto.setSukunimi(PERSON_1_SUKUNIMI);
-    ErillishakuRivi loytynytRivi =
-        ErillishaunTuontiHelper.etsiHenkiloaVastaavaRivi(henkiloPerustietoDto, ERILLISHAKU_RIVIT);
+    ErillishakuRivi loytynytRivi = ErillishaunTuontiHelper.etsiHenkiloaVastaavaRivi(henkiloPerustietoDto,
+        ERILLISHAKU_RIVIT);
 
     assertEquals(PERSON_1_OID, loytynytRivi.getPersonOid());
   }

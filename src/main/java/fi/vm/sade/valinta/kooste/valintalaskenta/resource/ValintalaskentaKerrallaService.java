@@ -34,85 +34,66 @@ import org.springframework.stereotype.Service;
 public class ValintalaskentaKerrallaService {
   private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaService.class);
 
-  @Autowired private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
-  @Autowired private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
-  @Autowired private ValintalaskentaKerrallaRoute valintalaskentaRoute;
-  @Autowired private LaskentaSeurantaAsyncResource seurantaAsyncResource;
+  @Autowired
+  private ValintalaskentaKerrallaRouteValvomo valintalaskentaValvomo;
+  @Autowired
+  private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
+  @Autowired
+  private ValintalaskentaKerrallaRoute valintalaskentaRoute;
+  @Autowired
+  private LaskentaSeurantaAsyncResource seurantaAsyncResource;
 
-  public ValintalaskentaKerrallaService() {}
+  public ValintalaskentaKerrallaService() {
+  }
 
   public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback) {
     kaynnistaLaskentaHaulle(laskentaParams, callback, Observable.empty());
   }
 
-  public void kaynnistaLaskentaHaulle(
-      LaskentaParams laskentaParams,
-      Consumer<Response> callback,
+  public void kaynnistaLaskentaHaulle(LaskentaParams laskentaParams, Consumer<Response> callback,
       Observable<HakukohdeOIDAuthorityCheck> authCheck) {
     String hakuOid = laskentaParams.getHakuOid();
-    Optional<String> uuidForExistingNonMaskedLaskenta =
-        uuidForExistingNonMaskedLaskenta(laskentaParams.getMaski(), hakuOid);
+    Optional<String> uuidForExistingNonMaskedLaskenta = uuidForExistingNonMaskedLaskenta(laskentaParams.getMaski(),
+        hakuOid);
 
     if (uuidForExistingNonMaskedLaskenta.isPresent()) {
       String uuid = uuidForExistingNonMaskedLaskenta.get();
-      LOG.warn(
-          "Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun",
-          uuid,
-          uuid);
+      LOG.warn("Laskenta on jo kaynnissa haulle {} joten palautetaan seurantatunnus({}) ajossa olevaan hakuun",
+          uuid, uuid);
       callback.accept(redirectResponse(new TunnisteDto(uuid, false)));
     } else {
       LOG.info("Aloitetaan laskenta haulle {}", hakuOid);
-      valintaperusteetAsyncResource
-          .haunHakukohteet(hakuOid)
-          .subscribe(
-              (List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
-                Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids =
-                    kasitteleHakukohdeViitteet(
-                        hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
+      valintaperusteetAsyncResource.haunHakukohteet(hakuOid)
+          .subscribe((List<HakukohdeViiteDTO> hakukohdeViitteet) -> {
+            Collection<HakukohdeJaOrganisaatio> haunHakukohteetOids = kasitteleHakukohdeViitteet(
+                hakukohdeViitteet, hakuOid, laskentaParams.getMaski(), callback);
 
-                if (!LaskentaTyyppi.VALINTARYHMA.equals(laskentaParams.getLaskentatyyppi())) {
-                  authCheck
-                      .blockingNext()
-                      .forEach(
-                          authorityCheck ->
-                              haunHakukohteetOids.forEach(
-                                  hk -> {
-                                    if (!authorityCheck.test(hk.getHakukohdeOid())) {
-                                      LOG.error(
-                                          String.format(
-                                              "Ei oikeutta aloittaa laskentaa hakukohteelle %s haussa %s",
-                                              hk.getHakukohdeOid(), hakuOid));
-                                      throw new ForbiddenException(
-                                          "Ei oikeutta aloittaa laskentaa");
-                                    }
-                                  }));
+            if (!LaskentaTyyppi.VALINTARYHMA.equals(laskentaParams.getLaskentatyyppi())) {
+              authCheck.blockingNext().forEach(authorityCheck -> haunHakukohteetOids.forEach(hk -> {
+                if (!authorityCheck.test(hk.getHakukohdeOid())) {
+                  LOG.error(String.format("Ei oikeutta aloittaa laskentaa hakukohteelle %s haussa %s",
+                      hk.getHakukohdeOid(), hakuOid));
+                  throw new ForbiddenException("Ei oikeutta aloittaa laskentaa");
                 }
+              }));
+            }
 
-                createLaskenta(
-                    haunHakukohteetOids,
-                    (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback),
-                    laskentaParams,
-                    callback);
-              },
-              (Throwable poikkeus) -> {
-                LOG.error("kaynnistaLaskentaHaulle throws", poikkeus);
-                callback.accept(errorResponse(poikkeus.getMessage()));
-              });
+            createLaskenta(haunHakukohteetOids, (TunnisteDto uuid) -> notifyWorkAvailable(uuid, callback),
+                laskentaParams, callback);
+          }, (Throwable poikkeus) -> {
+            LOG.error("kaynnistaLaskentaHaulle throws", poikkeus);
+            callback.accept(errorResponse(poikkeus.getMessage()));
+          });
     }
   }
 
-  public void kaynnistaLaskentaUudelleen(
-      final String uuid, final Consumer<Response> callbackResponse) {
-    valintalaskentaValvomo
-        .fetchLaskenta(uuid)
-        .filter(ValintalaskentaKerrallaService::ajossaolevaLaskenta)
-        .ifPresentOrElse(
-            laskenta -> {
-              palautaAjossaolevaLaskenta(uuid, callbackResponse);
-            },
-            () -> {
-              resetoiTilat(uuid, callbackResponse);
-            });
+  public void kaynnistaLaskentaUudelleen(final String uuid, final Consumer<Response> callbackResponse) {
+    valintalaskentaValvomo.fetchLaskenta(uuid).filter(ValintalaskentaKerrallaService::ajossaolevaLaskenta)
+        .ifPresentOrElse(laskenta -> {
+          palautaAjossaolevaLaskenta(uuid, callbackResponse);
+        }, () -> {
+          resetoiTilat(uuid, callbackResponse);
+        });
   }
 
   private static final boolean ajossaolevaLaskenta(Laskenta laskenta) {
@@ -125,38 +106,26 @@ public class ValintalaskentaKerrallaService {
   }
 
   private void resetoiTilat(String uuid, Consumer<Response> callbackResponse) {
-    seurantaAsyncResource
-        .resetoiTilat(uuid)
-        .flatMap(
-            (LaskentaDto laskenta) ->
-                Observable.just(laskenta)
-                    .zipWith(
-                        valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid()),
-                        Pair::of))
-        .subscribe(
-            (Pair<LaskentaDto, List<HakukohdeViiteDTO>> laskentaJaHakukohdeViitteet) -> {
-              LaskentaDto laskenta = laskentaJaHakukohdeViitteet.getLeft();
-              notifyWorkAvailable(
-                  new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()),
-                  callbackResponse);
-            },
-            (Throwable t) -> {
-              LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
-              callbackResponse.accept(
-                  errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
-            });
+    seurantaAsyncResource.resetoiTilat(uuid)
+        .flatMap((LaskentaDto laskenta) -> Observable.just(laskenta)
+            .zipWith(valintaperusteetAsyncResource.haunHakukohteet(laskenta.getHakuOid()), Pair::of))
+        .subscribe((Pair<LaskentaDto, List<HakukohdeViiteDTO>> laskentaJaHakukohdeViitteet) -> {
+          LaskentaDto laskenta = laskentaJaHakukohdeViitteet.getLeft();
+          notifyWorkAvailable(new TunnisteDto(laskenta.getUuid(), laskenta.getLuotiinkoUusiLaskenta()),
+              callbackResponse);
+        }, (Throwable t) -> {
+          LOG.error("Laskennan uudelleenajo epäonnistui. Uuid: " + uuid, t);
+          callbackResponse.accept(errorResponse("Uudelleen ajo laskennalle heitti poikkeuksen!"));
+        });
   }
 
   private Optional<Laskenta> haeAjossaOlevaLaskentaHaulle(final String hakuOid) {
     return valintalaskentaValvomo.runningLaskentas().stream()
-        .filter(l -> hakuOid.equals(l.getHakuOid()) && !l.isOsittainenLaskenta())
-        .findFirst();
+        .filter(l -> hakuOid.equals(l.getHakuOid()) && !l.isOsittainenLaskenta()).findFirst();
   }
 
   private static Collection<HakukohdeJaOrganisaatio> kasitteleHakukohdeViitteet(
-      final List<HakukohdeViiteDTO> hakukohdeViitteet,
-      final String hakuOid,
-      final Optional<Maski> maski,
+      final List<HakukohdeViiteDTO> hakukohdeViitteet, final String hakuOid, final Optional<Maski> maski,
       final Consumer<Response> callback) {
     LOG.info("Tarkastellaan hakukohdeviitteita haulle {}", hakuOid);
 
@@ -164,21 +133,15 @@ public class ValintalaskentaKerrallaService {
       LOG.error("Valintaperusteet palautti tyhjat hakukohdeviitteet haulle {}!", hakuOid);
       throw new NullPointerException("Valintaperusteet palautti tyhjat hakukohdeviitteet!");
     }
-    final List<HakukohdeJaOrganisaatio> haunHakukohdeOids =
-        hakukohdeViitteet.stream()
-            .filter(Objects::nonNull)
-            .filter(hakukohdeOid -> hakukohdeOid.getOid() != null)
-            .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
-            .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid()))
-            .collect(Collectors.toList());
+    final List<HakukohdeJaOrganisaatio> haunHakukohdeOids = hakukohdeViitteet.stream().filter(Objects::nonNull)
+        .filter(hakukohdeOid -> hakukohdeOid.getOid() != null)
+        .filter(hakukohdeOid -> hakukohdeOid.getTila().equals("JULKAISTU"))
+        .map(u -> new HakukohdeJaOrganisaatio(u.getOid(), u.getTarjoajaOid())).collect(Collectors.toList());
 
-    Collection<HakukohdeJaOrganisaatio> oids =
-        maski.map(m -> m.maskaa(haunHakukohdeOids)).orElse(haunHakukohdeOids);
+    Collection<HakukohdeJaOrganisaatio> oids = maski.map(m -> m.maskaa(haunHakukohdeOids))
+        .orElse(haunHakukohdeOids);
     if (oids.isEmpty()) {
-      String msg =
-          "Haulla "
-              + hakuOid
-              + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?";
+      String msg = "Haulla " + hakuOid + " ei saatu hakukohteita! Onko valinnat synkronoitu tarjonnan kanssa?";
       LOG.error(msg);
       callback.accept(errorResponse(msg));
       throw new RuntimeException(msg);
@@ -187,8 +150,7 @@ public class ValintalaskentaKerrallaService {
     }
   }
 
-  private void notifyWorkAvailable(
-      final TunnisteDto uuid, final Consumer<Response> callbackResponse) {
+  private void notifyWorkAvailable(final TunnisteDto uuid, final Consumer<Response> callbackResponse) {
     // ohitetaan ajossa olevan laskennan kaynnistaminen
     if (uuid.getLuotiinkoUusiLaskenta()) {
       valintalaskentaRoute.workAvailable();
@@ -196,47 +158,31 @@ public class ValintalaskentaKerrallaService {
     callbackResponse.accept(redirectResponse(uuid));
   }
 
-  private void createLaskenta(
-      Collection<HakukohdeJaOrganisaatio> hakukohdeData,
-      Consumer<TunnisteDto> laskennanAloitus,
-      LaskentaParams laskentaParams,
+  private void createLaskenta(Collection<HakukohdeJaOrganisaatio> hakukohdeData,
+      Consumer<TunnisteDto> laskennanAloitus, LaskentaParams laskentaParams,
       Consumer<Response> callbackResponse) {
     final List<HakukohdeDto> hakukohdeDtos = toHakukohdeDto(hakukohdeData);
     validateHakukohdeDtos(hakukohdeData, hakukohdeDtos, callbackResponse);
-    seurantaAsyncResource
-        .luoLaskenta(laskentaParams, hakukohdeDtos)
-        .subscribe(
-            laskennanAloitus::accept,
-            (Throwable t) -> {
-              LOG.info(
-                  "Seurannasta uuden laskennan haku paatyi virheeseen. Yritetään uudelleen.", t);
-              createLaskentaRetry(
-                  hakukohdeDtos,
-                  laskennanAloitus,
-                  laskentaParams,
-                  callbackResponse); // FIXME kill me OK-152!
-            });
+    seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos).subscribe(laskennanAloitus::accept,
+        (Throwable t) -> {
+          LOG.info("Seurannasta uuden laskennan haku paatyi virheeseen. Yritetään uudelleen.", t);
+          createLaskentaRetry(hakukohdeDtos, laskennanAloitus, laskentaParams, callbackResponse); // FIXME
+          // kill me
+          // OK-152!
+        });
   }
 
-  private void createLaskentaRetry(
-      List<HakukohdeDto> hakukohdeDtos,
-      Consumer<TunnisteDto> laskennanAloitus,
-      LaskentaParams laskentaParams,
-      Consumer<Response> callbackResponse) {
-    seurantaAsyncResource
-        .luoLaskenta(laskentaParams, hakukohdeDtos)
-        .subscribe(
-            laskennanAloitus::accept,
-            (Throwable t) -> {
-              LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
-              callbackResponse.accept(errorResponse(t.getMessage()));
-            });
+  private void createLaskentaRetry(List<HakukohdeDto> hakukohdeDtos, Consumer<TunnisteDto> laskennanAloitus,
+      LaskentaParams laskentaParams, Consumer<Response> callbackResponse) {
+    seurantaAsyncResource.luoLaskenta(laskentaParams, hakukohdeDtos).subscribe(laskennanAloitus::accept,
+        (Throwable t) -> {
+          LOG.error("Seurannasta uuden laskennan haku paatyi virheeseen", t);
+          callbackResponse.accept(errorResponse(t.getMessage()));
+        });
   }
 
-  private static void validateHakukohdeDtos(
-      Collection<HakukohdeJaOrganisaatio> hakukohdeData,
-      List<HakukohdeDto> hakukohdeDtos,
-      Consumer<Response> callbackResponse) {
+  private static void validateHakukohdeDtos(Collection<HakukohdeJaOrganisaatio> hakukohdeData,
+      List<HakukohdeDto> hakukohdeDtos, Consumer<Response> callbackResponse) {
     if (hakukohdeDtos.isEmpty()) {
       String msg = "Laskentaa ei voida aloittaa hakukohteille joilta puuttuu organisaatio!";
       LOG.error(msg);
@@ -244,41 +190,32 @@ public class ValintalaskentaKerrallaService {
       throw new RuntimeException(msg);
     }
     if (hakukohdeDtos.size() < hakukohdeData.size()) {
-      LOG.warn(
-          "Hakukohteita puuttuvien organisaatio-oidien vuoksi filtteroinnin jalkeen {}/{}!",
-          hakukohdeDtos.size(),
-          hakukohdeData.size());
+      LOG.warn("Hakukohteita puuttuvien organisaatio-oidien vuoksi filtteroinnin jalkeen {}/{}!",
+          hakukohdeDtos.size(), hakukohdeData.size());
     } else {
-      LOG.info(
-          "Hakukohteita filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeData.size());
+      LOG.info("Hakukohteita filtteroinnin jalkeen {}/{}!", hakukohdeDtos.size(), hakukohdeData.size());
     }
   }
 
   private static Response redirectResponse(final TunnisteDto target) {
-    return Response.ok(
-            Vastaus.laskennanSeuraus(target.getUuid(), target.getLuotiinkoUusiLaskenta()))
-        .build();
+    return Response.ok(Vastaus.laskennanSeuraus(target.getUuid(), target.getLuotiinkoUusiLaskenta())).build();
   }
 
   private static Response errorResponse(final String errorMessage) {
     return Response.serverError().entity(errorMessage).build();
   }
 
-  private static List<HakukohdeDto> toHakukohdeDto(
-      Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
-    return hakukohdeData.stream()
-        .filter(Objects::nonNull)
-        .filter(hk -> hk.getHakukohdeOid() != null)
+  private static List<HakukohdeDto> toHakukohdeDto(Collection<HakukohdeJaOrganisaatio> hakukohdeData) {
+    return hakukohdeData.stream().filter(Objects::nonNull).filter(hk -> hk.getHakukohdeOid() != null)
         .filter(hk -> hk.getOrganisaatioOid() != null)
         .map(hk -> new HakukohdeDto(hk.getHakukohdeOid(), hk.getOrganisaatioOid()))
         .collect(Collectors.toList());
   }
 
   private Optional<String> uuidForExistingNonMaskedLaskenta(Optional<Maski> maski, String hakuOid) {
-    final Optional<Laskenta> ajossaOlevaLaskentaHaulle =
-        !maski.isPresent() || !maski.get().isMask()
-            ? haeAjossaOlevaLaskentaHaulle(hakuOid)
-            : Optional.empty();
+    final Optional<Laskenta> ajossaOlevaLaskentaHaulle = !maski.isPresent() || !maski.get().isMask()
+        ? haeAjossaOlevaLaskentaHaulle(hakuOid)
+        : Optional.empty();
     return ajossaOlevaLaskentaHaulle.map(LaskentaInfo::getUuid);
   }
 }

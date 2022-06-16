@@ -10,7 +10,8 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 /** XSSFRow -> Rivi */
 public class XSSFRivi {
 
-  private XSSFRivi() {}
+  private XSSFRivi() {
+  }
 
   private static List<Solu> soluiksi(XSSFRow row) {
     List<Solu> solut = Lists.newArrayList();

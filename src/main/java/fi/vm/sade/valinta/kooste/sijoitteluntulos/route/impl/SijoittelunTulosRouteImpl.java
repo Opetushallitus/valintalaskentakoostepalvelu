@@ -103,23 +103,15 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
 
   @Autowired
   public SijoittelunTulosRouteImpl(
-      @Value(
-              "${valintalaskentakoostepalvelu.sijoittelunTulosRouteImpl.pakkaaTiedostotTarriin:false}")
-          boolean pakkaaTiedostotTarriin,
-      @Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}/dokumentit/lataa/")
-          String dokumenttipalveluUrl,
-      @Value(SijoittelunTulosTaulukkolaskentaRoute.SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE)
-          String taulukkolaskenta,
-      @Value(SijoittelunTulosOsoitetarratRoute.SEDA_SIJOITTELUNTULOS_OSOITETARRAT_HAULLE)
-          String osoitetarrat,
+      @Value("${valintalaskentakoostepalvelu.sijoittelunTulosRouteImpl.pakkaaTiedostotTarriin:false}") boolean pakkaaTiedostotTarriin,
+      @Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}/dokumentit/lataa/") String dokumenttipalveluUrl,
+      @Value(SijoittelunTulosTaulukkolaskentaRoute.SEDA_SIJOITTELUNTULOS_TAULUKKOLASKENTA_HAULLE) String taulukkolaskenta,
+      @Value(SijoittelunTulosOsoitetarratRoute.SEDA_SIJOITTELUNTULOS_OSOITETARRAT_HAULLE) String osoitetarrat,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource,
       HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta,
-      SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
-      TarjontaAsyncResource tarjontaAsyncResource,
-      OrganisaatioAsyncResource organisaatioAsyncResource,
-      ViestintapalveluResource viestintapalveluResource,
-      ApplicationResource applicationResource,
-      AtaruAsyncResource ataruAsyncResource,
+      SijoittelunTulosExcelKomponentti sijoittelunTulosExcel, TarjontaAsyncResource tarjontaAsyncResource,
+      OrganisaatioAsyncResource organisaatioAsyncResource, ViestintapalveluResource viestintapalveluResource,
+      ApplicationResource applicationResource, AtaruAsyncResource ataruAsyncResource,
       DokumenttiAsyncResource dokumenttiAsyncResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
       ValintalaskentaAsyncResource valintalaskentaResource) {
@@ -154,469 +146,303 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
   private void configureTaulukkolaskenta() {
     String yksittainenTaulukkoTyo = yksittainenTyo("taulukkolaskenta");
     from(taulukkolaskenta)
-        .errorHandler(
-            deadLetterChannel(luontiEpaonnistui)
-                .maximumRedeliveries(0)
-                .logExhaustedMessageHistory(true)
-                .logExhausted(true)
-                .logStackTrace(true)
-                // hide retry/handled stacktrace
-                .logRetryStackTrace(false)
-                .logHandled(false))
-        .log(ERROR, "Aloitetaan taulukkolaskentojen muodostus koko haulle!")
-        .process(SECURITY)
-        .to(hakukohteidenHaku)
-        .split(body())
-        .stopOnException()
-        .shareUnitOfWork()
-        .to(yksittainenTaulukkoTyo)
+        .errorHandler(deadLetterChannel(luontiEpaonnistui).maximumRedeliveries(0)
+            .logExhaustedMessageHistory(true).logExhausted(true).logStackTrace(true)
+            // hide retry/handled stacktrace
+            .logRetryStackTrace(false).logHandled(false))
+        .log(ERROR, "Aloitetaan taulukkolaskentojen muodostus koko haulle!").process(SECURITY)
+        .to(hakukohteidenHaku).split(body()).stopOnException().shareUnitOfWork().to(yksittainenTaulukkoTyo)
         .end();
-    from(yksittainenTaulukkoTyo)
-        .routeId("Sijoitteluntulokset koko haulle taulukkolaskentatyöjono")
-        .process(SECURITY)
-        .process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) {
-                SijoittelunTulosProsessi prosessi = prosessi(exchange);
-                String hakukohdeOid = exchange.getIn().getBody(String.class);
-                LOG.info("configureTaulukkolaskenta hakukohdeOid: " + hakukohdeOid);
-                String hakuOid = hakuOid(exchange);
-                String tarjoajaOid = StringUtils.EMPTY;
-                AuditSession auditSession = auditSession(exchange);
-                String hakukohdeNimi;
-                String tarjoajaNimi;
-                String preferoitukielikoodi = KieliUtil.SUOMI;
-                try {
-                  AbstractHakukohde hakukohde =
-                      tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, MINUTES);
-                  tarjoajaOid = hakukohde.tarjoajaOids.iterator().next();
-                  Teksti hakukohdeTeksti = new Teksti(hakukohde.nimi);
-                  preferoitukielikoodi = hakukohdeTeksti.getKieli();
-                  hakukohdeNimi = hakukohdeTeksti.getTeksti();
-                  tarjoajaNimi =
-                      Teksti.getTeksti(
-                          CompletableFutureUtil.sequence(
-                                  hakukohde.tarjoajaOids.stream()
-                                      .map(organisaatioAsyncResource::haeOrganisaatio)
-                                      .collect(Collectors.toList()))
-                              .get(5, MINUTES)
-                              .stream()
-                              .map(Organisaatio::getNimi)
-                              .collect(Collectors.toList()),
-                          " - ");
-                  hakuOid = hakukohde.hakuOid;
-                } catch (Exception e) {
-                  hakukohdeNimi = "Nimetön hakukohde " + hakukohdeOid;
-                  tarjoajaNimi = "Nimetön tarjoaja " + tarjoajaOid;
-                  prosessi
-                      .getVaroitukset()
-                      .add(new Varoitus(hakukohdeOid, "Hakukohteelle ei saatu tarjoajaOidia!"));
-                }
-                List<Valintatulos> tilat = Collections.emptyList();
-                List<HakemusWrapper> hakemukset = Collections.emptyList();
-                List<Lukuvuosimaksu> lukuvuosimaksus = Collections.emptyList();
-                fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hk = null;
-                Haku hakuDTO = null;
-                List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
-                try {
-                  hakuDTO = tarjontaAsyncResource.haeHaku(hakuOid).get(5, TimeUnit.MINUTES);
-                  // TODO here it would make more sense to parallelise the asynchronous calls and
-                  // bundle the results together after they all complete.
-                  hakemukset =
-                      (hakuDTO.isHakemuspalvelu()
-                              ? Observable.fromFuture(
-                                  ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
-                              : Observable.just(
-                                  applicationResource
-                                      .getApplicationsByOid(
-                                          hakuOid,
-                                          hakukohdeOid,
-                                          ApplicationResource.ACTIVE_AND_INCOMPLETE,
-                                          ApplicationResource.MAX)
-                                      .stream()
-                                      .<HakemusWrapper>map(HakuappHakemusWrapper::new)
-                                      .collect(Collectors.toList())))
-                          .timeout(5, MINUTES)
-                          .blockingFirst();
-                  hk =
-                      valintaTulosServiceAsyncResource
-                          .getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid)
-                          .timeout(5, MINUTES)
-                          .toFuture()
-                          .get();
-                  lukuvuosimaksus =
-                      valintaTulosServiceAsyncResource
-                          .fetchLukuvuosimaksut(hakukohdeOid, auditSession)
-                          .timeout(5, MINUTES)
-                          .toFuture()
-                          .get();
-                  valinnanvaiheet =
-                      valintalaskentaResource.laskennantulokset(hakukohdeOid).get(1, MINUTES);
-                } catch (Exception e) {
-                  log.error("Problem when getting resources for creating the excel", e);
-                }
+    from(yksittainenTaulukkoTyo).routeId("Sijoitteluntulokset koko haulle taulukkolaskentatyöjono")
+        .process(SECURITY).process(new Processor() {
+          @Override
+          public void process(Exchange exchange) {
+            SijoittelunTulosProsessi prosessi = prosessi(exchange);
+            String hakukohdeOid = exchange.getIn().getBody(String.class);
+            LOG.info("configureTaulukkolaskenta hakukohdeOid: " + hakukohdeOid);
+            String hakuOid = hakuOid(exchange);
+            String tarjoajaOid = StringUtils.EMPTY;
+            AuditSession auditSession = auditSession(exchange);
+            String hakukohdeNimi;
+            String tarjoajaNimi;
+            String preferoitukielikoodi = KieliUtil.SUOMI;
+            try {
+              AbstractHakukohde hakukohde = tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5,
+                  MINUTES);
+              tarjoajaOid = hakukohde.tarjoajaOids.iterator().next();
+              Teksti hakukohdeTeksti = new Teksti(hakukohde.nimi);
+              preferoitukielikoodi = hakukohdeTeksti.getKieli();
+              hakukohdeNimi = hakukohdeTeksti.getTeksti();
+              tarjoajaNimi = Teksti.getTeksti(CompletableFutureUtil
+                  .sequence(hakukohde.tarjoajaOids.stream()
+                      .map(organisaatioAsyncResource::haeOrganisaatio)
+                      .collect(Collectors.toList()))
+                  .get(5, MINUTES).stream().map(Organisaatio::getNimi).collect(Collectors.toList()),
+                  " - ");
+              hakuOid = hakukohde.hakuOid;
+            } catch (Exception e) {
+              hakukohdeNimi = "Nimetön hakukohde " + hakukohdeOid;
+              tarjoajaNimi = "Nimetön tarjoaja " + tarjoajaOid;
+              prosessi.getVaroitukset()
+                  .add(new Varoitus(hakukohdeOid, "Hakukohteelle ei saatu tarjoajaOidia!"));
+            }
+            List<Valintatulos> tilat = Collections.emptyList();
+            List<HakemusWrapper> hakemukset = Collections.emptyList();
+            List<Lukuvuosimaksu> lukuvuosimaksus = Collections.emptyList();
+            fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hk = null;
+            Haku hakuDTO = null;
+            List<ValintatietoValinnanvaiheDTO> valinnanvaiheet = ListUtils.EMPTY_LIST;
+            try {
+              hakuDTO = tarjontaAsyncResource.haeHaku(hakuOid).get(5, TimeUnit.MINUTES);
+              // TODO here it would make more sense to parallelise the asynchronous calls and
+              // bundle the results together after they all complete.
+              hakemukset = (hakuDTO.isHakemuspalvelu()
+                  ? Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
+                  : Observable.just(applicationResource
+                      .getApplicationsByOid(hakuOid, hakukohdeOid,
+                          ApplicationResource.ACTIVE_AND_INCOMPLETE, ApplicationResource.MAX)
+                      .stream().<HakemusWrapper>map(HakuappHakemusWrapper::new)
+                      .collect(Collectors.toList()))).timeout(5, MINUTES).blockingFirst();
+              hk = valintaTulosServiceAsyncResource
+                  .getHakukohdeBySijoitteluajoPlainDTO(hakuOid, hakukohdeOid).timeout(5, MINUTES)
+                  .toFuture().get();
+              lukuvuosimaksus = valintaTulosServiceAsyncResource
+                  .fetchLukuvuosimaksut(hakukohdeOid, auditSession).timeout(5, MINUTES).toFuture()
+                  .get();
+              valinnanvaiheet = valintalaskentaResource.laskennantulokset(hakukohdeOid).get(1, MINUTES);
+            } catch (Exception e) {
+              log.error("Problem when getting resources for creating the excel", e);
+            }
 
+            try {
+              if (pakkaaTiedostotTarriin) {
+                Tiedosto tiedosto = new Tiedosto("sijoitteluntulos_" + hakukohdeOid + ".xlsx",
+                    IOUtils.toByteArray(sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi,
+                        hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus,
+                        hk, hakuDTO, valinnanvaiheet)));
+                prosessi.getValmiit().add(new Valmis(tiedosto, hakukohdeOid, tarjoajaOid));
+                return;
+              } else {
+                InputStream input = sijoittelunTulosExcel.luoXls(tilat, preferoitukielikoodi,
+                    hakukohdeNimi, tarjoajaNimi, hakukohdeOid, hakemukset, lukuvuosimaksus, hk,
+                    hakuDTO, valinnanvaiheet);
                 try {
-                  if (pakkaaTiedostotTarriin) {
-                    Tiedosto tiedosto =
-                        new Tiedosto(
-                            "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
-                            IOUtils.toByteArray(
-                                sijoittelunTulosExcel.luoXls(
-                                    tilat,
-                                    preferoitukielikoodi,
-                                    hakukohdeNimi,
-                                    tarjoajaNimi,
-                                    hakukohdeOid,
-                                    hakemukset,
-                                    lukuvuosimaksus,
-                                    hk,
-                                    hakuDTO,
-                                    valinnanvaiheet)));
-                    prosessi.getValmiit().add(new Valmis(tiedosto, hakukohdeOid, tarjoajaOid));
-                    return;
-                  } else {
-                    InputStream input =
-                        sijoittelunTulosExcel.luoXls(
-                            tilat,
-                            preferoitukielikoodi,
-                            hakukohdeNimi,
-                            tarjoajaNimi,
-                            hakukohdeOid,
-                            hakemukset,
-                            lukuvuosimaksus,
-                            hk,
-                            hakuDTO,
-                            valinnanvaiheet);
-                    try {
-                      String id = generateId();
-                      String finalTarjoajaOid = tarjoajaOid;
-                      dokumenttiAsyncResource
-                          .tallenna(
-                              id,
-                              "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
-                              getTimeToLive(),
-                              dokumenttiprosessi(exchange).getTags(),
-                              "application/vnd.ms-excel",
-                              input)
-                          .subscribe(
-                              ok -> {
-                                prosessi
-                                    .getValmiit()
-                                    .add(new Valmis(hakukohdeOid, finalTarjoajaOid, id));
-                              },
-                              poikkeus -> {
-                                LOG.error(
-                                    "Sijoittelun tulosexcelin tallennus dokumenttipalveluun epäonnistui");
-                                throw new RuntimeException(poikkeus);
-                              });
-                    } catch (Exception e) {
-                      LOG.error(
-                          "Dokumentin tallennus epäonnistui hakukohteelle " + hakukohdeOid, e);
-                      prosessi
-                          .getVaroitukset()
-                          .add(
-                              new Varoitus(
-                                  hakukohdeOid,
-                                  "Ei saatu tallennettua dokumenttikantaan! " + e.getMessage()));
-                      prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
-                    }
-                  }
-                  LOG.info("Sijoitteluntulosexcelin luonti onnistui hakukohteelle " + hakukohdeOid);
-                } catch (SijoittelultaEiSisaltoaPoikkeus e) {
-                  prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
+                  String id = generateId();
+                  String finalTarjoajaOid = tarjoajaOid;
+                  dokumenttiAsyncResource.tallenna(id, "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
+                      getTimeToLive(), dokumenttiprosessi(exchange).getTags(),
+                      "application/vnd.ms-excel", input).subscribe(ok -> {
+                        prosessi.getValmiit()
+                            .add(new Valmis(hakukohdeOid, finalTarjoajaOid, id));
+                      }, poikkeus -> {
+                        LOG.error(
+                            "Sijoittelun tulosexcelin tallennus dokumenttipalveluun epäonnistui");
+                        throw new RuntimeException(poikkeus);
+                      });
                 } catch (Exception e) {
-                  LOG.error(
-                      "Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle " + hakukohdeOid,
-                      e);
-                  prosessi
-                      .getVaroitukset()
-                      .add(
-                          new Varoitus(
-                              hakukohdeOid,
-                              "Ei saatu sijoittelun tuloksia tai hakukohteita! " + e.getMessage()));
+                  LOG.error("Dokumentin tallennus epäonnistui hakukohteelle " + hakukohdeOid, e);
+                  prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid,
+                      "Ei saatu tallennettua dokumenttikantaan! " + e.getMessage()));
                   prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
                 }
               }
-            })
-        .to(muodostaDokumentit);
+              LOG.info("Sijoitteluntulosexcelin luonti onnistui hakukohteelle " + hakukohdeOid);
+            } catch (SijoittelultaEiSisaltoaPoikkeus e) {
+              prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
+            } catch (Exception e) {
+              LOG.error("Sijoitteluntulosexcelin luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
+              prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid,
+                  "Ei saatu sijoittelun tuloksia tai hakukohteita! " + e.getMessage()));
+              prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
+            }
+          }
+        }).to(muodostaDokumentit);
   }
 
   private void configureOsoitetarrat() {
     String yksittainenOsoitetarraTyo = yksittainenTyo("osoitetarrat");
     from(osoitetarrat)
-        .errorHandler(
-            deadLetterChannel(luontiEpaonnistui)
-                .maximumRedeliveries(0)
-                .logExhaustedMessageHistory(true)
-                .logExhausted(true)
-                .logStackTrace(true)
-                // hide retry/handled stacktrace
-                .logRetryStackTrace(false)
-                .logHandled(false))
-        .log(ERROR, "Aloitetaan osoitetarrojen muodostus koko haulle!")
-        .process(SECURITY)
-        .to(hakukohteidenHaku)
-        .split(body())
-        .stopOnException()
-        .shareUnitOfWork()
-        .to(yksittainenOsoitetarraTyo)
-        .end();
-    from(yksittainenOsoitetarraTyo)
-        .routeId("Sijoitteluntulokset koko haulle osoitetarrattyöjono")
-        .process(SECURITY)
-        .process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) {
-                SijoittelunTulosProsessi prosessi = prosessi(exchange);
-                String hakukohdeOid = exchange.getIn().getBody(String.class);
-                LOG.info("configureOsoitetarrat hakukohdeOid: " + hakukohdeOid);
-                StopWatch stopWatch =
-                    new StopWatch("Hakukohteen " + hakukohdeOid + " osoitetarrojen muodostus");
-                stopWatch.start("Tiedot tarjonnasta");
-                String tarjoajaOid = StringUtils.EMPTY;
-                try {
-                  tarjoajaOid =
-                      tarjontaAsyncResource
-                          .haeHakukohde(hakukohdeOid)
-                          .get(5, MINUTES)
-                          .tarjoajaOids
-                          .iterator()
-                          .next();
-                } catch (Exception e) {
-                  prosessi
-                      .getVaroitukset()
-                      .add(new Varoitus(hakukohdeOid, "Hakukohteelle ei saatu tarjoajaOidia!"));
-                }
-                stopWatch.stop();
-                try {
-                  stopWatch.start("Tiedot koodistosta");
-                  Map<String, Koodi> maajavaltio =
-                      koodistoCachedAsyncResource.haeKoodisto(
-                          KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-                  Map<String, Koodi> posti =
-                      koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.POSTI);
-                  stopWatch.stop();
-                  stopWatch.start("Tiedot valintarekisteristä");
-                  fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hakukohteenTulos =
-                      valintaTulosServiceAsyncResource
-                          .getHakukohdeBySijoitteluajoPlainDTO(hakuOid(exchange), hakukohdeOid)
-                          .timeout(5, MINUTES)
-                          .toFuture()
-                          .get();
-                  stopWatch.stop();
-                  List<String> hyvaksytytHakemukset =
-                      hakukohteenTulos.getValintatapajonot().stream()
-                          .flatMap(valintatapajono -> valintatapajono.getHakemukset().stream())
-                          .filter(hakemus -> hakemus.getTila().isHyvaksytty())
-                          .map(HakemusDTO::getHakemusOid)
-                          .distinct()
-                          .collect(Collectors.toList());
-                  if (hyvaksytytHakemukset.isEmpty()) {
-                    prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
-                    return;
-                  }
-                  stopWatch.start("Tiedot hakemuksilta");
-                  List<HakemusWrapper> hakemukset =
-                      Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid(exchange)))
-                          .flatMap(
-                              haku ->
-                                  haku.isHakemuspalvelu()
-                                      ? Observable.fromFuture(
-                                          ataruAsyncResource.getApplicationsByOids(
-                                              hyvaksytytHakemukset))
-                                      : Observable.just(
-                                          applicationResource
-                                              .getApplicationsByOids(hyvaksytytHakemukset)
-                                              .stream()
-                                              .<HakemusWrapper>map(HakuappHakemusWrapper::new)
-                                              .collect(Collectors.toList())))
-                          .timeout(5, MINUTES)
-                          .blockingFirst();
-                  stopWatch.stop();
-                  List<Osoite> addressLabels = Lists.newArrayList();
-
-                  for (HakemusWrapper h : hakemukset) {
-                    addressLabels.add(
-                        OsoiteHakemukseltaUtil.osoiteHakemuksesta(
-                            h, maajavaltio, posti, new NimiPaattelyStrategy()));
-                  }
-                  stopWatch.start("Tarrat viestintäpalvelulta");
-                  Osoitteet osoitteet = new Osoitteet(addressLabels);
-                  if (pakkaaTiedostotTarriin) {
-                    Tiedosto tiedosto =
-                        new Tiedosto(
-                            "osoitetarrat_" + hakukohdeOid + ".pdf",
-                            IOUtils.toByteArray(
-                                viestintapalveluResource.haeOsoitetarratSync(osoitteet)));
-                    prosessi.getValmiit().add(new Valmis(tiedosto, hakukohdeOid, tarjoajaOid));
-                    return;
-                  } else {
-                    InputStream input =
-                        pipeInputStreams(viestintapalveluResource.haeOsoitetarratSync(osoitteet));
-                    String id = generateId();
-                    String finalTarjoajaOid = tarjoajaOid;
-                    dokumenttiAsyncResource
-                        .tallenna(
-                            id,
-                            "osoitetarrat_" + hakukohdeOid + ".pdf",
-                            getTimeToLive(),
-                            dokumenttiprosessi(exchange).getTags(),
-                            "application/pdf",
-                            input)
-                        .subscribe(
-                            ok -> {
-                              prosessi
-                                  .getValmiit()
-                                  .add(new Valmis(hakukohdeOid, finalTarjoajaOid, id));
-                            },
-                            poikkeus -> {
-                              LOG.error("Osoitetarrojen tallennus dokumenttipalveluun epäonnistui");
-                              throw new RuntimeException(poikkeus);
-                            });
-                  }
-                  stopWatch.stop();
-                  LOG.info(stopWatch.prettyPrint());
-                  LOG.info("Osoitetarrojen luonti onnistui hakukohteelle " + hakukohdeOid);
-                } catch (Exception e) {
-                  LOG.error("Osoitetarrojen luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
-                  prosessi
-                      .getVaroitukset()
-                      .add(
-                          new Varoitus(
-                              hakukohdeOid,
-                              "Ei saatu sijoittelun tuloksia tai hakukohteita! " + e.getMessage()));
-                  prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
-                }
+        .errorHandler(deadLetterChannel(luontiEpaonnistui).maximumRedeliveries(0)
+            .logExhaustedMessageHistory(true).logExhausted(true).logStackTrace(true)
+            // hide retry/handled stacktrace
+            .logRetryStackTrace(false).logHandled(false))
+        .log(ERROR, "Aloitetaan osoitetarrojen muodostus koko haulle!").process(SECURITY).to(hakukohteidenHaku)
+        .split(body()).stopOnException().shareUnitOfWork().to(yksittainenOsoitetarraTyo).end();
+    from(yksittainenOsoitetarraTyo).routeId("Sijoitteluntulokset koko haulle osoitetarrattyöjono").process(SECURITY)
+        .process(new Processor() {
+          @Override
+          public void process(Exchange exchange) {
+            SijoittelunTulosProsessi prosessi = prosessi(exchange);
+            String hakukohdeOid = exchange.getIn().getBody(String.class);
+            LOG.info("configureOsoitetarrat hakukohdeOid: " + hakukohdeOid);
+            StopWatch stopWatch = new StopWatch(
+                "Hakukohteen " + hakukohdeOid + " osoitetarrojen muodostus");
+            stopWatch.start("Tiedot tarjonnasta");
+            String tarjoajaOid = StringUtils.EMPTY;
+            try {
+              tarjoajaOid = tarjontaAsyncResource.haeHakukohde(hakukohdeOid).get(5, MINUTES).tarjoajaOids
+                  .iterator().next();
+            } catch (Exception e) {
+              prosessi.getVaroitukset()
+                  .add(new Varoitus(hakukohdeOid, "Hakukohteelle ei saatu tarjoajaOidia!"));
+            }
+            stopWatch.stop();
+            try {
+              stopWatch.start("Tiedot koodistosta");
+              Map<String, Koodi> maajavaltio = koodistoCachedAsyncResource
+                  .haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+              Map<String, Koodi> posti = koodistoCachedAsyncResource
+                  .haeKoodisto(KoodistoCachedAsyncResource.POSTI);
+              stopWatch.stop();
+              stopWatch.start("Tiedot valintarekisteristä");
+              fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO hakukohteenTulos = valintaTulosServiceAsyncResource
+                  .getHakukohdeBySijoitteluajoPlainDTO(hakuOid(exchange), hakukohdeOid)
+                  .timeout(5, MINUTES).toFuture().get();
+              stopWatch.stop();
+              List<String> hyvaksytytHakemukset = hakukohteenTulos.getValintatapajonot().stream()
+                  .flatMap(valintatapajono -> valintatapajono.getHakemukset().stream())
+                  .filter(hakemus -> hakemus.getTila().isHyvaksytty()).map(HakemusDTO::getHakemusOid)
+                  .distinct().collect(Collectors.toList());
+              if (hyvaksytytHakemukset.isEmpty()) {
+                prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null, true));
+                return;
               }
-            })
-        .to(muodostaDokumentit);
+              stopWatch.start("Tiedot hakemuksilta");
+              List<HakemusWrapper> hakemukset = Observable
+                  .fromFuture(tarjontaAsyncResource.haeHaku(hakuOid(exchange)))
+                  .flatMap(haku -> haku.isHakemuspalvelu()
+                      ? Observable.fromFuture(
+                          ataruAsyncResource.getApplicationsByOids(hyvaksytytHakemukset))
+                      : Observable.just(
+                          applicationResource.getApplicationsByOids(hyvaksytytHakemukset)
+                              .stream().<HakemusWrapper>map(HakuappHakemusWrapper::new)
+                              .collect(Collectors.toList())))
+                  .timeout(5, MINUTES).blockingFirst();
+              stopWatch.stop();
+              List<Osoite> addressLabels = Lists.newArrayList();
+
+              for (HakemusWrapper h : hakemukset) {
+                addressLabels.add(OsoiteHakemukseltaUtil.osoiteHakemuksesta(h, maajavaltio, posti,
+                    new NimiPaattelyStrategy()));
+              }
+              stopWatch.start("Tarrat viestintäpalvelulta");
+              Osoitteet osoitteet = new Osoitteet(addressLabels);
+              if (pakkaaTiedostotTarriin) {
+                Tiedosto tiedosto = new Tiedosto("osoitetarrat_" + hakukohdeOid + ".pdf",
+                    IOUtils.toByteArray(viestintapalveluResource.haeOsoitetarratSync(osoitteet)));
+                prosessi.getValmiit().add(new Valmis(tiedosto, hakukohdeOid, tarjoajaOid));
+                return;
+              } else {
+                InputStream input = pipeInputStreams(
+                    viestintapalveluResource.haeOsoitetarratSync(osoitteet));
+                String id = generateId();
+                String finalTarjoajaOid = tarjoajaOid;
+                dokumenttiAsyncResource
+                    .tallenna(id, "osoitetarrat_" + hakukohdeOid + ".pdf", getTimeToLive(),
+                        dokumenttiprosessi(exchange).getTags(), "application/pdf", input)
+                    .subscribe(ok -> {
+                      prosessi.getValmiit().add(new Valmis(hakukohdeOid, finalTarjoajaOid, id));
+                    }, poikkeus -> {
+                      LOG.error("Osoitetarrojen tallennus dokumenttipalveluun epäonnistui");
+                      throw new RuntimeException(poikkeus);
+                    });
+              }
+              stopWatch.stop();
+              LOG.info(stopWatch.prettyPrint());
+              LOG.info("Osoitetarrojen luonti onnistui hakukohteelle " + hakukohdeOid);
+            } catch (Exception e) {
+              LOG.error("Osoitetarrojen luonti epäonnistui hakukohteelle " + hakukohdeOid, e);
+              prosessi.getVaroitukset().add(new Varoitus(hakukohdeOid,
+                  "Ei saatu sijoittelun tuloksia tai hakukohteita! " + e.getMessage()));
+              prosessi.getValmiit().add(new Valmis(hakukohdeOid, tarjoajaOid, null));
+            }
+          }
+        }).to(muodostaDokumentit);
   }
 
   private void configureDeadLetterChannel() {
     from(luontiEpaonnistui)
-        .log(
-            ERROR,
-            "Sijoitteluntulosten taulukkolaskentaluonti epaonnistui: ${property.CamelExceptionCaught}")
-        .process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) {
-                if (dokumenttiprosessi(exchange).getPoikkeukset().isEmpty()) {
-                  dokumenttiprosessi(exchange)
-                      .getPoikkeukset()
-                      .add(
-                          new Poikkeus(
-                              Poikkeus.KOOSTEPALVELU, "Sijoitteluntulosten vienti epäonnistui!"));
-                }
-              }
-            })
-        .stop();
+        .log(ERROR, "Sijoitteluntulosten taulukkolaskentaluonti epaonnistui: ${property.CamelExceptionCaught}")
+        .process(new Processor() {
+          @Override
+          public void process(Exchange exchange) {
+            if (dokumenttiprosessi(exchange).getPoikkeukset().isEmpty()) {
+              dokumenttiprosessi(exchange).getPoikkeukset().add(
+                  new Poikkeus(Poikkeus.KOOSTEPALVELU, "Sijoitteluntulosten vienti epäonnistui!"));
+            }
+          }
+        }).stop();
   }
 
   private void configureMuodostaDokumentit() {
-    from(muodostaDokumentit)
-        .process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) {
-                SijoittelunTulosProsessi prosessi = prosessi(exchange);
-                if (prosessi.inkrementoi() == 0) {
-                  try {
-                    InputStream tar = generoiYhteenvetoTar(prosessi.getValmiit());
-                    String id = generateId();
-                    dokumenttiAsyncResource
-                        .tallenna(
-                            id,
-                            "sijoitteluntuloksethaulle.tar",
-                            defaultExpirationDate().getTime(),
-                            dokumenttiprosessi(exchange).getTags(),
-                            "application/x-tar",
-                            tar)
-                        .subscribe(
-                            ok -> {
-                              prosessi.setDokumenttiId(id);
-                            },
-                            poikkeus -> {
-                              LOG.error(
-                                  "Sijoittelun tulostietojen tallennus dokumenttipalveluun epäonnistui");
-                              throw new RuntimeException(poikkeus);
-                            });
-                  } catch (Exception e) {
-                    LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!", e);
-                    prosessi
-                        .getPoikkeukset()
-                        .add(
-                            new Poikkeus(
-                                Poikkeus.DOKUMENTTIPALVELU,
-                                "Tulostietojen tallennus epäonnistui!"));
-                  }
-                }
-              }
-            });
+    from(muodostaDokumentit).process(new Processor() {
+      @Override
+      public void process(Exchange exchange) {
+        SijoittelunTulosProsessi prosessi = prosessi(exchange);
+        if (prosessi.inkrementoi() == 0) {
+          try {
+            InputStream tar = generoiYhteenvetoTar(prosessi.getValmiit());
+            String id = generateId();
+            dokumenttiAsyncResource
+                .tallenna(id, "sijoitteluntuloksethaulle.tar", defaultExpirationDate().getTime(),
+                    dokumenttiprosessi(exchange).getTags(), "application/x-tar", tar)
+                .subscribe(ok -> {
+                  prosessi.setDokumenttiId(id);
+                }, poikkeus -> {
+                  LOG.error("Sijoittelun tulostietojen tallennus dokumenttipalveluun epäonnistui");
+                  throw new RuntimeException(poikkeus);
+                });
+          } catch (Exception e) {
+            LOG.error("Tulostietojen tallennus dokumenttipalveluun epäonnistui!", e);
+            prosessi.getPoikkeukset()
+                .add(new Poikkeus(Poikkeus.DOKUMENTTIPALVELU, "Tulostietojen tallennus epäonnistui!"));
+          }
+        }
+      }
+    });
   }
 
   private void configureHakukohteidenHaku() {
-    from(hakukohteidenHaku)
-        .errorHandler(
-            deadLetterChannel(luontiEpaonnistui)
-                .maximumRedeliveries(0)
-                .logExhaustedMessageHistory(true)
-                .logExhausted(true)
-                .logStackTrace(true)
-                // hide retry/handled stacktrace
-                .logRetryStackTrace(false)
-                .logHandled(false))
-        .process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) throws Exception {
-                String hakuOid = hakuOid(exchange);
-                StopWatch stopWatch =
-                    new StopWatch("Haun " + hakuOid + " hakukohteiden haku tarjonnasta");
-                stopWatch.start();
-                try {
-                  dokumenttiprosessi(exchange)
-                      .getVaroitukset()
-                      .add(
-                          new Varoitus(
-                              hakuOid,
-                              "Haetaan tarjonnalta kaikki hakukohteet! Varoitus, pyyntö saattaa kestää pitkään!"));
-                  Set<String> hakukohdeOids =
-                      tarjontaAsyncResource.haunHakukohteet(hakuOid).get(1, TimeUnit.MINUTES);
-                  if (hakukohdeOids == null || hakukohdeOids.isEmpty()) {
-                    throw kasittelePoikkeus(
-                        Poikkeus.TARJONTA,
-                        exchange,
-                        new RuntimeException("Tarjonnalta ei saatu hakukohteita haulle"),
-                        Poikkeus.hakuOid(hakuOid));
-                  } else {
-                    LOG.info(
-                        "configureHakukohteidenHaku : saatiin tarjonnalta {} hakukohdeOidia haulle {}",
-                        hakukohdeOids.size(),
-                        hakuOid);
-                  }
-                  exchange.getOut().setBody(hakukohdeOids);
-                  dokumenttiprosessi(exchange).setKokonaistyo(hakukohdeOids.size());
-                } catch (Exception e) {
-                  LOG.error("Hakukohteiden haku epäonnistui!", e);
-                  throw kasittelePoikkeus(Poikkeus.TARJONTA, exchange, e);
-                }
-                stopWatch.stop();
-                LOG.info(stopWatch.prettyPrint());
+    from(hakukohteidenHaku).errorHandler(deadLetterChannel(luontiEpaonnistui).maximumRedeliveries(0)
+        .logExhaustedMessageHistory(true).logExhausted(true).logStackTrace(true)
+        // hide retry/handled stacktrace
+        .logRetryStackTrace(false).logHandled(false)).process(new Processor() {
+          @Override
+          public void process(Exchange exchange) throws Exception {
+            String hakuOid = hakuOid(exchange);
+            StopWatch stopWatch = new StopWatch("Haun " + hakuOid + " hakukohteiden haku tarjonnasta");
+            stopWatch.start();
+            try {
+              dokumenttiprosessi(exchange).getVaroitukset().add(new Varoitus(hakuOid,
+                  "Haetaan tarjonnalta kaikki hakukohteet! Varoitus, pyyntö saattaa kestää pitkään!"));
+              Set<String> hakukohdeOids = tarjontaAsyncResource.haunHakukohteet(hakuOid).get(1,
+                  TimeUnit.MINUTES);
+              if (hakukohdeOids == null || hakukohdeOids.isEmpty()) {
+                throw kasittelePoikkeus(Poikkeus.TARJONTA, exchange,
+                    new RuntimeException("Tarjonnalta ei saatu hakukohteita haulle"),
+                    Poikkeus.hakuOid(hakuOid));
+              } else {
+                LOG.info("configureHakukohteidenHaku : saatiin tarjonnalta {} hakukohdeOidia haulle {}",
+                    hakukohdeOids.size(), hakuOid);
               }
-            });
+              exchange.getOut().setBody(hakukohdeOids);
+              dokumenttiprosessi(exchange).setKokonaistyo(hakukohdeOids.size());
+            } catch (Exception e) {
+              LOG.error("Hakukohteiden haku epäonnistui!", e);
+              throw kasittelePoikkeus(Poikkeus.TARJONTA, exchange, e);
+            }
+            stopWatch.stop();
+            LOG.info(stopWatch.prettyPrint());
+          }
+        });
   }
 
   protected SijoittelunTulosProsessi prosessi(Exchange exchange) {
-    return exchange.getProperty(
-        ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, SijoittelunTulosProsessi.class);
+    return exchange.getProperty(ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, SijoittelunTulosProsessi.class);
   }
 
-  private void writeLinesToTarFile(
-      String fileName, byte[] data, TarArchiveOutputStream tarOutputStream) throws IOException {
+  private void writeLinesToTarFile(String fileName, byte[] data, TarArchiveOutputStream tarOutputStream)
+      throws IOException {
     TarArchiveEntry archiveEntry = new TarArchiveEntry(fileName);
     archiveEntry.setSize(data.length);
     tarOutputStream.putArchiveEntry(archiveEntry);
@@ -624,8 +450,7 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
     tarOutputStream.closeArchiveEntry();
   }
 
-  private void writeLinesToTarFile(
-      String fileName, Collection<String> lines, TarArchiveOutputStream tarOutputStream)
+  private void writeLinesToTarFile(String fileName, Collection<String> lines, TarArchiveOutputStream tarOutputStream)
       throws IOException {
     TarArchiveEntry archiveEntry = new TarArchiveEntry(fileName);
     ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -656,22 +481,14 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
         }
       }
     }
-    LOG.error(
-        "Sijoitteluntulosexcel valmistui! {} työtä! Joista onnistuneita {} ja epäonnistuneita {}",
-        yhteensa,
-        onnistuneita,
-        yhteensa - onnistuneita);
+    LOG.error("Sijoitteluntulosexcel valmistui! {} työtä! Joista onnistuneita {} ja epäonnistuneita {}", yhteensa,
+        onnistuneita, yhteensa - onnistuneita);
     ByteArrayOutputStream tarFileBytes = new ByteArrayOutputStream();
     TarArchiveOutputStream tarOutputStream = new TarArchiveOutputStream(tarFileBytes);
     {
       Collection<String> rivit = Lists.newArrayList();
-      rivit.add(
-          "Yhteensä "
-              + yhteensa
-              + ", joista onnistuneita "
-              + onnistuneita
-              + " ja epäonnistuneita "
-              + (yhteensa - onnistuneita));
+      rivit.add("Yhteensä " + yhteensa + ", joista onnistuneita " + onnistuneita + " ja epäonnistuneita "
+          + (yhteensa - onnistuneita));
 
       for (Valmis epa : epaonnistuneet) {
         String otsikko;
@@ -701,13 +518,12 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
       }
       for (Valmis v : perTarjoaja.getValue()) {
         if (v.containsTiedosto()) {
-          writeLinesToTarFile(
-              v.getTiedosto().getTiedostonNimi(), v.getTiedosto().getData(), subTarOutputStream);
+          writeLinesToTarFile(v.getTiedosto().getTiedostonNimi(), v.getTiedosto().getData(),
+              subTarOutputStream);
         } else if (v.isOnnistunut()) {
           String hakukohdeFileName = "hakukohdeOid_" + v.getHakukohdeOid() + ".txt";
           String kokoUrl = dokumenttipalveluUrl + v.getTulosId();
-          writeLinesToTarFile(
-              hakukohdeFileName, Arrays.asList(v.getTulosId(), kokoUrl), subTarOutputStream);
+          writeLinesToTarFile(hakukohdeFileName, Arrays.asList(v.getTulosId(), kokoUrl), subTarOutputStream);
         }
       }
       subTarOutputStream.close();
@@ -718,16 +534,11 @@ public class SijoittelunTulosRouteImpl extends AbstractDokumenttiRouteBuilder {
   }
 
   private String yksittainenTyo(String type) {
-    return "seda:sijoitteluntulos_"
-        + type
-        + "_haulle_yksittainentulos?"
-        +
-        // jos palvelin sammuu niin ei suorita loppuun tyojonoa
-        "purgeWhenStopping=true"
-        +
+    return "seda:sijoitteluntulos_" + type + "_haulle_yksittainentulos?" +
+    // jos palvelin sammuu niin ei suorita loppuun tyojonoa
+        "purgeWhenStopping=true" +
         // reitin kutsuja ei jaa koskaan odottamaan paluuarvoa
-        "&waitForTaskToComplete=Never"
-        +
+        "&waitForTaskToComplete=Never" +
         // tyojonossa on yksi tyostaja
         "&concurrentConsumers=6";
   }

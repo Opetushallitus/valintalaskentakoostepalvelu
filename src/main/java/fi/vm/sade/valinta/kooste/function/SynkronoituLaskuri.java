@@ -16,10 +16,7 @@ public class SynkronoituLaskuri {
     this.suoritaJokaKerta = null;
   }
 
-  private SynkronoituLaskuri(
-      int laskurinAlkuarvo,
-      boolean suoritaVainKerran,
-      SynkronoituToiminto suoritaJokaKerta,
+  private SynkronoituLaskuri(int laskurinAlkuarvo, boolean suoritaVainKerran, SynkronoituToiminto suoritaJokaKerta,
       SynkronoituToiminto synkronoituToiminto) {
     this.synkronoituToiminto = synkronoituToiminto;
     this.laskuri = new AtomicInteger(laskurinAlkuarvo);
@@ -39,8 +36,10 @@ public class SynkronoituLaskuri {
 
   public static class SynkronoituLaskuriBuilder {
     private int laskurinAlkuarvo = 0;
-    private SynkronoituToiminto synkronoituToiminto = () -> {};
-    private SynkronoituToiminto suoritaJokaKerta = () -> {};
+    private SynkronoituToiminto synkronoituToiminto = () -> {
+    };
+    private SynkronoituToiminto suoritaJokaKerta = () -> {
+    };
     private boolean suoritaVainKerran = true;
 
     public SynkronoituLaskuriBuilder setLaskurinAlkuarvo(int laskurinAlkuarvo) {
@@ -53,8 +52,7 @@ public class SynkronoituLaskuri {
       return this;
     }
 
-    public SynkronoituLaskuriBuilder setSynkronoituToiminto(
-        SynkronoituToiminto synkronoituToiminto) {
+    public SynkronoituLaskuriBuilder setSynkronoituToiminto(SynkronoituToiminto synkronoituToiminto) {
       this.synkronoituToiminto = synkronoituToiminto;
       return this;
     }
@@ -65,8 +63,7 @@ public class SynkronoituLaskuri {
     }
 
     public SynkronoituLaskuri build() {
-      return new SynkronoituLaskuri(
-          laskurinAlkuarvo, suoritaVainKerran, suoritaJokaKerta, synkronoituToiminto);
+      return new SynkronoituLaskuri(laskurinAlkuarvo, suoritaVainKerran, suoritaJokaKerta, synkronoituToiminto);
     }
   }
 

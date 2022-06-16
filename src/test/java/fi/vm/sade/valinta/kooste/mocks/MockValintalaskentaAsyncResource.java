@@ -17,8 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncResource {
 
-  private static AtomicReference<List<ValintatietoValinnanvaiheDTO>> resultReference =
-      new AtomicReference<>();
+  private static AtomicReference<List<ValintatietoValinnanvaiheDTO>> resultReference = new AtomicReference<>();
 
   public static void setResult(List<ValintatietoValinnanvaiheDTO> result) {
     resultReference.set(result);
@@ -44,14 +43,13 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
   }
 
   @Override
-  public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
-      String hakukohdeOid) {
+  public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid) {
     return CompletableFuture.completedFuture(resultReference.get());
   }
 
   @Override
-  public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
-      String hakukohdeOid, Executor executor) {
+  public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid,
+      Executor executor) {
     return CompletableFuture.completedFuture(resultReference.get());
   }
 
@@ -61,17 +59,13 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
   }
 
   @Override
-  public CompletableFuture<ValinnanvaiheDTO> lisaaTuloksia(
-      final String hakuOid,
-      final String hakukohdeOid,
-      final String tarjoajaOid,
-      final ValinnanvaiheDTO vaihe) {
+  public CompletableFuture<ValinnanvaiheDTO> lisaaTuloksia(final String hakuOid, final String hakukohdeOid,
+      final String tarjoajaOid, final ValinnanvaiheDTO vaihe) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Observable<String> laskeJaSijoittele(
-      String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
+  public Observable<String> laskeJaSijoittele(String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
     throw new UnsupportedOperationException();
   }
 }

@@ -22,41 +22,28 @@ public class HakijapalvelunOsoiteTest {
 
   @Ignore
   @Test
-  public void testaaHakijapalvelunOsoitteenHaku3()
-      throws JsonSyntaxException, JsonIOException, IOException {
-    Organisaatio organisaatio =
-        new Gson()
-            .fromJson(
-                new InputStreamReader(
-                    new ClassPathResource("organisaatio/osoite.json").getInputStream()),
-                Organisaatio.class);
+  public void testaaHakijapalvelunOsoitteenHaku3() throws JsonSyntaxException, JsonIOException, IOException {
+    Organisaatio organisaatio = new Gson().fromJson(
+        new InputStreamReader(new ClassPathResource("organisaatio/osoite.json").getInputStream()),
+        Organisaatio.class);
     HaeOsoiteKomponentti h = new HaeOsoiteKomponentti(null);
     System.err.println(new GsonBuilder().setPrettyPrinting().create().toJson(organisaatio));
-    Osoite osoite =
-        LueHakijapalvelunOsoite.lueHakijapalvelunOsoite(
-            h, KieliUtil.SUOMI, organisaatio, new Teksti());
+    Osoite osoite = LueHakijapalvelunOsoite.lueHakijapalvelunOsoite(h, KieliUtil.SUOMI, organisaatio, new Teksti());
   }
 
   @Ignore
   @Test
-  public void testaaHakijapalvelunOsoitteenHaku()
-      throws JsonSyntaxException, JsonIOException, IOException {
-    OrganisaatioRDTO organisaatio =
-        new Gson()
-            .fromJson(
-                new InputStreamReader(
-                    new ClassPathResource("organisaatio/organisaatiodto.json").getInputStream()),
-                OrganisaatioRDTO.class);
+  public void testaaHakijapalvelunOsoitteenHaku() throws JsonSyntaxException, JsonIOException, IOException {
+    OrganisaatioRDTO organisaatio = new Gson().fromJson(
+        new InputStreamReader(new ClassPathResource("organisaatio/organisaatiodto.json").getInputStream()),
+        OrganisaatioRDTO.class);
   }
 
   @Ignore
   @Test
-  public void testaaHakijapalvelunOsoitteenHaku2()
-      throws JsonSyntaxException, JsonIOException, IOException {
-    com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider provider =
-        new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider();
-    fi.vm.sade.valinta.kooste.ObjectMapperProvider mapper =
-        new fi.vm.sade.valinta.kooste.ObjectMapperProvider();
+  public void testaaHakijapalvelunOsoitteenHaku2() throws JsonSyntaxException, JsonIOException, IOException {
+    com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider provider = new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider();
+    fi.vm.sade.valinta.kooste.ObjectMapperProvider mapper = new fi.vm.sade.valinta.kooste.ObjectMapperProvider();
 
     String json = IOUtils.toString(new ClassPathResource("organisaatio/org.json").getInputStream());
     mapper.getContext(OrganisaatioRDTO.class).readValue(json, OrganisaatioRDTO.class);

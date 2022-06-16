@@ -20,9 +20,7 @@ public class ValintatapajonoRivi {
   @ApiModelProperty(hidden = true)
   private final String nimi;
 
-  @ApiModelProperty(
-      required = true,
-      allowableValues = "HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
+  @ApiModelProperty(required = true, allowableValues = "HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
   private final String tila;
 
   @ApiModelProperty(required = true)
@@ -31,9 +29,7 @@ public class ValintatapajonoRivi {
   @ApiModelProperty(required = false)
   private final String pisteet;
 
-  @ApiModelProperty(
-      required = false,
-      value = "Kielikoodi ja kuvaus. Esim {\"FI\":\"Suomenkielinen kuvaus\",\"SV\":\"...\"}")
+  @ApiModelProperty(required = false, value = "Kielikoodi ja kuvaus. Esim {\"FI\":\"Suomenkielinen kuvaus\",\"SV\":\"...\"}")
   private final Map<String, String> kuvaus;
 
   @ApiModelProperty(hidden = true)
@@ -51,32 +47,22 @@ public class ValintatapajonoRivi {
     this.jonosija = null;
   }
 
-  public ValintatapajonoRivi(
-      String oid,
-      String jonosija,
-      String nimi,
-      String tila,
-      String pisteet,
-      String fi,
-      String sv,
-      String en) {
+  public ValintatapajonoRivi(String oid, String jonosija, String nimi, String tila, String pisteet, String fi,
+      String sv, String en) {
 
     this.oid = oid;
     this.jonosija = jonosija; // new BigDecimal(jonosija).intValue();
     this.nimi = nimi;
     this.tila = tila;
     this.pisteet = pisteet;
-    this.kuvaus =
-        Arrays.asList(new Kuvaus(SUOMI, fi), new Kuvaus(RUOTSI, sv), new Kuvaus(ENGLANTI, en))
-            .stream()
-            .filter(k -> StringUtils.trimToNull(k.getTeksti()) != null)
-            .collect(Collectors.toMap(k -> k.getKieli(), k -> k.getTeksti()));
+    this.kuvaus = Arrays.asList(new Kuvaus(SUOMI, fi), new Kuvaus(RUOTSI, sv), new Kuvaus(ENGLANTI, en)).stream()
+        .filter(k -> StringUtils.trimToNull(k.getTeksti()) != null)
+        .collect(Collectors.toMap(k -> k.getKieli(), k -> k.getTeksti()));
   }
 
   @ApiModelProperty(hidden = true)
   public boolean isValidi() {
-    boolean hasPisteetTaiJonosija =
-        StringUtils.isNotBlank(getJonosija()) || StringUtils.isNotBlank(getPisteet());
+    boolean hasPisteetTaiJonosija = StringUtils.isNotBlank(getJonosija()) || StringUtils.isNotBlank(getPisteet());
     return !isMaarittelematon() || hasPisteetTaiJonosija;
   }
 
@@ -92,9 +78,8 @@ public class ValintatapajonoRivi {
       } else if (ValintatapajonoExcel.VAIHTOEHDOT_KONVERSIO.containsKey(tila)) {
         tilaEnumeraationa = JarjestyskriteerituloksenTila.valueOf(tila);
       } else if (ValintatapajonoExcel.VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO.containsKey(tila)) {
-        tilaEnumeraationa =
-            JarjestyskriteerituloksenTila.valueOf(
-                ValintatapajonoExcel.VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO.get(tila));
+        tilaEnumeraationa = JarjestyskriteerituloksenTila
+            .valueOf(ValintatapajonoExcel.VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO.get(tila));
       }
     }
     return tilaEnumeraationa;

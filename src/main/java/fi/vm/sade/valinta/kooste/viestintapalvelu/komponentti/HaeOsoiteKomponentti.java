@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
 public class HaeOsoiteKomponentti {
   private static final Logger LOG = LoggerFactory.getLogger(HaeOsoiteKomponentti.class);
   private static final String SUOMI = "fin";
-  private final Cache<String, Maakoodi> koodiCache =
-      CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
+  private final Cache<String, Maakoodi> koodiCache = CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS)
+      .build();
   private KoodiService koodiService;
 
   @Autowired
@@ -33,49 +33,39 @@ public class HaeOsoiteKomponentti {
     this.koodiService = koodiService;
   }
 
-  public Osoite haeOsoiteYhteystiedoista(
-      Yhteystieto yhteystiedot,
-      final KieliType preferoitutyyppi,
-      String organisaationimi,
-      String email,
-      String numero) {
+  public Osoite haeOsoiteYhteystiedoista(Yhteystieto yhteystiedot, final KieliType preferoitutyyppi,
+      String organisaationimi, String email, String numero) {
     Maakoodi maakoodi;
     // onko ulkomaalainen?
     // hae koodistosta maa
     String postCode = yhteystiedot.getPostinumeroUri();
     final String uri = postCode;
     try {
-      maakoodi =
-          koodiCache.get(
-              uri,
-              new Callable<Maakoodi>() {
-                @Override
-                public Maakoodi call() throws Exception {
-                  String postitoimipaikka = StringUtils.EMPTY;
-                  List<KoodiType> koodiTypes =
-                      koodiService.searchKoodis(
-                          KoodiServiceSearchCriteriaBuilder.latestKoodisByUris(uri));
-                  for (KoodiType koodi : koodiTypes) {
-                    if (koodi.getMetadata() == null) {
-                      LOG.error("Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}", uri);
-                      continue;
-                    }
-                    // preferoidaan englantia
-                    postitoimipaikka = getKuvaus(koodi.getMetadata(), preferoitutyyppi);
-                    if (postitoimipaikka == null) {
-                      postitoimipaikka = getNimi(koodi.getMetadata());
-                      // jos suomea ei loydy kaikki kay
-                    }
-                    LOG.debug(
-                        "Haettiin postitoimipaikka {} urille {}",
-                        new Object[] {postitoimipaikka, uri});
-                    if (postitoimipaikka != null) {
-                      break;
-                    }
-                  }
-                  return new Maakoodi(postitoimipaikka, "FI");
-                }
-              });
+      maakoodi = koodiCache.get(uri, new Callable<Maakoodi>() {
+        @Override
+        public Maakoodi call() throws Exception {
+          String postitoimipaikka = StringUtils.EMPTY;
+          List<KoodiType> koodiTypes = koodiService
+              .searchKoodis(KoodiServiceSearchCriteriaBuilder.latestKoodisByUris(uri));
+          for (KoodiType koodi : koodiTypes) {
+            if (koodi.getMetadata() == null) {
+              LOG.error("Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}", uri);
+              continue;
+            }
+            // preferoidaan englantia
+            postitoimipaikka = getKuvaus(koodi.getMetadata(), preferoitutyyppi);
+            if (postitoimipaikka == null) {
+              postitoimipaikka = getNimi(koodi.getMetadata());
+              // jos suomea ei loydy kaikki kay
+            }
+            LOG.debug("Haettiin postitoimipaikka {} urille {}", new Object[] { postitoimipaikka, uri });
+            if (postitoimipaikka != null) {
+              break;
+            }
+          }
+          return new Maakoodi(postitoimipaikka, "FI");
+        }
+      });
     } catch (Exception e) {
       LOG.error("Yhteystiedoille ei saatu haettua maata koodistosta! Koodisto URI {}", uri);
       maakoodi = new Maakoodi(StringUtils.EMPTY, "FI");
@@ -84,14 +74,10 @@ public class HaeOsoiteKomponentti {
     if (KieliType.EN.equals(preferoitutyyppi)) {
       country = "FINLAND";
     }
-    return new OsoiteBuilder()
-        .setAddressline(yhteystiedot.getOsoite())
+    return new OsoiteBuilder().setAddressline(yhteystiedot.getOsoite())
         .setPostalCode(postinumero(yhteystiedot.getPostinumeroUri()))
         .setCity(StringUtils.capitalize(StringUtils.lowerCase(maakoodi.getPostitoimipaikka())))
-        .setCountry(country)
-        .setOrganisaationimi(organisaationimi)
-        .setNumero(numero)
-        .setEmail(email)
+        .setCountry(country).setOrganisaationimi(organisaationimi).setNumero(numero).setEmail(email)
         .createOsoite();
   }
 

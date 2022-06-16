@@ -8,11 +8,8 @@ public class HakutoiveenIlmoittautumistila {
   String ilmoittautumistila;
   Boolean ilmoittauduttavissa;
 
-  public HakutoiveenIlmoittautumistila(
-      Ilmoittautumisaika ilmoittautumisaika,
-      Option<Ilmoittautumistapa> ilmoittautumistapa,
-      String ilmoittautumistila,
-      Boolean ilmoittauduttavissa) {
+  public HakutoiveenIlmoittautumistila(Ilmoittautumisaika ilmoittautumisaika,
+      Option<Ilmoittautumistapa> ilmoittautumistapa, String ilmoittautumistila, Boolean ilmoittauduttavissa) {
     this.ilmoittautumisaika = ilmoittautumisaika;
     this.ilmoittautumistapa = ilmoittautumistapa;
     this.ilmoittautumistila = ilmoittautumistila;

@@ -23,11 +23,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Jussi Jartamo
- *     <p>Tuotantoa vastaava konfiguraatio
+ *         <p>
+ *         Tuotantoa vastaava konfiguraatio
  */
 public class ValintalaskentakoostepalveluJetty {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(ValintalaskentakoostepalveluJetty.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentakoostepalveluJetty.class);
 
   public static final int port;
   private static Server server;
@@ -35,8 +35,7 @@ public class ValintalaskentakoostepalveluJetty {
   static {
     try {
       // -Dport=8090
-      Integer portFlagOrZero =
-          Integer.parseInt(Optional.ofNullable(System.getProperty("port")).orElse("0"));
+      Integer portFlagOrZero = Integer.parseInt(Optional.ofNullable(System.getProperty("port")).orElse("0"));
       ServerSocket s = new ServerSocket(portFlagOrZero);
       port = s.getLocalPort();
       s.close();
@@ -52,10 +51,8 @@ public class ValintalaskentakoostepalveluJetty {
     // MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication("ROLE_APP_VALINTAPERUSTEET_READ_1.2.246.562.10.00000000001");
   }
 
-  public static final String resourcesAddress =
-      "http://localhost:"
-          + ValintalaskentakoostepalveluJetty.port
-          + "/valintalaskentakoostepalvelu/resources";
+  public static final String resourcesAddress = "http://localhost:" + ValintalaskentakoostepalveluJetty.port
+      + "/valintalaskentakoostepalvelu/resources";
 
   private static void mockUserHomeWithCommonProperties() {
     try {
@@ -67,13 +64,9 @@ public class ValintalaskentakoostepalveluJetty {
       System.setProperty("user.home", tempDir.getAbsolutePath());
       LOG.info("Set user.home to " + tempDir.getAbsolutePath() + " .");
       LOG.info("Writing properties to " + commonProperties.getAbsolutePath() + " ...");
-      IOUtils.writeLines(
-          Collections.singletonList("web.url.cas=some_cas_url"), System.lineSeparator(), output);
-      LOG.info(
-          "...successfully wrote to properties file in "
-              + commonProperties.getAbsolutePath()
-              + " the following content: "
-              + IOUtils.readLines(new FileReader(commonProperties)));
+      IOUtils.writeLines(Collections.singletonList("web.url.cas=some_cas_url"), System.lineSeparator(), output);
+      LOG.info("...successfully wrote to properties file in " + commonProperties.getAbsolutePath()
+          + " the following content: " + IOUtils.readLines(new FileReader(commonProperties)));
     } catch (FileNotFoundException e) {
       throw new RuntimeException(e);
     } catch (IOException e) {
@@ -88,14 +81,11 @@ public class ValintalaskentakoostepalveluJetty {
     mockUserHomeWithCommonProperties();
     int maxTriesToStart = 10;
     MockOpintopolkuCasAuthenticationFilter.clear();
-    UrlConfiguration.getInstance()
-        .addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
+    UrlConfiguration.getInstance().addOverride("url-virkailija", Integraatiopalvelimet.mockServer.getUrl())
         .addOverride("url-ilb", Integraatiopalvelimet.mockServer.getUrl())
-        .addOverride(
-            "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl",
+        .addOverride("valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl",
             Integraatiopalvelimet.mockServer.getUrl())
-        .addOverride(
-            "valintalaskentakoostepalvelu.valintaperusteet-service.baseurl",
+        .addOverride("valintalaskentakoostepalvelu.valintaperusteet-service.baseurl",
             Integraatiopalvelimet.mockServer.getUrl());
     if (server.isStopped()) {
       int startTriesLeft = maxTriesToStart;
@@ -105,11 +95,9 @@ public class ValintalaskentakoostepalveluJetty {
           startServer();
           startSucceeded = true;
         } catch (Exception e) {
-          System.err.println(
-              ValintalaskentakoostepalveluJetty.class.getName()
-                  + " Warning: could not start server, trying again "
-                  + startTriesLeft
-                  + " times. Exception was:");
+          System.err.println(ValintalaskentakoostepalveluJetty.class.getName()
+              + " Warning: could not start server, trying again " + startTriesLeft
+              + " times. Exception was:");
           e.printStackTrace();
         }
       }
@@ -121,15 +109,11 @@ public class ValintalaskentakoostepalveluJetty {
   }
 
   private static void startServer() {
-    KoosteTestProfileConfiguration.PROXY_SERVER.set(
-        Integraatiopalvelimet.mockServer.getHost()
-            + ":"
-            + Integraatiopalvelimet.mockServer.getPort());
+    KoosteTestProfileConfiguration.PROXY_SERVER
+        .set(Integraatiopalvelimet.mockServer.getHost() + ":" + Integraatiopalvelimet.mockServer.getPort());
     String root = ProjectRootFinder.findProjectRoot().toString();
     WebAppContext wac = new WebAppContext();
-    wac.addFilter(
-        MockOpintopolkuCasAuthenticationFilter.class,
-        "/*",
+    wac.addFilter(MockOpintopolkuCasAuthenticationFilter.class, "/*",
         EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC, DispatcherType.INCLUDE));
     wac.setResourceBase(root + "/src/main/resources/webapp");
     KoosteProductionJetty.JETTY.start(wac, server, KoosteProductionJetty.contextPath);

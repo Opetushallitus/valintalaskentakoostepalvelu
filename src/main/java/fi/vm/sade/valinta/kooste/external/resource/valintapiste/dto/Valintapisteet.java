@@ -19,20 +19,20 @@ public class Valintapisteet {
   private String sukunimi;
   private List<Piste> pisteet;
 
-  public Valintapisteet() {}
+  public Valintapisteet() {
+  }
 
-  /** @param a Tallettaja and AdditionalData */
+  /**
+   * @param a
+   *          Tallettaja and AdditionalData
+   */
   public Valintapisteet(Pair<String, ApplicationAdditionalDataDTO> a) {
-    this(
-        a.getRight().getOid(),
-        a.getRight().getPersonOid(),
-        a.getRight().getFirstNames(),
+    this(a.getRight().getOid(), a.getRight().getPersonOid(), a.getRight().getFirstNames(),
         a.getRight().getLastName(),
         ADDITIONAL_INFO_TO_PISTEET.apply(a.getRight().getAdditionalData(), a.getKey()));
   }
 
-  public Valintapisteet(
-      String hakemusOID, String oppijaOID, String etunimet, String sukunimi, List<Piste> pisteet) {
+  public Valintapisteet(String hakemusOID, String oppijaOID, String etunimet, String sukunimi, List<Piste> pisteet) {
     this.hakemusOID = hakemusOID;
     this.oppijaOID = oppijaOID;
     this.etunimet = etunimet;
@@ -61,25 +61,13 @@ public class Valintapisteet {
   }
 
   public static ApplicationAdditionalDataDTO toAdditionalData(Valintapisteet v) {
-    Map<String, String> immutableAdditionalData =
-        v.getPisteet().stream()
-            .flatMap(
-                p ->
-                    Stream.concat(
-                        Optional.ofNullable(p.getArvo())
-                            .map(a -> Stream.of(Pair.of(p.getTunniste(), a)))
-                            .orElse(Stream.empty()),
-                        Stream.of(
-                            Pair.of(
-                                withOsallistuminenSuffix(p.getTunniste()),
-                                p.getOsallistuminen().toString()))))
-            .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+    Map<String, String> immutableAdditionalData = v.getPisteet().stream().flatMap(p -> Stream.concat(
+        Optional.ofNullable(p.getArvo()).map(a -> Stream.of(Pair.of(p.getTunniste(), a)))
+            .orElse(Stream.empty()),
+        Stream.of(Pair.of(withOsallistuminenSuffix(p.getTunniste()), p.getOsallistuminen().toString()))))
+        .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
-    return new ApplicationAdditionalDataDTO(
-        v.getHakemusOID(),
-        v.getOppijaOID(),
-        v.getEtunimet(),
-        v.getSukunimi(),
+    return new ApplicationAdditionalDataDTO(v.getHakemusOID(), v.getOppijaOID(), v.getEtunimet(), v.getSukunimi(),
         new HashMap<>(immutableAdditionalData));
   }
 
@@ -87,21 +75,17 @@ public class Valintapisteet {
     return tunniste + "-OSALLISTUMINEN";
   }
 
-  private static BiFunction<Map<String, String>, String, List<Piste>> ADDITIONAL_INFO_TO_PISTEET =
-      (additionalInfo, tallettajaOid) ->
-          additionalInfo.entrySet().stream()
-              .flatMap(
-                  entry -> {
-                    String k = entry.getKey();
-                    Object v = entry.getValue();
-                    if (k.endsWith("-OSALLISTUMINEN")) {
-                      String tunniste = k.replaceAll("-OSALLISTUMINEN", "");
-                      Osallistuminen osallistuminen = Osallistuminen.valueOf(v.toString());
-                      String arvo = additionalInfo.get(tunniste);
-                      return Stream.of(new Piste(tunniste, arvo, osallistuminen, tallettajaOid));
-                    } else {
-                      return Stream.empty();
-                    }
-                  })
-              .collect(Collectors.toList());
+  private static BiFunction<Map<String, String>, String, List<Piste>> ADDITIONAL_INFO_TO_PISTEET = (additionalInfo,
+      tallettajaOid) -> additionalInfo.entrySet().stream().flatMap(entry -> {
+        String k = entry.getKey();
+        Object v = entry.getValue();
+        if (k.endsWith("-OSALLISTUMINEN")) {
+          String tunniste = k.replaceAll("-OSALLISTUMINEN", "");
+          Osallistuminen osallistuminen = Osallistuminen.valueOf(v.toString());
+          String arvo = additionalInfo.get(tunniste);
+          return Stream.of(new Piste(tunniste, arvo, osallistuminen, tallettajaOid));
+        } else {
+          return Stream.empty();
+        }
+      }).collect(Collectors.toList());
 }

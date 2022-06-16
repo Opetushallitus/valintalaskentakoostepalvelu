@@ -14,31 +14,21 @@ public class Letter {
   private boolean skipIPosti = false;
   private String emailAddressEPosti;
 
-  public Letter() {}
+  public Letter() {
+  }
 
   public Letter(Osoite addressLabel, Map<String, Object> customLetterContents) {
     this.addressLabel = addressLabel;
     this.templateReplacements = customLetterContents;
   }
 
-  public Letter(
-      Osoite addressLabel,
-      String templateName,
-      String languageCode,
-      Map<String, Object> replacements) {
+  public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements) {
     this.addressLabel = addressLabel;
     this.templateReplacements = replacements;
   }
 
-  public Letter(
-      Osoite addressLabel,
-      String templateName,
-      String languageCode,
-      Map<String, Object> replacements,
-      String personOid,
-      boolean skipIPosti,
-      String emailAddressEPosti,
-      String applicationOid) {
+  public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements,
+      String personOid, boolean skipIPosti, String emailAddressEPosti, String applicationOid) {
     this.addressLabel = addressLabel;
     this.templateReplacements = replacements;
     this.personOid = personOid;
@@ -47,11 +37,7 @@ public class Letter {
     this.emailAddressEPosti = emailAddressEPosti;
   }
 
-  public Letter(
-      Osoite addressLabel,
-      String templateName,
-      String languageCode,
-      Map<String, Object> replacements,
+  public Letter(Osoite addressLabel, String templateName, String languageCode, Map<String, Object> replacements,
       String emailAddress) {
     this.addressLabel = addressLabel;
     this.templateReplacements = replacements;
@@ -124,16 +110,8 @@ public class Letter {
 
   @Override
   public String toString() {
-    return "Letter [addressLabel="
-        + addressLabel
-        + ", templateReplacements="
-        + templateReplacements
-        + ", personOid="
-        + personOid
-        + ", applicationOid="
-        + applicationOid
-        + ", skipIPosti="
-        + skipIPosti
+    return "Letter [addressLabel=" + addressLabel + ", templateReplacements=" + templateReplacements
+        + ", personOid=" + personOid + ", applicationOid=" + applicationOid + ", skipIPosti=" + skipIPosti
         + "]";
   }
 }

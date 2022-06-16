@@ -18,14 +18,8 @@ public class LaskentaStartParams implements LaskentaInfo {
   private final LaskentaTyyppi tyyppi;
   private final AuditSession auditSession;
 
-  public LaskentaStartParams(
-      AuditSession auditSession,
-      String uuid,
-      String hakuOid,
-      boolean erillishaku,
-      Integer valinnanvaihe,
-      Boolean valintakoelaskenta,
-      Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
+  public LaskentaStartParams(AuditSession auditSession, String uuid, String hakuOid, boolean erillishaku,
+      Integer valinnanvaihe, Boolean valintakoelaskenta, Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
       LaskentaTyyppi tyyppi) {
     this.auditSession = auditSession;
     this.uuid = uuid;
@@ -39,17 +33,9 @@ public class LaskentaStartParams implements LaskentaInfo {
     this.erillishaku = erillishaku;
   }
 
-  public LaskentaStartParams(
-      AuditSession auditSession,
-      String uuid,
-      String hakuOid,
-      boolean erillishaku,
-      boolean osittainenLaskenta,
-      boolean valintaryhmalaskenta,
-      Integer valinnanvaihe,
-      Boolean valintakoelaskenta,
-      Collection<HakukohdeJaOrganisaatio> hakukohdeDtos,
-      LaskentaTyyppi tyyppi) {
+  public LaskentaStartParams(AuditSession auditSession, String uuid, String hakuOid, boolean erillishaku,
+      boolean osittainenLaskenta, boolean valintaryhmalaskenta, Integer valinnanvaihe, Boolean valintakoelaskenta,
+      Collection<HakukohdeJaOrganisaatio> hakukohdeDtos, LaskentaTyyppi tyyppi) {
     this.auditSession = auditSession;
     this.uuid = uuid;
     this.hakuOid = hakuOid;

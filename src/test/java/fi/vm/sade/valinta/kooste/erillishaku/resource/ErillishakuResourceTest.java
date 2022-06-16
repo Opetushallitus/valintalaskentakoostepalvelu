@@ -39,10 +39,10 @@ public class ErillishakuResourceTest {
   private String tarjoajaOid = "1.2.246.562.10.591352080610";
   private String valintatapajonoOid = "14090336922663576781797489829886";
   private String henkiloOid = "hakija1";
-  private final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-  final MockKoodistoCachedAsyncResource mockKoodistoCachedAsyncResource =
-      new MockKoodistoCachedAsyncResource(mock(KoodistoAsyncResource.class));
+  private final String root = "http://localhost:" + ValintaKoosteJetty.port
+      + "/valintalaskentakoostepalvelu/resources";
+  final MockKoodistoCachedAsyncResource mockKoodistoCachedAsyncResource = new MockKoodistoCachedAsyncResource(
+      mock(KoodistoAsyncResource.class));
 
   @Before
   public void startServer() {
@@ -53,22 +53,13 @@ public class ErillishakuResourceTest {
     MockApplicationAsyncResource.setResult(createVientiHakemus(hakutyyppi));
 
     final String url = root + "/erillishaku/vienti";
-    final ProsessiId prosessiId =
-        createClient(url)
-            .query("hakutyyppi", hakutyyppi)
-            .query("hakuOid", hakuOid)
-            .query("hakukohdeOid", hakukohdeOid)
-            .query("tarjoajaOid", tarjoajaOid)
-            .query("valintatapajonoOid", valintatapajonoOid)
-            .query("valintatapajononNimi", "varsinainen jono")
-            .type(MediaType.APPLICATION_JSON_TYPE)
-            .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(
-                Entity.entity(Collections.emptyList(), MediaType.APPLICATION_JSON),
-                ProsessiId.class);
+    final ProsessiId prosessiId = createClient(url).query("hakutyyppi", hakutyyppi).query("hakuOid", hakuOid)
+        .query("hakukohdeOid", hakukohdeOid).query("tarjoajaOid", tarjoajaOid)
+        .query("valintatapajonoOid", valintatapajonoOid).query("valintatapajononNimi", "varsinainen jono")
+        .type(MediaType.APPLICATION_JSON_TYPE).accept(MediaType.APPLICATION_JSON_TYPE)
+        .post(Entity.entity(Collections.emptyList(), MediaType.APPLICATION_JSON), ProsessiId.class);
 
-    String documentId =
-        DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, prosessiId);
+    String documentId = DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, prosessiId);
     final InputStream storedDocument = MockDokumenttiAsyncResource.getStoredDocument(documentId);
     assertNotNull(storedDocument);
     verifyCreatedExcelDocument(hakutyyppi, storedDocument);
@@ -115,20 +106,12 @@ public class ErillishakuResourceTest {
   public void tuontiExcelTiedostostaKK() {
     final String url = root + "/erillishaku/tuonti";
 
-    final ProsessiId prosessiId =
-        createClient(url)
-            .query("hakutyyppi", "KORKEAKOULU")
-            .query("hakuOid", hakuOid)
-            .query("hakukohdeOid", hakukohdeOid)
-            .query("tarjoajaOid", tarjoajaOid)
-            .query("valintatapajonoOid", valintatapajonoOid)
-            .query("valintatapajononNimi", "varsinainen jono")
-            .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(
-                Entity.entity(
-                    ExcelTestData.kkHakuToisenAsteenValintatuloksella(),
-                    MediaType.APPLICATION_OCTET_STREAM),
-                ProsessiId.class);
+    final ProsessiId prosessiId = createClient(url).query("hakutyyppi", "KORKEAKOULU").query("hakuOid", hakuOid)
+        .query("hakukohdeOid", hakukohdeOid).query("tarjoajaOid", tarjoajaOid)
+        .query("valintatapajonoOid", valintatapajonoOid).query("valintatapajononNimi", "varsinainen jono")
+        .accept(MediaType.APPLICATION_JSON_TYPE)
+        .post(Entity.entity(ExcelTestData.kkHakuToisenAsteenValintatuloksella(),
+            MediaType.APPLICATION_OCTET_STREAM), ProsessiId.class);
 
     DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, prosessiId);
   }
@@ -137,79 +120,40 @@ public class ErillishakuResourceTest {
   public void tuontiExcelTiedostostaToinenAste() {
     final String url = root + "/erillishaku/tuonti";
 
-    final ProsessiId prosessiId =
-        createClient(url)
-            .query("hakutyyppi", "TOISEN_ASTEEN_OPPILAITOS")
-            .query("hakuOid", hakuOid)
-            .query("hakukohdeOid", hakukohdeOid)
-            .query("tarjoajaOid", tarjoajaOid)
-            .query("valintatapajonoOid", valintatapajonoOid)
-            .query("valintatapajononNimi", "varsinainen jono")
-            .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(
-                Entity.entity(
-                    ExcelTestData.toisenAsteenErillisHaku(), MediaType.APPLICATION_OCTET_STREAM),
-                ProsessiId.class);
+    final ProsessiId prosessiId = createClient(url).query("hakutyyppi", "TOISEN_ASTEEN_OPPILAITOS")
+        .query("hakuOid", hakuOid).query("hakukohdeOid", hakukohdeOid).query("tarjoajaOid", tarjoajaOid)
+        .query("valintatapajonoOid", valintatapajonoOid).query("valintatapajononNimi", "varsinainen jono")
+        .accept(MediaType.APPLICATION_JSON_TYPE)
+        .post(Entity.entity(ExcelTestData.toisenAsteenErillisHaku(), MediaType.APPLICATION_OCTET_STREAM),
+            ProsessiId.class);
 
     DokumenttiProsessiPoller.odotaProsessiaPalautaDokumenttiId(root, prosessiId);
   }
 
   private void verifyCreatedExcelDocument(Hakutyyppi hakutyyppi, final InputStream storedDocument) {
-    final ImportedErillisHakuExcel tulos =
-        new ImportedErillisHakuExcel(hakutyyppi, storedDocument, mockKoodistoCachedAsyncResource);
+    final ImportedErillisHakuExcel tulos = new ImportedErillisHakuExcel(hakutyyppi, storedDocument,
+        mockKoodistoCachedAsyncResource);
     assertEquals(1, tulos.rivit.size());
-    final HenkiloCreateDTO expectedHenkilo =
-        new HenkiloCreateDTO(
-            "SV",
-            "1",
-            MockData.etunimi,
-            MockData.sukunimi,
-            MockData.hetu,
-            "1901-01-01",
-            henkiloOid,
-            HenkiloTyyppi.OPPIJA,
-            "SV",
-            null);
+    final HenkiloCreateDTO expectedHenkilo = new HenkiloCreateDTO("SV", "1", MockData.etunimi, MockData.sukunimi,
+        MockData.hetu, "1901-01-01", henkiloOid, HenkiloTyyppi.OPPIJA, "SV", null);
     assertEquals(expectedHenkilo, tulos.rivit.get(0).toHenkiloCreateDTO(null));
 
-    final ErillishakuRivi expectedRivi =
-        new ErillishakuRiviBuilder()
-            .hakemusOid(MockData.hakemusOid)
-            .sukunimi(MockData.sukunimi)
-            .etunimi(MockData.etunimi)
-            .henkilotunnus(MockData.hetu)
-            .sahkoposti("testi@testi.fi")
-            .syntymaAika(MockData.syntymaAika)
-            .sukupuoli(Sukupuoli.MIES)
-            .personOid("")
-            .aidinkieli("SV")
-            .hakemuksenTila("KESKEN")
-            .ehdollisestiHyvaksyttavissa(false)
-            .hyvaksymiskirjeLahetetty(null)
-            .vastaanottoTila("")
-            .ilmoittautumisTila("")
-            .julkaistaankoTiedot(false)
-            .poistetaankoRivi(false)
-            .asiointikieli("SV")
-            .puhelinnumero("040123")
-            .osoite("Testitie 2")
-            .postinumero("00100")
-            .postitoimipaikka("HELSINKI")
-            .asuinmaa("FIN")
-            .kansalaisuus("FIN")
-            .kotikunta("Helsinki")
-            .toisenAsteenSuoritus(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null)
-            .toisenAsteenSuoritusmaa(hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "")
-            .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
-            .maksuntila(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Maksuntila.MAKSAMATTA : null)
-            .build();
+    final ErillishakuRivi expectedRivi = new ErillishakuRiviBuilder().hakemusOid(MockData.hakemusOid)
+        .sukunimi(MockData.sukunimi).etunimi(MockData.etunimi).henkilotunnus(MockData.hetu)
+        .sahkoposti("testi@testi.fi").syntymaAika(MockData.syntymaAika).sukupuoli(Sukupuoli.MIES).personOid("")
+        .aidinkieli("SV").hakemuksenTila("KESKEN").ehdollisestiHyvaksyttavissa(false)
+        .hyvaksymiskirjeLahetetty(null).vastaanottoTila("").ilmoittautumisTila("").julkaistaankoTiedot(false)
+        .poistetaankoRivi(false).asiointikieli("SV").puhelinnumero("040123").osoite("Testitie 2")
+        .postinumero("00100").postitoimipaikka("HELSINKI").asuinmaa("FIN").kansalaisuus("FIN")
+        .kotikunta("Helsinki").toisenAsteenSuoritus(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Boolean.TRUE : null)
+        .toisenAsteenSuoritusmaa(hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "")
+        .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
+        .maksuntila(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Maksuntila.MAKSAMATTA : null).build();
     assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
   }
 
   private WebClient createClient(String url) {
-    return new HttpResourceBuilder(getClass().getName())
-        .address(url)
-        .buildExposingWebClientDangerously()
+    return new HttpResourceBuilder(getClass().getName()).address(url).buildExposingWebClientDangerously()
         .getWebClient();
   }
 }

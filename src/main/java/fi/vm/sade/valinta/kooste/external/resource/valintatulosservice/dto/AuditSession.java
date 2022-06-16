@@ -15,7 +15,8 @@ public class AuditSession {
   private String uid;
   private String sessionId;
 
-  public AuditSession() {}
+  public AuditSession() {
+  }
 
   public AuditSession(String personOid, List<String> roles, String userAgent, String inetAddress) {
     this.personOid = personOid;
@@ -91,26 +92,8 @@ public class AuditSession {
 
   @Override
   public String toString() {
-    return "AuditSession{"
-        + "personOid='"
-        + personOid
-        + '\''
-        + ", roles="
-        + roles
-        + ", userAgent='"
-        + userAgent
-        + '\''
-        + ", inetAddress='"
-        + inetAddress
-        + '\''
-        + ", ifUnmodifiedSince="
-        + ifUnmodifiedSince
-        + ", uid='"
-        + uid
-        + '\''
-        + ", sessionId='"
-        + sessionId
-        + '\''
-        + '}';
+    return "AuditSession{" + "personOid='" + personOid + '\'' + ", roles=" + roles + ", userAgent='" + userAgent
+        + '\'' + ", inetAddress='" + inetAddress + '\'' + ", ifUnmodifiedSince=" + ifUnmodifiedSince + ", uid='"
+        + uid + '\'' + ", sessionId='" + sessionId + '\'' + '}';
   }
 }

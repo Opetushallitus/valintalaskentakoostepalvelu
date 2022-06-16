@@ -37,35 +37,26 @@ import org.springframework.stereotype.Component;
 public class JalkiohjauskirjeetKomponentti {
   private static final Logger LOG = LoggerFactory.getLogger(JalkiohjauskirjeetKomponentti.class);
 
-  public static LetterBatch teeJalkiohjauskirjeet(
-      Map<String, Koodi> maatjavaltiot1,
-      Map<String, Koodi> postinumerot,
-      String ylikirjoitettuPreferoitukielikoodi,
-      @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
+  public static LetterBatch teeJalkiohjauskirjeet(Map<String, Koodi> maatjavaltiot1, Map<String, Koodi> postinumerot,
+      String ylikirjoitettuPreferoitukielikoodi, @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
       Map<String, HakemusWrapper> hakemusOidHakemukset,
       Map<String, Map<String, List<SyotettyArvoDTO>>> syotetytArvot,
       final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
-      @Simple("${property.hakuOid}") String hakuOid,
-      @Property("templateName") String templateName,
-      @Property("sisalto") String sisalto,
-      @Property("tag") String tag,
-      boolean sahkoinenMassaposti,
-      boolean isKkHaku,
-      List<ContentStructureType> sisaltotyypit,
-      KirjeenVastaanottaja kirjeenVastaanottaja) {
+      @Simple("${property.hakuOid}") String hakuOid, @Property("templateName") String templateName,
+      @Property("sisalto") String sisalto, @Property("tag") String tag, boolean sahkoinenMassaposti,
+      boolean isKkHaku, List<ContentStructureType> sisaltotyypit, KirjeenVastaanottaja kirjeenVastaanottaja) {
     final int kaikkiHyvaksymattomat = hyvaksymattomatHakijat.size();
     if (kaikkiHyvaksymattomat == 0) {
-      LOG.error(
-          "Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
+      LOG.error("Jälkiohjauskirjeitä yritetään luoda haulle jolla kaikki hakijat on hyväksytty koulutukseen!");
       throw new SijoittelupalveluException(
           "Sijoittelupalvelun mukaan kaikki hakijat on hyväksytty johonkin koulutukseen!");
     }
     LOG.info("Aloitetaan {} kpl jälkiohjauskirjeen luonti", kaikkiHyvaksymattomat);
     final List<Letter> kirjeet = new ArrayList<>();
-    final boolean kaytetaanYlikirjoitettuKielikoodia =
-        StringUtils.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
-    String preferoituKielikoodi =
-        kaytetaanYlikirjoitettuKielikoodia ? ylikirjoitettuPreferoitukielikoodi : KieliUtil.SUOMI;
+    final boolean kaytetaanYlikirjoitettuKielikoodia = StringUtils.isNotBlank(ylikirjoitettuPreferoitukielikoodi);
+    String preferoituKielikoodi = kaytetaanYlikirjoitettuKielikoodia
+        ? ylikirjoitettuPreferoitukielikoodi
+        : KieliUtil.SUOMI;
     int count = 0;
     for (HakijaDTO hakija : hyvaksymattomatHakijat) {
       try {
@@ -74,9 +65,8 @@ public class JalkiohjauskirjeetKomponentti {
           continue;
         }
         final HakemusWrapper hakemus = hakemusOidHakemukset.get(hakemusOid);
-        final Osoite osoite =
-            OsoiteHakemukseltaUtil.osoiteHakemuksesta(
-                hakemus, maatjavaltiot1, postinumerot, new TuloskirjeNimiPaattelyStrategy());
+        final Osoite osoite = OsoiteHakemukseltaUtil.osoiteHakemuksesta(hakemus, maatjavaltiot1, postinumerot,
+            new TuloskirjeNimiPaattelyStrategy());
         final List<Map<String, Object>> tulosList = new ArrayList<>();
         if (!kaytetaanYlikirjoitettuKielikoodia) {
           preferoituKielikoodi = hakemus.getAsiointikieli();
@@ -84,17 +74,10 @@ public class JalkiohjauskirjeetKomponentti {
 
         for (HakutoiveDTO hakutoive : hakija.getHakutoiveet()) {
           String hakukohdeOid = hakutoive.getHakukohdeOid();
-          List<SyotettyArvoDTO> arvot =
-              syotetytArvot
-                  .get(hakukohdeOid)
-                  .getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
-          Map<String, Object> tulokset =
-              KirjeetUtil.getTuloksetMap(
-                  jalkiohjauskirjeessaKaytetytHakukohteet,
-                  hakukohdeOid,
-                  preferoituKielikoodi,
-                  hakutoive,
-                  arvot);
+          List<SyotettyArvoDTO> arvot = syotetytArvot.get(hakukohdeOid).getOrDefault(hakija.getHakemusOid(),
+              Collections.emptyList());
+          Map<String, Object> tulokset = KirjeetUtil.getTuloksetMap(jalkiohjauskirjeessaKaytetytHakukohteet,
+              hakukohdeOid, preferoituKielikoodi, hakutoive, arvot);
 
           StringBuilder omatPisteet = new StringBuilder();
           StringBuilder hyvaksytyt = new StringBuilder();
@@ -102,17 +85,16 @@ public class JalkiohjauskirjeetKomponentti {
           // VT-1036
           //
           List<Sijoitus> sijoitukset = Lists.newArrayList();
-          Collections.sort(
-              hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByPrioriteetti());
-          KirjeetUtil.jononTulokset(
-              osoite, hakutoive, omatPisteet, hyvaksytyt, sijoitukset, preferoituKielikoodi);
+          Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByPrioriteetti());
+          KirjeetUtil.jononTulokset(osoite, hakutoive, omatPisteet, hyvaksytyt, sijoitukset,
+              preferoituKielikoodi);
           tulokset.put("sijoitukset", sijoitukset);
 
           Collections.sort(hakutoive.getHakutoiveenValintatapajonot(), KirjeetUtil.sortByTila());
-          List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot =
-              hakutoive.getHakutoiveenValintatapajonot();
-          KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(
-              preferoituKielikoodi, tulokset, hakutoiveenValintatapajonot);
+          List<HakutoiveenValintatapajonoDTO> hakutoiveenValintatapajonot = hakutoive
+              .getHakutoiveenValintatapajonot();
+          KirjeetUtil.putValinnanTulosHylkausPerusteAndVarasijaData(preferoituKielikoodi, tulokset,
+              hakutoiveenValintatapajonot);
           tulokset.put("omatPisteet", omatPisteet.toString());
           tulokset.put("hyvaksytyt", hyvaksytyt.toString());
           tulosList.add(tulokset);
@@ -133,16 +115,8 @@ public class JalkiohjauskirjeetKomponentti {
         }
         boolean skipIPosti = sahkoinenMassaposti && !sendIPosti(hakemus);
         for (String sahkoposti : sahkopostit) {
-          kirjeet.add(
-              new Letter(
-                  osoite,
-                  templateName,
-                  preferoituKielikoodi,
-                  replacements,
-                  hakija.getHakijaOid(),
-                  skipIPosti,
-                  sahkoposti,
-                  hakija.getHakemusOid()));
+          kirjeet.add(new Letter(osoite, templateName, preferoituKielikoodi, replacements,
+              hakija.getHakijaOid(), skipIPosti, sahkoposti, hakija.getHakemusOid()));
         }
 
         count++;
@@ -151,16 +125,13 @@ public class JalkiohjauskirjeetKomponentti {
         }
       } catch (Exception e) {
         throw new RuntimeException(
-            String.format("Hakemuksen %s kirjedatan käsittely epäonnistui", hakija.getHakemusOid()),
-            e);
+            String.format("Hakemuksen %s kirjedatan käsittely epäonnistui", hakija.getHakemusOid()), e);
       }
     }
 
     LOG.info(
         "Yritetään luoda viestintäpalvelulle jälkiohjauskirje-erä haulle {} asiointikielelä {}, jossa kirjeitä {} kappaletta!",
-        hakuOid,
-        preferoituKielikoodi,
-        kirjeet.size());
+        hakuOid, preferoituKielikoodi, kirjeet.size());
     LetterBatch viesti = new LetterBatch(kirjeet, sisaltotyypit);
     viesti.setApplicationPeriod(hakuOid);
     viesti.setFetchTarget(null);

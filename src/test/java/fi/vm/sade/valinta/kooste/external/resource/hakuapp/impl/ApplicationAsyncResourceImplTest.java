@@ -38,24 +38,19 @@ import org.springframework.test.util.ReflectionTestUtils;
 public class ApplicationAsyncResourceImplTest {
   private final HttpResource wrappedHttpResource = mock(HttpResource.class);
   private final UrlConfiguration mockUrlConfiguration = mock(UrlConfiguration.class);
-  private final Hakemus hakemus1 =
-      new Hakemus(null, null, null, null, null, "hakemus1", "ACTIVE", "person1");
-  private final Hakemus hakemus2 =
-      new Hakemus(null, null, null, null, null, "hakemus2", "ACTIVE", "person2");
-  private final Hakemus hakemus3 =
-      new Hakemus(null, null, null, null, null, "hakemus3", "INCOMPLETE", "person3");
+  private final Hakemus hakemus1 = new Hakemus(null, null, null, null, null, "hakemus1", "ACTIVE", "person1");
+  private final Hakemus hakemus2 = new Hakemus(null, null, null, null, null, "hakemus2", "ACTIVE", "person2");
+  private final Hakemus hakemus3 = new Hakemus(null, null, null, null, null, "hakemus3", "INCOMPLETE", "person3");
   private final String urlToApplicationsList = "/url/to/applications/list";
   private final String urlToApplicationsListFull = "/url/to/applications/list/full";
   private final HttpClient mockClient = mock(HttpClient.class);
-  private ApplicationAsyncResourceImpl applicationAsyncResource =
-      new ApplicationAsyncResourceImpl(mockClient, mock(CasKoosteInterceptor.class));
+  private ApplicationAsyncResourceImpl applicationAsyncResource = new ApplicationAsyncResourceImpl(mockClient,
+      mock(CasKoosteInterceptor.class));
 
   @Before
   public void setMockInsideResourceUnderTest() {
-    ReflectionTestUtils.setField(
-        applicationAsyncResource, "wrappedHttpResource", wrappedHttpResource);
-    ReflectionTestUtils.setField(
-        applicationAsyncResource, "urlConfiguration", mockUrlConfiguration);
+    ReflectionTestUtils.setField(applicationAsyncResource, "wrappedHttpResource", wrappedHttpResource);
+    ReflectionTestUtils.setField(applicationAsyncResource, "urlConfiguration", mockUrlConfiguration);
   }
 
   @Test
@@ -64,58 +59,40 @@ public class ApplicationAsyncResourceImplTest {
     when(mockUrlConfiguration.url(eq("haku-app.applications.list"), queryCaptor.capture()))
         .thenReturn(urlToApplicationsList);
     ArrayList<String> hakemusOids = Lists.newArrayList("hakemus1Oid", "hakemus2Oid");
-    when(mockClient.postJson(
-            eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
+    when(mockClient.postJson(eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
         .thenReturn(CompletableFuture.completedFuture(Lists.newArrayList(hakemus1, hakemus2)));
-    List<HakemusWrapper> applications =
-        applicationAsyncResource
-            .getApplicationsByHakemusOids(hakemusOids)
-            .timeout(1, SECONDS)
-            .blockingFirst();
+    List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids)
+        .timeout(1, SECONDS).blockingFirst();
 
     assertNull(queryCaptor.getValue().get("state"));
     assertEquals(1, queryCaptor.getValue().size());
     assertEquals(ApplicationAsyncResource.DEFAULT_ROW_LIMIT, queryCaptor.getValue().get("rows"));
-    assertTrue(
-        EqualsBuilder.reflectionEquals(
-            new HakuappHakemusWrapper(hakemus1),
-            applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
-    assertTrue(
-        EqualsBuilder.reflectionEquals(
-            new HakuappHakemusWrapper(hakemus2),
-            applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
+    assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1),
+        applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
+    assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus2),
+        applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
   }
 
   @Test
-  public void
-      passiveApplicationsAreFilteredOutWhenFetchingApplicationsByHakemusOidsWithoutKeysList() {
+  public void passiveApplicationsAreFilteredOutWhenFetchingApplicationsByHakemusOidsWithoutKeysList() {
     hakemus2.setState("PASSIVE");
 
     ArgumentCaptor<Map<String, Object>> queryCaptor = ArgumentCaptor.forClass(Map.class);
     when(mockUrlConfiguration.url(eq("haku-app.applications.list"), queryCaptor.capture()))
         .thenReturn(urlToApplicationsList);
     ArrayList<String> hakemusOids = Lists.newArrayList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid");
-    when(mockClient.postJson(
-            eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
-        .thenReturn(
-            CompletableFuture.completedFuture(Lists.newArrayList(hakemus1, hakemus2, hakemus3)));
-    List<HakemusWrapper> applications =
-        applicationAsyncResource
-            .getApplicationsByHakemusOids(
-                Arrays.asList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid"))
-            .timeout(1, SECONDS)
-            .blockingFirst();
+    when(mockClient.postJson(eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
+        .thenReturn(CompletableFuture.completedFuture(Lists.newArrayList(hakemus1, hakemus2, hakemus3)));
+    List<HakemusWrapper> applications = applicationAsyncResource
+        .getApplicationsByHakemusOids(Arrays.asList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid"))
+        .timeout(1, SECONDS).blockingFirst();
 
     assertEquals(ApplicationAsyncResource.DEFAULT_ROW_LIMIT, queryCaptor.getValue().get("rows"));
     assertEquals(2, applications.size());
-    assertTrue(
-        EqualsBuilder.reflectionEquals(
-            new HakuappHakemusWrapper(hakemus1),
-            applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
-    assertTrue(
-        EqualsBuilder.reflectionEquals(
-            new HakuappHakemusWrapper(hakemus3),
-            applications.stream().filter(h -> h.getOid().equals("hakemus3")).findFirst().get()));
+    assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1),
+        applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
+    assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus3),
+        applications.stream().filter(h -> h.getOid().equals("hakemus3")).findFirst().get()));
   }
 
   @Test
@@ -127,28 +104,21 @@ public class ApplicationAsyncResourceImplTest {
     when(mockUrlConfiguration.url(eq("haku-app.applications.list"), queryCaptor.capture()))
         .thenReturn(urlToApplicationsList);
     ArrayList<String> hakemusOids = Lists.newArrayList("hakemus1Oid", "hakemus2Oid");
-    when(mockClient.postJson(
-            eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
+    when(mockClient.postJson(eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
         .thenReturn(CompletableFuture.completedFuture(Lists.newArrayList(hakemus1, hakemus2)));
     List<String> keys = Collections.singletonList("hakemusOid");
-    List<HakemusWrapper> applications =
-        applicationAsyncResource
-            .getApplicationsByhakemusOidsInParts(
-                "hakuOid", Arrays.asList("hakemus1Oid", "hakemus2Oid"), keys)
-            .get(1, SECONDS);
+    List<HakemusWrapper> applications = applicationAsyncResource
+        .getApplicationsByhakemusOidsInParts("hakuOid", Arrays.asList("hakemus1Oid", "hakemus2Oid"), keys)
+        .get(1, SECONDS);
 
     assertEquals(keys, queryCaptor.getValue().get("keys"));
     assertEquals("hakuOid", queryCaptor.getValue().get("asIds"));
     assertEquals(ApplicationAsyncResource.DEFAULT_ROW_LIMIT, queryCaptor.getValue().get("rows"));
     assertEquals(ApplicationAsyncResource.DEFAULT_STATES, queryCaptor.getValue().get("state"));
-    assertTrue(
-        EqualsBuilder.reflectionEquals(
-            new HakuappHakemusWrapper(hakemus1),
-            applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
-    assertTrue(
-        EqualsBuilder.reflectionEquals(
-            new HakuappHakemusWrapper(hakemus2),
-            applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
+    assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1),
+        applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
+    assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus2),
+        applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
   }
 
   @Test
@@ -157,26 +127,19 @@ public class ApplicationAsyncResourceImplTest {
     String hakuOid = "1.2.3.4.5.6";
     String hakukohdeOid = "7.8.9.0";
     String eventualUrl = "http://this.would.be.the.real.URL.with.parameters.example.com/?foo=bar";
-    when(mockUrlConfiguration.url(eq("haku-app.applications.listfull"), any(Map.class)))
-        .thenReturn(eventualUrl);
+    when(mockUrlConfiguration.url(eq("haku-app.applications.listfull"), any(Map.class))).thenReturn(eventualUrl);
 
     when(mockClient.getJson(any(String.class), any(Duration.class), any(Type.class)))
-        .thenAnswer(
-            (Answer<CompletableFuture<List<Hakemus>>>)
-                invocation -> {
-                  assertEquals(eventualUrl, invocation.getArgument(0));
-                  return CompletableFuture.completedFuture(Arrays.asList(hakemus1, hakemus2));
-                });
-    List<HakemusWrapper> applications =
-        applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).get(1L, SECONDS);
+        .thenAnswer((Answer<CompletableFuture<List<Hakemus>>>) invocation -> {
+          assertEquals(eventualUrl, invocation.getArgument(0));
+          return CompletableFuture.completedFuture(Arrays.asList(hakemus1, hakemus2));
+        });
+    List<HakemusWrapper> applications = applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).get(1L,
+        SECONDS);
 
-    assertTrue(
-        EqualsBuilder.reflectionEquals(
-            new HakuappHakemusWrapper(hakemus1),
-            applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
-    assertTrue(
-        EqualsBuilder.reflectionEquals(
-            new HakuappHakemusWrapper(hakemus2),
-            applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
+    assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus1),
+        applications.stream().filter(h -> h.getOid().equals("hakemus1")).findFirst().get()));
+    assertTrue(EqualsBuilder.reflectionEquals(new HakuappHakemusWrapper(hakemus2),
+        applications.stream().filter(h -> h.getOid().equals("hakemus2")).findFirst().get()));
   }
 }

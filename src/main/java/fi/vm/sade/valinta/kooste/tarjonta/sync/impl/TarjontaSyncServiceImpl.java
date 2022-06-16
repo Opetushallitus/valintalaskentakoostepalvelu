@@ -16,15 +16,15 @@ public class TarjontaSyncServiceImpl implements TarjontaSyncService {
 
   private static final Logger LOG = LoggerFactory.getLogger(TarjontaSyncServiceImpl.class);
 
-  @Autowired TarjontaAsyncResource tarjontaAsyncResource;
+  @Autowired
+  TarjontaAsyncResource tarjontaAsyncResource;
 
   @Autowired(required = false)
   HakuImportRoute hakuImportAktivointiRoute;
 
   public void syncHakukohteetFromTarjonta() {
     try {
-      Set<String> hakuOids =
-          tarjontaAsyncResource.findHakuOidsForAutosyncTarjonta().get(1, MINUTES);
+      Set<String> hakuOids = tarjontaAsyncResource.findHakuOidsForAutosyncTarjonta().get(1, MINUTES);
       if (hakuOids.isEmpty()) {
         LOG.info("Found no hakuOids to sync from tarjonta-service");
         return;

@@ -240,14 +240,13 @@ public class Valinnantulos {
       valinnantulos.setOhitaIlmoittautuminen(true);
     }
     if (null != hakija.getHyvaksymiskirjeLahetetty()) {
-      valinnantulos.setHyvaksymiskirjeLahetetty(
-          OffsetDateTime.ofInstant(
-              hakija.getHyvaksymiskirjeLahetetty().toInstant(), ZoneId.of("Europe/Helsinki")));
+      valinnantulos.setHyvaksymiskirjeLahetetty(OffsetDateTime
+          .ofInstant(hakija.getHyvaksymiskirjeLahetetty().toInstant(), ZoneId.of("Europe/Helsinki")));
     }
 
     valinnantulos.setValinnantila(hakija.hakemuksenTila);
-    valinnantulos.setVastaanottotila(
-        Optional.ofNullable(hakija.valintatuloksenTila).orElse(ValintatuloksenTila.KESKEN));
+    valinnantulos
+        .setVastaanottotila(Optional.ofNullable(hakija.valintatuloksenTila).orElse(ValintatuloksenTila.KESKEN));
     valinnantulos.setIlmoittautumistila(
         Optional.ofNullable(hakija.ilmoittautumisTila).orElse(IlmoittautumisTila.EI_TEHTY));
 
@@ -256,55 +255,18 @@ public class Valinnantulos {
 
   @Override
   public String toString() {
-    return "Valinnantulos{"
-        + "hakukohdeOid='"
-        + hakukohdeOid
-        + '\''
-        + ", valintatapajonoOid='"
-        + valintatapajonoOid
-        + '\''
-        + ", hakemusOid='"
-        + hakemusOid
-        + '\''
-        + ", henkiloOid='"
-        + henkiloOid
-        + '\''
-        + ", ehdollisestiHyvaksyttavissa="
-        + ehdollisestiHyvaksyttavissa
-        + ", ehdollisenHyvaksymisenEhtoKoodi="
-        + ehdollisenHyvaksymisenEhtoKoodi
-        + ", ehdollisenHyvaksymisenEhtoFI="
-        + ehdollisenHyvaksymisenEhtoFI
-        + ", ehdollisenHyvaksymisenEhtoSV="
-        + ehdollisenHyvaksymisenEhtoSV
-        + ", ehdollisenHyvaksymisenEhtoEN="
-        + ehdollisenHyvaksymisenEhtoEN
-        + ", valinnantilanKuvauksenTekstiFI="
-        + valinnantilanKuvauksenTekstiFI
-        + ", valinnantilanKuvauksenTekstiSV="
-        + valinnantilanKuvauksenTekstiSV
-        + ", valinnantilanKuvauksenTekstiEN="
-        + valinnantilanKuvauksenTekstiEN
-        + ", julkaistavissa="
-        + julkaistavissa
-        + ", hyvaksyttyVarasijalta="
-        + hyvaksyttyVarasijalta
-        + ", hyvaksyPeruuntunut="
-        + hyvaksyPeruuntunut
-        + ", poistettava="
-        + poistettava
-        + ", ohitaVastaanotto="
-        + ohitaVastaanotto
-        + ", ohitaIlmoittautuminen="
-        + ohitaIlmoittautuminen
-        + ", ilmoittautumistila="
-        + ilmoittautumistila
-        + ", valinnantila="
-        + valinnantila
-        + ", vastaanottotila="
-        + vastaanottotila
-        + ", hyvaksymiskirjeLahetetty="
-        + hyvaksymiskirjeLahetetty
-        + '}';
+    return "Valinnantulos{" + "hakukohdeOid='" + hakukohdeOid + '\'' + ", valintatapajonoOid='" + valintatapajonoOid
+        + '\'' + ", hakemusOid='" + hakemusOid + '\'' + ", henkiloOid='" + henkiloOid + '\''
+        + ", ehdollisestiHyvaksyttavissa=" + ehdollisestiHyvaksyttavissa + ", ehdollisenHyvaksymisenEhtoKoodi="
+        + ehdollisenHyvaksymisenEhtoKoodi + ", ehdollisenHyvaksymisenEhtoFI=" + ehdollisenHyvaksymisenEhtoFI
+        + ", ehdollisenHyvaksymisenEhtoSV=" + ehdollisenHyvaksymisenEhtoSV + ", ehdollisenHyvaksymisenEhtoEN="
+        + ehdollisenHyvaksymisenEhtoEN + ", valinnantilanKuvauksenTekstiFI=" + valinnantilanKuvauksenTekstiFI
+        + ", valinnantilanKuvauksenTekstiSV=" + valinnantilanKuvauksenTekstiSV
+        + ", valinnantilanKuvauksenTekstiEN=" + valinnantilanKuvauksenTekstiEN + ", julkaistavissa="
+        + julkaistavissa + ", hyvaksyttyVarasijalta=" + hyvaksyttyVarasijalta + ", hyvaksyPeruuntunut="
+        + hyvaksyPeruuntunut + ", poistettava=" + poistettava + ", ohitaVastaanotto=" + ohitaVastaanotto
+        + ", ohitaIlmoittautuminen=" + ohitaIlmoittautuminen + ", ilmoittautumistila=" + ilmoittautumistila
+        + ", valinnantila=" + valinnantila + ", vastaanottotila=" + vastaanottotila
+        + ", hyvaksymiskirjeLahetetty=" + hyvaksymiskirjeLahetetty + '}';
   }
 }

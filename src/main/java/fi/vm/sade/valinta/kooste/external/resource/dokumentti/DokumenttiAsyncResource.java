@@ -11,12 +11,7 @@ public interface DokumenttiAsyncResource {
 
   CompletableFuture<Void> uudelleenNimea(String dokumenttiId, String filename);
 
-  Observable<Response> tallenna(
-      String id,
-      String filename,
-      Long expirationDate,
-      List<String> tags,
-      String mimeType,
+  Observable<Response> tallenna(String id, String filename, Long expirationDate, List<String> tags, String mimeType,
       InputStream filedata);
 
   CompletableFuture<HttpResponse<InputStream>> lataa(String documentId);

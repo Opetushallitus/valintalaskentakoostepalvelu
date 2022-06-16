@@ -20,21 +20,14 @@ public interface LaskentaSeurantaAsyncResource {
 
   Observable<LaskentaDto> resetoiTilat(String uuid);
 
-  Observable<TunnisteDto> luoLaskenta(
-      LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids);
+  Observable<TunnisteDto> luoLaskenta(LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids);
 
-  Observable<Response> merkkaaHakukohteenTila(
-      String uuid,
-      String hakukohdeOid,
-      HakukohdeTila tila,
+  Observable<Response> merkkaaHakukohteenTila(String uuid, String hakukohdeOid, HakukohdeTila tila,
       Optional<IlmoitusDto> ilmoitusDtoOptional);
 
-  Observable<Response> merkkaaLaskennanTila(
-      String uuid,
-      LaskentaTila tila,
-      HakukohdeTila hakukohdetila,
+  Observable<Response> merkkaaLaskennanTila(String uuid, LaskentaTila tila, HakukohdeTila hakukohdetila,
       Optional<IlmoitusDto> ilmoitusDtoOptional);
 
-  Observable<Response> merkkaaLaskennanTila(
-      String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional);
+  Observable<Response> merkkaaLaskennanTila(String uuid, LaskentaTila tila,
+      Optional<IlmoitusDto> ilmoitusDtoOptional);
 }

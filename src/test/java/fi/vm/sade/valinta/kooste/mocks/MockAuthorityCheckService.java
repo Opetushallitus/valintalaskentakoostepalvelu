@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service;
 public class MockAuthorityCheckService extends AuthorityCheckService {
 
   @Override
-  public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
-      Collection<String> roles) {
+  public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(Collection<String> roles) {
     return Observable.just((oid) -> true);
   }
 
@@ -26,10 +25,8 @@ public class MockAuthorityCheckService extends AuthorityCheckService {
   }
 
   @Override
-  public boolean isAuthorizedForAnyParentOid(
-      Set<String> organisaatioOids,
-      Collection<? extends GrantedAuthority> userRoles,
-      Collection<String> requiredRoles) {
+  public boolean isAuthorizedForAnyParentOid(Set<String> organisaatioOids,
+      Collection<? extends GrantedAuthority> userRoles, Collection<String> requiredRoles) {
     return true;
   }
 }

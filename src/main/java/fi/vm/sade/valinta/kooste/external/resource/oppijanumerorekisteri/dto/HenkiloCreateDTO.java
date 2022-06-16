@@ -22,16 +22,8 @@ public class HenkiloCreateDTO implements Serializable {
   public final KielisyysDto asiointiKieli;
   public final Set<KansalaisuusDto> kansalaisuus;
 
-  public HenkiloCreateDTO(
-      String aidinkieli,
-      String sukupuoli,
-      String etunimet,
-      String sukunimi,
-      String hetu,
-      String syntymaaika,
-      String oidHenkilo,
-      HenkiloTyyppi henkiloTyyppi,
-      String asiointiKieli,
+  public HenkiloCreateDTO(String aidinkieli, String sukupuoli, String etunimet, String sukunimi, String hetu,
+      String syntymaaika, String oidHenkilo, HenkiloTyyppi henkiloTyyppi, String asiointiKieli,
       String kansalaisuus) {
     this.aidinkieli = createKielisyys(aidinkieli);
     this.sukupuoli = isNotBlank(sukupuoli) ? sukupuoli : null;
@@ -80,35 +72,10 @@ public class HenkiloCreateDTO implements Serializable {
   @Override
   public String toString() {
     String overrideHetu = hetu == null ? null : "'***HETU***'";
-    return "HenkiloCreateDTO{"
-        + "etunimet='"
-        + etunimet
-        + '\''
-        + ", kutsumanimi='"
-        + kutsumanimi
-        + '\''
-        + ", sukunimi='"
-        + sukunimi
-        + '\''
-        + ", hetu="
-        + overrideHetu
-        + ", syntymaaika='"
-        + syntymaaika
-        + '\''
-        + ", oidHenkilo='"
-        + oidHenkilo
-        + '\''
-        + ", henkiloTyyppi="
-        + henkiloTyyppi
-        + ", sukupuoli='"
-        + sukupuoli
-        + '\''
-        + ", aidinkieli="
-        + aidinkieli
-        + ", asiointiKieli="
-        + asiointiKieli
-        + ", kansalaisuus="
-        + kansalaisuus
-        + '}';
+    return "HenkiloCreateDTO{" + "etunimet='" + etunimet + '\'' + ", kutsumanimi='" + kutsumanimi + '\''
+        + ", sukunimi='" + sukunimi + '\'' + ", hetu=" + overrideHetu + ", syntymaaika='" + syntymaaika + '\''
+        + ", oidHenkilo='" + oidHenkilo + '\'' + ", henkiloTyyppi=" + henkiloTyyppi + ", sukupuoli='"
+        + sukupuoli + '\'' + ", aidinkieli=" + aidinkieli + ", asiointiKieli=" + asiointiKieli
+        + ", kansalaisuus=" + kansalaisuus + '}';
   }
 }

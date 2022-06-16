@@ -6,9 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface KoekutsukirjeetService {
-  void koekutsukirjeetHakemuksille(
-      KirjeProsessi prosessi, KoekutsuDTO koekutsu, Collection<String> hakemusOids);
+  void koekutsukirjeetHakemuksille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, Collection<String> hakemusOids);
 
-  void koekutsukirjeetOsallistujille(
-      KirjeProsessi prosessi, KoekutsuDTO koekutsu, List<String> valintakoeOids);
+  void koekutsukirjeetOsallistujille(KirjeProsessi prosessi, KoekutsuDTO koekutsu, List<String> valintakoeOids);
 }

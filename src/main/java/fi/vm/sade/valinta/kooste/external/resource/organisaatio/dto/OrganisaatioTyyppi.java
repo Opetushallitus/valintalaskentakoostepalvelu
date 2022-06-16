@@ -10,14 +10,11 @@ public class OrganisaatioTyyppi {
   private String oppilaitostyyppi;
   private List<String> organisaatiotyypit;
 
-  public OrganisaatioTyyppi() {}
+  public OrganisaatioTyyppi() {
+  }
 
-  public OrganisaatioTyyppi(
-      String oid,
-      Map<String, String> nimi,
-      List<OrganisaatioTyyppi> children,
-      String oppilaitostyyppi,
-      List<String> organisaatiotyypit) {
+  public OrganisaatioTyyppi(String oid, Map<String, String> nimi, List<OrganisaatioTyyppi> children,
+      String oppilaitostyyppi, List<String> organisaatiotyypit) {
     this.oid = oid;
     this.nimi = nimi;
     this.children = children;
@@ -67,19 +64,7 @@ public class OrganisaatioTyyppi {
 
   @Override
   public String toString() {
-    return "OrganisaatioTyyppi{"
-        + "oid='"
-        + oid
-        + '\''
-        + ", nimi="
-        + nimi
-        + ", children="
-        + children
-        + ", oppilaitostyyppi='"
-        + oppilaitostyyppi
-        + '\''
-        + ", organisaatiotyypit="
-        + organisaatiotyypit
-        + '}';
+    return "OrganisaatioTyyppi{" + "oid='" + oid + '\'' + ", nimi=" + nimi + ", children=" + children
+        + ", oppilaitostyyppi='" + oppilaitostyyppi + '\'' + ", organisaatiotyypit=" + organisaatiotyypit + '}';
   }
 }

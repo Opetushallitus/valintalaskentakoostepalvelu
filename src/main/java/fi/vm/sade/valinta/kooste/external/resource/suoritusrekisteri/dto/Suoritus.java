@@ -109,36 +109,9 @@ public class Suoritus {
 
   @Override
   public String toString() {
-    return "Suoritus{"
-        + "id='"
-        + id
-        + '\''
-        + ", komo='"
-        + komo
-        + '\''
-        + ", myontaja='"
-        + myontaja
-        + '\''
-        + ", tila='"
-        + tila
-        + '\''
-        + ", valmistuminen='"
-        + valmistuminen
-        + '\''
-        + ", henkiloOid='"
-        + henkiloOid
-        + '\''
-        + ", yksilollistaminen='"
-        + yksilollistaminen
-        + '\''
-        + ", suoritusKieli='"
-        + suoritusKieli
-        + '\''
-        + ", source='"
-        + source
-        + '\''
-        + ", vahvistettu="
-        + vahvistettu
-        + '}';
+    return "Suoritus{" + "id='" + id + '\'' + ", komo='" + komo + '\'' + ", myontaja='" + myontaja + '\''
+        + ", tila='" + tila + '\'' + ", valmistuminen='" + valmistuminen + '\'' + ", henkiloOid='" + henkiloOid
+        + '\'' + ", yksilollistaminen='" + yksilollistaminen + '\'' + ", suoritusKieli='" + suoritusKieli + '\''
+        + ", source='" + source + '\'' + ", vahvistettu=" + vahvistettu + '}';
   }
 }

@@ -18,8 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu>
-    implements SijoittelunValvonta {
+public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu> implements SijoittelunValvonta {
   private static final Logger LOG = LoggerFactory.getLogger(SijoitteluRouteImpl.class);
   private final String DEADLETTERCHANNEL = "direct:sijoittelun_deadletterchannel";
   private final SijoitteleAsyncResource sijoitteluResource;
@@ -31,15 +30,12 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu>
 
   @Override
   protected Cache<String, Sijoittelu> configureCache() {
-    return CacheBuilder.newBuilder()
-        .expireAfterWrite(60, TimeUnit.MINUTES)
-        .removalListener(
-            new RemovalListener<String, Sijoittelu>() {
-              public void onRemoval(RemovalNotification<String, Sijoittelu> notification) {
-                LOG.info("{} siivottu pois muistista", notification.getValue());
-              }
-            })
-        .build();
+    return CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.MINUTES)
+        .removalListener(new RemovalListener<String, Sijoittelu>() {
+          public void onRemoval(RemovalNotification<String, Sijoittelu> notification) {
+            LOG.info("{} siivottu pois muistista", notification.getValue());
+          }
+        }).build();
   }
 
   @Override
@@ -49,49 +45,33 @@ public class SijoitteluRouteImpl extends KoostepalveluRouteBuilder<Sijoittelu>
 
   @Override
   public void configure() throws Exception {
-    interceptFrom(SIJOITTELU_REITTI)
-        .process(
-            Reititys.<Sijoittelu>kuluttaja(
-                l -> {
-                  Sijoittelu vanhaSijoittelu = getKoostepalveluCache().getIfPresent(l.getHakuOid());
-                  if (vanhaSijoittelu != null && vanhaSijoittelu.isTekeillaan()) {
-                    // varmistetaan etta uudelleen ajon reunatapauksessa
-                    // mahdollisesti viela suorituksessa oleva vanha
-                    // laskenta
-                    // lakkaa kayttamasta resursseja ja siivoutuu ajallaan
-                    // pois
-                    throw new RuntimeException(
-                        "Sijoittelu haulle " + l.getHakuOid() + " on jo kaynnissa!");
-                  }
-                  getKoostepalveluCache().put(l.getHakuOid(), l);
-                }));
-    from(DEADLETTERCHANNEL)
-        .routeId("Sijoittelun deadletterchannel")
-        .process(
-            exchange ->
-                LOG.error(
-                    "Sijoittelu paattyi virheeseen {}\r\n{}",
-                    simple("${exception.message}").evaluate(exchange, String.class),
-                    simple("${exception.stacktrace}").evaluate(exchange, String.class)))
+    interceptFrom(SIJOITTELU_REITTI).process(Reititys.<Sijoittelu>kuluttaja(l -> {
+      Sijoittelu vanhaSijoittelu = getKoostepalveluCache().getIfPresent(l.getHakuOid());
+      if (vanhaSijoittelu != null && vanhaSijoittelu.isTekeillaan()) {
+        // varmistetaan etta uudelleen ajon reunatapauksessa
+        // mahdollisesti viela suorituksessa oleva vanha
+        // laskenta
+        // lakkaa kayttamasta resursseja ja siivoutuu ajallaan
+        // pois
+        throw new RuntimeException("Sijoittelu haulle " + l.getHakuOid() + " on jo kaynnissa!");
+      }
+      getKoostepalveluCache().put(l.getHakuOid(), l);
+    }));
+    from(DEADLETTERCHANNEL).routeId("Sijoittelun deadletterchannel")
+        .process(exchange -> LOG.error("Sijoittelu paattyi virheeseen {}\r\n{}",
+            simple("${exception.message}").evaluate(exchange, String.class),
+            simple("${exception.stacktrace}").evaluate(exchange, String.class)))
         .stop();
-    from(SIJOITTELU_REITTI)
-        .errorHandler(deadLetterChannel())
-        .routeId("Sijoittelureitti")
-        .threads()
-        .process(
-            Reititys.<Sijoittelu>kuluttaja(
-                (s -> {
-                  LOG.info("Aloitetaan sijoittelu haulle {}", s.getHakuOid());
-                  sijoitteluResource.sijoittele(
-                      s.getHakuOid(),
-                      success -> {
-                        s.setValmis();
-                      },
-                      e -> {
-                        LOG.error("Sijoittelu epaonnistui haulle " + s.getHakuOid(), e);
-                        s.setOhitettu();
-                      });
-                })));
+    from(SIJOITTELU_REITTI).errorHandler(deadLetterChannel()).routeId("Sijoittelureitti").threads()
+        .process(Reititys.<Sijoittelu>kuluttaja((s -> {
+          LOG.info("Aloitetaan sijoittelu haulle {}", s.getHakuOid());
+          sijoitteluResource.sijoittele(s.getHakuOid(), success -> {
+            s.setValmis();
+          }, e -> {
+            LOG.error("Sijoittelu epaonnistui haulle " + s.getHakuOid(), e);
+            s.setOhitettu();
+          });
+        })));
   }
 
   @Override
