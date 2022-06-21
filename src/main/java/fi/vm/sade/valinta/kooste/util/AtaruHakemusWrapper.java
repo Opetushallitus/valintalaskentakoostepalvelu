@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.util;
 
 import static fi.vm.sade.valinta.kooste.util.Converter.setHakemusDTOvalintapisteet;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
@@ -279,10 +280,12 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   @Override
   public List<String> getHuoltajienSahkopostiosoitteet() {
     List<String> result = new ArrayList<>();
-    if (keyvalues.containsKey("guardian-email_0")) {
+    if (keyvalues.containsKey("guardian-email_0")
+        && !Strings.isNullOrEmpty(keyvalues.get("guardian-email_0"))) {
       result.add(keyvalues.get("guardian-email_0"));
     }
-    if (keyvalues.containsKey("guardian-email-secondary_0")) {
+    if (keyvalues.containsKey("guardian-email-secondary_0")
+        && !Strings.isNullOrEmpty(keyvalues.get("guardian-email-secondary_0"))) {
       result.add(keyvalues.get("guardian-email-secondary_0"));
     }
     return result;
