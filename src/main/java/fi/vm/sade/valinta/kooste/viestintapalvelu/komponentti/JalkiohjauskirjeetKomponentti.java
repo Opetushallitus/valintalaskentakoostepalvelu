@@ -86,7 +86,7 @@ public class JalkiohjauskirjeetKomponentti {
           String hakukohdeOid = hakutoive.getHakukohdeOid();
           List<SyotettyArvoDTO> arvot =
               syotetytArvot
-                  .get(hakukohdeOid)
+                  .getOrDefault(hakukohdeOid, Collections.emptyMap())
                   .getOrDefault(hakija.getHakemusOid(), Collections.emptyList());
           Map<String, Object> tulokset =
               KirjeetUtil.getTuloksetMap(
