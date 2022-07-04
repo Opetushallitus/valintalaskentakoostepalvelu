@@ -661,8 +661,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     CompletableFuture<String> vakiosisaltoF =
         this.haeHakukohteenVakiosisalto(
             hyvaksymiskirjeDTO.getSisalto(), hyvaksymiskirjeDTO.getHakukohdeOid());
+
+    CompletableFuture<Haku> hakuF = tarjontaAsyncResource.haeHaku(hyvaksymiskirjeDTO.getHakuOid());
     CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> syotetytArvotF =
-        hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
+        hakuF.thenComposeAsync(
+            haku -> {
+              if (haku.isKorkeakouluhaku()) {
+                return CompletableFuture.completedFuture(Collections.emptyMap());
+              } else {
+                return hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
+              }
+            });
+
     return CompletableFuture.allOf(
             maatjavaltiot1F,
             postinumerotF,
