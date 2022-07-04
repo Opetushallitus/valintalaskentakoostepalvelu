@@ -667,6 +667,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         hakuF.thenComposeAsync(
             haku -> {
               if (haku.isKorkeakouluhaku()) {
+                LOG.info(
+                    "Hyväksymiskirjeiden muodostus: haku {} on korkeakouluhaku, joten ei haeta valintalaskennasta syötettyjä arvoja",
+                    haku.oid);
                 return CompletableFuture.completedFuture(Collections.emptyMap());
               } else {
                 return hakijatF.thenComposeAsync(this::hakijoidenSyotetytArvot);
