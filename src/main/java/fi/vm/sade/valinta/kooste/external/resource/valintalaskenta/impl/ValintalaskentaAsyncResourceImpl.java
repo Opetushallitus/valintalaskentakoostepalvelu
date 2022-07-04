@@ -65,7 +65,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
       String hakukohdeOid, Executor executor) {
     return this.httpclient.getJson(
         getUrl("valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid),
-        Duration.ofMinutes(1),
+        Duration.ofMinutes(10),
         new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType(),
         executor);
   }
