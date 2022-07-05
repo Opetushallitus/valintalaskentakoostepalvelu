@@ -177,7 +177,7 @@ public class HyvaksymiskirjeetKomponentti {
         if (ohjeetUudelleOpiskelijalle != null) {
           replacements.put(
               "ohjeetUudelleOpiskelijalle",
-              ohjeetUudelleOpiskelijalle.getTeksti(preferoituKielikoodi));
+              ohjeetUudelleOpiskelijalle.getTeksti(preferoituKielikoodi, null));
         } else {
           replacements.put("ohjeetUudelleOpiskelijalle", null);
         }
