@@ -35,7 +35,7 @@ public class HakemusUtil {
   private static Map<String, String> varasijallaTilat() {
     Map<String, String> m = Maps.newHashMap();
     m.put(KieliUtil.SUOMI, "varasijalla");
-    m.put(KieliUtil.RUOTSI, "på reservplats");
+    m.put(KieliUtil.RUOTSI, "På reservplats");
     m.put(KieliUtil.ENGLANTI, "on the waiting list");
     return m;
   }
@@ -143,7 +143,7 @@ public class HakemusUtil {
       case KieliUtil.SUOMI:
         return numero.toString() + ". " + VARASIJALLA.get(KieliUtil.SUOMI);
       case KieliUtil.RUOTSI:
-        return numero.toString() + " " + VARASIJALLA.get(KieliUtil.RUOTSI);
+        return VARASIJALLA.get(KieliUtil.RUOTSI) + " " + numero.toString();
       case KieliUtil.ENGLANTI:
         switch (numero % 10) {
           case 1:
