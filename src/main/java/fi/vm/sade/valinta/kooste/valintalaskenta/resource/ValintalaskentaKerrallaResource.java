@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.ForbiddenException;
@@ -189,7 +190,7 @@ public class ValintalaskentaKerrallaResource {
           LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
           asyncResponseTimeout.resume(errorResponse("Uudelleen ajo laskennalle timeouttasi!"));
         });
-    checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid)
+    checkAuthorizationForLaskentaFromSeuranta(uuid)
         .subscribe(
             allowed -> {
               kaynnistaLaskentaUudelleen(uuid, asyncResponse);
@@ -226,7 +227,7 @@ public class ValintalaskentaKerrallaResource {
   @Produces(APPLICATION_JSON)
   @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
   public Laskenta status(@PathParam("uuid") String uuid) {
-    checkAuthorizationForHakuWithLaskentaInMemory(uuid);
+    checkAuthorizationForLaskentaFromSeuranta(uuid);
     return valintalaskentaValvomo
         .fetchLaskenta(uuid)
         .orElseThrow(() -> new NotFoundException("Valintalaskenta ei ole muistissa!"));
@@ -243,7 +244,7 @@ public class ValintalaskentaKerrallaResource {
         (AsyncResponse asyncResponseTimeout) ->
             asyncResponseTimeout.resume(
                 valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
-    checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid)
+    checkAuthorizationForLaskentaFromSeuranta(uuid)
         .subscribe(
             allowed -> {
               valintalaskentaStatusExcelHandler.getStatusXls(
@@ -266,7 +267,7 @@ public class ValintalaskentaKerrallaResource {
     }
     // Jos käyttöoikeustarkastelu epäonnistuu, tulee poikkeus, tämän suoritus
     // keskeytyy ja poikkeus muuttuu http-virhekoodiksi.
-    checkAuthorizationForHakuWithLaskentaFromSeuranta(uuid).blockingFirst();
+    checkAuthorizationForLaskentaFromSeuranta(uuid).blockingFirst();
     peruutaLaskenta(uuid, lopetaVainJonossaOlevaLaskenta);
     // Palauta OK odottamatta vastausta peruutuspyyntöön
     return Response.ok().build();
@@ -319,38 +320,39 @@ public class ValintalaskentaKerrallaResource {
     return null;
   }
 
-  private void checkAuthorizationForHakuWithLaskentaInMemory(String uuid) {
-    valintalaskentaValvomo
-        .fetchLaskenta(uuid)
-        .ifPresentOrElse(
-            laskenta -> {
-              authorityCheckService.checkAuthorizationForHaku(
-                  laskenta.getHakuOid(), valintalaskentaAllowedRoles);
-            },
-            () -> {
-              throw new NotFoundException("Valintalaskenta ei ole muistissa.");
-            });
-  }
-
-  private Observable<Boolean> checkAuthorizationForHakuWithLaskentaFromSeuranta(String uuid) {
-    // Tallenna tätä pyyntöä suorittavan säikeen konteksti, jotta samaan käyttäjätietoon
-    // voidaan viitata tarkastelun suorittavasta säikeestä.
-    AuthorityCheckService.Context context = authorityCheckService.getContext();
-    return getHakuForLaskentaFromSeuranta(uuid)
-        .map(hakuOid -> checkAuthorizationForHakuInContext(context, hakuOid));
-  }
-
-  private Boolean checkAuthorizationForHakuInContext(
-      AuthorityCheckService.Context context, String hakuOid) {
-    authorityCheckService.withContext(
-        context,
-        () -> {
-          authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
-        });
+  private Boolean checkAuthorizationForLaskentaInContext(
+      AuthorityCheckService.Context context, LaskentaDto laskentaDto) {
+    if (LaskentaTyyppi.HAKU.equals(laskentaDto.getTyyppi())) {
+      authorityCheckService.withContext(
+          context,
+          () -> {
+            authorityCheckService.checkAuthorizationForHaku(
+                laskentaDto.getHakuOid(), valintalaskentaAllowedRoles);
+          });
+    } else {
+      final List<String> hakukohdeOids =
+          laskentaDto.getHakukohteet().stream()
+              .map(hk -> hk.getHakukohdeOid())
+              .collect(Collectors.toList());
+      authorityCheckService.withContext(
+          context,
+          () -> {
+            authorityCheckService.checkAuthorizationForHakukohteet(
+                hakukohdeOids, valintalaskentaAllowedRoles);
+          });
+    }
     return Boolean.TRUE;
   }
 
-  private Observable<String> getHakuForLaskentaFromSeuranta(String uuid) {
-    return seurantaAsyncResource.laskenta(uuid).map(LaskentaDto::getHakuOid);
+  private Observable<Boolean> checkAuthorizationForLaskentaFromSeuranta(String uuid) {
+    // Tallenna tätä pyyntöä suorittavan säikeen konteksti, jotta samaan käyttäjätietoon
+    // voidaan viitata tarkastelun suorittavasta säikeestä.
+    AuthorityCheckService.Context context = authorityCheckService.getContext();
+    return getLaskentaDtoFromSeuranta(uuid)
+        .map(laskentaDto -> checkAuthorizationForLaskentaInContext(context, laskentaDto));
+  }
+
+  private Observable<LaskentaDto> getLaskentaDtoFromSeuranta(String uuid) {
+    return seurantaAsyncResource.laskenta(uuid);
   }
 }

@@ -93,6 +93,29 @@ public class AuthorityCheckService {
     }
   }
 
+  public void checkAuthorizationForHakukohteet(
+      Collection<String> hakukohdeOids, Collection<String> requiredRoles) {
+    Collection<? extends GrantedAuthority> userRoles = getRoles();
+
+    if (containsOphRole(userRoles)) {
+      // on OPH-käyttäjä, ei tarvitse käydä läpi organisaatioita
+      return;
+    }
+
+    boolean isAuthorized =
+        getAuthorityCheckForRoles(requiredRoles)
+            .map(authorityCheck -> hakukohdeOids.stream().anyMatch(authorityCheck))
+            .timeout(2, MINUTES)
+            .blockingFirst();
+
+    if (!isAuthorized) {
+      String msg =
+          String.format("Käyttäjällä ei oikeutta yhteenkään hakukohteeseen: %s", hakukohdeOids);
+      LOG.error(msg);
+      throw new ForbiddenException(msg);
+    }
+  }
+
   public boolean isAuthorizedForAnyParentOid(
       Set<String> organisaatioOids,
       Collection<? extends GrantedAuthority> userRoles,
