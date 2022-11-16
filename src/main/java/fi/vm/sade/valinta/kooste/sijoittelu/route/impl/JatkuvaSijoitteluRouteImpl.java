@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
-import fi.vm.sade.valinta.kooste.Reititys;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoitteluExchange;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.ModuloiPaivamaaraJaTunnit;
 import fi.vm.sade.valinta.kooste.util.Formatter;
@@ -15,8 +13,6 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.ws.rs.NotAuthorizedException;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.impl.DefaultExchange;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,61 +20,66 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
-public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaSijoittelu {
+public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
   private static final Logger LOG = LoggerFactory.getLogger(JatkuvaSijoitteluRouteImpl.class);
-  private final String DEADLETTERCHANNEL = "direct:jatkuvan_sijoittelun_deadletterchannel";
+
   private final SijoitteleAsyncResource sijoitteluAsyncResource;
   private final SijoittelunSeurantaResource sijoittelunSeurantaResource;
-  private final String jatkuvaSijoitteluTimer;
-  private final String jatkuvaSijoitteluQueue;
-  private final DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue;
+  private final DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayedQueue;
   private final int DELAY_WHEN_FAILS = (int) TimeUnit.MINUTES.toMillis(45L);
   private final int VAKIO_AJOTIHEYS = 24;
   private final ConcurrentHashMap<String, Long> ajossaHakuOids;
+  private final Timer timer;
 
-  @Value("${jatkuvasijoittelu.autostart:true}")
-  private boolean autoStartup = true;
+  private Timer createFixedRateTimer(boolean start, long runEveryMinute) {
+    Timer timer = new Timer("JatkuvaSijoitteluTimer");
+    if(start) {
+      TimerTask repeatedTask = new TimerTask() {
+        public void run() {
+          JatkuvaSijoitteluRouteImpl.this.teeJatkuvaSijoittelu();
+        }
+      };
+      long delay = 1000L;
+      long period = TimeUnit.MINUTES.toMillis(runEveryMinute);
+      timer.scheduleAtFixedRate(repeatedTask, delay, period);
+    }
+    return timer;
+  }
 
   @Autowired
   public JatkuvaSijoitteluRouteImpl(
-      @Value(
-              "timer://jatkuvaSijoitteluTimer?${valintalaskentakoostepalvelu.jatkuvasijoittelu.timer:fixedRate=true&period=5minutes}")
-          String jatkuvaSijoitteluTimer,
-      @Value(
-              "seda:jatkuvaSijoitteluAjo?purgeWhenStopping=true&waitForTaskToComplete=Never&concurrentConsumers=1&queue=#jatkuvaSijoitteluDelayedQueue")
-          String jatkuvaSijoitteluQueue,
+      @Value("${jatkuvasijoittelu.autostart:true}")
+      boolean autoStartup,
+      @Value("${valintalaskentakoostepalvelu.jatkuvasijoittelu.intervalMinutes:5}")
+      long jatkuvaSijoitteluPollIntervalInMinutes,
       SijoitteleAsyncResource sijoitteluAsyncResource,
       SijoittelunSeurantaResource sijoittelunSeurantaResource,
       @Qualifier("jatkuvaSijoitteluDelayedQueue")
-          DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue) {
-    this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
-    this.jatkuvaSijoitteluQueue = jatkuvaSijoitteluQueue;
+          DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayedQueue) {
     this.sijoitteluAsyncResource = sijoitteluAsyncResource;
     this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
     this.jatkuvaSijoitteluDelayedQueue = jatkuvaSijoitteluDelayedQueue;
     this.ajossaHakuOids = new ConcurrentHashMap<>();
+    this.timer = createFixedRateTimer(autoStartup, jatkuvaSijoitteluPollIntervalInMinutes);
   }
 
   public JatkuvaSijoitteluRouteImpl(
-      String jatkuvaSijoitteluTimer,
-      String jatkuvaSijoitteluQueue,
+      boolean autoStartup,
+      long jatkuvaSijoitteluPollIntervalInMinutes,
       SijoitteleAsyncResource sijoitteluAsyncResource,
       SijoittelunSeurantaResource sijoittelunSeurantaResource,
-      DelayQueue<DelayedSijoitteluExchange> jatkuvaSijoitteluDelayedQueue,
+      DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayedQueue,
       ConcurrentHashMap<String, Long> ajossaHakuOids) {
-    this.jatkuvaSijoitteluTimer = jatkuvaSijoitteluTimer;
-    this.jatkuvaSijoitteluQueue = jatkuvaSijoitteluQueue;
     this.sijoitteluAsyncResource = sijoitteluAsyncResource;
     this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
     this.jatkuvaSijoitteluDelayedQueue = jatkuvaSijoitteluDelayedQueue;
     this.ajossaHakuOids = ajossaHakuOids;
+    this.timer = createFixedRateTimer(autoStartup, jatkuvaSijoitteluPollIntervalInMinutes);
   }
 
   @Override
   public Collection<DelayedSijoittelu> haeJonossaOlevatSijoittelut() {
-    return jatkuvaSijoitteluDelayedQueue.stream()
-        .map(d -> d.getDelayedSijoittelu())
-        .collect(Collectors.toList());
+    return new ArrayList<>(jatkuvaSijoitteluDelayedQueue);
   }
 
   public void teeJatkuvaSijoittelu() {
@@ -124,10 +125,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
                   Formatter.paivamaara(asetusAjankohta.toDate()),
                   intervalli,
                   Formatter.paivamaara(suoritusAjankohta.toDate()));
-              jatkuvaSijoitteluDelayedQueue.add(
-                  new DelayedSijoitteluExchange(
-                      new DelayedSijoittelu(hakuOid, suoritusAjankohta),
-                      new DefaultExchange(getContext())));
+              jatkuvaSijoitteluDelayedQueue.add(new DelayedSijoittelu(hakuOid, suoritusAjankohta));
             }
           }
         });
@@ -138,18 +136,18 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
     jatkuvaSijoitteluDelayedQueue.forEach(
         d -> {
           // Poistetaan tyojonosta passiiviset sijoittelut
-          if (!aktiivisetSijoittelut.containsKey(d.getDelayedSijoittelu().getHakuOid())) {
+          if (!aktiivisetSijoittelut.containsKey(d.getHakuOid())) {
             jatkuvaSijoitteluDelayedQueue.remove(d);
             LOG.warn(
                 "Sijoittelu haulle {} poistettu ajastuksesta {}. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
-                d.getDelayedSijoittelu().getHakuOid(),
-                Formatter.paivamaara(new Date(d.getDelayedSijoittelu().getWhen())));
+                d.getHakuOid(),
+                Formatter.paivamaara(new Date(d.getWhen())));
           }
-          if (ajossaHakuOids.containsKey(d.getDelayedSijoittelu().getHakuOid())) {
+          if (ajossaHakuOids.containsKey(d.getHakuOid())) {
             LOG.info(
                 "Sijoittelu haulle {} poistettu ajastuksesta {}. Ylimaarainen sijoitteluajo tai joko parhaillaan ajossa tai epaonnistunut.",
-                d.getDelayedSijoittelu().getHakuOid(),
-                Formatter.paivamaara(new Date(d.getDelayedSijoittelu().getWhen())));
+                d.getHakuOid(),
+                Formatter.paivamaara(new Date(d.getWhen())));
             jatkuvaSijoitteluDelayedQueue.remove(d);
           }
         });
@@ -186,9 +184,7 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
     return sijoittelunSeurantaResource.hae().stream()
         .filter(Objects::nonNull)
         .filter(
-            sijoitteluDto -> {
-              return sijoitteluDto.isAjossa();
-            })
+          SijoitteluDto::isAjossa)
         .filter(
             sijoitteluDto -> {
               DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
@@ -196,66 +192,49 @@ public class JatkuvaSijoitteluRouteImpl extends RouteBuilder implements JatkuvaS
               // osalta
               return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
             })
-        .collect(Collectors.toMap(s -> s.getHakuOid(), s -> s));
+        .collect(Collectors.toMap(SijoitteluDto::getHakuOid, s -> s));
   }
 
   @Override
-  public void configure() throws Exception {
-    from(DEADLETTERCHANNEL)
-        .routeId("Jatkuvan sijoittelun deadletterchannel")
-        .process(
-            exchange ->
-                LOG.error(
-                    "Jatkuvasijoittelu paattyi virheeseen {}\r\n{}",
-                    simple("${exception.message}").evaluate(exchange, String.class),
-                    simple("${exception.stacktrace}").evaluate(exchange, String.class)))
-        .stop();
-
-    // Tarkistaa onko tilanne muuttunut ja laittaa delay jonoon puuttuvat sijoittelut
-    from(jatkuvaSijoitteluTimer)
-        .errorHandler(deadLetterChannel(DEADLETTERCHANNEL))
-        .routeId("Jatkuvan sijoittelun ajastin")
-        .autoStartup(autoStartup)
-        .process(exchange -> teeJatkuvaSijoittelu());
-
-    // Vie sijoittelu queuesta toita sijoitteluun sita mukaa kuin vanhenee
-    from(jatkuvaSijoitteluQueue)
-        .errorHandler(deadLetterChannel(DEADLETTERCHANNEL))
-        .routeId("Jatkuvan sijoittelun ajuri")
-        .process(
-            Reititys.<DelayedSijoittelu>kuluttaja(
-                sijoitteluHakuOid -> {
-                  final Long onkoAjossa =
-                      ajossaHakuOids.putIfAbsent(
-                          sijoitteluHakuOid.getHakuOid(), System.currentTimeMillis());
-                  if (onkoAjossa == null) {
-                    LOG.error(
-                        "Jatkuvasijoittelu kaynnistyy nyt haulle {}",
-                        sijoitteluHakuOid.getHakuOid());
-                    sijoitteluAsyncResource.sijoittele(
-                        sijoitteluHakuOid.getHakuOid(),
-                        done -> {
-                          LOG.warn(
-                              "Jatkuva sijoittelu saatiin tehtya haulle {}",
-                              sijoitteluHakuOid.getHakuOid());
-                          sijoittelunSeurantaResource.merkkaaSijoittelunAjetuksi(
-                              sijoitteluHakuOid.getHakuOid());
-                          LOG.warn(
-                              "Jatkuva sijoittelu merkattiin ajetuksi haulle {}",
-                              sijoitteluHakuOid.getHakuOid());
-                        },
-                        poikkeus -> {
-                          LOG.error(
-                              "Jatkuvan sijoittelun suorittaminen ei onnistunut haulle "
-                                  + sijoitteluHakuOid.getHakuOid(),
-                              poikkeus);
-                        });
-                  } else {
-                    LOG.error(
-                        "Jatkuvasijoittelu ei kaynnisty haulle {} koska uudelleen kaynnistysviivetta on viela jaljella",
-                        sijoitteluHakuOid.getHakuOid());
-                  }
-                }));
+  public void kaynnistaJatkuvaSijoittelu(DelayedSijoittelu sijoittelu) {
+    try {
+      // Vie sijoittelu queuesta toita sijoitteluun sita mukaa kuin vanhenee
+      final Long onkoAjossa =
+        ajossaHakuOids.putIfAbsent(
+          sijoittelu.getHakuOid(), System.currentTimeMillis());
+      if (onkoAjossa == null) {
+        LOG.error(
+          "Jatkuvasijoittelu kaynnistyy nyt haulle {}",
+          sijoittelu.getHakuOid());
+        sijoitteluAsyncResource.sijoittele(
+          sijoittelu.getHakuOid(),
+          done -> {
+            LOG.warn(
+              "Jatkuva sijoittelu saatiin tehtya haulle {}",
+              sijoittelu.getHakuOid());
+            sijoittelunSeurantaResource.merkkaaSijoittelunAjetuksi(
+              sijoittelu.getHakuOid());
+            LOG.warn(
+              "Jatkuva sijoittelu merkattiin ajetuksi haulle {}",
+              sijoittelu.getHakuOid());
+          },
+          poikkeus -> {
+            LOG.error(
+              "Jatkuvan sijoittelun suorittaminen ei onnistunut haulle "
+                + sijoittelu.getHakuOid(),
+              poikkeus);
+          });
+      } else {
+        LOG.error(
+          "Jatkuvasijoittelu ei kaynnisty haulle {} koska uudelleen kaynnistysviivetta on viela jaljella",
+          sijoittelu.getHakuOid());
+      }
+    } catch (Exception e) {
+      LOG.error(
+        "Jatkuvasijoittelu paattyi virheeseen {}\r\n{}",
+        e.getMessage(),
+        e.getStackTrace());
+    }
   }
 
   public int ajotiheysTaiVakio(Integer ajotiheys) {

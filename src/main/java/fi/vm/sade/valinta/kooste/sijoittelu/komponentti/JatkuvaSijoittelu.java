@@ -5,4 +5,8 @@ import java.util.Collection;
 
 public interface JatkuvaSijoittelu {
   Collection<DelayedSijoittelu> haeJonossaOlevatSijoittelut();
+
+  void teeJatkuvaSijoittelu();
+
+  void kaynnistaJatkuvaSijoittelu(DelayedSijoittelu sijoittelu);
 }

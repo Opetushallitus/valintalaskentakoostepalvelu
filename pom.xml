@@ -23,7 +23,7 @@
         <spring.security.version>5.1.8.RELEASE</spring.security.version>
         <spring.version>5.1.14.RELEASE</spring.version>
         <jaxb.version>2.3.0</jaxb.version>
-        <mockito.version>2.24.0</mockito.version>
+        <mockito.version>3.2.4</mockito.version>
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>7.5.0-SNAPSHOT</sijoittelu.version>
