@@ -7,6 +7,7 @@ import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import java.util.concurrent.DelayQueue;
 import org.apache.camel.CamelContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -44,10 +45,8 @@ public class SijoitteluRouteConfig {
 
   @Bean
   public SijoitteluAktivointiRoute getSijoitteluAktivointiRoute(
-      @Qualifier("javaDslCamelContext") CamelContext context,
-      @Value(SijoitteluAktivointiRoute.SIJOITTELU_REITTI) String sijoitteluAktivoi)
+    SijoitteleAsyncResource sijoitteluAsyncResource)
       throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint(sijoitteluAktivoi), SijoitteluAktivointiRoute.class);
+    return new SijoitteluRouteImpl(sijoitteluAsyncResource);
   }
 }

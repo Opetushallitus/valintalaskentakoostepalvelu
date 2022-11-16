@@ -3,39 +3,24 @@ package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
-import java.util.function.Consumer;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 /** @author Jussi Jartamo */
-public class SijoitteluRouteTest extends CamelTestSupport {
-
-  @Produce(uri = SijoitteluAktivointiRoute.SIJOITTELU_REITTI)
-  protected ProducerTemplate template;
+public class SijoitteluRouteTest {
 
   private SijoitteleAsyncResource sijoitteluResource =
-      new SijoitteleAsyncResource() {
+    (hakuOid, successCallback, failureCallback) ->
+      successCallback.accept("OK");
 
-        @Override
-        public void sijoittele(
-            String hakuOid, Consumer<String> successCallback, Consumer<Throwable> failureCallback) {
-          successCallback.accept("OK");
-        }
-      };
-
-  protected RouteBuilder createRouteBuilder() throws Exception {
-    return new SijoitteluRouteImpl(sijoitteluResource);
-  }
+  private SijoitteluAktivointiRoute sijoitteluAktivointiRoute =
+    new SijoitteluRouteImpl(sijoitteluResource);
 
   @Test
   public void testaaReitti() {
     Sijoittelu sijoittelu = new Sijoittelu(StringUtils.EMPTY);
-    template.sendBody(sijoittelu);
+    sijoitteluAktivointiRoute.aktivoiSijoittelu(sijoittelu);
     Assert.assertEquals(true, sijoittelu.isValmis());
   }
 }
