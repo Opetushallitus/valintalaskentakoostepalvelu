@@ -37,6 +37,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDt
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -375,7 +376,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     mockToReturnJson(
         GET,
         "/valintalaskenta-laskenta-service/resources/hakukohde/HAKUKOHDE1/valinnanvaihe",
-        Collections.emptyList());
+        new ArrayList<>());
   }
 
   private ProsessiId makeCallAndReturnDokumenttiId(String asiointikieli) {

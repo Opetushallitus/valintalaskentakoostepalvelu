@@ -17,28 +17,9 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class HakuImportRouteConfig {
 
-  @Bean(name = "hakuImportValvomo")
+  @Bean("hakuImportValvomo")
   public ValvomoServiceImpl<HakuImportProsessi> getValvomoServiceImpl() {
     return new ValvomoServiceImpl<>();
-  }
-
-  @Bean
-  public HakuImportRouteImpl getHakuImportAktivointiRoute(
-    @Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}")
-      Integer hakuImportThreadpoolSize,
-    @Value("${valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize:10}")
-      Integer hakukohdeImportThreadpoolSize,
-    @Qualifier("hakuImportValvomo")
-      ValvomoAdminService<HakuImportProsessi> hakuImportValvomo,
-    SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
-    ValintaperusteetAsyncResource valintaperusteetRestResource,
-    SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
-    return new HakuImportRouteImpl(hakuImportThreadpoolSize,
-      hakukohdeImportThreadpoolSize,
-      hakuImportValvomo,
-      suoritaHakuImportKomponentti,
-      valintaperusteetRestResource,
-      tarjontaJaKoodistoHakukohteenHakuKomponentti);
   }
 
 }
