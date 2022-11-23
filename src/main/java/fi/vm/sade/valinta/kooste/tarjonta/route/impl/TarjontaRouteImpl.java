@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.tarjonta.route.impl;
 
 import fi.vm.sade.valinta.kooste.kela.komponentti.impl.LinjakoodiKomponentti;
-import org.apache.camel.spring.SpringRouteBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fi.vm.sade.valinta.kooste.tarjonta.route.LinjakoodiRoute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TarjontaRouteImpl extends SpringRouteBuilder {
-  private static final Logger LOG = LoggerFactory.getLogger(TarjontaRouteImpl.class);
+public class TarjontaRouteImpl implements LinjakoodiRoute {
 
   private LinjakoodiKomponentti linjakoodiKomponentti;
 
@@ -19,7 +16,7 @@ public class TarjontaRouteImpl extends SpringRouteBuilder {
   }
 
   @Override
-  public void configure() throws Exception {
-    from("direct:linjakoodiReitti").bean(linjakoodiKomponentti);
+  public String haeLinjakoodi(String hakukohdeOid) {
+    return linjakoodiKomponentti.haeLinjakoodi(hakukohdeOid);
   }
 }

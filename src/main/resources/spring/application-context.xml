@@ -203,12 +203,6 @@
 			</jaxws:outInterceptors>
 		</jaxws:client>
 
-		<bean id="redeliveryPolicy" class="org.apache.camel.processor.RedeliveryPolicy">
-			<property name="maximumRedeliveries" value="5" />
-			<property name="redeliveryDelay" value="25" />
-			<property name="retryAttemptedLogLevel" value="ERROR" />
-		</bean>
-
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.hakemus.komponentti" />
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.erillishaku"  />
 

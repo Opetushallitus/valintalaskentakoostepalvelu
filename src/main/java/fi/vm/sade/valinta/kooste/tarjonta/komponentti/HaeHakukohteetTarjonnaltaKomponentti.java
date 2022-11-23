@@ -8,14 +8,13 @@ import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
 import fi.vm.sade.valinta.kooste.OPH;
 import java.util.Collection;
-import org.apache.camel.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("hakukohteetTarjonnaltaKomponentti")
 public class HaeHakukohteetTarjonnaltaKomponentti {
 
-  private TarjontaPublicService tarjontaService;
+  private final TarjontaPublicService tarjontaService;
 
   @Autowired
   public HaeHakukohteetTarjonnaltaKomponentti(TarjontaPublicService tarjontaService) {
@@ -23,13 +22,9 @@ public class HaeHakukohteetTarjonnaltaKomponentti {
   }
 
   public Collection<HakukohdeTyyppi> haeHakukohteetTarjonnalta(
-      @Property(OPH.HAKUOID) String hakuOid) {
+      String hakuOid) {
     return Collections2.filter(
         tarjontaService.haeTarjonta(hakuOid).getHakukohde(),
-        new Predicate<HakukohdeTyyppi>() {
-          public boolean apply(HakukohdeTyyppi hakukohde) {
-            return JULKAISTU == hakukohde.getHakukohteenTila();
-          }
-        });
+      hakukohde -> JULKAISTU == hakukohde.getHakukohteenTila());
   }
 }

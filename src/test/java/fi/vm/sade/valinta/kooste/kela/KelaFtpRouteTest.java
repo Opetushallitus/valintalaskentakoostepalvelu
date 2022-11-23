@@ -25,7 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @Configuration
-@ContextConfiguration(classes = {KoostepalveluContext.CamelConfig.class, KelaFtpRouteTest.class})
+@ContextConfiguration(classes = {KelaFtpRouteTest.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 public class KelaFtpRouteTest {
   private String HOST = "localhost";

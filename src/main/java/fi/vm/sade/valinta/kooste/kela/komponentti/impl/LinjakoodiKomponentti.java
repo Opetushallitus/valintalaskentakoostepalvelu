@@ -4,6 +4,7 @@ import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
 import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.valinta.kooste.exception.KoodistoException;
+import fi.vm.sade.valinta.kooste.tarjonta.route.LinjakoodiRoute;
 import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
 import java.util.List;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 /** Use proxy instead of calling bean:hakukohdeTarjonnaltaKomponentti! Proxy provides retries! */
 @Component
-public class LinjakoodiKomponentti {
+public class LinjakoodiKomponentti implements LinjakoodiRoute {
   private static final Logger LOG = LoggerFactory.getLogger(LinjakoodiKomponentti.class);
 
   private final KoodiService koodiService;

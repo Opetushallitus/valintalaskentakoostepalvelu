@@ -1,12 +1,14 @@
 package fi.vm.sade.valinta.kooste.hakuimport.route.impl;
 
-import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
-import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
-import fi.vm.sade.valinta.kooste.hakuimport.route.HakukohdeImportRoute;
+import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
+import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
-import org.apache.camel.CamelContext;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,17 +23,22 @@ public class HakuImportRouteConfig {
   }
 
   @Bean
-  public HakuImportRoute getHakuImportAktivointiRoute(
-      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint(HakuImportRoute.DIRECT_HAKU_IMPORT), HakuImportRoute.class);
+  public HakuImportRouteImpl getHakuImportAktivointiRoute(
+    @Value("${valintalaskentakoostepalvelu.hakuimport.threadpoolsize:10}")
+      Integer hakuImportThreadpoolSize,
+    @Value("${valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize:10}")
+      Integer hakukohdeImportThreadpoolSize,
+    @Qualifier("hakuImportValvomo")
+      ValvomoAdminService<HakuImportProsessi> hakuImportValvomo,
+    SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
+    ValintaperusteetAsyncResource valintaperusteetRestResource,
+    SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
+    return new HakuImportRouteImpl(hakuImportThreadpoolSize,
+      hakukohdeImportThreadpoolSize,
+      hakuImportValvomo,
+      suoritaHakuImportKomponentti,
+      valintaperusteetRestResource,
+      tarjontaJaKoodistoHakukohteenHakuKomponentti);
   }
 
-  @Bean
-  public HakukohdeImportRoute getHakukohdeImportAktivointiRoute(
-      @Qualifier("javaDslCamelContext") CamelContext context) throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(
-        context.getEndpoint(HakukohdeImportRoute.DIRECT_HAKUKOHDE_IMPORT),
-        HakukohdeImportRoute.class);
-  }
 }

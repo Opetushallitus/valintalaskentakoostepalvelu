@@ -1,9 +1,5 @@
 package fi.vm.sade.valinta.kooste.kela.komponentti.impl;
 
-import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_AINEISTONNIMI;
-import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_ORGANISAATIONNIMI;
-import static fi.vm.sade.valinta.kooste.kela.route.KelaRoute.PROPERTY_SIIRTOTUNNUS;
-
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAALKU;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVALOPPU;
 import fi.vm.sade.rajapinnat.kela.tkuva.data.TKUVAYHVA;
@@ -17,8 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Deque;
-import org.apache.camel.Body;
-import org.apache.camel.Property;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Component;
 
@@ -30,13 +24,16 @@ import org.springframework.stereotype.Component;
 public class KelaDokumentinLuontiKomponenttiImpl {
 
   public byte[] luo(
-      @Body Collection<TKUVAYHVA> rivit,
+      Collection<TKUVAYHVA> rivit,
       //
-      @Property(PROPERTY_AINEISTONNIMI) String aineistonNimi,
+      //@Property(PROPERTY_AINEISTONNIMI)
+      String aineistonNimi,
       //
-      @Property(PROPERTY_ORGANISAATIONNIMI) String organisaationNimi,
+      //@Property(PROPERTY_ORGANISAATIONNIMI)
+      String organisaationNimi,
       //
-      @Property(PROPERTY_SIIRTOTUNNUS) String siirtotunnus)
+      //@Property(PROPERTY_SIIRTOTUNNUS)
+      String siirtotunnus)
       throws Exception {
 
     int count = rivit.size();
