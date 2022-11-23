@@ -16,6 +16,8 @@ import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKompone
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 import fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
+import fi.vm.sade.valinta.sharedutils.FakeAuthenticationInitialiser;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import java.io.IOException;
 import java.util.Arrays;
@@ -38,20 +40,18 @@ import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 
-public class HakuImportTest extends CamelTestSupport {
+public class HakuImportTest {
   private static final Logger LOG = LoggerFactory.getLogger(HakuImportTest.class);
 
-  @Produce(uri = "direct:hakuimport")
-  protected ProducerTemplate template;
+  private HakuImportRouteImpl template = createRouteBuilder();
 
   @Ignore
   @Test
   public void testData() throws JsonSyntaxException, IOException {
-    // ObjectMapper mapper = new ObjectMapper(); // can reuse, share
-    // globally
-    // HakukohdeValintaperusteetV1RDTO obj = mapper.readValue(new File(
-    // "user.json"), User.class);
     HakukohdeValintaperusteetV1RDTO obj =
         DateDeserializer.gsonBuilder()
             .create()
@@ -67,28 +67,14 @@ public class HakuImportTest extends CamelTestSupport {
 
   @Test
   public void testRoute() {
-
-    template.send(
-        new Processor() {
-
-          @Override
-          public void process(Exchange exchange) {
-            exchange.setProperty("hakuOid", "hakuOid");
-            exchange.setProperty(
-                ValvomoAdminService.PROPERTY_VALVOMO_PROSESSI, new HakuImportProsessi("", ""));
-            exchange.getIn().setBody("hakuOid");
-          }
-          // )BodyAndProperty(new Object(), "hakuOid", "hakuOid");
-
-        });
+    FakeAuthenticationInitialiser.fakeAuthentication();
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    template.asyncAktivoiHakuImport("hakuOid");
+    template.asyncAktivoiHakukohdeImport("hakukohdeOid", new HakuImportProsessi("","hakuOid"), auth);
   }
 
-  protected RouteBuilder createRouteBuilder() {
+  public HakuImportRouteImpl createRouteBuilder() {
     final String VIALLINEN_HAKUKOHDE = "throws";
-    PropertyPlaceholderDelegateRegistry registry =
-        (PropertyPlaceholderDelegateRegistry) context().getRegistry();
-    JndiRegistry jndiRegistry = (JndiRegistry) registry.getRegistry();
-    jndiRegistry.bind("hakuImportValvomo", Mockito.mock(ValvomoAdminService.class));
     SuoritaHakuImportKomponentti suoritaHakuImportKomponentti =
         new SuoritaHakuImportKomponentti() {
           @Override
@@ -145,6 +131,7 @@ public class HakuImportTest extends CamelTestSupport {
     return new HakuImportRouteImpl(
         1,
         1,
+      new ValvomoServiceImpl<>(),
         suoritaHakuImportKomponentti,
         valintaperusteetRestResource,
         tarjontaJaKoodistoHakukohteenHakuKomponentti);

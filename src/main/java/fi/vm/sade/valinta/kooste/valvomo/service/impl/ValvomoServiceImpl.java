@@ -13,9 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import org.apache.camel.Exchange;
-import org.apache.camel.Header;
-import org.apache.camel.Property;
 import org.apache.commons.collections.Buffer;
 import org.apache.commons.collections.BufferUtils;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
@@ -39,9 +36,9 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
 
   @Override
   public void fail(
-      @Property(PROPERTY_VALVOMO_PROSESSI) T process,
-      @Property(Exchange.EXCEPTION_CAUGHT) Exception exception,
-      @Header("message") String message) {
+      T process,
+      Exception exception,
+      String message) {
     StringBuffer buffer = newBufferWithDate("VIRHE");
     if (exception == null) {
       LOG.info("Process failed {}", process);
@@ -68,14 +65,14 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
   }
 
   @Override
-  public void finish(@Property(PROPERTY_VALVOMO_PROSESSI) T prosessi) {
+  public void finish(T prosessi) {
     processBuffer.add(
         new ProsessiJaStatus<T>(
             prosessi, newBufferWithDate("LOPETETTU").toString(), Status.FINISHED));
   }
 
   @Override
-  public void start(@Property(PROPERTY_VALVOMO_PROSESSI) T prosessi) {
+  public void start(T prosessi) {
     processBuffer.add(
         new ProsessiJaStatus<T>(
             prosessi, newBufferWithDate("ALOITETTU").toString(), Status.STARTED));
@@ -96,11 +93,7 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
   public Collection<T> getUusimmatProsessit() {
     return Collections2.transform(
         Lists.reverse(Lists.newArrayList(processBuffer)),
-        new Function<ProsessiJaStatus<T>, T>() {
-          public T apply(ProsessiJaStatus<T> input) {
-            return input.getProsessi();
-          }
-        });
+      (Function<ProsessiJaStatus<T>, T>) input -> input.getProsessi());
   }
 
   @Override

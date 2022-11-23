@@ -1,12 +1,14 @@
 package fi.vm.sade.valinta.kooste.kela.route.impl;
 
-import fi.vm.sade.valinta.kooste.ProxyWithAnnotationHelper;
+import fi.vm.sade.organisaatio.resource.api.KelaResource;
+import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.kela.dto.KelaProsessi;
+import fi.vm.sade.valinta.kooste.kela.komponentti.impl.*;
 import fi.vm.sade.valinta.kooste.kela.route.KelaRoute;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
-import org.apache.camel.CamelContext;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,10 +23,19 @@ public class KelaRouteConfig {
   }
 
   @Bean
-  public KelaRoute getKelaRoute(
-      @Value(KelaRoute.SEDA_KELA_LUONTI) String kelaluonti,
-      @Qualifier("javaDslCamelContext") CamelContext context)
+  public KelaRoute getKelaRoute(DokumenttiAsyncResource dokumenttiAsyncResource,
+                                KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti,
+                                KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
+                                TarjontaAsyncResource tarjontaAsyncResource,
+                                HaunTyyppiKomponentti haunTyyppiKomponentti,
+                                OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
+                                OppilaitosKomponentti oppilaitosKomponentti,
+                                LinjakoodiKomponentti linjakoodiKomponentti,
+                                ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
+                                KelaResource kelaResource)
       throws Exception {
-    return ProxyWithAnnotationHelper.createProxy(context.getEndpoint(kelaluonti), KelaRoute.class);
+    return new KelaRouteImpl(dokumenttiAsyncResource,kelaHakijaKomponentti,kelaDokumentinLuontiKomponentti,
+      tarjontaAsyncResource, haunTyyppiKomponentti, oppijanumerorekisteriAsyncResource, oppilaitosKomponentti, linjakoodiKomponentti,
+      valintaTulosServiceAsyncResource, kelaResource);
   }
 }

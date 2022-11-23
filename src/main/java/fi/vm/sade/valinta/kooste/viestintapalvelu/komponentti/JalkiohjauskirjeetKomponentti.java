@@ -25,9 +25,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.camel.Body;
-import org.apache.camel.Property;
-import org.apache.camel.language.Simple;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,14 +38,14 @@ public class JalkiohjauskirjeetKomponentti {
       Map<String, Koodi> maatjavaltiot1,
       Map<String, Koodi> postinumerot,
       String ylikirjoitettuPreferoitukielikoodi,
-      @Body final Collection<HakijaDTO> hyvaksymattomatHakijat,
+      Collection<HakijaDTO> hyvaksymattomatHakijat,
       Map<String, HakemusWrapper> hakemusOidHakemukset,
       Map<String, Map<String, List<SyotettyArvoDTO>>> syotetytArvot,
       final Map<String, MetaHakukohde> jalkiohjauskirjeessaKaytetytHakukohteet,
-      @Simple("${property.hakuOid}") String hakuOid,
-      @Property("templateName") String templateName,
-      @Property("sisalto") String sisalto,
-      @Property("tag") String tag,
+      String hakuOid,
+      String templateName,
+      String sisalto,
+      String tag,
       boolean sahkoinenMassaposti,
       boolean isKkHaku,
       List<ContentStructureType> sisaltotyypit,

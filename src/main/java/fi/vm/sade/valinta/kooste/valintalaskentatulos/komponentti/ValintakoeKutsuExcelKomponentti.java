@@ -222,4 +222,5 @@ public class ValintakoeKutsuExcelKomponentti {
         Yhteystiedot.yhteystiedotHakemukselta(h),
         osallistuuEdesYhteen);
   }
+
 }
