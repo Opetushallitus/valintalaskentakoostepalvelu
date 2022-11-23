@@ -15,11 +15,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -43,8 +46,9 @@ public class HakuImportRouteImpl implements HakuImportRoute, HakukohdeImportRout
           Integer hakuImportThreadpoolSize,
       @Value("${valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize:10}")
           Integer hakukohdeImportThreadpoolSize,
-      @Qualifier("hakuImportValvomo")
-      ValvomoAdminService<HakuImportProsessi> hakuImportValvomo,
+      @Autowired(required = false)
+      @Qualifier(value="hakuImportValvomo")
+      ValvomoServiceImpl<HakuImportProsessi> hakuImportValvomo,
       SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
       ValintaperusteetAsyncResource valintaperusteetRestResource,
       SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {

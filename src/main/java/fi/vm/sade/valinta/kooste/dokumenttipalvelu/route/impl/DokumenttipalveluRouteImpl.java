@@ -5,7 +5,6 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,7 @@ public class DokumenttipalveluRouteImpl {
   private final DokumenttiAsyncResource dokumenttiAsyncResource;
 
   @Autowired
-  public DokumenttipalveluRouteImpl(DokumenttiAsyncResource dokumenttiAsyncResource) throws SchedulerException {
+  public DokumenttipalveluRouteImpl(DokumenttiAsyncResource dokumenttiAsyncResource) {
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     scheduleCleanCronJob();
   }
@@ -27,7 +26,7 @@ public class DokumenttipalveluRouteImpl {
     String cronExpression = "0 0 0/2 * * ?";
     ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
     scheduler.initialize();
-    ScheduledFuture<?> schedule = scheduler.schedule(this::execute, new CronTrigger(cronExpression));
+    scheduler.schedule(this::execute, new CronTrigger(cronExpression));
   }
 
   public void execute() {
