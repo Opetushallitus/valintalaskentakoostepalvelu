@@ -53,8 +53,7 @@ public class SijoitteluAktivointiResource {
   public static final String ANY_CRUD = "hasAnyRole('ROLE_APP_SIJOITTELU_CRUD')";
   public static final String OPH_CRUD_ROLE = "ROLE_APP_SIJOITTELU_CRUD_1.2.246.562.10.00000000001";
 
-  @Autowired
-  private SijoitteluAktivointiRoute sijoitteluAktivointiProxy;
+  @Autowired private SijoitteluAktivointiRoute sijoitteluAktivointiProxy;
 
   @Autowired(required = false)
   private JatkuvaSijoittelu jatkuvaSijoittelu;

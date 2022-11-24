@@ -12,5 +12,4 @@ public interface SijoittelunTulosTaulukkolaskentaRoute {
       String sijoitteluAjoId,
       AuditSession session,
       Authentication auth);
-
 }

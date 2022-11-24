@@ -18,13 +18,14 @@ public class SijoitteluRouteImpl implements SijoittelunValvonta, SijoitteluAktiv
 
   private static final Logger LOG = LoggerFactory.getLogger(SijoitteluRouteImpl.class);
   private final SijoitteleAsyncResource sijoitteluResource;
-  private final Cache<String, Sijoittelu> sijoitteluCache = CacheBuilder.newBuilder()
-    .weakValues()
-    .expireAfterWrite(3, TimeUnit.HOURS)
-    .removalListener(
-      (RemovalListener<String, Sijoittelu>) notification ->
-        LOG.info("{} siivottu pois muistista", notification.getValue()))
-    .build();
+  private final Cache<String, Sijoittelu> sijoitteluCache =
+      CacheBuilder.newBuilder()
+          .weakValues()
+          .expireAfterWrite(3, TimeUnit.HOURS)
+          .removalListener(
+              (RemovalListener<String, Sijoittelu>)
+                  notification -> LOG.info("{} siivottu pois muistista", notification.getValue()))
+          .build();
 
   @Autowired
   public SijoitteluRouteImpl(SijoitteleAsyncResource sijoitteluResource) {
@@ -33,7 +34,7 @@ public class SijoitteluRouteImpl implements SijoittelunValvonta, SijoitteluAktiv
 
   @Override
   public Sijoittelu haeAktiivinenSijoitteluHaulle(String hakuOid) {
-    return null; //getKoostepalveluCache().getIfPresent(hakuOid);
+    return null; // getKoostepalveluCache().getIfPresent(hakuOid);
   }
 
   @Override
@@ -47,30 +48,26 @@ public class SijoitteluRouteImpl implements SijoittelunValvonta, SijoitteluAktiv
         // lakkaa kayttamasta resursseja ja siivoutuu ajallaan
         // pois
         throw new RuntimeException(
-          "Sijoittelu haulle " + sijoittelu.getHakuOid() + " on jo kaynnissa!");
+            "Sijoittelu haulle " + sijoittelu.getHakuOid() + " on jo kaynnissa!");
       } else {
         sijoitteluCache.put(sijoittelu.getHakuOid(), sijoittelu);
       }
 
       LOG.info("Aloitetaan sijoittelu haulle {}", sijoittelu.getHakuOid());
       sijoitteluResource.sijoittele(
-        sijoittelu.getHakuOid(),
-        success -> {
-          sijoittelu.setValmis();
-        },
-        e -> {
-          LOG.error("Sijoittelu epaonnistui haulle " + sijoittelu.getHakuOid(), e);
-          sijoittelu.setOhitettu();
-        });
+          sijoittelu.getHakuOid(),
+          success -> {
+            sijoittelu.setValmis();
+          },
+          e -> {
+            LOG.error("Sijoittelu epaonnistui haulle " + sijoittelu.getHakuOid(), e);
+            sijoittelu.setOhitettu();
+          });
     } catch (Exception e) {
-      if(sijoittelu.isTekeillaan()) {
+      if (sijoittelu.isTekeillaan()) {
         sijoittelu.setOhitettu();
       }
-      LOG.error(
-        "Sijoittelu paattyi virheeseen {}\r\n{}",
-        e.getMessage(),
-        e.getStackTrace());
+      LOG.error("Sijoittelu paattyi virheeseen {}\r\n{}", e.getMessage(), e.getStackTrace());
     }
   }
-
 }

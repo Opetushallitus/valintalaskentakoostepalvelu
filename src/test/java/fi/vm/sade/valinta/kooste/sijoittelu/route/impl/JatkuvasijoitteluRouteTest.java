@@ -11,13 +11,10 @@ import java.util.concurrent.DelayQueue;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** @author jussija */
 public class JatkuvasijoitteluRouteTest {
-  private final DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayedQueue =
-      new DelayQueue<>();
+  private final DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayedQueue = new DelayQueue<>();
   private final SijoittelunSeurantaResource sijoittelunSeurantaResource =
       Mockito.mock(SijoittelunSeurantaResource.class);
   private final SijoitteleAsyncResource sijoitteluResource =
@@ -71,5 +68,4 @@ public class JatkuvasijoitteluRouteTest {
         "ei saa menna uudestaan tyojonoon koska oli ajossa",
         jatkuvaSijoitteluRouteImpl.haeJonossaOlevatSijoittelut().isEmpty());
   }
-
 }

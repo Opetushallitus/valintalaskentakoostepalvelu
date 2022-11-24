@@ -37,5 +37,4 @@ public class KoostepalveluContext {
       OrganisationHierarchyAuthorizer organisationHierarchyAuthorizer) {
     return new ThreadLocalAuthorizer();
   }
-
 }

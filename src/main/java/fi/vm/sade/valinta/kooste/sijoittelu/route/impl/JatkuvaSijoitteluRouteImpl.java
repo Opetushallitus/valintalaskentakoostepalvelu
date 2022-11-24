@@ -33,12 +33,13 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
 
   private Timer createFixedRateTimer(boolean start, long runEveryMinute) {
     Timer timer = new Timer("JatkuvaSijoitteluTimer");
-    if(start) {
-      TimerTask repeatedTask = new TimerTask() {
-        public void run() {
-          JatkuvaSijoitteluRouteImpl.this.teeJatkuvaSijoittelu();
-        }
-      };
+    if (start) {
+      TimerTask repeatedTask =
+          new TimerTask() {
+            public void run() {
+              JatkuvaSijoitteluRouteImpl.this.teeJatkuvaSijoittelu();
+            }
+          };
       long delay = 1000L;
       long period = TimeUnit.MINUTES.toMillis(runEveryMinute);
       timer.scheduleAtFixedRate(repeatedTask, delay, period);
@@ -48,10 +49,9 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
 
   @Autowired
   public JatkuvaSijoitteluRouteImpl(
-      @Value("${jatkuvasijoittelu.autostart:true}")
-      boolean autoStartup,
+      @Value("${jatkuvasijoittelu.autostart:true}") boolean autoStartup,
       @Value("${valintalaskentakoostepalvelu.jatkuvasijoittelu.intervalMinutes:5}")
-      long jatkuvaSijoitteluPollIntervalInMinutes,
+          long jatkuvaSijoitteluPollIntervalInMinutes,
       SijoitteleAsyncResource sijoitteluAsyncResource,
       SijoittelunSeurantaResource sijoittelunSeurantaResource,
       @Qualifier("jatkuvaSijoitteluDelayedQueue")
@@ -183,8 +183,7 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
   private Map<String, SijoitteluDto> _getAktiivisetSijoittelut() {
     return sijoittelunSeurantaResource.hae().stream()
         .filter(Objects::nonNull)
-        .filter(
-          SijoitteluDto::isAjossa)
+        .filter(SijoitteluDto::isAjossa)
         .filter(
             sijoitteluDto -> {
               DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
@@ -200,40 +199,29 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
     try {
       // Vie sijoittelu queuesta toita sijoitteluun sita mukaa kuin vanhenee
       final Long onkoAjossa =
-        ajossaHakuOids.putIfAbsent(
-          sijoittelu.getHakuOid(), System.currentTimeMillis());
+          ajossaHakuOids.putIfAbsent(sijoittelu.getHakuOid(), System.currentTimeMillis());
       if (onkoAjossa == null) {
-        LOG.error(
-          "Jatkuvasijoittelu kaynnistyy nyt haulle {}",
-          sijoittelu.getHakuOid());
+        LOG.error("Jatkuvasijoittelu kaynnistyy nyt haulle {}", sijoittelu.getHakuOid());
         sijoitteluAsyncResource.sijoittele(
-          sijoittelu.getHakuOid(),
-          done -> {
-            LOG.warn(
-              "Jatkuva sijoittelu saatiin tehtya haulle {}",
-              sijoittelu.getHakuOid());
-            sijoittelunSeurantaResource.merkkaaSijoittelunAjetuksi(
-              sijoittelu.getHakuOid());
-            LOG.warn(
-              "Jatkuva sijoittelu merkattiin ajetuksi haulle {}",
-              sijoittelu.getHakuOid());
-          },
-          poikkeus -> {
-            LOG.error(
-              "Jatkuvan sijoittelun suorittaminen ei onnistunut haulle "
-                + sijoittelu.getHakuOid(),
-              poikkeus);
-          });
+            sijoittelu.getHakuOid(),
+            done -> {
+              LOG.warn("Jatkuva sijoittelu saatiin tehtya haulle {}", sijoittelu.getHakuOid());
+              sijoittelunSeurantaResource.merkkaaSijoittelunAjetuksi(sijoittelu.getHakuOid());
+              LOG.warn("Jatkuva sijoittelu merkattiin ajetuksi haulle {}", sijoittelu.getHakuOid());
+            },
+            poikkeus -> {
+              LOG.error(
+                  "Jatkuvan sijoittelun suorittaminen ei onnistunut haulle "
+                      + sijoittelu.getHakuOid(),
+                  poikkeus);
+            });
       } else {
         LOG.error(
-          "Jatkuvasijoittelu ei kaynnisty haulle {} koska uudelleen kaynnistysviivetta on viela jaljella",
-          sijoittelu.getHakuOid());
+            "Jatkuvasijoittelu ei kaynnisty haulle {} koska uudelleen kaynnistysviivetta on viela jaljella",
+            sijoittelu.getHakuOid());
       }
     } catch (Exception e) {
-      LOG.error(
-        "Jatkuvasijoittelu paattyi virheeseen {}\r\n{}",
-        e.getMessage(),
-        e.getStackTrace());
+      LOG.error("Jatkuvasijoittelu paattyi virheeseen {}\r\n{}", e.getMessage(), e.getStackTrace());
     }
   }
 

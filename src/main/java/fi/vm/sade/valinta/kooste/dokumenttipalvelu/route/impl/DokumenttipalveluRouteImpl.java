@@ -1,10 +1,7 @@
 package fi.vm.sade.valinta.kooste.dokumenttipalvelu.route.impl;
 
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +19,7 @@ public class DokumenttipalveluRouteImpl {
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     scheduleCleanCronJob();
   }
+
   private void scheduleCleanCronJob() {
     String cronExpression = "0 0 0/2 * * ?";
     ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
@@ -33,8 +31,7 @@ public class DokumenttipalveluRouteImpl {
     try {
       dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
     } catch (Exception e) {
-      LOG.info(
-        "Dokumenttipalvelun tyhjennys-kutsu epäonnistui! Yritetään uudelleen.", e);
+      LOG.info("Dokumenttipalvelun tyhjennys-kutsu epäonnistui! Yritetään uudelleen.", e);
       try { // FIXME kill me OK-152
         dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
       } catch (Exception e2) {
