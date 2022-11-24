@@ -22,20 +22,4 @@ public class KelaRouteConfig {
     return new ValvomoServiceImpl<KelaProsessi>();
   }
 
-  @Bean
-  public KelaRoute getKelaRoute(DokumenttiAsyncResource dokumenttiAsyncResource,
-                                KelaHakijaRiviKomponenttiImpl kelaHakijaKomponentti,
-                                KelaDokumentinLuontiKomponenttiImpl kelaDokumentinLuontiKomponentti,
-                                TarjontaAsyncResource tarjontaAsyncResource,
-                                HaunTyyppiKomponentti haunTyyppiKomponentti,
-                                OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
-                                OppilaitosKomponentti oppilaitosKomponentti,
-                                LinjakoodiKomponentti linjakoodiKomponentti,
-                                ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
-                                KelaResource kelaResource)
-      throws Exception {
-    return new KelaRouteImpl(dokumenttiAsyncResource,kelaHakijaKomponentti,kelaDokumentinLuontiKomponentti,
-      tarjontaAsyncResource, haunTyyppiKomponentti, oppijanumerorekisteriAsyncResource, oppilaitosKomponentti, linjakoodiKomponentti,
-      valintaTulosServiceAsyncResource, kelaResource);
-  }
 }
