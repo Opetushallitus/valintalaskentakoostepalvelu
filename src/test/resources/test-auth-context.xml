@@ -9,7 +9,6 @@
         http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
         http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
 
-    <bean name="admin" class="fi.vm.sade.valinta.kooste.test.AuthPolicyMock" />
     <ctx:property-placeholder
             location="classpath:test.properties,classpath:valintakoelaskenta-test.properties"
             ignore-resource-not-found="true" properties-ref="defaultProps"/>
@@ -18,11 +17,6 @@
     
     <s:authentication-manager alias="authenticationManager">
     </s:authentication-manager>
-    <bean id="redeliveryPolicy" class="org.apache.camel.processor.RedeliveryPolicy">
-		<property name="maximumRedeliveries" value="5" />
-		<property name="redeliveryDelay" value="25" />
-		<property name="retryAttemptedLogLevel" value="ERROR" />
-	</bean>
     <bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
         <constructor-arg>
             <list>

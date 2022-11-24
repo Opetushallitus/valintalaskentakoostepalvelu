@@ -8,13 +8,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.impl.DefaultExchange;
-import org.apache.camel.impl.JndiRegistry;
-import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
-import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -23,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 /** @author jussija */
 public class JatkuvasijoitteluRouteTest {
-  private static final Logger LOG = LoggerFactory.getLogger(JatkuvasijoitteluRouteTest.class);
   private final DelayQueue<DelayedSijoittelu> jatkuvaSijoitteluDelayedQueue =
       new DelayQueue<>();
   private final SijoittelunSeurantaResource sijoittelunSeurantaResource =
