@@ -15,7 +15,6 @@ import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakuImportKomponentti;
 import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKomponentti;
 import fi.vm.sade.valinta.kooste.hakuimport.route.impl.HakuImportRouteImpl;
-import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
 import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 import fi.vm.sade.valinta.sharedutils.FakeAuthenticationInitialiser;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
@@ -61,7 +60,8 @@ public class HakuImportTest {
     FakeAuthenticationInitialiser.fakeAuthentication();
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     template.asyncAktivoiHakuImport("hakuOid");
-    template.asyncAktivoiHakukohdeImport("hakukohdeOid", new HakuImportProsessi("","hakuOid"), auth);
+    template.asyncAktivoiHakukohdeImport(
+        "hakukohdeOid", new HakuImportProsessi("", "hakuOid"), auth);
   }
 
   public HakuImportRouteImpl createRouteBuilder() {
@@ -122,7 +122,7 @@ public class HakuImportTest {
     return new HakuImportRouteImpl(
         1,
         1,
-      new ValvomoServiceImpl<>(),
+        new ValvomoServiceImpl<>(),
         suoritaHakuImportKomponentti,
         valintaperusteetRestResource,
         tarjontaJaKoodistoHakukohteenHakuKomponentti);

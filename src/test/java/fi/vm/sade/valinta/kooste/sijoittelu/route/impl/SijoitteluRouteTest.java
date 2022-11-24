@@ -11,11 +11,10 @@ import org.junit.Test;
 public class SijoitteluRouteTest {
 
   private SijoitteleAsyncResource sijoitteluResource =
-    (hakuOid, successCallback, failureCallback) ->
-      successCallback.accept("OK");
+      (hakuOid, successCallback, failureCallback) -> successCallback.accept("OK");
 
   private SijoitteluAktivointiRoute sijoitteluAktivointiRoute =
-    new SijoitteluRouteImpl(sijoitteluResource);
+      new SijoitteluRouteImpl(sijoitteluResource);
 
   @Test
   public void testaaReitti() {

@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Profile;
 public class TarjontaRouteConfig {
 
   @Bean
-  public OrganisaatioRoute getOrganisaatioRoute(OrganisaatioResource organisaatioResource) throws Exception {
+  public OrganisaatioRoute getOrganisaatioRoute(OrganisaatioResource organisaatioResource)
+      throws Exception {
     return organisaatioResource::getOrganisaatioByOID;
   }
-
 }

@@ -7,7 +7,5 @@ import org.springframework.security.core.Authentication;
 public interface HakukohdeImportRoute {
 
   Future<?> asyncAktivoiHakukohdeImport(
-      String hakukohdeOid,
-      HakuImportProsessi prosessi,
-      Authentication auth);
+      String hakukohdeOid, HakuImportProsessi prosessi, Authentication auth);
 }

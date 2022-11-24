@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.hakuimport.route.impl;
 
 import static java.util.concurrent.CompletableFuture.*;
+
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
@@ -9,25 +10,22 @@ import fi.vm.sade.valinta.kooste.hakuimport.komponentti.SuoritaHakukohdeImportKo
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakuImportRoute;
 import fi.vm.sade.valinta.kooste.hakuimport.route.HakukohdeImportRoute;
 import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoAdminService;
+import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import fi.vm.sade.valinta.kooste.valvomo.service.impl.ValvomoServiceImpl;
+import javax.ws.rs.core.Response;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
-import javax.ws.rs.core.Response;
 
 @Component
 public class HakuImportRouteImpl implements HakuImportRoute, HakukohdeImportRoute {
@@ -46,9 +44,8 @@ public class HakuImportRouteImpl implements HakuImportRoute, HakukohdeImportRout
           Integer hakuImportThreadpoolSize,
       @Value("${valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize:10}")
           Integer hakukohdeImportThreadpoolSize,
-      @Autowired(required = false)
-      @Qualifier(value="hakuImportValvomo")
-      ValvomoServiceImpl<HakuImportProsessi> hakuImportValvomo,
+      @Autowired(required = false) @Qualifier(value = "hakuImportValvomo")
+          ValvomoServiceImpl<HakuImportProsessi> hakuImportValvomo,
       SuoritaHakuImportKomponentti suoritaHakuImportKomponentti,
       ValintaperusteetAsyncResource valintaperusteetRestResource,
       SuoritaHakukohdeImportKomponentti tarjontaJaKoodistoHakukohteenHakuKomponentti) {
@@ -65,16 +62,19 @@ public class HakuImportRouteImpl implements HakuImportRoute, HakukohdeImportRout
 
   @Override
   public Future<?> asyncAktivoiHakuImport(String hakuOid) {
-    HakuImportProsessi prosessi =
-      new HakuImportProsessi("Haun importointi", hakuOid);
+    HakuImportProsessi prosessi = new HakuImportProsessi("Haun importointi", hakuOid);
     hakuImportValvomo.start(prosessi);
     Collection<String> hakukohdeOids = suoritaHakuImportKomponentti.suoritaHakukohdeImport(hakuOid);
     prosessi.setHakukohteita(hakukohdeOids.size());
     LOG.info("Hakukohteita importoitavana {}", hakukohdeOids.size());
 
-    CompletableFuture<Void> allDone = allOf(hakukohdeOids.stream().map(hakukohdeOid ->
-      runAsync(importHakukohdeJob(prosessi, hakukohdeOid), hakuImportThreadPool)
-    ).toArray(CompletableFuture[]::new));
+    CompletableFuture<Void> allDone =
+        allOf(
+            hakukohdeOids.stream()
+                .map(
+                    hakukohdeOid ->
+                        runAsync(importHakukohdeJob(prosessi, hakukohdeOid), hakuImportThreadPool))
+                .toArray(CompletableFuture[]::new));
 
     allDone.whenComplete((a, b) -> hakuImportValvomo.finish(prosessi));
     return allDone;
@@ -84,20 +84,18 @@ public class HakuImportRouteImpl implements HakuImportRoute, HakukohdeImportRout
   private Runnable importHakukohdeJob(HakuImportProsessi prosessi, String hakukohdeOid) {
     return () -> {
       try {
-        HakukohdeImportDTO hki = tarjontaJaKoodistoHakukohteenHakuKomponentti.suoritaHakukohdeImport(hakukohdeOid);
-        Response response = valintaperusteetRestResource
-          .tuoHakukohde(hki).blockingFirst();
+        HakukohdeImportDTO hki =
+            tarjontaJaKoodistoHakukohteenHakuKomponentti.suoritaHakukohdeImport(hakukohdeOid);
+        Response response = valintaperusteetRestResource.tuoHakukohde(hki).blockingFirst();
         LOG.debug("Hakukohde " + hakukohdeOid + " importoitu! " + response.getStatus());
         int t = prosessi.lisaaTuonti();
         if (t % 25 == 0 || t == prosessi.getHakukohteita()) {
-          LOG.info(
-            "Hakukohde on tuotu onnistuneesti ({}/{}).",
-            t, prosessi.getHakukohteita());
+          LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).", t, prosessi.getHakukohteita());
         }
       } catch (Exception e) {
         LOG.error(
-          "Epaonnistuneita hakukohdeOideja tahan mennessa {}",
-          Arrays.toString(prosessi.getEpaonnistuneetHakukohteet()));
+            "Epaonnistuneita hakukohdeOideja tahan mennessa {}",
+            Arrays.toString(prosessi.getEpaonnistuneetHakukohteet()));
         String message = hakukohdeOid + "_KONVERSIOSSA";
         prosessi.lisaaVirhe(message);
         hakuImportValvomo.fail(prosessi, e, message);
@@ -106,8 +104,8 @@ public class HakuImportRouteImpl implements HakuImportRoute, HakukohdeImportRout
   }
 
   @Override
-  public Future<?> asyncAktivoiHakukohdeImport(String hakukohdeOid, HakuImportProsessi prosessi, Authentication auth) {
+  public Future<?> asyncAktivoiHakukohdeImport(
+      String hakukohdeOid, HakuImportProsessi prosessi, Authentication auth) {
     return hakukohdeImportThreadPool.submit(importHakukohdeJob(prosessi, hakukohdeOid));
   }
-
 }

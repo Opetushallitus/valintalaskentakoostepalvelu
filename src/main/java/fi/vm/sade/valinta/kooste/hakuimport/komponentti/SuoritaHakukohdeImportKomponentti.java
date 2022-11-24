@@ -102,8 +102,7 @@ public class SuoritaHakukohdeImportKomponentti {
         .noneMatch(ylakoodi -> "koulutus".equals(ylakoodi.getKoodistoUri()));
   }
 
-  public HakukohdeImportDTO suoritaHakukohdeImport(
-          String hakukohdeOid) {
+  public HakukohdeImportDTO suoritaHakukohdeImport(String hakukohdeOid) {
     try {
       if (hakukohdeOid.length() == KOUTA_HAKUKOHDE_OID_LENGTH) {
         return processKoutaHakukohde(hakukohdeOid);

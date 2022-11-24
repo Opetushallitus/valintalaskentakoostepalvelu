@@ -2,11 +2,9 @@ package fi.vm.sade.valinta.kooste.tarjonta.komponentti;
 
 import static fi.vm.sade.tarjonta.service.types.TarjontaTila.JULKAISTU;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import fi.vm.sade.tarjonta.service.TarjontaPublicService;
 import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
-import fi.vm.sade.valinta.kooste.OPH;
 import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,10 +19,9 @@ public class HaeHakukohteetTarjonnaltaKomponentti {
     this.tarjontaService = tarjontaService;
   }
 
-  public Collection<HakukohdeTyyppi> haeHakukohteetTarjonnalta(
-      String hakuOid) {
+  public Collection<HakukohdeTyyppi> haeHakukohteetTarjonnalta(String hakuOid) {
     return Collections2.filter(
         tarjontaService.haeTarjonta(hakuOid).getHakukohde(),
-      hakukohde -> JULKAISTU == hakukohde.getHakukohteenTila());
+        hakukohde -> JULKAISTU == hakukohde.getHakukohteenTila());
   }
 }

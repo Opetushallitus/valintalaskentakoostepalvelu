@@ -35,10 +35,7 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
   }
 
   @Override
-  public void fail(
-      T process,
-      Exception exception,
-      String message) {
+  public void fail(T process, Exception exception, String message) {
     StringBuffer buffer = newBufferWithDate("VIRHE");
     if (exception == null) {
       LOG.info("Process failed {}", process);
@@ -93,7 +90,7 @@ public class ValvomoServiceImpl<T> implements ValvomoService<T>, ValvomoAdminSer
   public Collection<T> getUusimmatProsessit() {
     return Collections2.transform(
         Lists.reverse(Lists.newArrayList(processBuffer)),
-      (Function<ProsessiJaStatus<T>, T>) input -> input.getProsessi());
+        (Function<ProsessiJaStatus<T>, T>) input -> input.getProsessi());
   }
 
   @Override
