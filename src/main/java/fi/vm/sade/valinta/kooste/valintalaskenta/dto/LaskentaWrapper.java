@@ -4,12 +4,10 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.camel.TypeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,14 +79,6 @@ public class LaskentaWrapper {
 
   public boolean isOnkoToitaOikeaMaara() {
     return onkoToitaOikeaMaara;
-  }
-
-  public List<HakemusDTO> convertHakemuksetToHakemuksetDTO(TypeConverter converter) {
-    List<HakemusDTO> hx =
-        getHakemuksetLisatiedoilla().parallelStream()
-            .map(h -> converter.tryConvertTo(HakemusDTO.class, h))
-            .collect(Collectors.toList());
-    return hx;
   }
 
   public List<ValintaperusteetDTO> getValintaperusteet() {
