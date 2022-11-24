@@ -39,10 +39,4 @@ public class SijoitteluRouteConfig {
     return new DelayQueue<>();
   }
 
-  @Bean
-  public SijoitteluAktivointiRoute getSijoitteluAktivointiRoute(
-    SijoitteleAsyncResource sijoitteluAsyncResource)
-    throws Exception {
-    return new SijoitteluRouteImpl(sijoitteluAsyncResource);
-  }
 }
