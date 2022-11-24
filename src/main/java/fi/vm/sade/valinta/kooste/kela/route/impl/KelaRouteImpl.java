@@ -90,22 +90,6 @@ public class KelaRouteImpl implements KelaRoute {
     this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
     this.kelaResource = kelaResource;
   }
-  /*
-  private void kelaFailed(Exception e) {
-    String virhe = null;
-    String stacktrace = null;
-    try {
-      virhe = simple("${exception.message}").evaluate(exchange, String.class);
-      stacktrace = simple("${exception.stacktrace}").evaluate(exchange, String.class);
-    } catch (Exception e) {
-    }
-    LOG.error("Keladokumentin luonti paattyi virheeseen! {}\r\n{}", virhe, stacktrace);
-    dokumenttiprosessi(exchange)
-      .getPoikkeukset()
-      .add(new Poikkeus(Poikkeus.KOOSTEPALVELU, "Kela-dokumentin luonti", virhe));
-    dokumenttiprosessi(exchange).addException(virhe);
-    dokumenttiprosessi(exchange).luovutaUudelleenYritystenKanssa();
-  }*/
 
   private KelaLuontiJaHaut kelaluontiHaeJaValmistaHaku(KelaLuonti luonti) {
     List<Haku> haut = Lists.newArrayList();
