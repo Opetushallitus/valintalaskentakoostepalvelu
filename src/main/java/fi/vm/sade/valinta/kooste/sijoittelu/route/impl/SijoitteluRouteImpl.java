@@ -34,7 +34,7 @@ public class SijoitteluRouteImpl implements SijoittelunValvonta, SijoitteluAktiv
 
   @Override
   public Sijoittelu haeAktiivinenSijoitteluHaulle(String hakuOid) {
-    return null; // getKoostepalveluCache().getIfPresent(hakuOid);
+    return sijoitteluCache.getIfPresent(hakuOid);
   }
 
   @Override
