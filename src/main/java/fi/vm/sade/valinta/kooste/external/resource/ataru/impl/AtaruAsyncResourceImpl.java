@@ -60,9 +60,30 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
               if (hakemukset.isEmpty()) {
                 return CompletableFuture.completedFuture(Collections.emptyList());
               } else {
+                if (hakukohdeOid != null) {
+                  LOG.info(
+                      "Saatiin {} hakemusta hakukohteelle {}, haetaan henkilöt",
+                      hakemukset.size(),
+                      hakukohdeOid);
+                }
                 return getHenkilot(hakemukset)
                     .thenComposeAsync(
                         henkilot -> {
+                          if (henkilot.size() < hakemukset.size()) {
+                            hakemukset.forEach(
+                                hak -> {
+                                  if (!henkilot.keySet().contains(hak.getPersonOid())) {
+                                    LOG.error(
+                                        "Hakemuksen {} henkilöä {} ei löytynyt oppijanumerorekisteristä.",
+                                        hak.getHakemusOid(),
+                                        hak.getPersonOid());
+                                  }
+                                });
+                            throw new RuntimeException(
+                                String.format(
+                                    "Hakukohteelle %s löytyi %s hakemusta, mutta vain %s henkilöä.",
+                                    hakukohdeOid, hakemukset.size(), henkilot.size()));
+                          }
                           ensureKansalaisuus(henkilot);
                           Stream<String> asuinmaaKoodit =
                               hakemukset.stream()
