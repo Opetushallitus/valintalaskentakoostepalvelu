@@ -102,19 +102,18 @@ public class HakemuksetConverterUtilTest {
           .setValmistuminen(HAKUKAUDELLA)
           .setValmis()
           .done();
+  private static final SuoritusJaArvosanat vahvistettuPerusopetusValmisAiemmin =
+      new SuoritusrekisteriSpec.SuoritusBuilder()
+          .setPerusopetus()
+          .setVahvistettu(true)
+          .setYksilollistaminen("Ei")
+          .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
+          .setValmis()
+          .done();
   private static final SuoritusJaArvosanat vahvistettuLukioValmisHakukaudella =
       new SuoritusrekisteriSpec.SuoritusBuilder()
           .setLukio()
           .setVahvistettu(true)
-          .setValmistuminen(HAKUKAUDELLA)
-          .setValmis()
-          .done();
-  private static final SuoritusJaArvosanat vahvistamatonPerusopetusValmisHakukaudella =
-      new SuoritusrekisteriSpec.SuoritusBuilder()
-          .setPerusopetus()
-          .setVahvistettu(false)
-          .setYksilollistaminen("Ei")
-          .setMyontaja(HAKEMUS1_OID)
           .setValmistuminen(HAKUKAUDELLA)
           .setValmis()
           .done();
@@ -442,7 +441,7 @@ public class HakemuksetConverterUtilTest {
   }
 
   @Test
-  public void pohjakoulutusHakemukseltaJosEiSuorituksia() {
+  public void keskeytynytPohjakoulutusJosEiSuorituksia() {
     HakemusDTO h = new HakemusDTO();
     h.setAvaimet(
         new ArrayList<>() {
@@ -452,7 +451,7 @@ public class HakemuksetConverterUtilTest {
         });
     List<SuoritusJaArvosanat> suoritukset = new ArrayList<>();
     Assert.assertEquals(
-        PohjakoulutusToinenAste.PERUSKOULU,
+        PohjakoulutusToinenAste.KESKEYTYNYT,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
 
@@ -495,9 +494,15 @@ public class HakemuksetConverterUtilTest {
             this.add(new AvainArvoDTO("lukioPaattotodistusVuosi", "2015"));
           }
         });
+    List<SuoritusJaArvosanat> suoritukset =
+        new ArrayList<>() {
+          {
+            add(vahvistettuPerusopetusValmisHakukaudella);
+          }
+        };
     Assert.assertEquals(
         PohjakoulutusToinenAste.PERUSKOULU,
-        hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>()).get());
+        hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
 
   @Test
@@ -1089,6 +1094,7 @@ public class HakemuksetConverterUtilTest {
     List<SuoritusJaArvosanat> suoritukset =
         new ArrayList<>() {
           {
+            add(vahvistettuPerusopetusValmisAiemmin);
             add(
                 new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setValma()
@@ -1121,6 +1127,7 @@ public class HakemuksetConverterUtilTest {
     List<SuoritusJaArvosanat> suoritukset =
         new ArrayList<>() {
           {
+            add(vahvistettuPerusopetusValmisAiemmin);
             add(
                 new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setValma()
@@ -1154,6 +1161,7 @@ public class HakemuksetConverterUtilTest {
                     .setValmistuminen(HAKUKAUDELLA)
                     .setKesken()
                     .done());
+            add(vahvistettuPerusopetusValmisAiemmin);
           }
         };
     assertThat(
@@ -1176,6 +1184,7 @@ public class HakemuksetConverterUtilTest {
     List<SuoritusJaArvosanat> suoritukset =
         new ArrayList<>() {
           {
+            add(vahvistettuPerusopetusValmisAiemmin);
             add(
                 new SuoritusrekisteriSpec.SuoritusBuilder()
                     .setValma()
@@ -1229,6 +1238,7 @@ public class HakemuksetConverterUtilTest {
     List<SuoritusJaArvosanat> suoritukset =
         new ArrayList<>() {
           {
+            add(vahvistettuPerusopetusValmisAiemmin);
             add(vahvistettuKymppiKeskeytynytHakukaudella);
           }
         };
@@ -1252,7 +1262,12 @@ public class HakemuksetConverterUtilTest {
             add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true"));
           }
         });
-    List<SuoritusJaArvosanat> suoritukset = new ArrayList<>();
+    List<SuoritusJaArvosanat> suoritukset =
+        new ArrayList<>() {
+          {
+            add(vahvistettuPerusopetusValmisAiemmin);
+          }
+        };
     Map<String, String> oletettu = new HashMap<>();
     oletettu.put("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU);
     oletettu.put("PK_TILA", "false");
@@ -1278,6 +1293,7 @@ public class HakemuksetConverterUtilTest {
         new ArrayList<>() {
           {
             add(vahvistettuKymppiKeskeytynytEiHakukaudella);
+            add(vahvistettuPerusopetusValmisAiemmin);
           }
         };
     Map<String, String> oletettu = new HashMap<>();
@@ -1356,7 +1372,7 @@ public class HakemuksetConverterUtilTest {
   }
 
   @Test
-  public void pohjakoulutusHakemukseltaJosYOSuoritusKeskeytynytHakukaudella() {
+  public void pohjakoulutusSurenPerusteellaJosYOSuoritusKeskeytynytHakukaudella() {
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -1370,7 +1386,7 @@ public class HakemuksetConverterUtilTest {
     o.setSuoritukset(
         new ArrayList<>() {
           {
-            add(vahvistamatonPerusopetusValmisHakukaudella);
+            add(vahvistettuPerusopetusValmisAiemmin);
             add(vahvistettuYOKeskeytynytHakukaudella);
           }
         });
@@ -2927,6 +2943,7 @@ public class HakemuksetConverterUtilTest {
         new SuoritusrekisteriSpec.OppijaBuilder()
             .suoritus()
             .setPerusopetus()
+            .setYksilollistaminen("Ei")
             .setVahvistettu(false)
             .setValmistuminen(HAKUKAUDELLA)
             .setValmis()
