@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.AjastettuSijoitteluInfo;
 import fi.vm.sade.valinta.kooste.sijoittelu.job.AjastettuSijoitteluJob;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.util.Formatter;
@@ -7,6 +8,7 @@ import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.ws.rs.NotAuthorizedException;
 import org.joda.time.DateTime;
@@ -25,6 +27,8 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
   private final int VAKIO_AJOTIHEYS = 24;
   private final Timer timer;
   private final Scheduler sijoitteluScheduler;
+
+  private Map<String, AjastettuSijoitteluInfo> ajastetutSijoitteluInfot = new HashMap<>();
 
   private Timer createFixedRateTimer(boolean start, long runEveryMinute) {
     Timer timer = new Timer("JatkuvaSijoitteluTimer");
@@ -59,14 +63,33 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
     }
   }
 
+  @Override
   public void teeJatkuvaSijoittelu() {
     LOG.info("Sijoitteluiden ajastin kaynnistyi");
     Map<String, SijoitteluDto> aktiivisetSijoittelut = getAktiivisetSijoittelut();
     LOG.info(
         "Sijoitteluiden ajastin sai seurannalta {} aktiivista sijoittelua.",
         aktiivisetSijoittelut.size());
+    ajastetutSijoitteluInfot =
+        aktiivisetSijoittelut.values().stream()
+            .map(
+                dto ->
+                    new AjastettuSijoitteluInfo(
+                        dto.getHakuOid(), dto.getAloitusajankohta(), dto.getAjotiheys()))
+            .collect(Collectors.toMap(AjastettuSijoitteluInfo::getHakuOid, Function.identity()));
     poistaSammutetutTaiJoidenAjankohtaEiOleViela(aktiivisetSijoittelut);
     laitaAjoon(aktiivisetSijoittelut);
+  }
+
+  @Override
+  public List<AjastettuSijoitteluInfo> haeAjossaOlevatAjastetutSijoittelut() {
+    try {
+      return sijoitteluScheduler.getJobGroupNames().stream()
+          .map(hakuOid -> ajastetutSijoitteluInfot.get(hakuOid))
+          .collect(Collectors.toList());
+    } catch (SchedulerException se) {
+      throw new RuntimeException(se);
+    }
   }
 
   private void laitaAjoon(Map<String, SijoitteluDto> aktiivisetSijoittelut) {
@@ -86,30 +109,36 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
               Date asetusAjankohta = aloitusajankohtaTaiNyt(sijoitteluDto).toDate();
               Integer intervalli = ajotiheysTaiVakio(sijoitteluDto.getAjotiheys());
 
-              String jobName = String.valueOf(asetusAjankohta.hashCode());
+              String jobName =
+                  String.valueOf(asetusAjankohta.hashCode())
+                      .concat("#")
+                      .concat(String.valueOf(intervalli.hashCode()));
 
-              if(!sijoitteluScheduler.checkExists(JobKey.jobKey(jobName, hakuOid))) {
-                sijoitteluScheduler.deleteJobs(new ArrayList<>(sijoitteluScheduler.getJobKeys(GroupMatcher.groupEquals(hakuOid))));
-                LOG.info("Ajastettu sijoittelu haulle {} joka on asetettu {} intervallilla {} ajastetaan",
-                        hakuOid,
-                        Formatter.paivamaara(asetusAjankohta),
-                        intervalli);
+              if (!sijoitteluScheduler.checkExists(JobKey.jobKey(jobName, hakuOid))) {
+                sijoitteluScheduler.deleteJobs(
+                    new ArrayList<>(
+                        sijoitteluScheduler.getJobKeys(GroupMatcher.groupEquals(hakuOid))));
+                LOG.info(
+                    "Ajastettu sijoittelu haulle {} joka on asetettu {} intervallilla {} ajastetaan",
+                    hakuOid,
+                    Formatter.paivamaara(asetusAjankohta),
+                    intervalli);
 
                 JobDetail sijoitteluJob =
-                        JobBuilder.newJob(AjastettuSijoitteluJob.class)
-                                .withIdentity(jobName, jobName)
-                                .usingJobData("hakuOid", hakuOid)
-                                .build();
+                    JobBuilder.newJob(AjastettuSijoitteluJob.class)
+                        .withIdentity(jobName, jobName)
+                        .usingJobData("hakuOid", hakuOid)
+                        .build();
 
                 Trigger sijoitteluTrigger =
-                        TriggerBuilder.newTrigger()
-                                .withIdentity(jobName, jobName)
-                                .startAt(asetusAjankohta)
-                                .withSchedule(
-                                        SimpleScheduleBuilder.simpleSchedule()
-                                                .withIntervalInHours(intervalli)
-                                                .repeatForever())
-                                .build();
+                    TriggerBuilder.newTrigger()
+                        .withIdentity(jobName, jobName)
+                        .startAt(asetusAjankohta)
+                        .withSchedule(
+                            SimpleScheduleBuilder.simpleSchedule()
+                                .withIntervalInHours(intervalli)
+                                .repeatForever())
+                        .build();
 
                 Set<Trigger> triggers = new HashSet<>();
                 triggers.add(sijoitteluTrigger);
@@ -124,20 +153,26 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
   }
 
   private void poistaSammutetutTaiJoidenAjankohtaEiOleViela(
-          Map<String, SijoitteluDto> aktiivisetSijoittelut) {
+      Map<String, SijoitteluDto> aktiivisetSijoittelut) {
     try {
-      sijoitteluScheduler.getJobGroupNames().forEach(hakuOid -> {
-        try {
-          if (!aktiivisetSijoittelut.containsKey(hakuOid)) {
-            List<JobKey> jobKeys = new ArrayList<>(sijoitteluScheduler.getJobKeys(GroupMatcher.groupEquals(hakuOid)));
-            sijoitteluScheduler.deleteJobs(jobKeys);
-            LOG.warn("Sijoittelu haulle {} poistettu ajastuksesta. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
-                    hakuOid);
-          }
-        } catch (SchedulerException se) {
-          throw new RuntimeException(se);
-        }
-      });
+      sijoitteluScheduler
+          .getJobGroupNames()
+          .forEach(
+              hakuOid -> {
+                try {
+                  if (!aktiivisetSijoittelut.containsKey(hakuOid)) {
+                    List<JobKey> jobKeys =
+                        new ArrayList<>(
+                            sijoitteluScheduler.getJobKeys(GroupMatcher.groupEquals(hakuOid)));
+                    sijoitteluScheduler.deleteJobs(jobKeys);
+                    LOG.warn(
+                        "Sijoittelu haulle {} poistettu ajastuksesta. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
+                        hakuOid);
+                  }
+                } catch (SchedulerException se) {
+                  LOG.error("Ajastetun sijoittelun siivoaminen haulle {} epäonnistui", hakuOid, se);
+                }
+              });
 
     } catch (Exception e) {
       LOG.error("Ajastettujen sijoittelujen siivous epäonnistui", e);

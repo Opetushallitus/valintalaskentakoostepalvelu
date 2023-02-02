@@ -6,6 +6,7 @@ import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.AjastettuSijoitteluInfo;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.Sijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
@@ -21,6 +22,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
@@ -73,6 +75,14 @@ public class SijoitteluAktivointiResource {
   @ApiOperation(value = "Sijoittelun status", response = String.class)
   public Sijoittelu status(@PathParam("hakuoid") String hakuOid) {
     return sijoittelunValvonta.haeAktiivinenSijoitteluHaulle(hakuOid);
+  }
+
+  @GET
+  @Path("/status")
+  @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "Jatkuvan sijoittelun jonossa olevat sijoittelut", response = String.class)
+  public List<AjastettuSijoitteluInfo> status() {
+    return jatkuvaSijoittelu.haeAjossaOlevatAjastetutSijoittelut();
   }
 
   @POST
