@@ -31,13 +31,13 @@ public class AjastettuSijoitteluJob extends QuartzJobBean {
 
       String hakuOid = (String) context.getJobDetail().getJobDataMap().get("hakuOid");
       try {
-        LOG.error("Jatkuvasijoittelu kaynnistyy nyt haulle {}", hakuOid);
+        LOG.info("Ajastettu sijoittelu kaynnistyy nyt haulle {}", hakuOid);
         sijoitteluAsyncResource.sijoittele(
             hakuOid,
             done -> {
-              LOG.warn("Jatkuva sijoittelu saatiin tehtya haulle {}", hakuOid);
+              LOG.info("Jatkuva sijoittelu saatiin tehtya haulle {}", hakuOid);
               sijoittelunSeurantaResource.merkkaaSijoittelunAjetuksi(hakuOid);
-              LOG.warn("Jatkuva sijoittelu merkattiin ajetuksi haulle {}", hakuOid);
+              LOG.info("Jatkuva sijoittelu merkattiin ajetuksi haulle {}", hakuOid);
             },
             poikkeus -> {
               LOG.error(
