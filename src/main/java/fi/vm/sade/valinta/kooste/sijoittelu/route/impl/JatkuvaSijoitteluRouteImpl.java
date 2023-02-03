@@ -126,7 +126,7 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
 
                 JobDetail sijoitteluJob =
                     JobBuilder.newJob(AjastettuSijoitteluJob.class)
-                        .withIdentity(jobName, jobName)
+                        .withIdentity(jobName, hakuOid)
                         .usingJobData("hakuOid", hakuOid)
                         .build();
 
