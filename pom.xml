@@ -16,7 +16,7 @@
         <fake-sftp-server-rule.version>2.0.1</fake-sftp-server-rule.version>
         <cxf.version>3.3.5</cxf.version>
         <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
-        <jetty.version>9.4.27.v20200227</jetty.version>
+        <jetty.version>9.4.41.v20210516</jetty.version>
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
         <spring.security.version>5.1.8.RELEASE</spring.security.version>
