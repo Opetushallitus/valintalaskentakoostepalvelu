@@ -9,7 +9,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-           http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd
            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
            http://cxf.apache.org/jaxrs-client http://cxf.apache.org/schemas/jaxrs-client.xsd
@@ -97,8 +96,6 @@
     <mockito:mock id="viestintapalveluResource" class="fi.vm.sade.valinta.kooste.viestintapalvelu.resource.ViestintapalveluResource" />
     <mockito:mock id="valintakoeResource" class="fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource" />
     <mockito:mock id="hakukohdeResource" class="fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource" />
-    <mockito:mock id="SijoittelunTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.SijoittelunTulosExcelRoute" />
-    <mockito:mock id="ValintalaskentaTulosExcelRoute" class="fi.vm.sade.valinta.kooste.valintalaskentatulos.route.ValintalaskentaTulosExcelRoute" />
     <mockito:mock id="kirjeetHakukohdeCache" class="fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache" />
     <mockito:mock id="koodistoAsyncResource" class="fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource" />
     <mockito:mock id="organisationHierarchyAuthorizer" class="fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer" />

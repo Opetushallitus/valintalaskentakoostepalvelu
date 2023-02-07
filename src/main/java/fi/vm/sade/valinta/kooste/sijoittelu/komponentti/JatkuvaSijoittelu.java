@@ -1,8 +1,11 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.komponentti;
 
-import fi.vm.sade.valinta.kooste.sijoittelu.dto.DelayedSijoittelu;
-import java.util.Collection;
+import fi.vm.sade.valinta.kooste.sijoittelu.dto.AjastettuSijoitteluInfo;
+import java.util.List;
 
 public interface JatkuvaSijoittelu {
-  Collection<DelayedSijoittelu> haeJonossaOlevatSijoittelut();
+
+  List<AjastettuSijoitteluInfo> haeAjossaOlevatAjastetutSijoittelut();
+
+  void teeJatkuvaSijoittelu();
 }

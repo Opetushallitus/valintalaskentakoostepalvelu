@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -27,8 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.camel.Body;
-import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,14 +50,14 @@ public class KoekutsukirjeetKomponentti {
   }
 
   public LetterBatch valmistaKoekutsukirjeet(
-      @Body List<HakemusWrapper> hakemukset,
-      @Property(OPH.HAKUOID) String hakuOid,
-      @Property(OPH.HAKUKOHDEOID) String hakukohdeOid,
+      List<HakemusWrapper> hakemukset,
+      String hakuOid,
+      String hakukohdeOid,
       Map<String, Collection<String>> hakemusOidJaMuutHakukohdeOids,
-      @Property(OPH.LETTER_BODY_TEXT) String letterBodyText,
-      @Property(OPH.TARJOAJAOID) String tarjoajaOid,
-      @Property("tag") String tag,
-      @Property("templateName") String templateName)
+      String letterBodyText,
+      String tarjoajaOid,
+      String tag,
+      String templateName)
       throws Exception {
     try {
       LOG.info(

@@ -21,7 +21,6 @@ import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,9 +70,21 @@ public class AtaruAsyncResourceTest {
     onrHenkilo.setEtunimet("Feliks Esaias");
     onrHenkilo.setSukunimi("Pakarinen");
 
+    HenkiloPerustietoDto onrHenkilo2 = new HenkiloPerustietoDto();
+    onrHenkilo2.setOidHenkilo("1.2.246.562.24.86368188550");
+    onrHenkilo2.setEtunimet("Frank Esaias");
+    onrHenkilo2.setSukunimi("Pakarinen");
+
+    HenkiloPerustietoDto onrHenkilo3 = new HenkiloPerustietoDto();
+    onrHenkilo3.setOidHenkilo("1.2.246.562.24.86368188551");
+    onrHenkilo3.setEtunimet("Pekka Esaias");
+    onrHenkilo3.setSukunimi("Pakarinen");
+
     KansalaisuusDto kansalaisuus = new KansalaisuusDto();
     kansalaisuus.setKansalaisuusKoodi("246");
     onrHenkilo.setKansalaisuus(Sets.newHashSet(kansalaisuus));
+    onrHenkilo2.setKansalaisuus(Sets.newHashSet(kansalaisuus));
+    onrHenkilo3.setKansalaisuus(Sets.newHashSet(kansalaisuus));
 
     when(httpClient.postJson(
             eq(applicationsUrl),
@@ -91,7 +102,14 @@ public class AtaruAsyncResourceTest {
 
     Map<String, HenkiloPerustietoDto> henkiloResponse = new HashMap<>();
     henkiloResponse.put("1.2.246.562.24.86368188549", onrHenkilo);
-    when(mockOnr.haeHenkilot(Collections.singletonList("1.2.246.562.24.86368188549")))
+    henkiloResponse.put("1.2.246.562.24.86368188550", onrHenkilo2);
+    henkiloResponse.put("1.2.246.562.24.86368188551", onrHenkilo3);
+    when(mockOnr.haeHenkilot(
+            eq(
+                Lists.newArrayList(
+                    "1.2.246.562.24.86368188549",
+                    "1.2.246.562.24.86368188550",
+                    "1.2.246.562.24.86368188551"))))
         .thenReturn(CompletableFuture.completedFuture(henkiloResponse));
 
     List<HakemusWrapper> applications =
@@ -101,7 +119,7 @@ public class AtaruAsyncResourceTest {
     assertEquals(3, applications.size());
     assertEquals("FIN", applications.get(0).getAsuinmaa());
     assertEquals("MAF", applications.get(1).getAsuinmaa());
-    assertEquals("Feliks", applications.get(2).getEtunimi());
+    assertEquals("Pekka", applications.get(2).getEtunimi());
     assertEquals("FIN", applications.get(0).getKansalaisuus());
   }
 }

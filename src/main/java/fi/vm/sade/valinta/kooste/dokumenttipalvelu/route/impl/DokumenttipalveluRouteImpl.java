@@ -2,48 +2,41 @@ package fi.vm.sade.valinta.kooste.dokumenttipalvelu.route.impl;
 
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import java.util.concurrent.TimeUnit;
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.apache.camel.spring.SpringRouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DokumenttipalveluRouteImpl extends SpringRouteBuilder {
+public class DokumenttipalveluRouteImpl {
   private static final Logger LOG = LoggerFactory.getLogger(DokumenttipalveluRouteImpl.class);
-  private final String quartzDocumentServiceFlush;
   private final DokumenttiAsyncResource dokumenttiAsyncResource;
 
   @Autowired
-  public DokumenttipalveluRouteImpl(
-      @Value("quartz://documentServiceFlush?cron=0+0+0/2+*+*+?") String quartzDocumentServiceFlush,
-      DokumenttiAsyncResource dokumenttiAsyncResource) {
-    this.quartzDocumentServiceFlush = quartzDocumentServiceFlush;
+  public DokumenttipalveluRouteImpl(DokumenttiAsyncResource dokumenttiAsyncResource) {
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
+    scheduleCleanCronJob();
   }
 
-  @Override
-  public void configure() throws Exception {
-    from(quartzDocumentServiceFlush)
-        .process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) throws Exception {
-                try {
-                  dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
-                } catch (Exception e) {
-                  LOG.info(
-                      "Dokumenttipalvelun tyhjennys-kutsu epäonnistui! Yritetään uudelleen.", e);
-                  try { // FIXME kill me OK-152
-                    dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
-                  } catch (Exception e2) {
-                    LOG.error("Dokumenttipalvelun tyhjennys-kutsu epäonnistui!", e2);
-                  }
-                }
-              }
-            });
+  private void scheduleCleanCronJob() {
+    String cronExpression = "0 0 0/2 * * ?";
+    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+    scheduler.initialize();
+    scheduler.schedule(this::execute, new CronTrigger(cronExpression));
+  }
+
+  public void execute() {
+    try {
+      dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
+    } catch (Exception e) {
+      LOG.info("Dokumenttipalvelun tyhjennys-kutsu epäonnistui! Yritetään uudelleen.", e);
+      try { // FIXME kill me OK-152
+        dokumenttiAsyncResource.tyhjenna().get(1, TimeUnit.HOURS);
+      } catch (Exception e2) {
+        LOG.error("Dokumenttipalvelun tyhjennys-kutsu epäonnistui!", e2);
+      }
+    }
   }
 }

@@ -1,11 +1,9 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
-import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.camel.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,7 @@ public class SuoritaHakuImportKomponentti {
 
   @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
 
-  public Collection<String> suoritaHakukohdeImport(@Property(OPH.HAKUOID) String hakuOid) {
+  public Collection<String> suoritaHakukohdeImport(String hakuOid) {
     try {
       Set<String> hakukohteet =
           tarjontaAsyncResource.haunHakukohteet(hakuOid).get(60, TimeUnit.SECONDS);

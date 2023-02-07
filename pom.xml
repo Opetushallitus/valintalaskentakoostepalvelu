@@ -12,7 +12,6 @@
 
     <properties>
         <auditlog.api.version>8.3.0-SNAPSHOT</auditlog.api.version>
-        <camel.version>2.12.1</camel.version>
         <jsch.version>0.1.55</jsch.version>
         <fake-sftp-server-rule.version>2.0.1</fake-sftp-server-rule.version>
         <cxf.version>3.3.5</cxf.version>
@@ -23,7 +22,7 @@
         <spring.security.version>5.1.8.RELEASE</spring.security.version>
         <spring.version>5.1.14.RELEASE</spring.version>
         <jaxb.version>2.3.0</jaxb.version>
-        <mockito.version>2.24.0</mockito.version>
+        <mockito.version>3.2.4</mockito.version>
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>7.5.0-SNAPSHOT</sijoittelu.version>
@@ -160,6 +159,11 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-aop</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-tx</artifactId>
                 <version>${spring.version}</version>
             </dependency>
             <dependency>
@@ -517,6 +521,15 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+        <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-jetty</artifactId>
             <version>0.1.0-SNAPSHOT</version>
@@ -755,11 +768,6 @@
             <version>${cxf.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-quartz</artifactId>
-            <version>${camel.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
             <version>${jsch.version}</version>
@@ -798,17 +806,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-spring-security</artifactId>
-            <version>${camel.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-core</artifactId>
         </dependency>
@@ -833,12 +830,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-test</artifactId>
-            <version>${camel.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.stefanbirkner</groupId>
