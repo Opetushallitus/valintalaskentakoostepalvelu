@@ -69,7 +69,13 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
                 return getHenkilot(hakemukset)
                     .thenComposeAsync(
                         henkilot -> {
-                          if (henkilot.size() < hakemukset.size()) {
+                          long puuttuvatHenkilotCount =
+                              hakemukset.stream()
+                                  .map(AtaruHakemus::getPersonOid)
+                                  .filter(personOid -> !henkilot.containsKey(personOid))
+                                  .distinct()
+                                  .count();
+                          if (puuttuvatHenkilotCount > 0) {
                             hakemukset.forEach(
                                 hak -> {
                                   if (!henkilot.keySet().contains(hak.getPersonOid())) {
@@ -81,8 +87,8 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
                                 });
                             throw new RuntimeException(
                                 String.format(
-                                    "Hakukohteelle %s löytyi %s hakemusta, mutta vain %s henkilöä.",
-                                    hakukohdeOid, hakemukset.size(), henkilot.size()));
+                                    "Hakukohteelle %s löytyi %s puuttuvaa henkilöä.",
+                                    hakukohdeOid, puuttuvatHenkilotCount));
                           }
                           ensureKansalaisuus(henkilot);
                           Stream<String> asuinmaaKoodit =
