@@ -568,7 +568,7 @@ public class OppijanSuorituksetProxyResource {
       Boolean shouldUseApplicationPersonOid) {
 
     Map<String, List<String>> hakukohdeRyhmasForHakukohdes =
-        Observable.fromFuture(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(haku.oid))
+        Observable.fromFuture(tarjontaAsyncResource.haunHakukohderyhmatCached(haku.oid))
             .timeout(1, MINUTES)
             .blockingFirst();
     return hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
