@@ -88,6 +88,11 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
+  public CompletableFuture<Map<String, List<String>>> haunHakukohderyhmatCached(String hakuOid) {
+    return hakukohdeRyhmasForHakukohdes(hakuOid);
+  }
+
+  @Override
   public CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid) {
     return CompletableFuture.completedFuture(Maps.newHashMap());
   }
