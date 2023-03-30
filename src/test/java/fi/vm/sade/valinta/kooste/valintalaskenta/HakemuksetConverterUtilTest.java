@@ -1110,9 +1110,7 @@ public class HakemuksetConverterUtilTest {
 
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
 
-    Lisapistekoulutus[] oletetutLisapisteet = {
-        Lisapistekoulutus.LISAKOULUTUS_TUVA
-    };
+    Lisapistekoulutus[] oletetutLisapisteet = {Lisapistekoulutus.LISAKOULUTUS_TUVA};
     Arrays.stream(oletetutLisapisteet).forEach(lpk -> oletettu.put(lpk.name(), "true"));
 
     oletettu.put("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU);
