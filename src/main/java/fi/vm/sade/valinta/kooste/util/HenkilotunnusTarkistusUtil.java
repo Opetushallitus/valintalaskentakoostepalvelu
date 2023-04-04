@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,9 +12,15 @@ public class HenkilotunnusTarkistusUtil {
     'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'
   };
 
+  private static final Set<String> VALIMERKIT =
+      Set.of("-", "A", "B", "C", "D", "E", "F", "U", "V", "W", "X", "Y");
+
   public static boolean tarkistaHenkilotunnus(String henkilotunnus) {
     if (henkilotunnus == null || henkilotunnus.length() != 11) {
       return false; // ei vastaa henkilötunnusta sisällön koolta
+    }
+    if (!VALIMERKIT.contains(henkilotunnus.substring(6, 7))) {
+      return false;
     }
     String syntymaaika = henkilotunnus.substring(0, 6);
     String numero = henkilotunnus.substring(7, 10);

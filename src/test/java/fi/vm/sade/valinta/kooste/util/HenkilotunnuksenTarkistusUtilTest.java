@@ -21,6 +21,20 @@ public class HenkilotunnuksenTarkistusUtilTest {
           "Pitäisi olla validi henkilötunnus",
           HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus(jokuvaliditunnus));
     }
+
+    {
+      String jokuvaliditunnusValimerkilla = "190195A933N";
+      Assert.assertTrue(
+          "Pitäisi olla validi henkilötunnus",
+          HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus(jokuvaliditunnusValimerkilla));
+    }
+
+    {
+      String jokuvaliditunnusUudellaValimerkilla = "190195Y933N";
+      Assert.assertTrue(
+          "Pitäisi olla validi henkilötunnus",
+          HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus(jokuvaliditunnusUudellaValimerkilla));
+    }
   }
 
   @Test
@@ -49,5 +63,15 @@ public class HenkilotunnuksenTarkistusUtilTest {
     Assert.assertFalse(
         "Pitäisi olla epäkelpo henkilötunnus",
         HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus(kirjaimialoppuosassa));
+
+    String outoValimerkki = "190195J933N";
+    Assert.assertFalse(
+        "Pitäisi olla epäkelpo henkilötunnus",
+        HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus(outoValimerkki));
+
+    String tyhjaValimerkki = "190294 933N";
+    Assert.assertFalse(
+        "Pitäisi olla epäkelpo henkilötunnus",
+        HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus(outoValimerkki));
   }
 }
