@@ -334,6 +334,11 @@ public class SuoritusrekisteriSpec {
       return SuoritusBuilder.this;
     }
 
+    public SuoritusBuilder setTuva() {
+      suoritus.setKomo(SuoritusJaArvosanatWrapper.TUVA_KOMO);
+      return SuoritusBuilder.this;
+    }
+
     public SuoritusBuilder setSuoritusKieli(String suoritusKieli) {
       suoritus.setSuoritusKieli(suoritusKieli);
       return SuoritusBuilder.this;
