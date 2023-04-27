@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.ws.rs.NotAuthorizedException;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
@@ -118,30 +119,48 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
                 sijoitteluScheduler.deleteJobs(
                     new ArrayList<>(
                         sijoitteluScheduler.getJobKeys(GroupMatcher.groupEquals(hakuOid))));
-                LOG.info(
-                    "Ajastettu sijoittelu haulle {} joka on asetettu {} intervallilla {} ajastetaan",
-                    hakuOid,
-                    Formatter.paivamaara(asetusAjankohta),
-                    intervalli);
-
                 JobDetail sijoitteluJob =
                     JobBuilder.newJob(AjastettuSijoitteluJob.class)
                         .withIdentity(jobName, hakuOid)
                         .usingJobData("hakuOid", hakuOid)
                         .build();
 
-                Trigger sijoitteluTrigger =
+                String timezoneId = "Europe/Helsinki";
+                DateTime aloitusDateTime =
+                    new DateTime(asetusAjankohta, DateTimeZone.forID(timezoneId));
+                int aloitusTunnit = aloitusDateTime.getHourOfDay();
+                int aloitusMinuutit = aloitusDateTime.getMinuteOfHour();
+                String cron =
+                    String.format(
+                        "0 %s %s ? * * *",
+                        aloitusMinuutit,
+                        intervalli > 23
+                            ? aloitusTunnit
+                            : String.format("%s/%s", aloitusTunnit, intervalli));
+                CronScheduleBuilder cronScheduleBuilder =
+                    CronScheduleBuilder.cronSchedule(cron)
+                        .inTimeZone(TimeZone.getTimeZone(timezoneId))
+                        .withMisfireHandlingInstructionDoNothing();
+
+                Trigger sijoitteluCronTrigger =
                     TriggerBuilder.newTrigger()
                         .withIdentity(jobName, jobName)
                         .startAt(asetusAjankohta)
-                        .withSchedule(
-                            SimpleScheduleBuilder.simpleSchedule()
-                                .withIntervalInHours(intervalli)
-                                .repeatForever())
+                        .withSchedule(cronScheduleBuilder)
                         .build();
 
+                LOG.info(
+                    "Ajastettu sijoittelu haulle {} joka on asetettu {} intervallilla {} ajastetaan (datetime: {} | tunnit: {} | minuutit: {}). CRON: {}",
+                    hakuOid,
+                    Formatter.paivamaara(asetusAjankohta),
+                    intervalli,
+                    aloitusDateTime,
+                    aloitusTunnit,
+                    aloitusMinuutit,
+                    cron);
+
                 Set<Trigger> triggers = new HashSet<>();
-                triggers.add(sijoitteluTrigger);
+                triggers.add(sijoitteluCronTrigger);
 
                 sijoitteluScheduler.scheduleJob(sijoitteluJob, triggers, true);
               }
