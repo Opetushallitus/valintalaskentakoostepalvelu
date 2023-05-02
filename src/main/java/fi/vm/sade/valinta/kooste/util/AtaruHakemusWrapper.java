@@ -361,7 +361,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
                   AvainArvoDTO aa = new AvainArvoDTO();
                   aa.setAvain(key);
                   aa.setArvo(
-                          ATARU_POHJAKOULUTUS_VUOSI.equals(key) && StringUtils.isEmpty(value)
+                      ATARU_POHJAKOULUTUS_VUOSI.equals(key) && StringUtils.isEmpty(value)
                           ? resolvePerusopetuksenSuoritusvuosi(hakemus)
                           : value);
                   hakemusDto.getAvaimet().add(aa);
