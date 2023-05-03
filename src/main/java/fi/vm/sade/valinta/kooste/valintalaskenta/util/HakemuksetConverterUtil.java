@@ -617,6 +617,13 @@ public class HakemuksetConverterUtil {
             .filter(a -> POHJAKOULUTUS_ATARU.equals(a.getAvain()))
             .map(AvainArvoDTO::getArvo)
             .findFirst();
+    Optional<String> ataruPohjakoulutusVuosi =
+        hakemusDTO.getAvaimet().stream()
+            .filter(a -> ATARU_POHJAKOULUTUS_VUOSI.equals(a.getAvain()))
+            .map(AvainArvoDTO::getArvo)
+            .filter(Objects::nonNull)
+            .findFirst();
+
     Optional<String> pk = hakuAppPk;
     if (pk.isEmpty() && ataruPk.isPresent()) {
       LOG.info("Ataru-hakemuksen {} pohjakoulutus: {}", hakemusDTO.getHakemusoid(), ataruPk.get());
@@ -697,6 +704,24 @@ public class HakemuksetConverterUtil {
             .anyMatch(s -> s.isUlkomainenKorvaava() && s.isVahvistettu() && s.isValmis())) {
       // hakemuksella TAI suressa ulkomainen tutkinto
       return of(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO);
+    }
+
+    if (ataruPk.isPresent()
+        && ataruPohjakoulutusVuosi.isPresent()
+        && StringUtils.isNotEmpty(ataruPohjakoulutusVuosi.get())) {
+      Integer vuosi = Integer.valueOf(ataruPohjakoulutusVuosi.get());
+      String pohjakoulutus = ataruPk.get();
+      List<String> pkPohjakoulutukset =
+          List.of(
+              PohjakoulutusToinenAste.PERUSKOULU,
+              PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY,
+              PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY,
+              PohjakoulutusToinenAste.YKSILOLLISTETTY);
+      if (vuosi <= 2017 && pkPohjakoulutukset.contains(pohjakoulutus)) {
+        LOG.info(
+            "Hakijalle ei löytynyt pohjakoulutusta suoritusrekisteristä mutta hakemuksella on perusopetus ennen vuotta 2018. Käytetään sitä.");
+        return of(ataruPk.get());
+      }
     }
 
     LOG.warn(
