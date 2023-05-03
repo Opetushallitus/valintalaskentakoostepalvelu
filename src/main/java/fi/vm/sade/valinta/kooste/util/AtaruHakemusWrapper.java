@@ -367,6 +367,13 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
                   hakemusDto.getAvaimet().add(aa);
                 }
               });
+      if (!hakemusDto.getAvaimet().stream()
+          .anyMatch(aa -> ATARU_POHJAKOULUTUS_VUOSI.equals(aa.getArvo()))) {
+        AvainArvoDTO aa =
+            new AvainArvoDTO(
+                ATARU_POHJAKOULUTUS_VUOSI, resolvePerusopetuksenSuoritusvuosi(hakemus));
+        hakemusDto.getAvaimet().add(aa);
+      }
     }
 
     hakemusDto.getAvaimet().add(new AvainArvoDTO("language", getAidinkieli()));
