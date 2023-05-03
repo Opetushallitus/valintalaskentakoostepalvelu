@@ -250,6 +250,10 @@ public class SijoitteluAktivointiResource {
     }
     if (StringUtils.isBlank(hakuOid)) {
       return "get parameter 'hakuOid' required";
+    } else if (ajotiheys == null || ajotiheys > 24) {
+      throw new RuntimeException(String.format("Ajotiheys on virheellinen: %s", ajotiheys));
+    } else if (aloitusajankohta == null) {
+      return "Aloitusajankohta puuttuu";
     } else {
       authorityCheckService.checkAuthorizationForHaku(
           hakuOid, Collections.singleton("ROLE_APP_SIJOITTELU_CRUD"));
