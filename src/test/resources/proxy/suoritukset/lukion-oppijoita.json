@@ -7,9 +7,9 @@
         "suoritus": {
           "henkiloOid": "1.2.246.562.24.17552525783",
           "source": "1.2.246.562.24.17552525783",
-          "vahvistettu": false,
+          "vahvistettu": true,
           "komo": "TODO lukio komo oid",
-          "myontaja": "1.2.246.562.11.00000000576",
+          "myontaja": "1.2.246.562.10.15927425163",
           "tila": "VALMIS",
           "valmistuminen": "31.05.2014",
           "yksilollistaminen": "Ei",
