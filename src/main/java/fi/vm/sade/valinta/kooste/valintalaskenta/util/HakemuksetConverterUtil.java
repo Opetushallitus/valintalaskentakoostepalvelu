@@ -636,7 +636,12 @@ public class HakemuksetConverterUtil {
     final String pohjakoulutusHakemukselta = pk.get();
 
     final List<SuoritusJaArvosanatWrapper> suorituksetRekisterista =
-        sureSuoritukset.stream().map(SuoritusJaArvosanatWrapper::wrap).collect(toList());
+        sureSuoritukset.stream()
+            .map(SuoritusJaArvosanatWrapper::wrap)
+            .filter(
+                suoritusJaArvosanatWrapper ->
+                    !suoritusJaArvosanatWrapper.onTaltaHakemukselta(hakemusDTO))
+            .collect(toList());
 
     if (suorituksetRekisterista.stream()
         .anyMatch(
