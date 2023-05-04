@@ -31,7 +31,7 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
 
   private Map<String, AjastettuSijoitteluInfo> ajastetutSijoitteluInfot = new HashMap<>();
 
-  private Timer createFixedRateTimer(boolean start, long runEveryMinute) {
+  private Timer createAjastettujenSijoitteluidenPaivittaja(boolean start, long runEveryMinute) {
     Timer timer = new Timer("JatkuvaSijoitteluTimer");
     if (start) {
       TimerTask repeatedTask =
@@ -55,7 +55,9 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
       SijoittelunSeurantaResource sijoittelunSeurantaResource,
       SchedulerFactoryBean schedulerFactoryBean) {
     this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
-    this.timer = createFixedRateTimer(autoStartup, jatkuvaSijoitteluPollIntervalInMinutes);
+    this.timer =
+        createAjastettujenSijoitteluidenPaivittaja(
+            autoStartup, jatkuvaSijoitteluPollIntervalInMinutes);
     this.sijoitteluScheduler = schedulerFactoryBean.getScheduler();
     try {
       sijoitteluScheduler.start();
@@ -78,7 +80,7 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
                     new AjastettuSijoitteluInfo(
                         dto.getHakuOid(), dto.getAloitusajankohta(), dto.getAjotiheys()))
             .collect(Collectors.toMap(AjastettuSijoitteluInfo::getHakuOid, Function.identity()));
-    poistaSammutetutTaiJoidenAjankohtaEiOleViela(aktiivisetSijoittelut);
+    poistaSammutetut(aktiivisetSijoittelut);
     laitaAjoon(aktiivisetSijoittelut);
   }
 
@@ -107,8 +109,8 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
                 sijoitteluDto.getAjotiheys());
           } else {
             try {
-              Date asetusAjankohta = aloitusajankohtaTaiNyt(sijoitteluDto).toDate();
-              Integer intervalli = ajotiheysTaiVakio(sijoitteluDto.getAjotiheys());
+              Date asetusAjankohta = getAloitusajankohta(sijoitteluDto).toDate();
+              Integer intervalli = getAjotiheys(sijoitteluDto);
 
               String jobName =
                   String.valueOf(asetusAjankohta.hashCode())
@@ -171,8 +173,7 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
         });
   }
 
-  private void poistaSammutetutTaiJoidenAjankohtaEiOleViela(
-      Map<String, SijoitteluDto> aktiivisetSijoittelut) {
+  private void poistaSammutetut(Map<String, SijoitteluDto> aktiivisetSijoittelut) {
     try {
       sijoitteluScheduler
           .getJobGroupNames()
@@ -184,9 +185,7 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
                         new ArrayList<>(
                             sijoitteluScheduler.getJobKeys(GroupMatcher.groupEquals(hakuOid)));
                     sijoitteluScheduler.deleteJobs(jobKeys);
-                    LOG.warn(
-                        "Sijoittelu haulle {} poistettu ajastuksesta. Joko aloitusajankohtaa siirrettiin tulevaisuuteen tai jatkuvasijoittelu ei ole enaa aktiivinen haulle.",
-                        hakuOid);
+                    LOG.warn("Sijoittelu haulle {} poistettu ajastuksesta.", hakuOid);
                   }
                 } catch (SchedulerException se) {
                   LOG.error("Ajastetun sijoittelun siivoaminen haulle {} epäonnistui", hakuOid, se);
@@ -213,23 +212,21 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
         .filter(SijoitteluDto::isAjossa)
         .filter(
             sijoitteluDto -> {
-              DateTime aloitusajankohtaTaiNyt = aloitusajankohtaTaiNyt(sijoitteluDto);
-              // jos aloitusajankohta on jo mennyt tai se on nyt niin sijoittelu on aktiivinen sen
-              // osalta
-              return laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(aloitusajankohtaTaiNyt);
+              DateTime aloitusajankohta = getAloitusajankohta(sijoitteluDto);
+              return aktivoidaanko(aloitusajankohta);
             })
         .collect(Collectors.toMap(SijoitteluDto::getHakuOid, s -> s));
   }
 
-  public int ajotiheysTaiVakio(Integer ajotiheys) {
-    return Optional.ofNullable(ajotiheys).orElse(VAKIO_AJOTIHEYS);
+  public int getAjotiheys(SijoitteluDto sijoitteluDto) {
+    return Optional.ofNullable(sijoitteluDto.getAjotiheys()).orElse(VAKIO_AJOTIHEYS);
   }
 
-  public boolean laitetaankoJoTyoJonoonEliEnaaTuntiJaljellaAktivointiin(DateTime aloitusAika) {
+  public boolean aktivoidaanko(DateTime aloitusAika) {
     return aloitusAika.isBefore(DateTime.now().plusHours(1));
   }
 
-  private DateTime aloitusajankohtaTaiNyt(SijoitteluDto sijoitteluDto) {
+  private DateTime getAloitusajankohta(SijoitteluDto sijoitteluDto) {
     return new DateTime(
         Optional.ofNullable(sijoitteluDto.getAloitusajankohta()).orElse(new Date()));
   }
