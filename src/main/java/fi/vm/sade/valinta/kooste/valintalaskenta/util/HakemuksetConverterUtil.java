@@ -638,9 +638,7 @@ public class HakemuksetConverterUtil {
     final List<SuoritusJaArvosanatWrapper> suorituksetRekisterista =
         sureSuoritukset.stream()
             .map(SuoritusJaArvosanatWrapper::wrap)
-            .filter(
-                suoritusJaArvosanatWrapper ->
-                    !suoritusJaArvosanatWrapper.onTaltaHakemukselta(hakemusDTO))
+            .filter(suoritusJaArvosanatWrapper -> !suoritusJaArvosanatWrapper.onHakemukselta())
             .collect(toList());
 
     if (suorituksetRekisterista.stream()
@@ -683,6 +681,7 @@ public class HakemuksetConverterUtil {
       return of(paattelePerusopetuksenPohjakoulutus(perusopetus.get()));
     }
 
+    // TODO: Onko tämä enää tarpeellista kun hakemuksilta ei tule vahvistamattomia suorituksia?
     final Optional<SuoritusJaArvosanatWrapper> perusopetusVahvistamaton =
         suorituksetRekisterista.stream()
             .filter(s -> s.isPerusopetus() && !s.isVahvistettu())
@@ -806,6 +805,8 @@ public class HakemuksetConverterUtil {
             hakemus,
             sureSuoritukset.stream()
                 .map(SuoritusJaArvosanatWrapper::wrap)
+                // TODO: Onko tämä enää tarpeellista kun hakemuksilta ei tule vahvistamattomia
+                // suorituksia?
                 .filter(
                     s ->
                         !(s.onTaltaHakemukselta(hakemus)

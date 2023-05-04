@@ -94,6 +94,7 @@ public class HakemuksetConverterUtilTest {
   private static final String HAKEMUS2_OID = "1.2.246.562.11.2";
   private static final String HAKUKAUDELLA = "1.1.2015";
   private static final String HAKUKAUDEN_ULKOPUOLELLA = "1.1.2014";
+  private static final String PERUSKOULU_OID = "1.2.246.562.10.82871417679";
   private static final SuoritusJaArvosanat vahvistettuPerusopetusValmisHakukaudella =
       new SuoritusrekisteriSpec.SuoritusBuilder()
           .setPerusopetus()
@@ -321,7 +322,7 @@ public class HakemuksetConverterUtilTest {
               .setPerusopetus()
               .setVahvistettu(false)
               .setYksilollistaminen("Kokonaan")
-              .setMyontaja(HAKEMUS1_OID)
+              .setMyontaja(PERUSKOULU_OID)
               .setValmistuminen(HAKUKAUDELLA)
               .setValmis()
               .done();
@@ -331,7 +332,7 @@ public class HakemuksetConverterUtilTest {
               .setPerusopetus()
               .setVahvistettu(false)
               .setYksilollistaminen("Osittain")
-              .setMyontaja(HAKEMUS1_OID)
+              .setMyontaja(PERUSKOULU_OID)
               .setValmistuminen(HAKUKAUDELLA)
               .setValmis()
               .done();
@@ -341,7 +342,7 @@ public class HakemuksetConverterUtilTest {
               .setPerusopetus()
               .setVahvistettu(false)
               .setYksilollistaminen("Alueittain")
-              .setMyontaja(HAKEMUS1_OID)
+              .setMyontaja(PERUSKOULU_OID)
               .setValmistuminen(HAKUKAUDELLA)
               .setValmis()
               .done();
