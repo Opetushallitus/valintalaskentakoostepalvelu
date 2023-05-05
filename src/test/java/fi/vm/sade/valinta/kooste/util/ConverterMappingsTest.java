@@ -226,7 +226,7 @@ public class ConverterMappingsTest {
 
     assertEquals(wrapper.getOid(), dto.getHakemusoid());
 
-    assertEquals(28, dto.getAvaimet().size());
+    assertEquals(29, dto.getAvaimet().size());
 
     assertEquals(
         1,

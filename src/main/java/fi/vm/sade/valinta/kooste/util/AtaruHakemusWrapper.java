@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import static fi.vm.sade.valinta.kooste.util.Converter.setHakemusDTOvalintapisteet;
+import static fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil.ATARU_POHJAKOULUTUS_VUOSI;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -17,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class AtaruHakemusWrapper extends HakemusWrapper {
 
@@ -359,10 +360,20 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
                     .equals(key)) { // FIXME Hakemuspalvelun ei tulisi palauttaa ONR dataa
                   AvainArvoDTO aa = new AvainArvoDTO();
                   aa.setAvain(key);
-                  aa.setArvo(value);
+                  aa.setArvo(
+                      ATARU_POHJAKOULUTUS_VUOSI.equals(key) && StringUtils.isEmpty(value)
+                          ? resolvePerusopetuksenSuoritusvuosi(hakemus)
+                          : value);
                   hakemusDto.getAvaimet().add(aa);
                 }
               });
+      if (hakemusDto.getAvaimet().stream()
+          .noneMatch(aa -> ATARU_POHJAKOULUTUS_VUOSI.equals(aa.getAvain()))) {
+        AvainArvoDTO aa =
+            new AvainArvoDTO(
+                ATARU_POHJAKOULUTUS_VUOSI, resolvePerusopetuksenSuoritusvuosi(hakemus));
+        hakemusDto.getAvaimet().add(aa);
+      }
     }
 
     hakemusDto.getAvaimet().add(new AvainArvoDTO("language", getAidinkieli()));
@@ -413,6 +424,19 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     setHakemusDTOvalintapisteet(valintapisteet, hakemusDto);
 
     return hakemusDto;
+  }
+
+  public String resolvePerusopetuksenSuoritusvuosi(AtaruHakemus hakemus) {
+    Optional<String> perusopetuksenSuoritusvuosiOpt =
+        Stream.of(
+                "b5a683d9-21aa-419f-a6d9-a65c42ff1b29",
+                "ebb7fd12-e762-40e3-ad40-a1f9136728d5",
+                "bc159ab3-2f23-41ca-8b05-4b8573d408e7",
+                "42725ecd-95c4-4ec8-bdd0-a7ad881ee5f1")
+            .map(k -> hakemus.getKeyValues().get(k))
+            .filter(Objects::nonNull)
+            .findFirst();
+    return perusopetuksenSuoritusvuosiOpt.orElse(null);
   }
 
   private static String upperCase(String str) {
