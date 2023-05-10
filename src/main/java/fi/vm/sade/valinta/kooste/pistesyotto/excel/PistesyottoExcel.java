@@ -337,7 +337,7 @@ public class PistesyottoExcel {
                   min,
                   max,
                   VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO,
-                  StringUtils.trimToEmpty(valintaperuste.getTunniste()).replaceAll(",", "."),
+                  StringUtils.trimToEmpty(valintaperuste.getTunniste()),
                   VAKIO_OSALLISTUI,
                   StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
         } else if (valintaperuste.getArvot() != null && !valintaperuste.getArvot().isEmpty()) {
@@ -345,7 +345,7 @@ public class PistesyottoExcel {
               new DiskreettiDataArvo(
                   valintaperuste.getArvot(),
                   VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO,
-                  StringUtils.trimToEmpty(valintaperuste.getTunniste()).replaceAll(",", "."),
+                  StringUtils.trimToEmpty(valintaperuste.getTunniste()),
                   VAKIO_OSALLISTUI,
                   StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
         } else {
@@ -354,7 +354,7 @@ public class PistesyottoExcel {
                   0,
                   0,
                   VAIHTOEHDOT_TAKAISINPAIN_KONVERSIO,
-                  StringUtils.trimToEmpty(valintaperuste.getTunniste()).replaceAll(",", "."),
+                  StringUtils.trimToEmpty(valintaperuste.getTunniste()),
                   VAKIO_OSALLISTUI,
                   StringUtils.trimToEmpty(valintaperuste.getOsallistuminenTunniste())));
         }
