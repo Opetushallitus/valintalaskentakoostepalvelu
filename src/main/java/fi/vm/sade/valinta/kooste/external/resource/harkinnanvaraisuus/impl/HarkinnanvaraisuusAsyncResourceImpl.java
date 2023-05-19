@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl;
 
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.PK_10_KOMO;
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.POO_KOMO;
+
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuudenSyy;
 import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
@@ -27,9 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.PK_10_KOMO;
-import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.POO_KOMO;
 
 @Service
 public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAsyncResource {
@@ -96,14 +96,8 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
 
   private Boolean hasYksilollistettyMatAi(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
-      return oppijas.stream()
-          .anyMatch(
-              oppija ->
-                  loytyyYksilollistettyMaAi(oppija.getSuoritukset()))
-          && !oppijas.stream()
-          .anyMatch(
-              oppija ->
-                  hasKorotettuMatAi(oppija.getSuoritukset()));
+      return oppijas.stream().anyMatch(oppija -> loytyyYksilollistettyMaAi(oppija.getSuoritukset()))
+          && !oppijas.stream().anyMatch(oppija -> hasKorotettuMatAi(oppija.getSuoritukset()));
     } else {
       return false;
     }
@@ -122,11 +116,14 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
     return suoritukset.stream()
         .anyMatch(
             sa ->
-                (PK_10_KOMO.equals(sa.getSuoritus().getKomo()) || POO_KOMO.equals(sa.getSuoritus().getKomo()))
+                (PK_10_KOMO.equals(sa.getSuoritus().getKomo())
+                        || POO_KOMO.equals(sa.getSuoritus().getKomo()))
                     && sa.getSuoritus().isVahvistettu()
-                    && sa.getArvosanat().stream().anyMatch(
-                    arvosana -> "AI".equals(arvosana.getAine()) || "MA".equals(arvosana.getAine())));
-
+                    && sa.getArvosanat().stream()
+                        .anyMatch(
+                            arvosana ->
+                                "AI".equals(arvosana.getAine())
+                                    || "MA".equals(arvosana.getAine())));
   }
 
   private Boolean hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(List<Oppija> oppijas) {
