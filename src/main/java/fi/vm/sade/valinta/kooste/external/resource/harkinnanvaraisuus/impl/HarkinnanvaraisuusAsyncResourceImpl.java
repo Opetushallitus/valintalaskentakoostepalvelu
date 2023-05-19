@@ -28,6 +28,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.PK_10_KOMO;
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.POO_KOMO;
+
 @Service
 public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAsyncResource {
 
@@ -96,15 +99,34 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
       return oppijas.stream()
           .anyMatch(
               oppija ->
-                  oppija.getSuoritukset().stream()
-                      .anyMatch(
-                          sa ->
-                              PK_KOMO.equals(sa.getSuoritus().getKomo())
-                                  && sa.getSuoritus().isYksilollistettyMaAi()
-                                  && sa.getSuoritus().isVahvistettu()));
+                  loytyyYksilollistettyMaAi(oppija.getSuoritukset()))
+          && !oppijas.stream()
+          .anyMatch(
+              oppija ->
+                  hasKorotettuMatAi(oppija.getSuoritukset()));
     } else {
       return false;
     }
+  }
+
+  private boolean loytyyYksilollistettyMaAi(List<SuoritusJaArvosanat> suoritukset) {
+    return suoritukset.stream()
+        .anyMatch(
+            sa ->
+                PK_KOMO.equals(sa.getSuoritus().getKomo())
+                    && sa.getSuoritus().isYksilollistettyMaAi()
+                    && sa.getSuoritus().isVahvistettu());
+  }
+
+  private Boolean hasKorotettuMatAi(List<SuoritusJaArvosanat> suoritukset) {
+    return suoritukset.stream()
+        .anyMatch(
+            sa ->
+                (PK_10_KOMO.equals(sa.getSuoritus().getKomo()) || POO_KOMO.equals(sa.getSuoritus().getKomo()))
+                    && sa.getSuoritus().isVahvistettu()
+                    && sa.getArvosanat().stream().anyMatch(
+                    arvosana -> "AI".equals(arvosana.getAine()) || "MA".equals(arvosana.getAine())));
+
   }
 
   private Boolean hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(List<Oppija> oppijas) {
