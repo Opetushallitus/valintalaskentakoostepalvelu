@@ -128,9 +128,13 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
 
   private Boolean hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
+      boolean temp = oppijas.stream()
+          .anyMatch(
+              oppija -> hasKorotettuMatAi(oppija.getSuoritukset()));
       return oppijas.stream()
           .anyMatch(
               oppija ->
+                  hasKorotettuMatAi(oppija.getSuoritukset()) ||
                   oppija.getSuoritukset().stream()
                       .anyMatch(
                           sa ->
@@ -233,7 +237,9 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                     hh, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
               }
             }
-            if (hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
+            // yliajetaan vanha yksilöllistetyn mat/ai perusteella harkinnanvaraisuus sekä suren että atarun osalta jos korotuksia
+            if ((hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI) ||
+                hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
                 && hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(oppijas)) {
               LOG.info(
                   "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy 2018 "
