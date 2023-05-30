@@ -1070,7 +1070,9 @@ public class HarkinnavaraisuusAsyncResourceTest {
   @Test
   public void testJosYksilollistettyMatAiKorotettuYliajetaanVanhaSureHarkinnanvaraisuus()
       throws ExecutionException, InterruptedException, TimeoutException {
-
+    // ei varmuutta onko tämä realistinen tosielämän tilanne että vanha sure-tieto tulee hakemuksen
+    // mukana,
+    // mutta huomioidaan nyt tämäkin
     String leikkuriPvm = "2032-06-06";
     List<String> hakemusOids = new ArrayList<>();
     String hakemusOid1 = "1.2.246.562.11.00001010666";

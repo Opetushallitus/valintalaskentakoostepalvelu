@@ -234,8 +234,8 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                     hh, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
               }
             }
-            // yliajetaan vanha yksilöllistetyn mat/ai perusteella harkinnanvaraisuus sekä suren
-            // että atarun osalta jos korotuksia
+            // yliajetaan vanha yksilöllistetyn mat/ai perusteella harkinnanvaraisuus
+            // jos korotuksia, sekä atarun että varalta myös suren osalta
             if ((hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
                     || hh.getHarkinnanvaraisuudenSyy()
                         .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
