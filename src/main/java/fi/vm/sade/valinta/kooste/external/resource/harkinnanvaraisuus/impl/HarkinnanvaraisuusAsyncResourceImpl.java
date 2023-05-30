@@ -128,8 +128,6 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
 
   private Boolean hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
-      boolean temp =
-          oppijas.stream().anyMatch(oppija -> hasKorotettuMatAi(oppija.getSuoritukset()));
       return oppijas.stream()
           .anyMatch(
               oppija ->
