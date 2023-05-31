@@ -1,5 +1,8 @@
 package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl;
 
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.PK_10_KOMO;
+import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.POO_KOMO;
+
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuudenSyy;
 import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
@@ -93,18 +96,34 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
 
   private Boolean hasYksilollistettyMatAi(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
-      return oppijas.stream()
-          .anyMatch(
-              oppija ->
-                  oppija.getSuoritukset().stream()
-                      .anyMatch(
-                          sa ->
-                              PK_KOMO.equals(sa.getSuoritus().getKomo())
-                                  && sa.getSuoritus().isYksilollistettyMaAi()
-                                  && sa.getSuoritus().isVahvistettu()));
+      return oppijas.stream().anyMatch(oppija -> loytyyYksilollistettyMaAi(oppija.getSuoritukset()))
+          && !oppijas.stream().anyMatch(oppija -> hasKorotettuMatAi(oppija.getSuoritukset()));
     } else {
       return false;
     }
+  }
+
+  private boolean loytyyYksilollistettyMaAi(List<SuoritusJaArvosanat> suoritukset) {
+    return suoritukset.stream()
+        .anyMatch(
+            sa ->
+                PK_KOMO.equals(sa.getSuoritus().getKomo())
+                    && sa.getSuoritus().isYksilollistettyMaAi()
+                    && sa.getSuoritus().isVahvistettu());
+  }
+
+  private Boolean hasKorotettuMatAi(List<SuoritusJaArvosanat> suoritukset) {
+    return suoritukset.stream()
+        .anyMatch(
+            sa ->
+                (PK_10_KOMO.equals(sa.getSuoritus().getKomo())
+                        || POO_KOMO.equals(sa.getSuoritus().getKomo()))
+                    && sa.getSuoritus().isVahvistettu()
+                    && sa.getArvosanat().stream()
+                        .anyMatch(
+                            arvosana ->
+                                "AI".equals(arvosana.getAine())
+                                    || "MA".equals(arvosana.getAine())));
   }
 
   private Boolean hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(List<Oppija> oppijas) {
@@ -112,16 +131,17 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
       return oppijas.stream()
           .anyMatch(
               oppija ->
-                  oppija.getSuoritukset().stream()
-                      .anyMatch(
-                          sa ->
-                              PK_KOMO.equals(sa.getSuoritus().getKomo())
-                                  && VALMISTUMINEN_DTF
-                                          .parseDateTime(sa.getSuoritus().getValmistuminen())
-                                          .getYear()
-                                      >= 2018
-                                  && !sa.getSuoritus().isYksilollistettyMaAi()
-                                  && sa.getSuoritus().isVahvistettu()));
+                  hasKorotettuMatAi(oppija.getSuoritukset())
+                      || oppija.getSuoritukset().stream()
+                          .anyMatch(
+                              sa ->
+                                  PK_KOMO.equals(sa.getSuoritus().getKomo())
+                                      && VALMISTUMINEN_DTF
+                                              .parseDateTime(sa.getSuoritus().getValmistuminen())
+                                              .getYear()
+                                          >= 2018
+                                      && !sa.getSuoritus().isYksilollistettyMaAi()
+                                      && sa.getSuoritus().isVahvistettu()));
     } else {
       return false;
     }
@@ -214,7 +234,11 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                     hh, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN);
               }
             }
-            if (hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
+            // yliajetaan vanha yksilöllistetyn mat/ai perusteella harkinnanvaraisuus
+            // jos korotuksia, sekä atarun että varalta myös suren osalta
+            if ((hh.getHarkinnanvaraisuudenSyy().equals(HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
+                    || hh.getHarkinnanvaraisuudenSyy()
+                        .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
                 && hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(oppijas)) {
               LOG.info(
                   "Hakemuksella {} harkinnanvaraiseksi merkitty hakutoive {} ei ole harkinnanvarainen, koska suresta löytyy 2018 "
