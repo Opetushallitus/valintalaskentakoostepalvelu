@@ -652,6 +652,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                       results.put(oid, syotetytArvotByHakukohde(oid, null).get());
                     } catch (Exception e) {
                       LOG.error("Virhe haettaessa hakijoiden syötettyjä arvoja", e);
+                      resultFuture.completeExceptionally(e);
                       throw new RuntimeException(e);
                     }
                   });
