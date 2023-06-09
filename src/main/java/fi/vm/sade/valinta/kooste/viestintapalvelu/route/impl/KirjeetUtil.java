@@ -79,7 +79,11 @@ public class KirjeetUtil {
             new Sijoitus(valintatapajono, varasijaTeksti, jononPisteet, preferoitukielikoodi));
 
         KirjeetUtil.putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(
-            osoite, omatPisteet, numeerisetPisteet, alinHyvaksyttyPistemaara);
+            osoite,
+            omatPisteet,
+            numeerisetPisteet,
+            alinHyvaksyttyPistemaara,
+            valintatapajono.getJonosija());
         KirjeetUtil.putHyvaksyttyHakeneetData(hyvaksytyt, valintatapajono);
         if (valintatapajono.getHyvaksytty() == null) {
           throw new SijoittelupalveluException(
@@ -197,11 +201,18 @@ public class KirjeetUtil {
         .append(ARVO_VALI);
   }
 
+  private static boolean pisteetOnNegatiivinenJonosija(
+      BigDecimal numeerisetPisteet, Integer jonosija) {
+    if (numeerisetPisteet == null || jonosija == null) return false;
+    else return jonosija * (-1) == numeerisetPisteet.intValue();
+  }
+
   public static void putNumeerisetPisteetAndAlinHyvaksyttyPistemaara(
       Osoite osoite,
       StringBuilder omatPisteet,
       BigDecimal numeerisetPisteet,
-      BigDecimal alinHyvaksyttyPistemaara) {
+      BigDecimal alinHyvaksyttyPistemaara,
+      Integer jonosija) {
     // OVT-6334 : Logiikka ei kuulu koostepalveluun!
     if (osoite.isUlkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt()) {
       // ei pisteita
@@ -210,6 +221,8 @@ public class KirjeetUtil {
           .append(ARVO_EROTIN)
           .append(suomennaNumero(alinHyvaksyttyPistemaara, ARVO_VAKIO))
           .append(ARVO_VALI);
+    } else if (pisteetOnNegatiivinenJonosija(numeerisetPisteet, jonosija)) {
+      omatPisteet.append(ARVO_VAKIO).append(ARVO_EROTIN).append(ARVO_VAKIO).append(ARVO_VALI);
     } else {
       omatPisteet
           .append(suomennaNumero(numeerisetPisteet, ARVO_VAKIO))
