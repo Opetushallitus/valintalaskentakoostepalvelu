@@ -63,7 +63,7 @@ public class SijoittelunTulosHaulleResource {
               null, // ei asiointikielirajausta
               "osoitetarrat",
               "Luo osoitetarrat haulle",
-              null,
+              hakuOid,
               Arrays.asList("osoitetarrat", "haulle"));
       sijoittelunTulosOsoitetarratRoute.osoitetarratHaulle(
           prosessi, hakuOid, "latest", SecurityContextHolder.getContext().getAuthentication());
@@ -138,7 +138,7 @@ public class SijoittelunTulosHaulleResource {
               null, // ei asiointikielirajausta
               "taulukkolaskennat",
               "Luo taulukkolaskennat haulle",
-              null,
+              hakuOid,
               Arrays.asList("taulukkolaskennat", "haulle"));
       sijoittelunTulosTaulukkolaskentaRoute.taulukkolaskennatHaulle(
           prosessi,
