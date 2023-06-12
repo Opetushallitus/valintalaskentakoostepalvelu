@@ -628,15 +628,43 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
 
   private CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>>
       hakijoidenSyotetytArvot(List<HakijaDTO> hakijat) {
-    Executor executor = createExecutorService(2, "syotetytArvotByHakukohde");
-    return CompletableFutureUtil.sequence(
-        hakijat.stream()
-            .flatMap(hakija -> hakija.getHakutoiveet().stream())
-            .map(HakutoiveDTO::getHakukohdeOid)
-            .distinct()
-            .collect(
-                Collectors.toMap(
-                    Function.identity(), hk -> syotetytArvotByHakukohde(hk, executor))));
+    CompletableFuture<Map<String, Map<String, List<SyotettyArvoDTO>>>> resultFuture =
+        new CompletableFuture<>();
+
+    Executors.newSingleThreadExecutor()
+        .submit(
+            () -> {
+              long start = System.currentTimeMillis();
+              Map<String, Map<String, List<SyotettyArvoDTO>>> results = new ConcurrentHashMap<>();
+              List<String> hakukohdeOids =
+                  hakijat.stream()
+                      .flatMap(hakija -> hakija.getHakutoiveet().stream())
+                      .map(HakutoiveDTO::getHakukohdeOid)
+                      .distinct()
+                      .collect(Collectors.toList());
+              LOG.info(
+                  "Aloitetaan valintalaskennan tulosten haku {} hakijan {} hakukohteelle",
+                  hakijat.size(),
+                  hakukohdeOids.size());
+              hakukohdeOids.forEach(
+                  oid -> {
+                    try {
+                      results.put(oid, syotetytArvotByHakukohde(oid, null).get());
+                    } catch (Exception e) {
+                      LOG.error("Virhe haettaessa hakijoiden syötettyjä arvoja", e);
+                      resultFuture.completeExceptionally(e);
+                      throw new RuntimeException(e);
+                    }
+                  });
+              LOG.info(
+                  "Valintalaskennan tulosten haku {} hakijan {} hakukohteelle valmistui, kesto {}ms",
+                  hakijat.size(),
+                  hakukohdeOids.size(),
+                  System.currentTimeMillis() - start);
+              resultFuture.complete(results);
+            });
+
+    return resultFuture;
   }
 
   private CompletableFuture<String> muodostaHyvaksymiskirjeet(
