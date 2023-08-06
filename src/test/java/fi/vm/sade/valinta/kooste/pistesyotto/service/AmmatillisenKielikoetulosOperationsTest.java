@@ -6,11 +6,8 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
-import com.github.npathai.hamcrestopt.OptionalMatchers;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
@@ -156,10 +153,8 @@ public class AmmatillisenKielikoetulosOperationsTest {
     assertThat(source2Updates.getResultsToSendToSure(), hasKey(HAKEMUS_OID_2));
     assertThat(source2Updates.getResultsToSendToSure(), hasKey(HAKEMUS_OID_1));
 
-    assertThat(
-        source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_1), OptionalMatchers.isEmpty());
-    assertThat(
-        source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_2), OptionalMatchers.isPresent());
+    assertTrue(source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_1).isEmpty());
+    assertTrue(source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_2).isPresent());
     Optional<CompositeCommand> personOid2Updates =
         source2Updates.getResultsToSendToSure().get(HAKEMUS_OID_2);
 

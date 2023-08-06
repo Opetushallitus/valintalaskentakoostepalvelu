@@ -15,7 +15,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.github.npathai.hamcrestopt.OptionalMatchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -4188,7 +4187,7 @@ public class HakemuksetConverterUtilTest {
         oppija,
         h,
         true);
-    assertThat(firstHakemusArvo(h, "kielikoe_fi"), OptionalMatchers.isEmpty());
+    assertTrue(firstHakemusArvo(h, "kielikoe_fi").isEmpty());
   }
 
   private static String getFirstHakemusArvo(HakemusDTO hakemusDTO, String avain) {
