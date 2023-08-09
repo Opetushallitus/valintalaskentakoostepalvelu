@@ -19,7 +19,7 @@
         <slf4j.version>1.7.28</slf4j.version>
         <spring.security.version>5.1.8.RELEASE</spring.security.version>
         <spring.version>5.1.14.RELEASE</spring.version>
-        <mockito.version>3.2.4</mockito.version>
+        <mockito.version>5.4.0</mockito.version>
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>7.5.0-SNAPSHOT</sijoittelu.version>

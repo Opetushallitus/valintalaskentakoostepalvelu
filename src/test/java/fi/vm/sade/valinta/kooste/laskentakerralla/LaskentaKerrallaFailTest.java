@@ -7,7 +7,7 @@ import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import fi.vm.sade.valinta.kooste.mocks.MockOrganisaationAsyncResource;
@@ -85,10 +85,10 @@ public class LaskentaKerrallaFailTest {
     } catch (Throwable t) {
     }
 
-    verifyZeroInteractions(Mocks.applicationAsyncResource);
-    verifyZeroInteractions(Mocks.ohjausparametritAsyncResource);
-    verifyZeroInteractions(Mocks.valintalaskentaAsyncResource);
-    verifyZeroInteractions(Mocks.suoritusrekisteriAsyncResource);
+    verifyNoInteractions(Mocks.applicationAsyncResource);
+    verifyNoInteractions(Mocks.ohjausparametritAsyncResource);
+    verifyNoInteractions(Mocks.valintalaskentaAsyncResource);
+    verifyNoInteractions(Mocks.suoritusrekisteriAsyncResource);
 
     verify(asyncResponse, times(1)).resume(isA(ResponseImpl.class));
     ArgumentCaptor<ResponseImpl> responseCaptor = ArgumentCaptor.forClass(ResponseImpl.class);

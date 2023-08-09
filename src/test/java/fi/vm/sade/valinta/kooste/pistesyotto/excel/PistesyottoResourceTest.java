@@ -76,6 +76,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
@@ -398,7 +399,7 @@ public class PistesyottoResourceTest {
     Mockito.when(
             Mocks.getValintapisteAsyncResource()
                 .getValintapisteet(
-                    Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
+                    ArgumentMatchers.anyCollection(), Mockito.any(AuditSession.class)))
         .thenReturn(
             Observable.just(
                 new PisteetWithLastModified(Optional.empty(), Collections.emptyList())));
@@ -413,7 +414,7 @@ public class PistesyottoResourceTest {
             Mocks.getValintapisteAsyncResource()
                 .putValintapisteet(
                     Mockito.eq(Optional.empty()),
-                    Mockito.anyListOf(Valintapisteet.class),
+                    ArgumentMatchers.anyList(),
                     Mockito.any(AuditSession.class)))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptySet()));
 
@@ -521,7 +522,7 @@ public class PistesyottoResourceTest {
             Mocks.getValintapisteAsyncResource()
                 .putValintapisteet(
                     Mockito.eq(Optional.empty()),
-                    Mockito.anyListOf(Valintapisteet.class),
+                    ArgumentMatchers.anyList(),
                     Mockito.any(AuditSession.class)))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptySet()));
     JsonObject goodResponseJson = postPisteet(hakemusesToInput);
@@ -634,7 +635,7 @@ public class PistesyottoResourceTest {
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
                   .getValintapisteet(
-                      Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
+                      ArgumentMatchers.anyCollection(), Mockito.any(AuditSession.class)))
           .thenReturn(
               Observable.just(
                   new PisteetWithLastModified(
@@ -807,7 +808,7 @@ public class PistesyottoResourceTest {
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
                   .getValintapisteet(
-                      Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
+                      ArgumentMatchers.anyCollection(), Mockito.any(AuditSession.class)))
           .thenReturn(
               Observable.just(
                   new PisteetWithLastModified(Optional.empty(), Collections.emptyList())));
@@ -823,7 +824,7 @@ public class PistesyottoResourceTest {
               Mocks.getValintapisteAsyncResource()
                   .putValintapisteet(
                       Mockito.eq(Optional.empty()),
-                      Mockito.anyListOf(Valintapisteet.class),
+                      ArgumentMatchers.anyList(),
                       Mockito.any(AuditSession.class)))
           .thenAnswer(
               (Answer<Observable<Set<String>>>)
@@ -1009,7 +1010,7 @@ public class PistesyottoResourceTest {
               Mocks.getValintapisteAsyncResource()
                   .putValintapisteet(
                       Mockito.eq(Optional.empty()),
-                      Mockito.anyListOf(Valintapisteet.class),
+                      ArgumentMatchers.anyList(),
                       Mockito.any(AuditSession.class)))
           .thenAnswer(
               (Answer<CompletableFuture<Set<String>>>)
@@ -1139,7 +1140,7 @@ public class PistesyottoResourceTest {
               Mocks.getValintapisteAsyncResource()
                   .putValintapisteet(
                       Mockito.eq(Optional.empty()),
-                      Mockito.anyListOf(Valintapisteet.class),
+                      ArgumentMatchers.anyList(),
                       Mockito.any(AuditSession.class)))
           .thenAnswer(
               (Answer<CompletableFuture<Set<String>>>)
@@ -1423,7 +1424,7 @@ public class PistesyottoResourceTest {
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
                   .getValintapisteet(
-                      Mockito.anyCollectionOf(String.class), Mockito.any(AuditSession.class)))
+                      ArgumentMatchers.anyCollection(), Mockito.any(AuditSession.class)))
           .thenReturn(
               Observable.just(
                   new PisteetWithLastModified(
@@ -1440,7 +1441,7 @@ public class PistesyottoResourceTest {
               Mocks.getValintapisteAsyncResource()
                   .putValintapisteet(
                       Mockito.eq(Optional.empty()),
-                      Mockito.anyListOf(Valintapisteet.class),
+                      ArgumentMatchers.anyList(),
                       Mockito.any(AuditSession.class)))
           .thenReturn(CompletableFuture.completedFuture(Collections.emptySet()));
 
@@ -1566,7 +1567,7 @@ public class PistesyottoResourceTest {
               Mocks.getValintapisteAsyncResource()
                   .putValintapisteet(
                       Mockito.eq(Optional.empty()),
-                      Mockito.anyListOf(Valintapisteet.class),
+                      ArgumentMatchers.anyList(),
                       Mockito.any(AuditSession.class)))
           .thenAnswer(
               (Answer<CompletableFuture<Set<String>>>)
@@ -1786,7 +1787,7 @@ public class PistesyottoResourceTest {
               Mocks.getValintapisteAsyncResource()
                   .putValintapisteet(
                       Mockito.eq(Optional.empty()),
-                      Mockito.anyListOf(Valintapisteet.class),
+                      ArgumentMatchers.anyList(),
                       Mockito.any(AuditSession.class)))
           .thenAnswer(
               (Answer<CompletableFuture<Set<String>>>)
