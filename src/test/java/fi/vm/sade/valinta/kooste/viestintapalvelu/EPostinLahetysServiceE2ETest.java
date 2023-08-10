@@ -5,8 +5,7 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNotFound;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.*;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -61,7 +60,7 @@ public class EPostinLahetysServiceE2ETest {
   @Test
   public void testNoBatchIdFound1() throws Exception {
     mockToNotFound("GET", "/viestintapalvelu/api/v1/luotettu/letter/getBatchIdReadyForEPosti");
-    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi", 500);
     assertTrue(message.contains("getBatchIdReadyForEPosti HTTP 404"));
   }
 
@@ -69,7 +68,7 @@ public class EPostinLahetysServiceE2ETest {
   public void testNoBatchIdFound2() throws Exception {
     mockToReturnString(
         "GET", "/viestintapalvelu/api/v1/luotettu/letter/getBatchIdReadyForEPosti", null);
-    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi", 500);
     assertTrue(message.contains("Ei löydetty sopivaa kirjelähetyksen ID:tä"));
   }
 
@@ -78,7 +77,7 @@ public class EPostinLahetysServiceE2ETest {
     mockGetBatchIdResponse();
     mockToNotFound(
         "GET", "/viestintapalvelu/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/1234");
-    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi", 500);
     assertTrue(message.contains("getEPostiAddressesForLetterBatch/1234 HTTP 404"));
   }
 
@@ -89,7 +88,7 @@ public class EPostinLahetysServiceE2ETest {
         "GET",
         "/viestintapalvelu/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/1234",
         Arrays.asList());
-    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi", 500);
     assertTrue(message.contains("Ei löydetty sähköpostiosoitteita."));
   }
 
@@ -99,17 +98,17 @@ public class EPostinLahetysServiceE2ETest {
     mockGetEPostiOsoitteetResponse();
     mockGetOhjausparametrit();
     mockToInternalServerError("POST", "/oppijan-tunnistus/api/v1/tokens");
-    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi");
+    String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi", 500);
     assertTrue(message.contains("tokens HTTP 500"));
   }
 
   @Test
   public void testInvalidParameters() throws Exception {
-    String message = sendEPostiExpectFailure("hyvaksymiskirje", "foo");
+    String message = sendEPostiExpectFailure("hyvaksymiskirje", "foo", 400);
     assertTrue(message.contains("ei ole validi asiointikieli"));
-    message = sendEPostiExpectFailure("kirje", "sv");
+    message = sendEPostiExpectFailure("kirje", "sv", 400);
     assertTrue(message.contains("ei ole validi kirjeen tyyppi"));
-    message = sendEPostiExpectFailure("hyvaksymiskirje", null);
+    message = sendEPostiExpectFailure("hyvaksymiskirje", null, 400);
     assertTrue(message.contains("ovat pakollisia parametreja"));
   }
 
@@ -126,10 +125,10 @@ public class EPostinLahetysServiceE2ETest {
     return client.post(Entity.json(request));
   }
 
-  private String sendEPostiExpectFailure(String kirjeenTyyppi, String asiointikieli)
-      throws IOException {
+  private String sendEPostiExpectFailure(
+      String kirjeenTyyppi, String asiointikieli, int expectedErrorCode) throws IOException {
     Response response = sendEPosti(kirjeenTyyppi, asiointikieli);
-    assertEquals(500, response.getStatus());
+    assertEquals(expectedErrorCode, response.getStatus());
     return IOUtils.toString((InputStream) response.getEntity());
   }
 

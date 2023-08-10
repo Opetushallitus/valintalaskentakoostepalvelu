@@ -42,6 +42,7 @@ public class KoekutsukirjeetTest {
   public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); // 5sec
   final String root =
       "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+
   final HttpResourceBuilder.WebClientExposingHttpResource koekutsukirjeResource =
       new HttpResourceBuilder(getClass().getName())
           .address(root + "/viestintapalvelu/koekutsukirjeet/aktivoi")

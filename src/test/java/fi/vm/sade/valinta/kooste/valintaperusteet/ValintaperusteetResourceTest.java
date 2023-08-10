@@ -27,6 +27,7 @@ public class ValintaperusteetResourceTest {
       "http://localhost:"
           + ValintaKoosteJetty.port
           + "/valintalaskentakoostepalvelu/resources/V2valintaperusteet";
+
   private final HttpResourceBuilder.WebClientExposingHttpResource
       hakukohteenValintaperusteetResource =
           new HttpResourceBuilder(getClass().getName())

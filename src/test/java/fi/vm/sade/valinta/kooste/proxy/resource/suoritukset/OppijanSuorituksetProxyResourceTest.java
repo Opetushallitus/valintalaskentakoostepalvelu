@@ -192,7 +192,8 @@ public class OppijanSuorituksetProxyResourceTest {
     Response response =
         proxyBatchResource.getWebClient().type(MediaType.APPLICATION_JSON_TYPE).post(allHakemus);
     assertEquals(200, response.getStatus());
-    assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+    assertTrue(
+        response.getMediaType().toString().startsWith(MediaType.APPLICATION_JSON_TYPE.toString()));
     String json = getJsonFromResponse(response);
 
     Map<String, Map<String, String>> oppijanSuoritukset =

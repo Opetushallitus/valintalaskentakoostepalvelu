@@ -1,8 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
+import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.*;
 import static javax.ws.rs.HttpMethod.GET;
 import static org.junit.Assert.assertEquals;
 

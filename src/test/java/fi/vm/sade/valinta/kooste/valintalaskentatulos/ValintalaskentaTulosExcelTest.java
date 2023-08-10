@@ -50,6 +50,7 @@ import org.mockito.Mockito;
 public class ValintalaskentaTulosExcelTest {
   final String root =
       "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+
   final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null, null);
   final HttpResourceBuilder.WebClientExposingHttpResource valintakoekutsutResource =
       new HttpResourceBuilder(getClass().getName())

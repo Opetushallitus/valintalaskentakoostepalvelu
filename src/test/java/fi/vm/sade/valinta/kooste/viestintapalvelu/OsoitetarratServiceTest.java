@@ -36,6 +36,7 @@ import org.mockito.Mockito;
 public class OsoitetarratServiceTest {
   final String root =
       "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+
   final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource =
       new HttpResourceBuilder(getClass().getName())
           .address(root + "/viestintapalvelu/osoitetarrat/aktivoi")

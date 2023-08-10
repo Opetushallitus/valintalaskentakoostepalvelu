@@ -1,19 +1,11 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.resource;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.OPH;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuDTO;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KoekutsuProsessiImpl;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.*;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.KirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
@@ -24,31 +16,24 @@ import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /**
  * Ei palauta PDF-tiedostoa vaan URI:n varsinaiseen resurssiin - koska AngularJS resurssin
  * palauttaman datan konvertoiminen selaimen ladattavaksi tiedostoksi on ongelmallista (mutta ei
  * mahdotonta - onko tarpeen?).
  */
-@Controller("ViestintapalveluAktivointiResource")
-@Path("viestintapalvelu")
+@RestController("ViestintapalveluAktivointiResource")
+@RequestMapping("/viestintapalvelu")
 @PreAuthorize("isAuthenticated()")
 @Api(
     value = "/viestintapalvelu",
@@ -64,18 +49,19 @@ public class ViestintapalveluAktivointiResource {
   @Autowired private EPostiService ePostiService;
   @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
 
-  @POST
-  @Path("/osoitetarrat/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/osoitetarrat/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = Response.class)
+  @ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = ProsessiId.class)
   public ProsessiId aktivoiOsoitetarrojenLuonti(
-      DokumentinLisatiedot hakemuksillaRajaus,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet) {
+      @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "valintakoeTunnisteet", required = false)
+          List<String> valintakoeTunnisteet) {
     try {
       DokumentinLisatiedot lisatiedot =
           hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
@@ -108,20 +94,19 @@ public class ViestintapalveluAktivointiResource {
   /**
    * https://test-virkailija.oph.ware.fi/valintalaskentakoostepalvelu/resources/viestintapalvelu/osoitetarrat/sijoittelussahyvaksytyille/aktivoi?hakuOid=1.2.246.562.5.2013080813081926341927&hakukohdeOid=1.2.246.562.5.85532589612&sijoitteluajoId=1392302745967
    */
-  @POST
-  @Path("/osoitetarrat/sijoittelussahyvaksytyille/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/osoitetarrat/sijoittelussahyvaksytyille/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @ApiOperation(
       value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa",
-      response = Response.class)
+      response = ProsessiId.class)
   public ProsessiId aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
-      DokumentinLisatiedot hakemuksillaRajaus,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("sijoitteluajoId") Long sijoitteluajoId) {
+      @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid) {
     try {
       DokumentinLisatiedot lisatiedot =
           hakemuksillaRajaus == null ? new DokumentinLisatiedot() : hakemuksillaRajaus;
@@ -154,17 +139,17 @@ public class ViestintapalveluAktivointiResource {
    * @Deprecated Tehdaan eri luontivariaatiot reitin alustusmuuttujilla. Ei enää monta resurssia per
    * toiminto.
    */
-  @POST
-  @Path("/osoitetarrat/hakemuksille/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/osoitetarrat/hakemuksille/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @ApiOperation(
       value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = Response.class)
+      response = ProsessiId.class)
   public ProsessiId aktivoiOsoitetarrojenLuontiHakemuksille(
-      DokumentinLisatiedot hakemuksillaRajaus) {
+      @RequestBody DokumentinLisatiedot hakemuksillaRajaus) {
     try {
       if (hakemuksillaRajaus == null) {
         hakemuksillaRajaus = new DokumentinLisatiedot();
@@ -188,21 +173,21 @@ public class ViestintapalveluAktivointiResource {
     }
   }
 
-  @POST
-  @Path("/jalkiohjauskirjeet/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/jalkiohjauskirjeet/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @ApiOperation(
       value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille",
-      response = Response.class)
+      response = ProsessiId.class)
   public ProsessiId aktivoiJalkiohjauskirjeidenLuonti(
-      DokumentinLisatiedot hakemuksillaRajaus,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("templateName") String templateName,
-      @QueryParam("tarjoajaOid") String tarjoajaOid,
-      @QueryParam("tag") String tag) {
+      @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "templateName", required = false) String templateName,
+      @RequestParam(value = "tarjoajaOid", required = false) String tarjoajaOid,
+      @RequestParam(value = "tag", required = false) String tag) {
     try {
       if (hakemuksillaRajaus == null) {
         hakemuksillaRajaus = new DokumentinLisatiedot();
@@ -234,26 +219,27 @@ public class ViestintapalveluAktivointiResource {
     }
   }
 
-  @POST
-  @Path("/hakukohteessahylatyt/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/hakukohteessahylatyt/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @ApiOperation(
       value = "Aktivoi hakukohteessa hylatyille kirjeiden luonnin",
-      response = Response.class)
+      response = ProsessiId.class)
   public ProsessiId aktivoiHakukohteessahylatyilleLuonti(
-      DokumentinLisatiedot hakemuksillaRajaus,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("tarjoajaOid") String tarjoajaOid,
-      @QueryParam("templateName") String templateName,
-      @QueryParam("palautusAika") String palautusAika,
-      @QueryParam("palautusPvm") String palautusPvm,
-      @QueryParam("tag") String tag,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("sijoitteluajoId") Long sijoitteluajoId,
-      @QueryParam("vainTulosEmailinKieltaneet") boolean vainTulosEmailinKieltaneet) {
+      @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "tarjoajaOid", required = false) String tarjoajaOid,
+      @RequestParam(value = "templateName", required = false) String templateName,
+      @RequestParam(value = "palautusAika", required = false) String palautusAika,
+      @RequestParam(value = "palautusPvm", required = false) String palautusPvm,
+      @RequestParam(value = "tag", required = false) String tag,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "sijoitteluajoId", required = false) Long sijoitteluajoId,
+      @RequestParam(value = "vainTulosEmailinKieltaneet", defaultValue = "false")
+          boolean vainTulosEmailinKieltaneet) {
     try {
       if (templateName == null) {
         templateName = "jalkiohjauskirje";
@@ -281,26 +267,27 @@ public class ViestintapalveluAktivointiResource {
     }
   }
 
-  @POST
-  @Path("/hyvaksymiskirjeet/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/hyvaksymiskirjeet/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @ApiOperation(
       value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa",
-      response = Response.class)
+      response = ProsessiId.class)
   public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(
-      DokumentinLisatiedot hakemuksillaRajaus,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("tarjoajaOid") String tarjoajaOid,
-      @QueryParam("palautusAika") String palautusAika,
-      @QueryParam("palautusPvm") String palautusPvm,
-      @QueryParam("templateName") String templateName,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("sijoitteluajoId") Long sijoitteluajoId,
-      @QueryParam("asiointikieli") String asiointikieli,
-      @QueryParam("vainTulosEmailinKieltaneet") boolean vainTulosEmailinKieltaneet) {
+      @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "tarjoajaOid", required = false) String tarjoajaOid,
+      @RequestParam(value = "palautusAika", required = false) String palautusAika,
+      @RequestParam(value = "palautusPvm", required = false) String palautusPvm,
+      @RequestParam(value = "templateName", required = false) String templateName,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "sijoitteluajoId", required = false) Long sijoitteluajoId,
+      @RequestParam(value = "asiointikieli", required = false) String asiointikieli,
+      @RequestParam(value = "vainTulosEmailinKieltaneet", required = false)
+          boolean vainTulosEmailinKieltaneet) {
     if (hakuOid == null
         && hakukohdeOid == null
         && (hakemuksillaRajaus.getHakemusOids() == null
@@ -371,22 +358,22 @@ public class ViestintapalveluAktivointiResource {
     }
   }
 
-  @POST
-  @Path("/koekutsukirjeet/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/koekutsukirjeet/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @ApiOperation(
       value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa",
-      response = Response.class)
+      response = ProsessiId.class)
   public ProsessiId aktivoiKoekutsukirjeidenLuonti(
-      @QueryParam(OPH.HAKUOID) String hakuOid,
-      @QueryParam(OPH.HAKUKOHDEOID) String hakukohdeOid,
-      @QueryParam(OPH.TARJOAJAOID) String tarjoajaOid,
-      @QueryParam("templateName") String templateName,
-      @QueryParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet,
-      DokumentinLisatiedot hakemuksillaRajaus) {
+      @RequestParam(OPH.HAKUOID) String hakuOid,
+      @RequestParam(OPH.HAKUKOHDEOID) String hakukohdeOid,
+      @RequestParam(OPH.TARJOAJAOID) String tarjoajaOid,
+      @RequestParam("templateName") String templateName,
+      @RequestParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet,
+      @RequestBody DokumentinLisatiedot hakemuksillaRajaus) {
     if ((hakemuksillaRajaus == null
             || hakemuksillaRajaus.getHakemusOids() == null
             || hakemuksillaRajaus.getHakemusOids().isEmpty())
@@ -443,63 +430,68 @@ public class ViestintapalveluAktivointiResource {
     return new ProsessiId(prosessi.getId()); // Response.ok().build();
   }
 
-  @POST
-  @Path("/securelinkit/aktivoi")
-  @Produces("application/json")
+  @PostMapping(value = "/securelinkit/aktivoi", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Lähettää Secure Linkit ryhmäsähköpostilla", response = AsyncResponse.class)
-  public void secureLinkkienLahetys(
-      EPostiRequest ePostiRequest, @Suspended AsyncResponse asyncResponse) {
+  @ApiOperation(
+      value = "Lähettää Secure Linkit ryhmäsähköpostilla",
+      response = EPostiResponse.class)
+  public DeferredResult<ResponseEntity<EPostiResponse>> secureLinkkienLahetys(
+      @RequestBody EPostiRequest ePostiRequest) {
 
-    setAsyncTimeout(
-        asyncResponse,
-        "Securelinkien lähetys -palvelukutsu on aikakatkaistu: /viestintapalvelu/securelinkit/aktivoi/");
+    DeferredResult<ResponseEntity<EPostiResponse>> result = new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body(
+                      "Securelinkien lähetys -palvelukutsu on aikakatkaistu: /viestintapalvelu/securelinkit/aktivoi/"));
+        });
 
-    validateEPostiRequest(ePostiRequest, asyncResponse);
+    if (validateEPostiRequest(ePostiRequest, result)) {
+      ePostiService.lahetaSecurelinkit(
+          ePostiRequest,
+          (ePostiResponse) ->
+              result.setResult(ResponseEntity.status(HttpStatus.OK).body(ePostiResponse)),
+          (errorMessage) ->
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(String.format("Securelinkien lähetys epäonnistui! %s", errorMessage))));
+    }
 
-    ePostiService.lahetaSecurelinkit(
-        ePostiRequest,
-        (response) ->
-            asyncResponse.resume(Response.ok(response, MediaType.APPLICATION_JSON_TYPE).build()),
-        (errorMessage) ->
-            errorResponse(
-                String.format("Securelinkien lähetys epäonnistui! %s", errorMessage),
-                asyncResponse));
+    return result;
   }
 
-  @GET
-  @Path("/securelinkit/esikatselu")
-  @Produces("message/rfc822")
+  @GetMapping(value = "/securelinkit/esikatselu", produces = "message/rfc822")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Esikatsele Secure Linkin ryhmäsähköposti", response = AsyncResponse.class)
-  public void secureLinkkienEsikatselu(
-      @QueryParam(OPH.HAKUOID) String hakuOid,
-      @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
-      @QueryParam("asiointikieli") String asiointikieli,
-      @Suspended AsyncResponse asyncResponse) {
+  @ApiOperation(value = "Esikatsele Secure Linkin ryhmäsähköposti", response = byte[].class)
+  public DeferredResult<ResponseEntity<byte[]>> secureLinkkienEsikatselu(
+      @RequestParam(OPH.HAKUOID) String hakuOid,
+      @RequestParam("kirjeenTyyppi") String kirjeenTyyppi,
+      @RequestParam("asiointikieli") String asiointikieli) {
 
-    setAsyncTimeout(
-        asyncResponse,
-        "Securelinkin esikatselu -palvelukutsu on aikakatkaistu: /viestintapalvelu/securelinkit/esikatselu");
+    DeferredResult<ResponseEntity<byte[]>> result = new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () ->
+            result.setErrorResult(
+                ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                    .body(
+                        "Securelinkin esikatselu -palvelukutsu on aikakatkaistu: /viestintapalvelu/securelinkit/esikatselu")));
 
     EPostiRequest ePostiRequest = new EPostiRequest();
     ePostiRequest.setHakuOid(hakuOid);
     ePostiRequest.setKirjeenTyyppi(kirjeenTyyppi);
     ePostiRequest.setAsiointikieli(asiointikieli);
-    validateEPostiRequest(ePostiRequest, asyncResponse);
+    validateEPostiRequest(ePostiRequest, result);
 
-    ePostiService.esikatseleSecurelinkki(
-        ePostiRequest,
-        (response) -> asyncResponse.resume(response),
-        (errorMessage) ->
-            errorResponse(
-                String.format("Securelinkin esikatselu epäonnistui! %s", errorMessage),
-                asyncResponse));
+    ePostiService.esikatseleSecurelinkki(ePostiRequest, result);
+
+    return result;
   }
 
-  private void validateEPostiRequest(EPostiRequest ePostiRequest, AsyncResponse asyncResponse) {
+  private <T> boolean validateEPostiRequest(
+      EPostiRequest ePostiRequest, DeferredResult<ResponseEntity<T>> result) {
     String hakuOid = ePostiRequest.getHakuOid();
     String kirjeenTyyppi = ePostiRequest.getKirjeenTyyppi();
     String asiointikieli = ePostiRequest.getAsiointikieli();
@@ -508,8 +500,10 @@ public class ViestintapalveluAktivointiResource {
         || StringUtils.isBlank(kirjeenTyyppi)
         || StringUtils.isBlank(asiointikieli)) {
       LOG.error("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.");
-      errorResponse(
-          "HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja.", asyncResponse);
+      result.setErrorResult(
+          ResponseEntity.status(HttpStatus.BAD_REQUEST)
+              .body("HakuOid, asiointikieli ja kirjeenTyyppi ovat pakollisia parametreja."));
+      return false;
     }
     if (!("jalkiohjauskirje".equals(kirjeenTyyppi)
         || "jalkiohjauskirje_huoltajille".equals(kirjeenTyyppi)
@@ -518,30 +512,22 @@ public class ViestintapalveluAktivointiResource {
       LOG.error(
           "{} ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje', 'jalkiohjauskirje_huoltajille', 'hyvaksymiskirje' tai 'hyvaksymiskirje_huoltajille'.",
           kirjeenTyyppi);
-      errorResponse(
-          kirjeenTyyppi
-              + " ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje', 'jalkiohjauskirje_huoltajille', 'hyvaksymiskirje' tai 'hyvaksymiskirje_huoltajille'.",
-          asyncResponse);
+      result.setErrorResult(
+          ResponseEntity.status(HttpStatus.BAD_REQUEST)
+              .body(
+                  kirjeenTyyppi
+                      + " ei ole validi kirjeen tyyppi. Pitää olla 'jalkiohjauskirje', 'jalkiohjauskirje_huoltajille', 'hyvaksymiskirje' tai 'hyvaksymiskirje_huoltajille'."));
+      return false;
     }
     if (!("fi".equals(asiointikieli) || "sv".equals(asiointikieli) || "en".equals(asiointikieli))) {
       LOG.error("{} ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.", asiointikieli);
-      errorResponse(
-          asiointikieli + " ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'.",
-          asyncResponse);
+      result.setErrorResult(
+          ResponseEntity.status(HttpStatus.BAD_REQUEST)
+              .body(
+                  asiointikieli + " ei ole validi asiointikieli. Pitää olla 'fi', 'sv' tai 'en'."));
+      return false;
     }
-  }
-
-  private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
-    response.setTimeout(5L, TimeUnit.MINUTES);
-    response.setTimeoutHandler(asyncResponse -> errorResponse(timeoutMessage, asyncResponse));
-  }
-
-  private void errorResponse(String timeoutMessage, AsyncResponse asyncResponse) {
-    asyncResponse.resume(
-        Response.serverError()
-            .entity(ImmutableMap.of("error", timeoutMessage))
-            .type(MediaType.APPLICATION_JSON_TYPE)
-            .build());
+    return true;
   }
 
   private List<String> tags(String... tag) {

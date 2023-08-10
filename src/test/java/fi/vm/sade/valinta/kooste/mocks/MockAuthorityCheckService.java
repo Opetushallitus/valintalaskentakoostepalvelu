@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
-import io.reactivex.Observable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
