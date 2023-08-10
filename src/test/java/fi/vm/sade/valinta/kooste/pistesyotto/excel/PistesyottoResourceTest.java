@@ -90,6 +90,7 @@ public class PistesyottoResourceTest {
   private static final String KIELIKOE_TOIMIPISTE_OID = "1.2.3.44444.5";
   final String root =
       "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+
   final HttpResourceBuilder.WebClientExposingHttpResource pistesyottoTuontiResource =
       new HttpResourceBuilder(getClass().getName())
           .address(root + "/pistesyotto/tuonti")

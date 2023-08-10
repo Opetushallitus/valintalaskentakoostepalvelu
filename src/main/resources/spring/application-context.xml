@@ -375,59 +375,9 @@
 			  class="fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.JonotSijoittelussaProxyResource"/>
 		<ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice" />
 
-		<!-- CXF Swagger2Feature -->
-		<bean id="swagger2Feature" class="org.apache.cxf.jaxrs.swagger.Swagger2Feature">
-			<property name="resourcePackage" value="fi.vm.sade.valinta.kooste" />
-			<property name="version" value="1.0" />
-			<property name="filterClass" value="fi.vm.sade.valinta.kooste.swagger.AsyncResponseFilter"/>
-			<property name="basePath" value="${valintalaskentakoostepalvelu.swagger.basepath}" />
-
-			<property name="title" value="Swagger API documentation"/>
-			<property name="scan" value="true"/>
-		</bean>
-
 		<bean id="SessionResource"
 			  class="fi.vm.sade.valinta.kooste.session.SessionResource" />
-
-		<bean id="cors-filter" class="fi.vm.sade.valinta.kooste.filter.CorsResponseFilter"/>
-		<jaxrs:server id="koostepalveluResurssit">
-			<jaxrs:serviceBeans>
-				<ref bean="JonotSijoittelussaProxyResource"/>
-				<ref bean="OmatSivutHakemusResource"/>
-				<ref bean="ErillishakuResource"/>
-				<ref bean="HakuImportResource"/>
-				<ref bean="OppijanSuorituksetProxyResource"/>
-				<ref bean="ParametritResource"/>
-				<ref bean="PistesyottoResource"/>
-				<ref bean="SijoitteluAktivointiResource"/>
-				<ref bean="SijoittelunTulosHaulleResource"/>
-				<ref bean="ValintalaskentaKerrallaResource"/>
-				<ref bean="ValintalaskentaExcelResource"/>
-				<ref bean="ValintatapajonoResource"/>
-				<ref bean="ValintaperusteetResource"/>
-				<ref bean="ValintaperusteetResourceV2"/>
-				<ref bean="DokumenttiProsessiResource"/>
-				<ref bean="ViestintapalveluAktivointiResource"/>
-				<ref bean="ValintaTulosServiceProxyResource"/>
-				<ref bean="ViestintapalveluProxyResource"/>
-				<ref bean="SessionResource"/>
-				<ref bean="HakemuksetResource"/>
-				<ref bean="HarkinnanvaraisuusResource"/>
-				<ref bean="AktiivistenHakemustenValintakoeResource"/>
-			</jaxrs:serviceBeans>
-			<jaxrs:providers>
-				<ref bean="jsonProvider" />
-				<ref bean="cors-filter"/>
-				<ref bean="cxfExceptionLogger"/>
-				<ref bean="springAccessDeniedExceptionMapper"/>
-			</jaxrs:providers>
-			<jaxrs:features>
-				<ref bean="swagger2Feature" />
-			</jaxrs:features>
-		</jaxrs:server>
-		<bean id="cxfExceptionLogger" class="fi.vm.sade.valinta.sharedutils.http.CxfExceptionLogger"/>
-		<bean id="springAccessDeniedExceptionMapper" class="fi.vm.sade.valinta.sharedutils.http.SpringAccessDeniedExceptionMapper"/>
-
+		
 		<!-- Tarjonnan ajastettu synkronointi -->
 		<bean id="tarjontaSyncService"
 			  class="fi.vm.sade.valinta.kooste.tarjonta.sync.impl.TarjontaSyncServiceImpl" />

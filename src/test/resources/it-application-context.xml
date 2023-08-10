@@ -20,7 +20,6 @@
   <import resource="classpath:META-INF/cxf/cxf.xml" />
   <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 
-
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.mocks"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.erillishaku"/>
   <ctx:component-scan base-package="fi.vm.sade.valinta.kooste.proxy.resource.erillishaku"/>
@@ -104,27 +103,7 @@
     <bean id="jaxrsconfig" class="fi.vm.sade.valinta.kooste.JaxrsConfiguration"/>
 
     <bean id="cors-filter" class="fi.vm.sade.valinta.kooste.filter.CorsResponseFilter"/>
-    <jaxrs:server id="koostepalveluResurssit">
-      <jaxrs:serviceBeans>
-        <ref bean="ErillishakuResource"/>
-        <ref bean="PistesyottoResource"/>
-        <ref bean="SuorituksenArvosanatProxyResource"/>
-        <ref bean="DokumenttiProsessiResource"/>
-        <ref bean="ViestintapalveluAktivointiResource"/>
-        <ref bean="ValintalaskentaExcelResource"/>
-        <ref bean="HakemuksetResource"/>
-        <ref bean="ValintaperusteetResource"/>
-        <ref bean="ValintaperusteetResourceV2"/>
-      </jaxrs:serviceBeans>
-      <jaxrs:providers>
-        <ref bean="jsonProvider" />
-        <ref bean="cors-filter"/>
-        <ref bean="cxfExceptionLogger"/>
-        <ref bean="springAccessDeniedExceptionMapper"/>
-      </jaxrs:providers>
 
-    </jaxrs:server>
-    <bean id="cxfExceptionLogger" class="fi.vm.sade.valinta.sharedutils.http.CxfExceptionLogger"/>
     <bean id="springAccessDeniedExceptionMapper" class="fi.vm.sade.valinta.sharedutils.http.SpringAccessDeniedExceptionMapper"/>
 
       <ctx:mbean-export/>

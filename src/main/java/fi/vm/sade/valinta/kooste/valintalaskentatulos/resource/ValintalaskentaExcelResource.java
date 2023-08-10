@@ -41,35 +41,26 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /** @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa. */
-@Controller("ValintalaskentaExcelResource")
-@Path("valintalaskentaexcel")
+@RestController("ValintalaskentaExcelResource")
+@RequestMapping("/valintalaskentaexcel")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintalaskentaexcel", description = "Excel-raportteja")
 public class ValintalaskentaExcelResource {
   private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaExcelResource.class);
-  public static final MediaType APPLICATION_VND_MS_EXCEL =
-      new MediaType("application", "vnd.ms-excel");
-
   @Autowired private ValintakoekutsutExcelService valintakoekutsutExcelService;
   @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
   @Autowired private ValintalaskentaAsyncResource valintalaskentaResource;
@@ -77,19 +68,18 @@ public class ValintalaskentaExcelResource {
   @Autowired private OrganisaatioAsyncResource organisaatioAsyncResource;
   @Autowired private ApplicationAsyncResource applicationResource;
   @Autowired private AtaruAsyncResource ataruAsyncResource;
-  @Context private HttpServletRequest httpServletRequestJaxRS;
 
-  @POST
-  @Path("/valintakoekutsut/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/valintakoekutsut/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = Response.class)
+  @ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = ProsessiId.class)
   public ProsessiId haeTuloksetExcelMuodossa(
-      DokumentinLisatiedot lisatiedot,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid) {
+      @RequestBody DokumentinLisatiedot lisatiedot,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid) {
     if (lisatiedot == null) {
       throw new RuntimeException("ValintakoeOid on pakollinen!");
     }
@@ -130,17 +120,18 @@ public class ValintalaskentaExcelResource {
   @Autowired private DokumenttiAsyncResource dokumenttiAsyncResource;
   @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
 
-  @POST
-  @Path("/sijoitteluntulos/aktivoi")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/sijoitteluntulos/aktivoi",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Sijoittelun tulokset Excel-raporttina", response = Response.class)
+  @ApiOperation(value = "Sijoittelun tulokset Excel-raporttina", response = ProsessiId.class)
   public ProsessiId haeSijoittelunTuloksetExcelMuodossa(
-      @QueryParam("sijoitteluajoId") String sijoitteluajoId,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("hakuOid") String hakuOid) {
+      @RequestParam(value = "sijoitteluajoId", required = false) String sijoitteluajoId,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      HttpServletRequest request) {
     try {
       final DokumenttiProsessi p =
           new DokumenttiProsessi(
@@ -149,7 +140,7 @@ public class ValintalaskentaExcelResource {
               "",
               Arrays.asList("sijoitteluntulos", "taulukkolaskenta"));
       String id = UUID.randomUUID().toString();
-      AuditSession auditSession = AuthorizationUtil.createAuditSession(httpServletRequestJaxRS);
+      AuditSession auditSession = AuthorizationUtil.createAuditSession(request);
       p.setKokonaistyo(1);
       Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
           .flatMap(
@@ -279,14 +270,14 @@ public class ValintalaskentaExcelResource {
     }
   }
 
-  @GET
-  @Path("/valintalaskennantulos/aktivoi")
-  @Produces("application/vnd.ms-excel")
+  @GetMapping(value = "/valintalaskennantulos/aktivoi")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
-  public void haeValintalaskentaTuloksetExcelMuodossa(
-      @QueryParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
+  public DeferredResult<ResponseEntity<InputStream>> haeValintalaskentaTuloksetExcelMuodossa(
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid) {
+    DeferredResult<ResponseEntity<InputStream>> result = new DeferredResult<>();
+
     Observable<AbstractHakukohde> hakukohdeObservable =
         Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
     Observable<List<Organisaatio>> tarjoajatObservable =
@@ -323,28 +314,31 @@ public class ValintalaskentaExcelResource {
             ValintalaskennanTulosExcel::luoExcel);
     workbookObservable.subscribe(
         (workbook) ->
-            asyncResponse.resume(
-                Response.ok(
-                        Excel.export(workbook),
+            result.setResult(
+                ResponseEntity.status(HttpStatus.OK)
+                    .header(
+                        "content-type",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     .header("content-disposition", "inline; filename=valintalaskennantulos.xlsx")
-                    .build()),
+                    .body(Excel.export(workbook))),
         (e) -> {
           LOG.error(
               "Valintalaskennan tulokset -excelin luonti epäonnistui hakukohteelle " + hakukohdeOid,
               e);
-          asyncResponse.resume(
-              Response.ok(
+          result.setResult(
+              ResponseEntity.status(HttpStatus.OK)
+                  .header("content-type", "application/vnd.ms-excel")
+                  .header("content-disposition", "inline; filename=yritauudelleen.xls")
+                  .body(
                       ExcelExportUtil.exportGridAsXls(
                           new Object[][] {
                             new Object[] {
                               "Tarvittavien tietojen hakeminen epäonnistui!",
                               "Virhe: " + e.getMessage()
                             }
-                          }),
-                      APPLICATION_VND_MS_EXCEL)
-                  .header("content-disposition", "inline; filename=yritauudelleen.xls")
-                  .build());
+                          })));
         });
+
+    return result;
   }
 }

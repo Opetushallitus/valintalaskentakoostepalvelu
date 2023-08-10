@@ -3,28 +3,24 @@ package fi.vm.sade.valinta.kooste.session;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller("SessionResource")
-@Path("session")
+@RestController("SessionResource")
+@RequestMapping("/session")
 @Api(value = "/session", description = "Sessionhallinta")
 public class SessionResource {
 
-  @GET
-  @Path("/maxinactiveinterval")
+  @GetMapping(value = "/maxinactiveinterval", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize("isAuthenticated()")
-  @Produces(MediaType.TEXT_PLAIN)
   @ApiOperation(
       value = "Palauttaa session erääntymisen aikarajan sekunteina",
       notes = "Tarvitsee HTTP kutsun, jossa on session id",
       response = String.class)
-  public String maxInactiveInterval(@Context HttpServletRequest req) {
+  public String maxInactiveInterval(HttpServletRequest req) {
     return Integer.toString(req.getSession().getMaxInactiveInterval());
   }
 }

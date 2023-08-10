@@ -5,24 +5,16 @@ import static fi.vm.sade.valinta.kooste.external.resource.valintapiste.Valintapi
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;
 import static java.util.Collections.singletonList;
-import static java.util.concurrent.TimeUnit.MINUTES;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.HakemusDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.TuontiErrorDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.dto.UlkoinenResponseDTO;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyotonTuontivirhe;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
+import fi.vm.sade.valinta.kooste.pistesyotto.dto.*;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.*;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
@@ -42,35 +34,25 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.util.IOUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller("PistesyottoResource")
-@Path("pistesyotto")
+@RestController("PistesyottoResource")
+@RequestMapping("/pistesyotto")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/pistesyotto", description = "Pistesyötön tuonti ja vienti taulukkolaskentaan")
 public class PistesyottoResource {
@@ -86,88 +68,92 @@ public class PistesyottoResource {
   @Autowired private ApplicationAsyncResource applicationAsyncResource;
   @Autowired private AtaruAsyncResource ataruAsyncResource;
   @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
-  @Context private HttpServletRequest httpServletRequestJaxRS;
 
-  @GET
-  @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
-  @Produces(MediaType.APPLICATION_JSON)
+  @GetMapping(
+      value = "/koostetutPistetiedot/hakemus/{hakemusOid:.+}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
-      consumes = MediaType.APPLICATION_JSON,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
       value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  public void koostaPistetiedotYhdelleHakemukselle(
-      @PathParam("hakemusOid") String hakemusOid, @Suspended final AsyncResponse response) {
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    response.setTimeout(120L, TimeUnit.SECONDS);
-    response.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity> koostaPistetiedotYhdelleHakemukselle(
+      @PathVariable("hakemusOid") String hakemusOid, HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+
+    DeferredResult<ResponseEntity> result = new DeferredResult<>(120000l);
+    result.onTimeout(
+        () -> {
           LOG.error(
               "koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/hakemus/{}",
               hakemusOid);
-          handler.resume(
-              Response.serverError()
-                  .entity("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu")
-                  .build());
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("koostaPistetiedotYhdelleHakemukselle-palvelukutsu on aikakatkaistu"));
         });
+
     Observable.zip(
-            Observable.fromFuture(authorityCheckService.getAuthorityCheckForRoles(
-                asList(
-                    "ROLE_APP_HAKEMUS_READ_UPDATE",
-                    "ROLE_APP_HAKEMUS_READ",
-                    "ROLE_APP_HAKEMUS_CRUD",
-                    "ROLE_APP_HAKEMUS_LISATIETORU",
-                    "ROLE_APP_HAKEMUS_LISATIETOCRUD"))),
+            Observable.fromFuture(
+                authorityCheckService.getAuthorityCheckForRoles(
+                    asList(
+                        "ROLE_APP_HAKEMUS_READ_UPDATE",
+                        "ROLE_APP_HAKEMUS_READ",
+                        "ROLE_APP_HAKEMUS_CRUD",
+                        "ROLE_APP_HAKEMUS_LISATIETORU",
+                        "ROLE_APP_HAKEMUS_LISATIETOCRUD"))),
             pistesyottoKoosteService.koostaOsallistujanPistetiedot(hakemusOid, auditSession),
-            (authorityCheck, pistetiedotHakukohteittain) -> {
-              Set<String> hakutoiveOids = pistetiedotHakukohteittain.getHakukohteittain().keySet();
-              if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
-                return Response.ok()
-                    .header("Content-Type", "application/json")
-                    .entity(pistetiedotHakukohteittain)
-                    .build();
+            Pair::of)
+        .subscribe(
+            pair -> {
+              HenkiloValilehtiDTO henkiloValilehtiDTO = pair.getRight();
+              Set<String> hakutoiveOids = pair.getRight().getHakukohteittain().keySet();
+              HakukohdeOIDAuthorityCheck hakukohdeOIDAuthorityCheck = pair.getLeft();
+
+              if (hakutoiveOids.stream().anyMatch(hakukohdeOIDAuthorityCheck)) {
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(henkiloValilehtiDTO));
               } else {
                 String msg =
                     String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
                         auditSession.getPersonOid(), hakutoiveOids, hakemusOid);
                 LOG.error(msg);
-                return Response.status(Response.Status.FORBIDDEN).entity(msg).build();
+                result.setErrorResult(ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg));
               }
-            })
-        .subscribe(
-            response::resume,
+            },
             error -> {
               logError("koostaPistetiedotYhdelleHakemukselle epäonnistui", error);
-              response.resume(Response.serverError().entity(error.getMessage()).build());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error.getMessage()));
             });
+
+    return result;
   }
 
-  @PUT
-  @Path("/koostetutPistetiedot/hakemus/{hakemusOid}")
-  @Produces(MediaType.APPLICATION_JSON)
-  @Consumes(MediaType.APPLICATION_JSON)
+  @PutMapping(
+      value = "/koostetutPistetiedot/hakemus/{hakemusOid:.+}",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
-      consumes = MediaType.APPLICATION_JSON,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
       value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  public void tallennaKoostetutPistetiedotHakemukselle(
-      @PathParam("hakemusOid") String hakemusOid,
-      ApplicationAdditionalDataDTO pistetiedot,
-      @Suspended final AsyncResponse response) {
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
-    response.setTimeout(120L, TimeUnit.SECONDS);
-    response.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity> tallennaKoostetutPistetiedotHakemukselle(
+      @PathVariable("hakemusOid") String hakemusOid,
+      @RequestBody ApplicationAdditionalDataDTO pistetiedot,
+      HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+    final Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader(request);
+
+    DeferredResult<ResponseEntity> result = new DeferredResult<>(120000l);
+    result.onTimeout(
+        () -> {
           LOG.error(
               "tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/hakemus/{}",
               hakemusOid);
-          handler.resume(
-              Response.serverError()
-                  .entity("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu")
-                  .build());
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("tallennaKoostetutPistetiedotHakemukselle-palvelukutsu on aikakatkaistu"));
         });
 
     if (!hakemusOid.equals(pistetiedot.getOid())) {
@@ -176,8 +162,8 @@ public class PistesyottoResource {
               "URLissa tuli hakemusOid %s , mutta PUT-datassa hakemusOid %s",
               hakemusOid, pistetiedot.getOid());
       LOG.error(errorMessage);
-      response.resume(Response.status(Response.Status.BAD_REQUEST).entity(errorMessage).build());
-      return;
+      result.setResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage));
+      return result;
     }
 
     Observable<HakemusWrapper> hakemusO =
@@ -192,153 +178,150 @@ public class PistesyottoResource {
                   }
                 });
 
-    Observable.merge(
-            Observable.zip(
-                Observable.fromFuture(authorityCheckService.getAuthorityCheckForRoles(
+    Observable.zip(
+            Observable.fromFuture(
+                authorityCheckService.getAuthorityCheckForRoles(
                     asList(
                         "ROLE_APP_HAKEMUS_READ_UPDATE",
                         "ROLE_APP_HAKEMUS_CRUD",
                         "ROLE_APP_HAKEMUS_LISATIETORU",
                         "ROLE_APP_HAKEMUS_LISATIETOCRUD"))),
-                hakemusO,
-                (authorityCheck, hakemus) -> {
-                  Collection<String> hakutoiveOids = hakemus.getHakutoiveOids();
-                  if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
-                    return pistesyottoKoosteService.tallennaKoostetutPistetiedotHakemukselle(
-                        pistetiedot, ifUnmodifiedSince, auditSession);
-                  } else {
-                    String msg =
-                        String.format(
-                            "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
-                            auditSession.getPersonOid(), hakutoiveOids, hakemusOid);
-                    return Observable.error(
-                        new ForbiddenException(
-                            msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()));
-                  }
-                }))
+            hakemusO,
+            Pair::of)
         .subscribe(
-            x -> {
-              if (x.isEmpty()) {
-                response.resume(Response.noContent().build());
+            pair -> {
+              Collection<String> hakutoiveOids = pair.getRight().getHakutoiveOids();
+              HakukohdeOIDAuthorityCheck authorityCheck = pair.getLeft();
+              if (hakutoiveOids.stream().anyMatch(authorityCheck)) {
+                Set<TuontiErrorDTO> errors =
+                    pistesyottoKoosteService
+                        .tallennaKoostetutPistetiedotHakemukselle(
+                            pistetiedot, ifUnmodifiedSince, auditSession)
+                        .toFuture()
+                        .get();
+                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body(errors));
               } else {
-                response.resume(Response.ok(x).build());
+                String msg =
+                    String.format(
+                        "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteisiin %s hakeneen hakemuksen %s pistetietoja",
+                        auditSession.getPersonOid(), hakutoiveOids, hakemusOid);
+                result.setErrorResult(ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg));
               }
             },
             error -> {
               logError("tallennaKoostetutPistetiedotHakemukselle epäonnistui", error);
-              resumeWithException(response, error);
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error.getMessage()));
             });
+
+    return result;
   }
 
-  @GET
-  @Path("/koostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-  @Produces(MediaType.APPLICATION_JSON)
+  @GetMapping(
+      value = "/koostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
-      consumes = MediaType.APPLICATION_JSON,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
       value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  public void koostaPistetiedotHakemuksille(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("hakukohdeOid") String hakukohdeOid,
-      @Suspended final AsyncResponse response) {
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    response.setTimeout(120L, TimeUnit.SECONDS);
-    response.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity<PistesyottoValilehtiDTO>> koostaPistetiedotHakemuksille(
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("hakukohdeOid") String hakukohdeOid,
+      HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+
+    DeferredResult<ResponseEntity<PistesyottoValilehtiDTO>> result = new DeferredResult<>(120000l);
+    result.onTimeout(
+        () -> {
           LOG.error(
               "koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu: GET /koostetutPistetiedot/haku/{}/hakukohde/{}",
               hakuOid,
               hakukohdeOid);
-          handler.resume(
-              Response.serverError()
-                  .entity("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu")
-                  .build());
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("koostaPistetiedotHakemuksille-palvelukutsu on aikakatkaistu"));
         });
-    Observable.fromFuture(authorityCheckService
-        .getAuthorityCheckForRoles(
-            asList(
-                "ROLE_APP_HAKEMUS_READ_UPDATE",
-                "ROLE_APP_HAKEMUS_READ",
-                "ROLE_APP_HAKEMUS_CRUD",
-                "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
-        .switchMap(
+
+    Observable.fromFuture(
+            authorityCheckService.getAuthorityCheckForRoles(
+                asList(
+                    "ROLE_APP_HAKEMUS_READ_UPDATE",
+                    "ROLE_APP_HAKEMUS_READ",
+                    "ROLE_APP_HAKEMUS_CRUD",
+                    "ROLE_APP_HAKEMUS_LISATIETORU",
+                    "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
+        .subscribe(
             authorityCheck -> {
               if (authorityCheck.test(hakukohdeOid)) {
-                return Observable.fromFuture(
+                PistesyottoValilehtiDTO pistetiedot =
                     pistesyottoKoosteService
                         .koostaOsallistujienPistetiedot(hakuOid, hakukohdeOid, auditSession)
-                        .thenApplyAsync(
-                            pistetiedot -> {
-                              LOG.debug("Saatiin pistetiedot {}", pistetiedot);
-                              return Response.ok()
-                                  .header("Content-Type", "application/json")
-                                  .entity(pistetiedot)
-                                  .build();
-                            }));
+                        .get();
+                LOG.debug("Saatiin pistetiedot {}", pistetiedot);
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(pistetiedot));
               } else {
                 String msg =
                     String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
                         auditSession.getPersonOid(), hakukohdeOid);
                 LOG.error(msg);
-                return Observable.just(
-                    Response.status(Response.Status.FORBIDDEN).entity(msg).build());
+                result.setErrorResult(ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg));
               }
-            })
-        .subscribe(
-            response::resume,
+            },
             error -> {
               logError("koostaPistetiedotHakemuksille epäonnistui", error);
-              response.resume(Response.serverError().entity(error.getMessage()).build());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error.getMessage()));
             });
+
+    return result;
   }
 
-  private Optional<String> ifUnmodifiedSinceFromHeader() {
-    HttpServletRequest h = AuthorizationUtil.request(httpServletRequestJaxRS);
-    return list(h.getHeaderNames()).stream()
+  private Optional<String> ifUnmodifiedSinceFromHeader(HttpServletRequest request) {
+    return list(request.getHeaderNames()).stream()
         .map(String::toLowerCase)
         .filter(IF_UNMODIFIED_SINCE.toLowerCase()::equals)
-        .map(h::getHeader)
+        .map(request::getHeader)
         .findAny();
   }
 
-  @PUT
-  @Path("/koostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-  @Produces(MediaType.APPLICATION_JSON)
-  @Consumes(MediaType.APPLICATION_JSON)
+  @PutMapping(
+      value = "/koostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
-      consumes = MediaType.APPLICATION_JSON,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
       value = "Lisätietokenttien tallennus hakemuksille ja suoritusrekisteriin")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  public void tallennaKoostetutPistetiedot(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("hakukohdeOid") String hakukohdeOid,
-      List<ApplicationAdditionalDataDTO> pistetiedot,
-      @Suspended final AsyncResponse response) {
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader();
-    response.setTimeout(120L, TimeUnit.SECONDS);
-    response.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity<Set<TuontiErrorDTO>>> tallennaKoostetutPistetiedot(
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("hakukohdeOid") String hakukohdeOid,
+      @RequestBody List<ApplicationAdditionalDataDTO> pistetiedot,
+      HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+    Optional<String> ifUnmodifiedSince = ifUnmodifiedSinceFromHeader(request);
+
+    DeferredResult<ResponseEntity<Set<TuontiErrorDTO>>> result = new DeferredResult<>(120000l);
+    result.onTimeout(
+        () -> {
           LOG.error(
               "tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu: PUT /koostetutPistetiedot/haku/{}/hakukohde/{}",
               hakuOid,
               hakukohdeOid);
-          handler.resume(
-              Response.serverError()
-                  .entity("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu")
-                  .build());
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("tallennaKoostetutPistetiedot-palvelukutsu on aikakatkaistu"));
         });
-    Observable.fromFuture(authorityCheckService
-        .getAuthorityCheckForRoles(
-            asList(
-                "ROLE_APP_HAKEMUS_READ_UPDATE",
-                "ROLE_APP_HAKEMUS_CRUD",
-                "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
+
+    Observable.fromFuture(
+            authorityCheckService.getAuthorityCheckForRoles(
+                asList(
+                    "ROLE_APP_HAKEMUS_READ_UPDATE",
+                    "ROLE_APP_HAKEMUS_CRUD",
+                    "ROLE_APP_HAKEMUS_LISATIETORU",
+                    "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
         .flatMap(
             authorityCheck -> {
               if (authorityCheck.test(hakukohdeOid)) {
@@ -348,12 +331,10 @@ public class PistesyottoResource {
                   String.format(
                       "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
                       auditSession.getPersonOid(), hakukohdeOid);
-              return Observable.error(
-                  new ForbiddenException(
-                      msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()));
+              return Observable.error(new AccessDeniedException(msg));
             })
         .flatMap(
-            x ->
+            unused ->
                 Observable.fromFuture(ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid))
                     .flatMap(
                         hakemukset -> {
@@ -378,7 +359,7 @@ public class PistesyottoResource {
                             return Observable.just("OK");
                           }
                           return Observable.error(
-                              new ForbiddenException(
+                              new AccessDeniedException(
                                   String.format(
                                       "Käyttäjällä %s ei ole oikeuksia käsitellä hakemuksien %s pistetietoja, koska niillä ei ole haettu hakukohteeseen %s",
                                       auditSession.getPersonOid(),
@@ -386,114 +367,126 @@ public class PistesyottoResource {
                                       hakukohdeOid)));
                         }))
         .flatMap(
-            x ->
+            unused ->
                 Observable.fromFuture(
                     pistesyottoKoosteService.tallennaKoostetutPistetiedot(
                         hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedot, auditSession)))
         .subscribe(
-            x -> {
-              if (x.isEmpty()) {
-                response.resume(Response.noContent().build());
+            errors -> {
+              if (errors.isEmpty()) {
+                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
               } else {
-                response.resume(Response.ok(x).build());
+                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body(errors));
               }
             },
             error -> {
-              logError("tallennaKoostetutPistetiedot epäonnistui", error);
-              resumeWithException(response, error);
+              if (error instanceof AccessDeniedException) {
+                result.setErrorResult(
+                    ResponseEntity.status(HttpStatus.FORBIDDEN).body(error.getMessage()));
+              } else {
+                logError("tallennaKoostetutPistetiedot epäonnistui", error);
+                result.setErrorResult(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(error.getMessage()));
+              }
             });
+
+    return result;
   }
 
+  @PostMapping(
+      value = "/vienti",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @POST
-  @Path("/vienti")
-  @Consumes("application/json")
-  @Produces("application/json")
   @ApiOperation(
       consumes = "application/json",
       value = "Pistesyötön vienti taulukkolaskentaan",
       response = ProsessiId.class)
-  public void vienti(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @Suspended AsyncResponse asyncResponse) {
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
-    asyncResponse.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity<ProsessiId>> vienti(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+
+    DeferredResult<ResponseEntity<ProsessiId>> result = new DeferredResult<>(120000l);
+    result.onTimeout(
+        () -> {
           LOG.error("vienti-palvelukutsu on aikakatkaistu: POST /vienti");
-          handler.resume(
-              Response.serverError().entity("vienti-palvelukutsu on aikakatkaistu").build());
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("vienti-palvelukutsu on aikakatkaistu"));
         });
 
-    Observable.fromFuture(authorityCheckService
-        .getAuthorityCheckForRoles(
-            asList(
-                "ROLE_APP_HAKEMUS_READ_UPDATE",
-                "ROLE_APP_HAKEMUS_READ",
-                "ROLE_APP_HAKEMUS_CRUD",
-                "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
-        .flatMap(
+    Observable.fromFuture(
+            authorityCheckService.getAuthorityCheckForRoles(
+                asList(
+                    "ROLE_APP_HAKEMUS_READ_UPDATE",
+                    "ROLE_APP_HAKEMUS_READ",
+                    "ROLE_APP_HAKEMUS_CRUD",
+                    "ROLE_APP_HAKEMUS_LISATIETORU",
+                    "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
+        .subscribe(
             authorityCheck -> {
               if (authorityCheck.test(hakukohdeOid)) {
                 DokumenttiProsessi prosessi =
                     new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 vientiService.vie(hakuOid, hakukohdeOid, auditSession, prosessi);
-                return Observable.just(prosessi.toProsessiId());
+                result.setResult(
+                    ResponseEntity.status(HttpStatus.OK).body(prosessi.toProsessiId()));
               } else {
                 String msg =
                     String.format(
                         "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
                         auditSession.getPersonOid(), hakukohdeOid);
-                return Observable.error(
-                    new ForbiddenException(
-                        msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()));
+                result.setErrorResult(ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg));
               }
-            })
-        .subscribe(
-            id -> asyncResponse.resume(Response.ok(id).build()),
+            },
             error -> {
               logError("Pistetietojen vienti epäonnistui", error);
-              resumeWithException(asyncResponse, error);
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error.getMessage()));
             });
+
+    return result;
   }
 
+  @PostMapping(
+      value = "/tuonti",
+      consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @POST
-  @Path("/tuonti")
-  @Consumes("application/octet-stream")
-  @Produces("application/json")
   @ApiOperation(
       consumes = "application/json",
       value = "Pistesyötön tuonti taulukkolaskentaan",
       response = ProsessiId.class)
-  public void tuonti(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      InputStream file,
-      @Suspended AsyncResponse asyncResponse) {
-    asyncResponse.setTimeout(120L, TimeUnit.SECONDS);
-    asyncResponse.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity<Set<TuontiErrorDTO>>> tuonti(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      HttpServletRequest request) {
+
+    DeferredResult<ResponseEntity<Set<TuontiErrorDTO>>> result = new DeferredResult<>(120000l);
+    result.onTimeout(
+        () -> {
           LOG.error("tuonti-palvelukutsu on aikakatkaistu: POST /tuonti");
-          handler.resume(
-              Response.serverError().entity("tuonti-palvelukutsu on aikakatkaistu").build());
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("tuonti-palvelukutsu on aikakatkaistu"));
         });
 
     try {
-      final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
+      final AuditSession auditSession = createAuditSession(request);
       Observable<Object> authCheck =
-          Observable.fromFuture(authorityCheckService
-              .getAuthorityCheckForRoles(
-                  asList(
-                      "ROLE_APP_HAKEMUS_READ_UPDATE",
-                      "ROLE_APP_HAKEMUS_CRUD",
-                      "ROLE_APP_HAKEMUS_LISATIETORU",
-                      "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
+          Observable.fromFuture(
+                  authorityCheckService.getAuthorityCheckForRoles(
+                      asList(
+                          "ROLE_APP_HAKEMUS_READ_UPDATE",
+                          "ROLE_APP_HAKEMUS_CRUD",
+                          "ROLE_APP_HAKEMUS_LISATIETORU",
+                          "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
               .flatMap(
                   authorityCheck -> {
                     if (authorityCheck.test(hakukohdeOid)) {
@@ -503,19 +496,17 @@ public class PistesyottoResource {
                         String.format(
                             "Käyttäjällä %s ei ole oikeuksia käsitellä hakukohteen %s pistetietoja",
                             auditSession.getPersonOid(), hakukohdeOid);
-                    return Observable.error(
-                        new ForbiddenException(
-                            msg, Response.status(Response.Status.FORBIDDEN).entity(msg).build()));
+                    return Observable.error(new AccessDeniedException(msg));
                   });
 
       Observable<Set<TuontiErrorDTO>> map =
           authCheck.flatMap(
-              x -> {
+              unused -> {
                 DokumenttiProsessi prosessi =
                     new DokumenttiProsessi(
                         "Pistesyöttö", "tuonti", hakuOid, singletonList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-                ByteArrayOutputStream xlsx = readFileToBytearray(file);
+                ByteArrayOutputStream xlsx = readFileToBytearray(request.getInputStream());
                 final String uuid = UUID.randomUUID().toString();
                 Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
                 List<String> tags = asList();
@@ -553,12 +544,12 @@ public class PistesyottoResource {
           failedIds -> {
             if (failedIds.isEmpty()) {
               LOG.info("Kaikki pistetiedot tallennettu onnistuneesti");
-              asyncResponse.resume(Response.noContent().build());
+              result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
             } else {
               LOG.info(
                   "Joitakin pistetietoja ei voitu tallentaa: {}",
                   StringUtils.join(failedIds.toArray(), ","));
-              asyncResponse.resume(Response.ok(failedIds).build());
+              result.setResult(ResponseEntity.status(HttpStatus.OK).body(failedIds));
             }
           },
           error -> {
@@ -569,19 +560,27 @@ public class PistesyottoResource {
                       "tallennaKoostetutPistetiedot epäonnistui, vaikuttaa huonolta syötteeltä: "
                           + "%s",
                       pistesyotonTuontivirhe.virheet));
-              asyncResponse.resume(
-                  Response.status(Response.Status.BAD_REQUEST)
-                      .entity(pistesyotonTuontivirhe.virheet)
-                      .build());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                      .body(pistesyotonTuontivirhe.virheet));
+            } else if (error instanceof AccessDeniedException) {
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.FORBIDDEN)
+                      .body(error.getMessage() == null ? "" : error.getMessage()));
             } else {
               logError("Tuntematon virhetilanne", error);
-              resumeWithException(asyncResponse, error);
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(error.getMessage() == null ? "" : error.getMessage()));
             }
           });
     } catch (Exception e) {
       LOG.error("Odottamaton virhe", e);
-      asyncResponse.resume(e);
+      result.setErrorResult(
+          ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage()));
     }
+
+    return result;
   }
 
   private ByteArrayOutputStream readFileToBytearray(InputStream file) {
@@ -595,87 +594,83 @@ public class PistesyottoResource {
     }
   }
 
-  @POST
-  @Path("/ulkoinen")
+  @PostMapping(
+      value = "/ulkoinen",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @Consumes("application/json")
-  @Produces("application/json")
   @ApiOperation(
       consumes = "application/json",
       value = "Pistesyötön tuonti hakemuksille ulkoisesta järjestelmästä",
       response = UlkoinenResponseDTO.class)
-  public void ulkoinenTuonti(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("valinnanvaiheOid") String valinnanvaiheOid,
-      List<HakemusDTO> hakemukset,
-      @Suspended AsyncResponse asyncResponse) {
-    try {
-      final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-      if (hakemukset == null || hakemukset.isEmpty()) {
-        asyncResponse.resume(
-            Response.serverError()
-                .entity("Ulkoinen pistesyotto API requires at least one hakemus")
-                .build());
-      } else {
-        asyncResponse.setTimeout(120L, MINUTES);
-        asyncResponse.setTimeoutHandler(
-            asyncResponse1 -> {
-              LOG.error("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu: /haku/{}", hakuOid);
-              asyncResponse1.resume(
-                  Response.serverError()
-                      .entity("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu")
-                      .build());
-            });
+  public DeferredResult<ResponseEntity<UlkoinenResponseDTO>> ulkoinenTuonti(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestBody List<HakemusDTO> hakemukset,
+      HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
 
-        Observable.fromFuture(authorityCheckService
-            .getAuthorityCheckForRoles(
-                asList(
-                    "ROLE_APP_HAKEMUS_READ_UPDATE",
-                    "ROLE_APP_HAKEMUS_CRUD",
-                    "ROLE_APP_HAKEMUS_LISATIETORU",
-                    "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
-            .subscribe(
-                authorityCheck -> {
-                  LOG.info(
-                      "Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}",
-                      hakuOid,
-                      hakemukset);
-                  externalTuontiService.tuo(
-                      authorityCheck,
-                      hakemukset,
-                      auditSession,
-                      hakuOid,
-                      (onnistuneet, validointivirheet) -> {
-                        UlkoinenResponseDTO response = new UlkoinenResponseDTO();
-                        response.setKasiteltyOk(onnistuneet);
-                        response.setVirheet(Lists.newArrayList(validointivirheet));
-                        asyncResponse.resume(Response.ok(response).build());
-                      },
-                      sisainenPoikkeus -> {
-                        logError("Tuonti ulkoisesta jarjestelmasta epaonnistui!", sisainenPoikkeus);
-                        asyncResponse.resume(
-                            Response.serverError().entity(sisainenPoikkeus.toString()).build());
-                      });
-                },
-                sisainenPoikkeus -> {
-                  logError("Tuonti ulkoisesta jarjestelmasta epaonnistui!", sisainenPoikkeus);
-                  asyncResponse.resume(
-                      Response.serverError().entity(sisainenPoikkeus.toString()).build());
-                });
+    DeferredResult<ResponseEntity<UlkoinenResponseDTO>> result = new DeferredResult<>(120000l);
+    result.onTimeout(
+        () -> {
+          LOG.error("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu: /haku/{}", hakuOid);
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Ulkoinen pistesyotto -palvelukutsu on aikakatkaistu"));
+        });
+
+    try {
+      if (hakemukset == null || hakemukset.isEmpty()) {
+        result.setErrorResult(
+            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Ulkoinen pistesyotto API requires at least one hakemus"));
+        return result;
       }
+
+      Observable.fromFuture(
+              authorityCheckService.getAuthorityCheckForRoles(
+                  asList(
+                      "ROLE_APP_HAKEMUS_READ_UPDATE",
+                      "ROLE_APP_HAKEMUS_CRUD",
+                      "ROLE_APP_HAKEMUS_LISATIETORU",
+                      "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
+          .subscribe(
+              authorityCheck -> {
+                LOG.info(
+                    "Pisteiden tuonti ulkoisesta järjestelmästä (haku: {}): {}",
+                    hakuOid,
+                    hakemukset);
+                externalTuontiService.tuo(
+                    authorityCheck,
+                    hakemukset,
+                    auditSession,
+                    hakuOid,
+                    (onnistuneet, validointivirheet) -> {
+                      UlkoinenResponseDTO response = new UlkoinenResponseDTO();
+                      response.setKasiteltyOk(onnistuneet);
+                      response.setVirheet(Lists.newArrayList(validointivirheet));
+                      result.setResult(ResponseEntity.status(HttpStatus.OK).body(response));
+                    },
+                    sisainenPoikkeus -> {
+                      logError("Tuonti ulkoisesta jarjestelmasta epaonnistui!", sisainenPoikkeus);
+                      result.setErrorResult(
+                          ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                              .body(sisainenPoikkeus.toString()));
+                    });
+              },
+              sisainenPoikkeus -> {
+                logError("Tuonti ulkoisesta jarjestelmasta epaonnistui!", sisainenPoikkeus);
+                result.setErrorResult(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(sisainenPoikkeus.toString()));
+              });
     } catch (Exception e) {
       LOG.error("Tuonti ulkoisesta järjestelmästä epäonnistui", e);
-      asyncResponse.resume(Response.serverError().entity(e.toString()).build());
+      result.setErrorResult(
+          ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.toString()));
     }
-  }
 
-  private void resumeWithException(@Suspended AsyncResponse response, Throwable error) {
-    if (error instanceof WebApplicationException) {
-      response.resume(((WebApplicationException) error).getResponse());
-    } else {
-      response.resume(Response.serverError().entity(error.getMessage()).build());
-    }
+    return result;
   }
 
   private void logError(String errorMessage, Throwable error) {

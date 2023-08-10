@@ -67,6 +67,12 @@ public class ValintaKoosteJetty {
       if (useMocks) {
         FakeAuthenticationInitialiser.fakeAuthentication();
       }
+
+      // TEMPORARY UNTIL ALL SWITCHED TO SPRING MVC
+      if (!server.isStopped()) {
+        server.stop();
+      }
+
       if (server.isStopped()) {
         String root = ProjectRootFinder.findProjectRoot().toString();
         WebAppContext wac = new WebAppContext();

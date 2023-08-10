@@ -1,56 +1,57 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
-import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller("ValintaTulosServiceProxyResource")
-@Path("/proxy/valintatulosservice")
+@RestController("ValintaTulosServiceProxyResource")
+@RequestMapping("/proxy/valintatulosservice")
 public class ValintaTulosServiceProxyResource {
   private static final Logger LOG = LoggerFactory.getLogger(ValintaTulosServiceProxyResource.class);
 
   @Autowired private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
 
-  @GET
+  @GetMapping(
+      value = "/ilmanhakijantilaa/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}",
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-  @Path("/ilmanhakijantilaa/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-  @Consumes("application/json")
-  public void valintatuloksetIlmanTilaaHakijalle(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-      @Suspended AsyncResponse asyncResponse) {
-    setAsyncTimeout(
-        asyncResponse,
-        String.format(
-            "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /ilmanhakijantilaa/haku/%s/hakukohde/%s",
-            hakuOid, hakukohdeOid));
+  public DeferredResult<ResponseEntity<List<Valintatulos>>> valintatuloksetIlmanTilaaHakijalle(
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("hakukohdeOid") String hakukohdeOid,
+      @RequestParam(value = "valintatapajonoOid", required = false) String valintatapajonoOid) {
+
+    DeferredResult<ResponseEntity<List<Valintatulos>>> result =
+        new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          LOG.error(
+              String.format(
+                  "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /ilmanhakijantilaa/haku/%s/hakukohde/%s",
+                  hakuOid, hakukohdeOid));
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu"));
+        });
+
     valintaTulosServiceResource
         .findValintatuloksetIlmanHakijanTilaa(hakuOid, hakukohdeOid)
         .map(
@@ -63,45 +64,52 @@ public class ValintaTulosServiceProxyResource {
                     .collect(Collectors.toList());
               }
             })
-        .map(
-            valintatulokset ->
-                Response.ok(valintatulokset).type(MediaType.APPLICATION_JSON_TYPE).build())
         .subscribe(
-            asyncResponse::resume,
+            valintatulokset ->
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(valintatulokset)),
             error -> {
               LOG.error(
                   "Valintatulosten haku ilman valintatuloksen tilaa valinta-tulos-servicestä epäonnistui",
                   error);
-              respondWithError(
-                  asyncResponse,
-                  "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
-                      + error.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(
+                          "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
+                              + error.getMessage()));
             });
+
+    return result;
   }
 
-  @POST
+  @PostMapping(
+      value = "/myohastyneet/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}",
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-  @Path("/myohastyneet/haku/{hakuOid}/hakukohde/{hakukohdeOid}")
-  @Consumes("application/json")
-  public void tietoSiitaEttaVastaanottoAikarajaOnMennyt(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("hakukohdeOid") String hakukohdeOid,
-      Set<String> hakemusOids,
-      @Suspended AsyncResponse asyncResponse) {
-    setAsyncTimeout(
-        asyncResponse,
-        String.format(
-            "ValintatulosserviceProxy -palvelukutsu vastaanottoaikarajojen menneeksi on aikakatkaistu: /myohastyneet/haku/%s/hakukohde/%s",
-            hakuOid, hakukohdeOid));
+  public DeferredResult<ResponseEntity<List<VastaanottoAikarajaMennytDTO>>>
+      tietoSiitaEttaVastaanottoAikarajaOnMennyt(
+          @PathVariable("hakuOid") String hakuOid,
+          @PathVariable("hakukohdeOid") String hakukohdeOid,
+          Set<String> hakemusOids) {
+
+    DeferredResult<ResponseEntity<List<VastaanottoAikarajaMennytDTO>>> result =
+        new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          LOG.error(
+              String.format(
+                  "ValintatulosserviceProxy -palvelukutsu vastaanottoaikarajojen menneeksi on aikakatkaistu: /myohastyneet/haku/%s/hakukohde/%s",
+                  hakuOid, hakukohdeOid));
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu"));
+        });
 
     valintaTulosServiceResource
         .findVastaanottoAikarajaMennyt(hakuOid, hakukohdeOid, hakemusOids)
-        .map(
-            aikarajaMennytDtos ->
-                Response.ok(aikarajaMennytDtos).type(MediaType.APPLICATION_JSON_TYPE).build())
         .subscribe(
-            asyncResponse::resume,
+            aikarajaMennytDtos ->
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(aikarajaMennytDtos)),
             error -> {
               LOG.error(
                   "Vastaanottoaikarajojen haku valinta-tulos-servicestä haun "
@@ -110,38 +118,45 @@ public class ValintaTulosServiceProxyResource {
                       + hakukohdeOid
                       + " epäonnistui",
                   error);
-              respondWithError(
-                  asyncResponse,
-                  "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
-                      + error.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(
+                          "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
+                              + error.getMessage()));
             });
+    return result;
   }
 
-  @POST
+  @PostMapping(
+      value =
+          "/tilahakijalle/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid:.+}",
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-  @Path(
-      "/tilahakijalle/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid}")
-  @Consumes("application/json")
-  public void vastaanottotilaHakijalle(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("hakukohdeOid") String hakukohdeOid,
-      @PathParam("valintatapajonoOid") String valintatapajonoOid,
-      Set<String> hakemusOids,
-      @Suspended AsyncResponse asyncResponse) {
-    setAsyncTimeout(
-        asyncResponse,
-        String.format(
-            "ValintatulosserviceProxy -palvelukutsu tila hakijalle -tiedon hakemiseksi on aikakatkaistu: /tilahakijalle/haku/%s/hakukohde/%s/valintatapajono/%s",
-            hakuOid, hakukohdeOid, valintatapajonoOid));
+  public DeferredResult<ResponseEntity<List<TilaHakijalleDto>>> vastaanottotilaHakijalle(
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("hakukohdeOid") String hakukohdeOid,
+      @PathVariable("valintatapajonoOid") String valintatapajonoOid,
+      Set<String> hakemusOids) {
+
+    DeferredResult<ResponseEntity<List<TilaHakijalleDto>>> result =
+        new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          LOG.error(
+              String.format(
+                  "ValintatulosserviceProxy -palvelukutsu tila hakijalle -tiedon hakemiseksi on aikakatkaistu: /tilahakijalle/haku/%s/hakukohde/%s/valintatapajono/%s",
+                  hakuOid, hakukohdeOid, valintatapajonoOid));
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu"));
+        });
 
     valintaTulosServiceResource
         .findTilahakijalle(hakuOid, hakukohdeOid, valintatapajonoOid, hakemusOids)
-        .map(
-            tilaHakijalleDtos ->
-                Response.ok(tilaHakijalleDtos).type(MediaType.APPLICATION_JSON_TYPE).build())
         .subscribe(
-            asyncResponse::resume,
+            tilaHakijalleDtos ->
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(tilaHakijalleDtos)),
             error -> {
               LOG.error(
                   "Hakijan tilojen haku valinta-tulos-servicestä haun "
@@ -152,40 +167,40 @@ public class ValintaTulosServiceProxyResource {
                       + valintatapajonoOid
                       + " epäonnistui",
                   error);
-              respondWithError(
-                  asyncResponse,
-                  "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
-                      + error.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(
+                          "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
+                              + error.getMessage()));
             });
+    return result;
   }
 
-  private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
-    response.setTimeout(5L, TimeUnit.MINUTES);
-    response.setTimeoutHandler(
-        asyncResponse -> {
-          LOG.error(timeoutMessage);
-          respondWithError(
-              asyncResponse, "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu");
-        });
-  }
-
+  @GetMapping(
+      value =
+          "/hakemus/{hakemusOid}/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid:.+}",
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-  @GET
-  @Path(
-      "/hakemus/{hakemusOid}/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid}")
-  @Consumes("application/json")
-  public void hakemuksenSijoittelunTulos(
-      @PathParam("hakemusOid") String hakemusOid,
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("hakukohdeOid") String hakukohdeOid,
-      @PathParam("valintatapajonoOid") String valintatapajonoOid,
-      @Suspended AsyncResponse asyncResponse) {
-    setAsyncTimeout(
-        asyncResponse,
-        String.format(
-            "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /hakemus/%s/haku/%s/hakukohde/%s/valintatapajono/%s",
-            hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid));
+  public DeferredResult<ResponseEntity<List<Valintatulos>>> hakemuksenSijoittelunTulos(
+      @PathVariable("hakemusOid") String hakemusOid,
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("hakukohdeOid") String hakukohdeOid,
+      @PathVariable("valintatapajonoOid") String valintatapajonoOid) {
+
+    DeferredResult<ResponseEntity<List<Valintatulos>>> result =
+        new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          LOG.error(
+              String.format(
+                  "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /hakemus/%s/haku/%s/hakukohde/%s/valintatapajono/%s",
+                  hakemusOid, hakuOid, hakukohdeOid, valintatapajonoOid));
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu"));
+        });
+
     valintaTulosServiceResource
         .findValintatuloksetByHakemus(hakuOid, hakemusOid)
         .map(
@@ -198,48 +213,57 @@ public class ValintaTulosServiceProxyResource {
                     .collect(Collectors.toList());
               }
             })
-        .map(
-            valintatulokset ->
-                Response.ok(valintatulokset).type(MediaType.APPLICATION_JSON_TYPE).build())
         .subscribe(
-            asyncResponse::resume,
+            valintatulokset ->
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(valintatulokset)),
             error -> {
               LOG.error("Valintatulosten haku valinta-tulos-servicestä epäonnistui", error);
-              respondWithError(
-                  asyncResponse,
-                  "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
-                      + error.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(
+                          "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
+                              + error.getMessage()));
             });
+
+    return result;
   }
 
+  @GetMapping(
+      value = "/hakemus/{hakemusOid}/haku/{hakuOid:.+}",
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-  @GET
-  @Path("/hakemus/{hakemusOid}/haku/{hakuOid}")
-  @Consumes("application/json")
-  public void kaikkiHakemuksenSijoittelunTulokset(
-      @PathParam("hakemusOid") String hakemusOid,
-      @PathParam("hakuOid") String hakuOid,
-      @Suspended AsyncResponse asyncResponse) {
-    setAsyncTimeout(
-        asyncResponse,
-        String.format(
-            "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /hakemus/%s/haku/%s",
-            hakemusOid, hakuOid));
+  public DeferredResult<ResponseEntity<List<Valintatulos>>> kaikkiHakemuksenSijoittelunTulokset(
+      @PathVariable("hakemusOid") String hakemusOid, @PathVariable("hakuOid") String hakuOid) {
+
+    DeferredResult<ResponseEntity<List<Valintatulos>>> result =
+        new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          LOG.error(
+              String.format(
+                  "ValintatulosserviceProxy -palvelukutsu on aikakatkaistu: /hakemus/%s/haku/%s",
+                  hakemusOid, hakuOid));
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("ValintatulosserviceProxy -palvelukutsu on aikakatkaistu"));
+        });
+
     valintaTulosServiceResource
         .findValintatuloksetByHakemus(hakuOid, hakemusOid)
-        .map(
-            valintatulokset ->
-                Response.ok(valintatulokset).type(MediaType.APPLICATION_JSON_TYPE).build())
         .subscribe(
-            asyncResponse::resume,
+            valintatulokset ->
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(valintatulokset)),
             error -> {
               LOG.error("Valintatulosten haku valinta-tulos-servicestä epäonnistui", error);
-              respondWithError(
-                  asyncResponse,
-                  "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
-                      + error.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(
+                          "ValintatulosserviceProxy -palvelukutsu epäonnistui virheeseen: "
+                              + error.getMessage()));
             });
+
+    return result;
   }
 
   public static class ValintaTulosServiceSerializersModule extends SimpleModule {

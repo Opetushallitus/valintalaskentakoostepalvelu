@@ -47,7 +47,8 @@ public class AuthorityCheckService {
       final Set<String> organizationGroupOids =
           parseOrganizationGroupOidsFromSecurityRoles(authorities);
       if (organizationGroupOids.isEmpty() && organizationOids.isEmpty()) {
-        return CompletableFuture.failedFuture(new RuntimeException("Unauthorized. User has no organization OIDS"));
+        return CompletableFuture.failedFuture(
+            new RuntimeException("Unauthorized. User has no organization OIDS"));
       }
       CompletableFuture<Set<String>> searchByOrganizationOids =
           Optional.of(organizationOids)
@@ -62,9 +63,9 @@ public class AuthorityCheckService {
               .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
       return searchByOrganizationOids.thenComposeAsync(
-              byOrgs ->
-                  searchByOrganizationGroupOids.thenApplyAsync(
-                      byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid)));
+          byOrgs ->
+              searchByOrganizationGroupOids.thenApplyAsync(
+                  byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid)));
     }
   }
 

@@ -26,21 +26,16 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
-@Controller("ErillishakuResource")
-@Path("erillishaku")
+@RestController("ErillishakuResource")
+@RequestMapping(value = "/erillishaku")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/erillishaku", description = "Resurssi erillishaun tietojen tuontiin ja vientiin")
 public class ErillishakuResource {
@@ -68,28 +63,27 @@ public class ErillishakuResource {
   @Autowired private ErillishaunVientiService vientiService;
   @Autowired private TarjontaAsyncResource tarjontaResource;
 
-  @Context private HttpServletRequest httpServletRequestJaxRS;
-
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-  @POST
-  @Path("/vienti")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/vienti",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
       consumes = "application/json",
       value = "Erillishaun hakukohteen vienti taulukkolaskentaan",
       response = ProsessiId.class)
   public ProsessiId vienti(
-      @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintatapajonoOid") String valintatapajonoOid) {
+      @RequestParam(value = "hakutyyppi", required = false) Hakutyyppi tyyppi,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "valintatapajonoOid", required = false) String valintatapajonoOid,
+      HttpServletRequest request) {
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
     authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
     vientiService.vie(
-        createAuditSession(httpServletRequestJaxRS),
+        createAuditSession(request),
         prosessi,
         new ErillishakuDTO(
             tyyppi,
@@ -102,21 +96,24 @@ public class ErillishakuResource {
   }
 
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-  @POST
-  @Path("/tuonti")
-  @Consumes("application/octet-stream")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/tuonti",
+      consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
       consumes = "application/json",
       value = "Erillishaun hakukohteen tuonti taulukkolaskennalla",
       response = ProsessiId.class)
   public ProsessiId tuonti(
-      @QueryParam("hakutyyppi") Hakutyyppi tyyppi,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintatapajonoOid") String valintatapajonoOid,
-      InputStream file)
+      @RequestParam(value = "hakutyyppi", required = false) Hakutyyppi tyyppi,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "valintatapajonoOid", required = false) String valintatapajonoOid,
+      HttpServletRequest request)
       throws Exception {
+
+    InputStream file = request.getInputStream();
+
     LOG.info(
         "Käyttäjä "
             + AuditLog.loggedInUserOid()
@@ -131,7 +128,7 @@ public class ErillishakuResource {
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
     tuontiService.tuoExcelistä(
-        createAuditSession(httpServletRequestJaxRS),
+        createAuditSession(request),
         prosessi,
         new ErillishakuDTO(
             tyyppi,
@@ -145,20 +142,21 @@ public class ErillishakuResource {
   }
 
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-  @POST
-  @Path("/tuonti/json")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/tuonti/json",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
       consumes = "application/json",
       value = "Erillishaun hakukohteen tuonti JSON-tietueella",
       response = ProsessiId.class)
   public ProsessiId tuontiJson(
-      @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU") @QueryParam("hakutyyppi")
+      @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU")
+          @RequestParam(value = "hakutyyppi", required = false)
           Hakutyyppi tyyppi,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintatapajonoOid") String valintatapajonoOid,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "valintatapajonoOid", required = false) String valintatapajonoOid,
       @ApiParam(
               "maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>"
                   + "maksuntila=[MAKSAMATTA|MAKSETTU|VAPAUTETTU]<br>"
@@ -171,7 +169,9 @@ public class ErillishakuResource {
                   + "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>"
                   + "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>"
                   + "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
-          ErillishakuJson json) {
+          @RequestBody
+          ErillishakuJson json,
+      HttpServletRequest request) {
     LOG.info(
         "Käyttäjä "
             + AuditLog.loggedInUserOid()
@@ -185,7 +185,7 @@ public class ErillishakuResource {
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
     tuontiService.tuoJson(
-        createAuditSession(httpServletRequestJaxRS),
+        createAuditSession(request),
         prosessi,
         new ErillishakuDTO(
             tyyppi,
@@ -200,20 +200,21 @@ public class ErillishakuResource {
   }
 
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-  @POST
-  @Path("/tuonti/ui")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(
+      value = "/tuonti/ui",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
       consumes = "application/json",
       value = "Erillishaun hakukohteen tuonti JSON-tietueella",
       response = ProsessiId.class)
   public ProsessiId tuontiJsonFromUI(
-      @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU") @QueryParam("hakutyyppi")
+      @ApiParam(allowableValues = "TOISEN_ASTEEN_OPPILAITOS,KORKEAKOULU")
+          @RequestParam(value = "hakutyyppi", required = false)
           Hakutyyppi tyyppi,
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("hakukohdeOid") String hakukohdeOid,
-      @QueryParam("valintatapajonoOid") String valintatapajonoOid,
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      @RequestParam(value = "valintatapajonoOid", required = false) String valintatapajonoOid,
       @ApiParam(
               "maksuvelvollisuus=[EI_TARKISTETTU|MAKSUVELVOLLINEN|EI_MAKSUVELVOLLINEN]<br>"
                   + "maksuntila=[MAKSAMATTA|MAKSETTU|VAPAUTETTU]<br>"
@@ -226,7 +227,9 @@ public class ErillishakuResource {
                   + "aa|ml|eu|bn|zh|rw|99|ha|nn|or|ta|ks|co|cr|mk|vi|io|lt|bo|ru|ik|ja|be|sc|ka|ay|he|xh|fy|dv|tn|eo|jv|sn|na|os|ln|rn|om|hz|rm|<br>"
                   + "ss|et|bs|af|za|ve|ia|gv|st|mn|mi|fo|ri|gn|ku|es|as|ff|ig|da|av|ch|lb|tr|cy|el|li|ki|nb|lu|sm|no|tw|sw|mh|wa|tt|fr|de|km|fa|<br>"
                   + "ht|kk|yo|ny|qu|ca|an|pt|yi|si|bg|cu|nd|ky|th|sr|ba|kr|ps|br|it|im|id|bh|iu|ar|pl|nl|ms|pi|tk|sh|cs|vk|kg]<br>")
-          ErillishakuJson json) {
+          @RequestBody
+          ErillishakuJson json,
+      HttpServletRequest request) {
     LOG.info(
         "Käyttäjä "
             + AuditLog.loggedInUserOid()
@@ -240,7 +243,7 @@ public class ErillishakuResource {
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
     tuontiService.tuoJson(
-        createAuditSession(true, httpServletRequestJaxRS),
+        createAuditSession(true, request),
         prosessi,
         new ErillishakuDTO(
             tyyppi,
@@ -254,7 +257,7 @@ public class ErillishakuResource {
     return prosessi.toProsessiId();
   }
 
-  private String findTarjoajaOid(@QueryParam("hakukohdeOid") String hakukohdeOid) {
+  private String findTarjoajaOid(String hakukohdeOid) {
     try {
       return tarjontaResource
           .haeHakukohde(hakukohdeOid)

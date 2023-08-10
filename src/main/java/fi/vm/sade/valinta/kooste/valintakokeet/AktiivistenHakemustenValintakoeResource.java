@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintakokeet;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
-
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -13,25 +11,23 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller
+@RestController
 @PreAuthorize("isAuthenticated()")
-@Path("/valintakoe")
+@RequestMapping("/valintakoe")
 @Api(value = "/valintakoe", description = "Resurssi valintakoeosallistumistulosten hakemiseen.")
 public class AktiivistenHakemustenValintakoeResource {
   private static final String VALINTAKAYTTAJA_ROLE =
@@ -57,20 +53,20 @@ public class AktiivistenHakemustenValintakoeResource {
     this.tarjontaAsyncResource = tarjontaAsyncResource;
   }
 
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("hakutoive/{hakukohdeOid}")
+  @GetMapping(value = "hakutoive/{hakukohdeOid:.+}", produces = MediaType.APPLICATION_JSON)
   @PreAuthorize(VALINTAKAYTTAJA_ROLE)
   @ApiOperation(
       value =
           "Hakee valintakoeosallistumiset hakukohteelle OID:n perusteella, "
               + "filtteröiden pois passiiviset hakemukset",
       response = ValintakoeOsallistuminenDTO.class)
-  public void osallistumisetByHakutoive(
-      @ApiParam(value = "Hakukohde OID", required = true) @PathParam("hakukohdeOid")
-          String hakukohdeOid,
-      @Suspended AsyncResponse asyncResponse) {
-    asyncResponse.setTimeout(30, TimeUnit.SECONDS);
+  public DeferredResult<ResponseEntity<List<ValintakoeOsallistuminenDTO>>>
+      osallistumisetByHakutoive(
+          @ApiParam(value = "Hakukohde OID", required = true) @PathVariable("hakukohdeOid")
+              String hakukohdeOid) {
+
+    DeferredResult<ResponseEntity<List<ValintakoeOsallistuminenDTO>>> result =
+        new DeferredResult<>(30 * 1000l);
 
     Observable.fromFuture(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
         .flatMap(
@@ -78,17 +74,18 @@ public class AktiivistenHakemustenValintakoeResource {
                 filtteroiPoisPassiivistenHakemustenOsallistumistiedot(osallistumiset, hakukohdeOid))
         .subscribe(
             osallistumiset ->
-                asyncResponse.resume(Response.ok(osallistumiset, APPLICATION_JSON_TYPE).build()),
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(osallistumiset)),
             exception -> {
               String message =
                   String.format(
                       "Virhe haettaessa valintakoeosallistumisia hakukohteelle %s", hakukohdeOid);
               LOG.error(message, exception);
-              asyncResponse.resume(
-                  Response.serverError()
-                      .entity(String.format("%s : %s", message, exception.getMessage()))
-                      .build());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(String.format("%s : %s", message, exception.getMessage())));
             });
+
+    return result;
   }
 
   private Observable<List<ValintakoeOsallistuminenDTO>>

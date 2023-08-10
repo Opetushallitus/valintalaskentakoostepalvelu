@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa;
 
-import com.google.gson.Gson;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
@@ -14,23 +13,20 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 import java.util.stream.Collectors;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller("JonotSijoittelussaProxyResource")
-@Path("/proxy/jonotsijoittelussa")
+@RestController("JonotSijoittelussaProxyResource")
+@RequestMapping("/proxy/jonotsijoittelussa")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/proxy/jonotsijoittelussa", description = "Tarkistaa onko jonot sijoittelussa")
 public class JonotSijoittelussaProxyResource {
@@ -40,14 +36,23 @@ public class JonotSijoittelussaProxyResource {
   @Autowired private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
   @Autowired private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 
+  @GetMapping(value = "/hakuOid/{hakuOid}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @GET
-  @Path("/hakuOid/{hakuOid}")
-  public void jonotSijoittelussa(
-      @PathParam("hakuOid") String hakuOid, @Suspended final AsyncResponse asyncResponse) {
-    asyncResponse.setTimeout(5L, TimeUnit.MINUTES);
-    asyncResponse.setTimeoutHandler(this::handleTimeout);
+  public DeferredResult<ResponseEntity<Set<String>>> jonotSijoittelussa(
+      @PathVariable("hakuOid") String hakuOid) {
+
+    DeferredResult<ResponseEntity<Set<String>>> result = new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          String explanation =
+              String.format(
+                  "JonotSijoittelussaProxyResource -palvelukutsu on aikakatkaistu: /proxy/jonotsijoittelussa/hakuOid/{}");
+          LOG.error(explanation);
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body(explanation));
+        });
+
     final Observable<List<JonoDto>> laskennanJonot =
         valintalaskentaAsyncResource.jonotSijoitteluun(hakuOid);
     final Observable<Map<String, List<ValintatapajonoDTO>>> valintaperusteidenJonot =
@@ -88,28 +93,16 @@ public class JonotSijoittelussaProxyResource {
             })
         .subscribe(
             laskennastaPuuttuvatHakukohdeOids ->
-                asyncResponse.resume(
-                    Response.ok(
-                            new Gson().toJson(laskennastaPuuttuvatHakukohdeOids),
-                            MediaType.APPLICATION_JSON_TYPE)
-                        .build()),
+                result.setResult(
+                    ResponseEntity.status(HttpStatus.OK).body(laskennastaPuuttuvatHakukohdeOids)),
             exception -> {
               LOG.error(
                   "Jonojen tarkistus sijoittelussa epaonnistui haulle {}!", hakuOid, exception);
-              asyncResponse.resume(Response.serverError().entity(exception).build());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(exception.getMessage()));
             });
-  }
 
-  private void handleTimeout(AsyncResponse handler) {
-    String explanation =
-        String.format(
-            "JonotSijoittelussaProxyResource -palvelukutsu on aikakatkaistu: /proxy/jonotsijoittelussa/hakuOid/{}");
-    LOG.error(explanation);
-    try {
-      handler.resume(Response.serverError().entity(explanation).build());
-    } catch (Throwable t) {
-      // dont care! timeout callback is racing with real response. throws when real response is
-      // faster.
-    }
+    return result;
   }
 }

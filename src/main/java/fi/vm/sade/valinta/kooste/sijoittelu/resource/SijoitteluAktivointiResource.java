@@ -24,25 +24,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 /** @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa. */
-@Controller("SijoitteluAktivointiResource")
-@Path("koostesijoittelu")
+@RestController("SijoitteluAktivointiResource")
+@RequestMapping("/koostesijoittelu")
 @PreAuthorize("isAuthenticated()")
 @Api(
     value = "/koostesijoittelu",
@@ -69,28 +66,24 @@ public class SijoitteluAktivointiResource {
 
   @Autowired private AuthorityCheckService authorityCheckService;
 
-  @GET
-  @Path("/status/{hakuoid}")
-  @Produces(MediaType.APPLICATION_JSON)
+  @GetMapping(value = "/status/{hakuoid:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Sijoittelun status", response = String.class)
-  public Sijoittelu status(@PathParam("hakuoid") String hakuOid) {
+  public Sijoittelu status(@PathVariable("hakuoid") String hakuOid) {
     return sijoittelunValvonta.haeAktiivinenSijoitteluHaulle(hakuOid);
   }
 
-  @GET
-  @Path("/status")
-  @Produces(MediaType.APPLICATION_JSON)
+  @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Jatkuvan sijoittelun jonossa olevat sijoittelut", response = String.class)
   public List<AjastettuSijoitteluInfo> status() {
     return jatkuvaSijoittelu.haeAjossaOlevatAjastetutSijoittelut();
   }
 
-  @POST
-  @Path("/aktivoi")
+  @PostMapping(value = "/aktivoi")
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD')")
   @ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
   public void aktivoiSijoittelu(
-      @QueryParam("hakuOid") String hakuOid, @Context HttpServletRequest request) {
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      HttpServletRequest request) {
     authorityCheckService.checkAuthorizationForHaku(
         hakuOid, Collections.singleton("ROLE_APP_SIJOITTELU_CRUD"));
 
@@ -114,12 +107,11 @@ public class SijoitteluAktivointiResource {
     }
   }
 
-  @GET
-  @Path("/jatkuva/aktivoi")
-  @Produces(MediaType.TEXT_PLAIN)
+  @GetMapping(value = "/jatkuva/aktivoi", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(ANY_CRUD)
   @ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
-  public String aktivoiJatkuvassaSijoittelussa(@QueryParam("hakuOid") String hakuOid) {
+  public String aktivoiJatkuvassaSijoittelussa(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid) {
     if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
       return "no privileges.";
     }
@@ -143,12 +135,11 @@ public class SijoitteluAktivointiResource {
     }
   }
 
-  @GET
-  @Path("/jatkuva/poista")
-  @Produces(MediaType.TEXT_PLAIN)
+  @GetMapping(value = "/jatkuva/poista", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(ANY_CRUD)
   @ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
-  public String poistaJatkuvastaSijoittelusta(@QueryParam("hakuOid") String hakuOid) {
+  public String poistaJatkuvastaSijoittelusta(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid) {
     if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
       return "no privileges.";
     }
@@ -165,32 +156,28 @@ public class SijoitteluAktivointiResource {
     }
   }
 
-  @GET
-  @Path("/jatkuva/kaikki")
-  @Produces(MediaType.APPLICATION_JSON)
+  @GetMapping(value = "/jatkuva/kaikki", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OPH_CRUD)
   @ApiOperation(value = "Kaikki aktiiviset sijoittelut", response = Map.class)
   public Collection<SijoitteluDto> aktiivisetSijoittelut() {
     return sijoittelunSeurantaResource.hae();
   }
 
-  @GET
-  @Path("/jatkuva")
-  @Produces(MediaType.APPLICATION_JSON)
+  @GetMapping(value = "/jatkuva", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(ANY_CRUD)
   @ApiOperation(value = "Haun aktiiviset sijoittelut", response = SijoitteluDto.class)
-  public void jatkuvaTila(
-      @QueryParam("hakuOid") String hakuOid, @Suspended AsyncResponse asyncResponse) {
-    asyncResponse.setTimeout(2L, TimeUnit.MINUTES);
-    asyncResponse.setTimeoutHandler(
-        asyncResponse1 -> {
+  public DeferredResult<ResponseEntity<String>> jatkuvaTila(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid) {
+
+    DeferredResult<ResponseEntity<String>> result = new DeferredResult<>(2 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
           LOG.error(
               "Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu: /koostesijoittelu/jatkuva/{}",
               hakuOid);
-          asyncResponse1.resume(
-              Response.serverError()
-                  .entity("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu")
-                  .build());
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Haun aktiiviset sijoittelut -palvelukutsu on aikakatkaistu"));
         });
 
     Collection<? extends GrantedAuthority> userRoles = SecurityUtil.getRoles();
@@ -207,16 +194,19 @@ public class SijoitteluAktivointiResource {
 
               if (isAuthorizedForHaku) {
                 String resp = jatkuvaTilaAutorisoituOrganisaatiolle(hakuOid);
-                asyncResponse.resume(resp);
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(resp));
               } else {
                 String msg =
                     String.format(
                         "Käyttäjällä ei oikeutta haun %s haun tarjoajiin %s tai niiden yläorganisaatioihin.",
                         hakuOid, String.join(", ", haku.tarjoajaOids));
                 LOG.error(msg);
-                asyncResponse.resume(new ForbiddenException(msg));
+                result.setErrorResult(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg));
               }
             });
+
+    return result;
   }
 
   private boolean containsOphRole(Collection<? extends GrantedAuthority> userRoles) {
@@ -236,15 +226,13 @@ public class SijoitteluAktivointiResource {
     }
   }
 
-  @GET
-  @Path("/jatkuva/paivita")
-  @Produces(MediaType.TEXT_PLAIN)
+  @GetMapping(value = "/jatkuva/paivita", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(ANY_CRUD)
   @ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
   public String paivitaJatkuvanSijoittelunAloitus(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("aloitusajankohta") Long aloitusajankohta,
-      @QueryParam("ajotiheys") Integer ajotiheys) {
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "aloitusajankohta", required = false) Long aloitusajankohta,
+      @RequestParam(value = "ajotiheys", required = false) Integer ajotiheys) {
     if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
       return "no privileges.";
     }
