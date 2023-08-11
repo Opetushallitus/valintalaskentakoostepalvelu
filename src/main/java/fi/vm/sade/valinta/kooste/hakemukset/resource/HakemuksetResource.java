@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
+import io.reactivex.Observable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.HashMap;
@@ -78,14 +79,14 @@ public class HakemuksetResource {
         hakuOid);
     Long started = System.currentTimeMillis();
 
-    authorityCheckService
+    Observable.fromFuture(authorityCheckService
         .getAuthorityCheckForRoles(
             asList(
                 "ROLE_APP_HAKEMUS_READ_UPDATE",
                 "ROLE_APP_HAKEMUS_READ",
                 "ROLE_APP_HAKEMUS_CRUD",
                 "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD"))
+                "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
         .subscribe(
             authCheck -> {
               valinnanvaiheenValintakoekutsutService.hae(

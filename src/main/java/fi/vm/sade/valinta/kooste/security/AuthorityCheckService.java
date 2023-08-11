@@ -36,19 +36,18 @@ public class AuthorityCheckService {
   @Autowired private OrganisaatioResource organisaatioResource;
   @Autowired private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 
-  public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
+  public CompletableFuture<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
       Collection<String> roles) {
     final Collection<String> authorities = getAuthoritiesFromAuthenticationStartingWith(roles);
     final Set<String> organizationOids = parseOrganizationOidsFromSecurityRoles(authorities);
     boolean isRootAuthority = organizationOids.stream().anyMatch(oid -> isRootOrganizationOID(oid));
     if (isRootAuthority) {
-      return Observable.just((oid) -> true);
+      return CompletableFuture.completedFuture((oid) -> true);
     } else {
       final Set<String> organizationGroupOids =
           parseOrganizationGroupOidsFromSecurityRoles(authorities);
       if (organizationGroupOids.isEmpty() && organizationOids.isEmpty()) {
-        return Observable.error(
-            new RuntimeException("Unauthorized. User has no organization OIDS"));
+        return CompletableFuture.failedFuture(new RuntimeException("Unauthorized. User has no organization OIDS"));
       }
       CompletableFuture<Set<String>> searchByOrganizationOids =
           Optional.of(organizationOids)
@@ -62,11 +61,10 @@ public class AuthorityCheckService {
               .map(tarjontaAsyncResource::hakukohdeSearchByOrganizationGroupOids)
               .orElse(CompletableFuture.completedFuture(Collections.emptySet()));
 
-      return Observable.fromFuture(
-          searchByOrganizationOids.thenComposeAsync(
+      return searchByOrganizationOids.thenComposeAsync(
               byOrgs ->
                   searchByOrganizationGroupOids.thenApplyAsync(
-                      byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid))));
+                      byGroups -> (oid) -> byOrgs.contains(oid) || byGroups.contains(oid)));
     }
   }
 
@@ -103,7 +101,7 @@ public class AuthorityCheckService {
     }
 
     boolean isAuthorized =
-        getAuthorityCheckForRoles(requiredRoles)
+        Observable.fromFuture(getAuthorityCheckForRoles(requiredRoles))
             .map(authorityCheck -> hakukohdeOids.stream().anyMatch(authorityCheck))
             .timeout(2, MINUTES)
             .blockingFirst();
