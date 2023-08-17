@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController("SuorituksenArvosanatProxyResource")
-@RequestMapping("/proxy/suoritukset")
+@RequestMapping("/resources/proxy/suoritukset")
 @PreAuthorize("isAuthenticated()")
 @Api(
     value = "/proxy/suoritukset",

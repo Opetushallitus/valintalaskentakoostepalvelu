@@ -4,7 +4,6 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
 
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
@@ -12,6 +11,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
@@ -35,7 +35,7 @@ import org.mockito.Mockito;
 /** @author Jussi Jartamo */
 public class OsoitetarratServiceTest {
   final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
 
   final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource =
       new HttpResourceBuilder(getClass().getName())
@@ -57,7 +57,7 @@ public class OsoitetarratServiceTest {
 
   @Before
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
   }
 
   @Test

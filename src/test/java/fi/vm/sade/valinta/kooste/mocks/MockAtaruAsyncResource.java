@@ -15,9 +15,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.mockito.internal.util.collections.Sets;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+@Profile("mockresources")
 @Service
 public class MockAtaruAsyncResource implements AtaruAsyncResource {
 

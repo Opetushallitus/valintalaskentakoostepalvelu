@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  *     <p>Testaa uudelleen yrityksia, eli epavarmaa verkkoyhteytta! @Ignore NGinx ongelma on
  *     ratkaistu. Ei tarvi toistaiseksi varautua näihin!
  */
+@Profile("!boottest")
 @Ignore
 @Configuration
 @ContextConfiguration(classes = HakuRetryTesti.class)

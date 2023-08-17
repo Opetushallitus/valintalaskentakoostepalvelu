@@ -46,7 +46,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 ///
 // valintalaskenta-laskenta-service/resources/valintalaskentakoostepalvelu/hakukohde/{hakukohdeOid}/valinnanvaihe
 @RestController
-@RequestMapping("/valintatapajonolaskenta")
+@RequestMapping("/resources/valintatapajonolaskenta")
 @PreAuthorize("isAuthenticated()")
 @Api(
     value = "/valintatapajonolaskenta",

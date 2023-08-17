@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController("SessionResource")
-@RequestMapping("/session")
+@RequestMapping("/resources/session")
 @Api(value = "/session", description = "Sessionhallinta")
 public class SessionResource {
 

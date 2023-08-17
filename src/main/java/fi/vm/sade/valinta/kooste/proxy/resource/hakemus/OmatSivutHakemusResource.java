@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController
-@RequestMapping("/proxy/valintatulos")
+@RequestMapping("/resources/proxy/valintatulos")
 public class OmatSivutHakemusResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(OmatSivutHakemusResource.class);

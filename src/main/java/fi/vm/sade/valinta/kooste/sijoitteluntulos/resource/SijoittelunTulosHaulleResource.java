@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /** @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa. */
 @Controller("SijoittelunTulosHaulleResource")
-@RequestMapping("/sijoitteluntuloshaulle")
+@RequestMapping("/resources/sijoitteluntuloshaulle")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/sijoitteluntuloshaulle", description = "Sijoitteluntulosten generointi koko haulle")
 public class SijoittelunTulosHaulleResource {

@@ -5,7 +5,7 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.*;
+import static fi.vm.sade.valinta.kooste.testapp.MockServicesApp.resourcesAddress;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.HttpMethod.GET;
 import static javax.ws.rs.HttpMethod.POST;
@@ -39,6 +39,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import java.io.IOException;
@@ -89,7 +90,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                         o.getSukunimi(),
                         Collections.emptyList()))
             .collect(Collectors.toList());
-    startShared();
+    MockServicesApp.start();
     setUpMockCalls();
   }
 

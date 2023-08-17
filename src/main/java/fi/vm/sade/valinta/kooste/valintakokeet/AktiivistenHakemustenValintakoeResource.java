@@ -27,7 +27,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
-@RequestMapping("/valintakoe")
+@RequestMapping("/resources/valintakoe")
 @Api(value = "/valintakoe", description = "Resurssi valintakoeosallistumistulosten hakemiseen.")
 public class AktiivistenHakemustenValintakoeResource {
   private static final String VALINTAKAYTTAJA_ROLE =

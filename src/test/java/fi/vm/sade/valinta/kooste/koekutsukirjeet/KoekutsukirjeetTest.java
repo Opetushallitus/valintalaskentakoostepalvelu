@@ -7,7 +7,6 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
@@ -17,6 +16,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResourc
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
@@ -41,7 +41,7 @@ public class KoekutsukirjeetTest {
   static final Logger LOG = LoggerFactory.getLogger(KoekutsukirjeetTest.class);
   public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); // 5sec
   final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
 
   final HttpResourceBuilder.WebClientExposingHttpResource koekutsukirjeResource =
       new HttpResourceBuilder(getClass().getName())
@@ -50,7 +50,7 @@ public class KoekutsukirjeetTest {
 
   @Before
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
   }
 
   @Test

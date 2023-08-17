@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController("HakuImportResource")
-@RequestMapping("/hakuimport")
+@RequestMapping("/resources/hakuimport")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/hakuimport", description = "Haun tuontiin tarjonnalta")
 public class HakuImportResource {

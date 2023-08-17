@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
@@ -20,6 +19,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
@@ -51,7 +51,7 @@ public class OppijanSuorituksetProxyResourceTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(OppijanSuorituksetProxyResourceTest.class);
   private static final String URL =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
   private static final String opiskelijaOid = "1.2.246.562.24.71943835646";
   private static final String hakemusOid = "1.2.246.562.11.00000000615";
   private static final String hakuOid = "1.2.246.562.29.90697286251";
@@ -75,7 +75,7 @@ public class OppijanSuorituksetProxyResourceTest {
 
   @BeforeClass
   public static void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
   }
 
   @Before

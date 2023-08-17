@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("test")
+@Profile("mockservices")
 @Configuration
 public class KoosteTestProfileConfiguration {
   private static final Logger LOG = LoggerFactory.getLogger(KoosteTestProfileConfiguration.class);

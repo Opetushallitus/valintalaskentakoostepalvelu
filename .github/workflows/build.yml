@@ -31,7 +31,7 @@ jobs:
           timezoneLinux: "Europe/Helsinki"
 
       - name: Build with Maven
-        run: mvn clean spotless:check package -B -Dbranch=${GITHUB_REF_NAME} -Drevision=${GITHUB_SHA} -DbuildNumber=${GITHUB_RUN_NUMBER}
+        run: mvn clean spotless:check verify -B -Dbranch=${GITHUB_REF_NAME} -Drevision=${GITHUB_SHA} -DbuildNumber=${GITHUB_RUN_NUMBER}
 
       - uses: actions/cache@v2
         id: restore-build
@@ -61,7 +61,7 @@ jobs:
           git clone https://github.com/Opetushallitus/ci-tools.git
           source ci-tools/common/setup-tools.sh
           export ARTIFACT_NAME="valintalaskentakoostepalvelu"
-          mv target/valintalaskentakoostepalvelu-*.jar $DOCKER_BUILD_DIR/artifact/${ARTIFACT_NAME}.jar
+          mv target/valintalaskentakoostepalvelu.jar $DOCKER_BUILD_DIR/artifact/${ARTIFACT_NAME}.jar
           cp -vr src/main/resources/oph-configuration $DOCKER_BUILD_DIR/config/
           export BASE_IMAGE="baseimage-fatjar-openjdk11:master"
           ./ci-tools/common/pull-image.sh

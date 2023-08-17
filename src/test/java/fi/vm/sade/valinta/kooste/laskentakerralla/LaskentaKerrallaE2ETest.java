@@ -2,8 +2,6 @@ package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.HAKUKOHDE1;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.HAKUKOHDE2;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeviite;
@@ -14,6 +12,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +31,7 @@ public class LaskentaKerrallaE2ETest {
 
   @Before
   public void startServer() {
-    startShared();
+    MockServicesApp.start();
   }
 
   @Test
@@ -41,7 +40,7 @@ public class LaskentaKerrallaE2ETest {
     HttpResourceBuilder.WebClientExposingHttpResource http =
         new HttpResourceBuilder(getClass().getName())
             .address(
-                resourcesAddress
+                MockServicesApp.resourcesAddress
                     + "/valintalaskentakerralla/haku/HAKUOID1/tyyppi/HAKU/whitelist/true")
             .buildExposingWebClientDangerously();
     mockToReturnJson(

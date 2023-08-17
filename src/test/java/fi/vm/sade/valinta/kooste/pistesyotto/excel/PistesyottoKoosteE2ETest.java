@@ -6,7 +6,6 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNotFound;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithParams;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.*;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static java.util.Collections.emptyList;
@@ -55,6 +54,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.dto.Osallistumistieto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistesyottoValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
@@ -101,7 +101,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
   @Before
   public void startServer() {
-    startShared();
+    MockServicesApp.start();
     MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
         "ROLE_APP_HAKEMUS_READ_UPDATE_1.2.246.562.10.00000000001");
   }
@@ -111,7 +111,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createClient(
-            resourcesAddress
+            MockServicesApp.resourcesAddress
                 + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
 
     List<ApplicationAdditionalDataDTO> applicationAdditionalDatas = readAdditionalData();
@@ -157,7 +157,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createClient(
-            resourcesAddress
+            MockServicesApp.resourcesAddress
                 + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
 
     List<ApplicationAdditionalDataDTO> applicationAdditionalDatas = readAdditionalData();
@@ -231,7 +231,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
   public void testTallentaaKoostetutPistetiedotHakukohteelle() throws Exception {
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createClient(
-            resourcesAddress
+            MockServicesApp.resourcesAddress
                 + "/pistesyotto/koostetutPistetiedot/haku/testihaku/hakukohde/testihakukohde");
     List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos =
         luePistetiedot("List_ApplicationAdditionalDataDTO.json");
@@ -287,7 +287,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createClient(
-            resourcesAddress
+            MockServicesApp.resourcesAddress
                 + "/pistesyotto/koostetutPistetiedot/hakemus/"
                 + applicationAdditionaData.getOid());
     applicationAdditionaData.getAdditionalData().remove("kielikoe_fi");
@@ -381,7 +381,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     HttpResourceBuilder.WebClientExposingHttpResource http =
         createClient(
-            resourcesAddress
+            MockServicesApp.resourcesAddress
                 + "/pistesyotto/koostetutPistetiedot/hakemus/"
                 + applicationAdditionalDataDto.getOid());
     applicationAdditionalDataDto.getAdditionalData().remove("kielikoe_fi");
@@ -438,7 +438,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     String hakijaOid = applicationAdditionalDataDto.getPersonOid();
 
     String url =
-        resourcesAddress
+        MockServicesApp.resourcesAddress
             + "/pistesyotto/koostetutPistetiedot/hakemus/"
             + applicationAdditionalDataDto.getOid();
     HttpResourceBuilder.WebClientExposingHttpResource http = createClient(url);

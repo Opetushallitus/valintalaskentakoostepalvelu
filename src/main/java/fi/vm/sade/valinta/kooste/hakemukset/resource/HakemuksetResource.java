@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController("HakemuksetResource")
-@RequestMapping("/hakemukset")
+@RequestMapping("/resources/hakemukset")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/hakemukset", description = "Hakemusten hakeminen")
 public class HakemuksetResource {

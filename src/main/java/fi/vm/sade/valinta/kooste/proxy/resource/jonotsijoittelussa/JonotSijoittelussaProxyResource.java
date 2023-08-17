@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController("JonotSijoittelussaProxyResource")
-@RequestMapping("/proxy/jonotsijoittelussa")
+@RequestMapping("/resources/proxy/jonotsijoittelussa")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/proxy/jonotsijoittelussa", description = "Tarkistaa onko jonot sijoittelussa")
 public class JonotSijoittelussaProxyResource {

@@ -7,8 +7,10 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+@Profile("mockresources")
 @Service
 public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource {
 
