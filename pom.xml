@@ -4,6 +4,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.12</version>
+    </parent>
+
     <artifactId>valintalaskentakoostepalvelu</artifactId>
     <groupId>fi.vm.sade.valinta</groupId>
     <version>5.1-SNAPSHOT</version>
@@ -17,8 +23,8 @@
         <jetty.version>9.4.27.v20200227</jetty.version>
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
-        <spring.security.version>5.1.8.RELEASE</spring.security.version>
-        <spring.version>5.1.14.RELEASE</spring.version>
+        <spring.security.version>5.8.3</spring.security.version>
+        <spring.version>5.3.27</spring.version>
         <mockito.version>5.4.0</mockito.version>
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
@@ -26,6 +32,8 @@
         <valinta-sharedutils.version>5.11-SNAPSHOT</valinta-sharedutils.version>
         <valintaperusteet.version>5.17-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>5.17.2-SNAPSHOT</valintalaskenta.version>
+
+        <spring.boot.version>3.1.1</spring.boot.version>
     </properties>
 
     <dependencyManagement>
@@ -139,61 +147,6 @@
                 <version>${auditlog.api.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-expression</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-aop</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-tx</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context-support</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-core</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-config</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-core</artifactId>
                 <version>${cxf.version}</version>
@@ -271,15 +224,16 @@
                 <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-webapp</artifactId>
-                <version>${jetty.version}</version>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-access</artifactId>
+                <version>1.2.12</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-access</artifactId>
-                <version>1.3.0-alpha5</version>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.12</version>
             </dependency>
+
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
@@ -364,11 +318,6 @@
                 <version>9.0-beta</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
-            </dependency>
-            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>3.0.2</version>
@@ -436,6 +385,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
         </dependency>
@@ -443,11 +402,6 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
             <version>2.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>opintopolku-jetty</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
@@ -474,10 +428,6 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-cxf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -672,11 +622,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
         </dependency>
         <dependency>
@@ -691,15 +636,10 @@
             <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
-        <!-- spring security -->
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <version>4.2.18.RELEASE</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- Tests -->
@@ -806,6 +746,10 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>2.0.1</version>
@@ -839,8 +783,8 @@
                         </goals>
                         <configuration>
                             <target>
-                                <echo message="writing ${project.build.outputDirectory}/webapp/buildversion.txt"/>
-                                <echo file="${project.build.outputDirectory}/webapp/buildversion.txt">
+                                <echo message="writing ${project.build.outputDirectory}/static/buildversion.txt"/>
+                                <echo file="${project.build.outputDirectory}/static/buildversion.txt">
                                     <![CDATA[artifactId=${project.artifactId}
 version=${project.version}
 buildNumber=${build}
@@ -850,7 +794,7 @@ buildTtime=${maven.build.timestamp}
 ]]>
                                 </echo>
                                 <loadfile property="buildversiontxt"
-                                          srcFile="${project.build.outputDirectory}/webapp/buildversion.txt"/>
+                                          srcFile="${project.build.outputDirectory}/static/buildversion.txt"/>
                                 <echo message="${buildversiontxt}"/>
                                 <echo file="target/mavenversion.txt">${project.version}</echo>
                             </target>
@@ -866,74 +810,6 @@ buildTtime=${maven.build.timestamp}
                 <configuration>
                     <release>11</release>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty.version}</version>
-                <configuration>
-                    <systemProperties>
-                        <systemProperty>
-                            <name>log4j.configuration</name>
-                            <value>file:///${basedir}/src/test/resources/log4j.properties</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>spring.profiles.active</name>
-                            <value>test</value>
-                        </systemProperty>
-                    </systemProperties>
-                    <webAppConfig>
-                        <contextPath>/${project.artifactId}</contextPath>
-                        <descriptor>${basedir}/src/main/resources/webapp/WEB-INF/web.xml</descriptor>
-                    </webAppConfig>
-                    <stopPort>21079</stopPort>
-                    <stopKey>STOP</stopKey>
-                    <httpConnector>
-                        <port>18180</port>
-                        <idleTimeout>30000000</idleTimeout>
-                    </httpConnector>
-                    <contextHandlers>
-                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
-                            <contextPath>/valintalaskentakoostepalvelu</contextPath>
-                            <resourceBase>
-                                ${basedir}/target/valintalaskentakoostepalvelu
-                            </resourceBase>
-                            <configurationClasses>
-                                <configurationClass>org.eclipse.jetty.webapp.WebInfConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.webapp.WebXmlConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.webapp.MetaInfConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.webapp.FragmentConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.plus.webapp.EnvConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.plus.webapp.PlusConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.webapp.JettyWebXmlConfiguration
-                                </configurationClass>
-                            </configurationClasses>
-                        </contextHandler>
-                    </contextHandlers>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-servlets</artifactId>
-                        <version>${jetty.version}</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.javassist</groupId>
-                                <artifactId>javassist</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm</artifactId>
-                        <version>9.0-beta</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm-commons</artifactId>
-                        <version>9.0-beta</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -952,50 +828,6 @@ buildTtime=${maven.build.timestamp}
                                 </requireJavaVersion>
                                 <dependencyConvergence/>
                             </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>allinone</shadedClassifierName>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Main-Class>fi.vm.sade.valinta.kooste.KoosteProductionJetty</Main-Class>
-                                    </manifestEntries>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.handlers</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.schemas</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                     <resource>META-INF/cxf/bus-extensions.txt</resource>
-                                </transformer>
-                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

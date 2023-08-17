@@ -19,7 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController("ParametritResource")
-@RequestMapping("/parametrit")
+@RequestMapping("/resources/parametrit")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/parametrit", description = "Ohjausparametrit palveluiden aktiviteettipäivämäärille")
 public class ParametritResource {

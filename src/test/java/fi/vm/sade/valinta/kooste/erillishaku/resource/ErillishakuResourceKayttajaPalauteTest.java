@@ -14,12 +14,12 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.google.gson.GsonBuilder;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
@@ -39,7 +39,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
 
   static final Logger LOG = LoggerFactory.getLogger(ErillishakuResourceKayttajaPalauteTest.class);
   final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
   String hakuOid = "1.2.246.562.5.2013080813081926341928";
   String hakukohdeOid = "1.2.246.562.5.72607738902";
   String tarjoajaOid = "1.2.246.562.10.591352080610";
@@ -55,7 +55,8 @@ public class ErillishakuResourceKayttajaPalauteTest {
 
   @Before
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
+
     MockApplicationAsyncResource.serviceIsAvailable.set(true);
   }
 

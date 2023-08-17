@@ -56,7 +56,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 /** @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa. */
 @RestController("ValintalaskentaExcelResource")
-@RequestMapping("/valintalaskentaexcel")
+@RequestMapping("/resources/valintalaskentaexcel")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintalaskentaexcel", description = "Excel-raportteja")
 public class ValintalaskentaExcelResource {

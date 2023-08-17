@@ -12,12 +12,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.jasig.cas.client.validation.AssertionImpl;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.stereotype.Component;
 
+@Component
+@Order(3)
 public class MockOpintopolkuCasAuthenticationFilter implements Filter {
   private static CasAuthenticationToken casAuthenticationToken = null;
 

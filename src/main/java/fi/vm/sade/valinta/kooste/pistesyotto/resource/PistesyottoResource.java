@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController("PistesyottoResource")
-@RequestMapping("/pistesyotto")
+@RequestMapping("/resources/pistesyotto")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/pistesyotto", description = "Pistesyötön tuonti ja vienti taulukkolaskentaan")
 public class PistesyottoResource {

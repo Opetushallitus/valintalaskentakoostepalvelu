@@ -16,8 +16,12 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaKerrall
 import fi.vm.sade.valinta.kooste.valintalaskenta.resource.ValintalaskentaStatusExcelHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 
+@Profile("laskentakerralla")
 @Configuration
+@ActiveProfiles("laskentakerralla")
 public class LaskentaKerrallaContext {
 
   public LaskentaKerrallaContext() {}

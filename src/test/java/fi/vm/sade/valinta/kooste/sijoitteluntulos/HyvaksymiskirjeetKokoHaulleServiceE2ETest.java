@@ -4,8 +4,6 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonWithCookie;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKEMUS2;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKUKOHDE1;
@@ -30,6 +28,7 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodisto;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
@@ -56,7 +55,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
   @Before
   public void init() {
-    startShared();
+    MockServicesApp.start();
     mockParams();
     MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
         "ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
@@ -306,7 +305,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     HttpResourceBuilder.WebClientExposingHttpResource http =
         new HttpResourceBuilder(getClass().getName())
             .timeoutMillis(TimeUnit.SECONDS.toMillis(240L))
-            .address(resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet")
+            .address(MockServicesApp.resourcesAddress + "/sijoitteluntuloshaulle/hyvaksymiskirjeet")
             .buildExposingWebClientDangerously();
     WebClient client =
         http.getWebClient()
@@ -412,7 +411,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
   private void pollAndAssertDokumenttiProsessi(ProsessiId dokumenttiId) {
     Prosessi valmisProsessi =
         DokumenttiProsessiPoller.pollDokumenttiProsessi(
-            resourcesAddress, dokumenttiId, Prosessi::valmis);
+            MockServicesApp.resourcesAddress, dokumenttiId, Prosessi::valmis);
     Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
     Assert.assertEquals(false, valmisProsessi.keskeytetty);
   }

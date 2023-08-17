@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 /** Palauttaa prosessoidut dokumentit resursseina */
 @RestController("DokumenttiProsessiResource")
-@RequestMapping("/dokumenttiprosessi")
+@RequestMapping("/resources/dokumenttiprosessi")
 @PreAuthorize("isAuthenticated()")
 @Api(
     value = "/dokumenttiprosessi",

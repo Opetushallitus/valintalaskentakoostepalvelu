@@ -45,8 +45,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /** Used when importing points from outside, such as - Soteli - DIA-yhteisvalinta */
+@Service
 public class PistesyottoExternalTuontiService {
   private static final Logger LOG = LoggerFactory.getLogger(PistesyottoExternalTuontiService.class);
   private final ValintalaskentaValintakoeAsyncResource valintakoeResource;

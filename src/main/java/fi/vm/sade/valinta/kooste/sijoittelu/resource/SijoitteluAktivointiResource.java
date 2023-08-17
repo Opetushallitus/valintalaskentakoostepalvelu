@@ -39,7 +39,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 /** @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa. */
 @RestController("SijoitteluAktivointiResource")
-@RequestMapping("/koostesijoittelu")
+@RequestMapping("/resources/koostesijoittelu")
 @PreAuthorize("isAuthenticated()")
 @Api(
     value = "/koostesijoittelu",

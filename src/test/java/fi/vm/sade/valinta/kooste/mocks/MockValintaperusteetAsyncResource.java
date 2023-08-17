@@ -19,9 +19,11 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.ws.rs.core.Response;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /** @author Jussi Jartamo */
+@Profile("mockresources")
 @Service
 public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncResource {
   private static AtomicReference<List<HakukohdeJaValintakoeDTO>> hakukohdeResultReference =

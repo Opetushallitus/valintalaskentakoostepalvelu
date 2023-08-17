@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.Response;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+@Profile("mockresources")
 @Service
 public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
   private static Map<String, InputStream> docs = new ConcurrentHashMap<>();

@@ -33,19 +33,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /** User: wuoti Date: 20.5.2013 Time: 13.27 */
+@Profile("hakuimport")
 @Configuration
 @ContextConfiguration(classes = HakuImportKoosteReititysTest.class)
 @PropertySource("classpath:test.properties")
 @ImportResource({"classpath:META-INF/spring/context/hakuimport-context.xml", "test-context.xml"})
 @RunWith(SpringJUnit4ClassRunner.class)
+@ActiveProfiles("hakuimport")
 public class HakuImportKoosteReititysTest {
 
   private static final String HAKU_OID = "hakuoid1";

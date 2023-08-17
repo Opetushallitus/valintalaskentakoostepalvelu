@@ -104,8 +104,6 @@
 
     <bean id="cors-filter" class="fi.vm.sade.valinta.kooste.filter.CorsResponseFilter"/>
 
-    <bean id="springAccessDeniedExceptionMapper" class="fi.vm.sade.valinta.sharedutils.http.SpringAccessDeniedExceptionMapper"/>
-
       <ctx:mbean-export/>
   </beans>
 

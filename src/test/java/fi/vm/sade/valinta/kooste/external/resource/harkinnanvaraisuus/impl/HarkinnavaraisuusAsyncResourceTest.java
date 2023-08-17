@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl;
 
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.POO_KOMO;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,6 +22,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.impl.Op
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
@@ -46,7 +46,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
 
   @Before
   public void init() {
-    startShared();
+    MockServicesApp.start();
   }
 
   @Test

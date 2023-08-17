@@ -33,7 +33,7 @@ import org.springframework.web.context.request.async.DeferredResult;
  * mahdotonta - onko tarpeen?).
  */
 @RestController("ViestintapalveluAktivointiResource")
-@RequestMapping("/viestintapalvelu")
+@RequestMapping("/resources/viestintapalvelu")
 @PreAuthorize("isAuthenticated()")
 @Api(
     value = "/viestintapalvelu",

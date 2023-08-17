@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.hyvaksymiskirjeet;
 
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static javax.ws.rs.HttpMethod.GET;
 import static org.junit.Assert.assertEquals;
 
@@ -9,6 +8,7 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl.OrganisaatioAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import java.util.Collections;
 import java.util.Optional;
@@ -21,7 +21,7 @@ import org.junit.Test;
 public class HakijatoimistoTest {
   @Before
   public void init() {
-    startShared();
+    MockServicesApp.start();
   }
 
   @Test

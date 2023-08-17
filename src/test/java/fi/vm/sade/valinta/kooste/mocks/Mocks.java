@@ -7,9 +7,11 @@ import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.Viestintapal
 import javax.annotation.PostConstruct;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /** @author Jussi Jartamo */
+@Profile("mockresources")
 @Service
 public class Mocks {
 

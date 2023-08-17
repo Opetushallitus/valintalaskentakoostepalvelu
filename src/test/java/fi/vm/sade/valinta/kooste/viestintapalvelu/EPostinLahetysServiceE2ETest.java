@@ -5,7 +5,6 @@ import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToNotFound;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJsonAndCheckBody;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.*;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -17,6 +16,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.Recipient;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiRequest;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.EPostiResponse;
@@ -39,7 +39,7 @@ public class EPostinLahetysServiceE2ETest {
 
   @Before
   public void init() {
-    startShared();
+    MockServicesApp.start();
     MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
         "ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
   }
@@ -115,7 +115,7 @@ public class EPostinLahetysServiceE2ETest {
   private Response sendEPosti(String kirjeenTyyppi, String asiointikieli) {
     HttpResourceBuilder.WebClientExposingHttpResource http =
         new HttpResourceBuilder(getClass().getName())
-            .address(resourcesAddress + "/viestintapalvelu/securelinkit/aktivoi")
+            .address(MockServicesApp.resourcesAddress + "/viestintapalvelu/securelinkit/aktivoi")
             .buildExposingWebClientDangerously();
     EPostiRequest request = new EPostiRequest();
     request.setAsiointikieli(asiointikieli);

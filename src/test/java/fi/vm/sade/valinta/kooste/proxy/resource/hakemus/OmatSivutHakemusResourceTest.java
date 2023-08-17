@@ -1,12 +1,12 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.*;
 import static javax.ws.rs.HttpMethod.GET;
 import static org.junit.Assert.assertEquals;
 
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ public class OmatSivutHakemusResourceTest {
 
   @Before
   public void init() {
-    startShared();
+    MockServicesApp.start();
     MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
         "ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
   }
@@ -43,7 +43,7 @@ public class OmatSivutHakemusResourceTest {
     final HttpResourceBuilder.WebClientExposingHttpResource proxyResource =
         new HttpResourceBuilder(getClass().getName())
             .address(
-                resourcesAddress
+                MockServicesApp.resourcesAddress
                     + "/proxy/valintatulos/haku/"
                     + hakuOid
                     + "/hakemusOid/"

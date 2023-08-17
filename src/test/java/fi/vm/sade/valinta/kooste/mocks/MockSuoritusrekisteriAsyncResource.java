@@ -13,8 +13,10 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+@Profile("mockresources")
 @Service
 public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyncResource {
   private static AtomicReference<Oppija> oppijaRef = new AtomicReference<>();

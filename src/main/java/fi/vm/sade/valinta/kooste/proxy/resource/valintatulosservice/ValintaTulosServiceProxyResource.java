@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController("ValintaTulosServiceProxyResource")
-@RequestMapping("/proxy/valintatulosservice")
+@RequestMapping("/resources/proxy/valintatulosservice")
 public class ValintaTulosServiceProxyResource {
   private static final Logger LOG = LoggerFactory.getLogger(ValintaTulosServiceProxyResource.class);
 

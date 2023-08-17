@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController
-@RequestMapping("/valintaperusteet")
+@RequestMapping("/resources/valintaperusteet")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/valintaperusteet", description = "Valintaperusteet")
 public class ValintaperusteetResource {

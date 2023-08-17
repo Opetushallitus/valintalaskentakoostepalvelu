@@ -7,9 +7,9 @@ import static org.junit.Assert.assertTrue;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2.ValintaperusteetResourceResult;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.util.Arrays;
@@ -25,7 +25,7 @@ public class ValintaperusteetResourceTest {
 
   private final String root =
       "http://localhost:"
-          + ValintaKoosteJetty.port
+          + MockResourcesApp.port
           + "/valintalaskentakoostepalvelu/resources/V2valintaperusteet";
 
   private final HttpResourceBuilder.WebClientExposingHttpResource
@@ -36,7 +36,7 @@ public class ValintaperusteetResourceTest {
 
   @Before
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
     Mocks.reset();
   }
 

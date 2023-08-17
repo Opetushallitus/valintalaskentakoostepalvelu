@@ -35,7 +35,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController("ErillishakuResource")
-@RequestMapping(value = "/erillishaku")
+@RequestMapping(value = "/resources/erillishaku")
 @PreAuthorize("isAuthenticated()")
 @Api(value = "/erillishaku", description = "Resurssi erillishaun tietojen tuontiin ja vientiin")
 public class ErillishakuResource {

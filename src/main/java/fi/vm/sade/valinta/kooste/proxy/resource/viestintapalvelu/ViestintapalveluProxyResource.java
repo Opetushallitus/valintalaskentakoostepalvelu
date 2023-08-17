@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController("ViestintapalveluProxyResource")
-@RequestMapping("/proxy/viestintapalvelu")
+@RequestMapping("/resources/proxy/viestintapalvelu")
 public class ViestintapalveluProxyResource {
   private static final Logger LOG = LoggerFactory.getLogger(ViestintapalveluProxyResource.class);
 
