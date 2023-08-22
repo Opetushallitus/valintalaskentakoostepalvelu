@@ -67,6 +67,7 @@ log4j.properties.file=${user.home.conf}/log4j.properties
 root.organisaatio.oid=1.2.246.562.10.00000000001
 user.home.conf=${user.home}/oph-configuration
 web.url.cas=https\://${host.cas}/cas
+cas.service.key=valintalaskentakoostepalvelu
 
 valintalaskentakoostepalvelu.jatkuvasijoittelu.cron=0+*/15+*+*+*+?
 valintalaskentakoostepalvelu.viestintapalvelu.url=https://${host.virkailija}/viestintapalvelu
