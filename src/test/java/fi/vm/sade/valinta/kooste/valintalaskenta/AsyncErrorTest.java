@@ -1,12 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 
 /** @author Jussi Jartamo @Ignore lokaaliin testaukseen. CAS virheen todentamiseen. */
-@Ignore
+@Disabled
 public class AsyncErrorTest {
 
   @Test

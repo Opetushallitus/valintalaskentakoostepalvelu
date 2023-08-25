@@ -1,15 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.koski;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import java.time.LocalDateTime;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class KoskiOppijaTest {
   private static final Gson GSON = new Gson();
 

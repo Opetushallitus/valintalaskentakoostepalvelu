@@ -7,8 +7,8 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
 import java.util.*;
 import org.joda.time.DateTime;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
             .build();
     {
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
-      Assert.assertTrue(aa.isEmpty());
+      Assertions.assertTrue(aa.isEmpty());
     }
   }
 
@@ -116,8 +116,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
       LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
 
-      Assert.assertTrue(
-          "AINEREAALI löytyy ja se sisältää molemmat PS:t",
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -142,9 +141,9 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
-      Assert.assertTrue(
-          "AINEREAALI löytyy ja se sisältää molemmat PS:t",
+              == 1L,
+          "AINEREAALI löytyy ja se sisältää molemmat PS:t");
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -167,7 +166,8 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
+              == 1L,
+          "AINEREAALI löytyy ja se sisältää molemmat PS:t");
     }
   }
 
@@ -219,8 +219,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
       LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
 
-      Assert.assertTrue(
-          "AINEREAALI löytyy ja se sisältää molemmat PS:t",
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -241,7 +240,8 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
+              == 1L,
+          "AINEREAALI löytyy ja se sisältää molemmat PS:t");
     }
   }
 
@@ -266,8 +266,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
       LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
 
-      Assert.assertTrue(
-          "HI löytyy",
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -282,7 +281,8 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
+              == 1L,
+          "HI löytyy");
     }
   }
 
@@ -309,8 +309,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
       // LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
       // AIDINKIELI
-      Assert.assertTrue(
-          "SA löytyy ja se sisältää oikeat roolit",
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -325,7 +324,8 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
+              == 1L,
+          "SA löytyy ja se sisältää oikeat roolit");
     }
     //
     {
@@ -359,8 +359,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
       // LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
       // AIDINKIELI
-      Assert.assertTrue(
-          "O5 löytyy ja se sisältää oikeat roolit",
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -375,9 +374,9 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
-      Assert.assertTrue(
-          "O5 löytyy ja se sisältää oikeat roolit",
+              == 1L,
+          "O5 löytyy ja se sisältää oikeat roolit");
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -392,7 +391,8 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
+              == 1L,
+          "O5 löytyy ja se sisältää oikeat roolit");
       /*
       Assert.assertTrue("A5_ROOLI löytyy ja sen arvo on 14",
               aa.stream().filter(a -> "A5_ROOLI".equals(a.getAvain()) && "14".equals(a.getArvo())).count() == 1L);
@@ -427,8 +427,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
       // LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
       // AIDINKIELI
-      Assert.assertTrue(
-          "A löytyy ja se sisältää oikeat roolit",
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -443,7 +442,8 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
+              == 1L,
+          "A löytyy ja se sisältää oikeat roolit");
     }
     {
       DateTime nyt = DateTime.now();
@@ -498,8 +498,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
       // LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
       // AIDINKIELI
-      Assert.assertTrue(
-          "J löytyy ja se sisältää oikeat roolit",
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -514,9 +513,9 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
-      Assert.assertTrue(
-          "I löytyy ja se sisältää oikeat roolit",
+              == 1L,
+          "J löytyy ja se sisältää oikeat roolit");
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -531,9 +530,9 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
-      Assert.assertTrue(
-          "Z löytyy ja se sisältää oikeat roolit",
+              == 1L,
+          "I löytyy ja se sisältää oikeat roolit");
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -548,9 +547,9 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
-      Assert.assertTrue(
-          "O löytyy ja se sisältää oikeat roolit",
+              == 1L,
+          "Z löytyy ja se sisältää oikeat roolit");
+      Assertions.assertTrue(
           aa.stream()
                   .filter(
                       a ->
@@ -565,7 +564,8 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                       .build()
                                       .build()))
                   .count()
-              == 1L);
+              == 1L,
+          "O löytyy ja se sisältää oikeat roolit");
       // KYPSYYSNÄYTE ENGLANNILLE
       // Assert.assertTrue("J_ROOLI löytyy ja sen arvo on 13",
       //        aa.stream().filter(a -> "J_ROOLI".equals(a.getAvain()) &&
@@ -633,8 +633,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       {
         List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
         // LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
-        Assert.assertTrue(
-            "A löytyy ja se sisältää molemmat",
+        Assertions.assertTrue(
             aa.stream()
                     .filter(
                         a ->
@@ -657,9 +656,9 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                         .build()
                                         .build()))
                     .count()
-                == 1L);
-        Assert.assertTrue(
-            "01 löytyy",
+                == 1L,
+            "A löytyy ja se sisältää molemmat");
+        Assertions.assertTrue(
             aa.stream()
                     .filter(
                         a ->
@@ -678,7 +677,8 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
                                         .build()
                                         .build()))
                     .count()
-                == 1L);
+                == 1L,
+            "01 löytyy");
       }
     }
     {
@@ -710,9 +710,9 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
         LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
         // List<AvainArvoDTO> aa = OppijaToAvainArvoDTOConverter.convert(suoritus,
         // laskennanalkamisparametri(nyt));
-        Assert.assertTrue(
-            "R233 roolia ei saa löytyä koska ei olla kiinnostuneita tällaisesta roolista",
-            aa.stream().filter(a -> "R233".equals(a.getAvain())).count() == 0L);
+        Assertions.assertTrue(
+            aa.stream().filter(a -> "R233".equals(a.getAvain())).count() == 0L,
+            "R233 roolia ei saa löytyä koska ei olla kiinnostuneita tällaisesta roolista");
       }
     }
   }

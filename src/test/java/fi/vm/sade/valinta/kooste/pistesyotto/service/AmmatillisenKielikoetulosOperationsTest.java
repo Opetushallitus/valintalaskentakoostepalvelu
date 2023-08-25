@@ -4,9 +4,10 @@ import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
@@ -34,9 +35,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.joda.time.LocalDate;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class AmmatillisenKielikoetulosOperationsTest {
   private static final String HAKEMUS_OID_1 = "1.2.246.562.11.00000000001";
@@ -126,7 +126,7 @@ public class AmmatillisenKielikoetulosOperationsTest {
         }
       };
 
-  @Before
+  @BeforeEach
   public void populateTestData() {
     hakijaOidByHakemusOid.put(HAKEMUS_OID_1, PERSON_OID_1);
     hakijaOidByHakemusOid.put(HAKEMUS_OID_2, PERSON_OID_2);
@@ -166,7 +166,7 @@ public class AmmatillisenKielikoetulosOperationsTest {
     testObserver.assertValueCount(1);
     List<Arvosana> receivedArvosanas =
         testObserver.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
-    Assert.assertThat(receivedArvosanas, Matchers.hasSize(2));
+    assertThat(receivedArvosanas, Matchers.hasSize(2));
 
     assertEquals(
         receivedArvosanas.get(0),

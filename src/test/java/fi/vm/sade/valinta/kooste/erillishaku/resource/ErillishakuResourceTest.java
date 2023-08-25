@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
@@ -30,8 +30,8 @@ import java.util.List;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ErillishakuResourceTest {
   private String hakuOid = "1.2.246.562.5.2013080813081926341928";
@@ -44,7 +44,7 @@ public class ErillishakuResourceTest {
   final MockKoodistoCachedAsyncResource mockKoodistoCachedAsyncResource =
       new MockKoodistoCachedAsyncResource(mock(KoodistoAsyncResource.class));
 
-  @Before
+  @BeforeEach
   public void startServer() {
     MockResourcesApp.start();
   }

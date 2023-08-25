@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl;
 
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.POO_KOMO;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,8 +32,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class HarkinnavaraisuusAsyncResourceTest {
 
@@ -44,7 +42,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
   OppijanumerorekisteriAsyncResource mockOnr = mock(OppijanumerorekisteriAsyncResourceImpl.class);
   public static final String PK_KOMO = "1.2.246.562.13.62959769647";
 
-  @Before
+  @BeforeEach
   public void init() {
     MockServicesApp.start();
   }

@@ -2,10 +2,10 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
 import static fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila.HYVAKSYTTAVISSA;
 import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableSet;
 import fi.vm.sade.valinta.kooste.excel.Excel;
@@ -45,7 +45,8 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.util.StreamUtils;
 
 public class ValintalaskennanTulosExcelTest {
@@ -338,7 +339,7 @@ public class ValintalaskennanTulosExcelTest {
         getWorksheetData(workbook.getSheetAt(1)));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void sheetGenerationFailsNoApplication() {
     List<JonosijaDTO> jonosijatToisellaEiHakemusta =
         Arrays.asList(
@@ -376,22 +377,25 @@ public class ValintalaskennanTulosExcelTest {
                     new FunktioTulosDTO("keskiarvo", "9")),
                 false,
                 false));
-    ValintalaskennanTulosExcel.luoExcel(
-        haku,
-        hakukohde,
-        Collections.singletonList(tarjoaja),
-        asList(
-            valinnanvaihe(
-                1,
-                nyt.toDate(),
+    Assertions.assertThrows(
+        NullPointerException.class,
+        () ->
+            ValintalaskennanTulosExcel.luoExcel(
+                haku,
+                hakukohde,
+                Collections.singletonList(tarjoaja),
                 asList(
-                    valintatapajono(1, jonosijatToisellaEiHakemusta),
-                    valintatapajono(2, Collections.emptyList()))),
-            valinnanvaihe(
-                2,
-                nyt.minusMonths(12).toDate(),
-                Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
-        hakemukset());
+                    valinnanvaihe(
+                        1,
+                        nyt.toDate(),
+                        asList(
+                            valintatapajono(1, jonosijatToisellaEiHakemusta),
+                            valintatapajono(2, Collections.emptyList()))),
+                    valinnanvaihe(
+                        2,
+                        nyt.minusMonths(12).toDate(),
+                        Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
+                hakemukset()));
   }
 
   @Test

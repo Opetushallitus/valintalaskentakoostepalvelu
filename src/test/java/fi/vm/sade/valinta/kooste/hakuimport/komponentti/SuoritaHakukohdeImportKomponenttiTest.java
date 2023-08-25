@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.hakuimport.komponentti;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -20,8 +20,8 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class SuoritaHakukohdeImportKomponenttiTest {
@@ -37,7 +37,7 @@ public class SuoritaHakukohdeImportKomponenttiTest {
     return koodi;
   }
 
-  @Before
+  @BeforeEach
   public void before() {
     koutaAsyncResource = Mockito.mock(KoutaAsyncResource.class);
 

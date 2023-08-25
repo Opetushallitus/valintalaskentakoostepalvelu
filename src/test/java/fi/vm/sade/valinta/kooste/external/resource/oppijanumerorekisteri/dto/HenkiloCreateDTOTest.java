@@ -1,8 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HenkiloCreateDTOTest {
   @Test
@@ -16,14 +17,14 @@ public class HenkiloCreateDTOTest {
   @Test
   public void multipleFirstNames() {
     HenkiloCreateDTO dto = getHenkiloWithFirstname("Henrikki Aapeli Testi");
-    assertEquals("Kutsumanimi should be the first one of first names", "Henrikki", dto.kutsumanimi);
+    assertEquals("Henrikki", dto.kutsumanimi, "Kutsumanimi should be the first one of first names");
   }
 
   @Test
   public void multipleFirstNamesWithHyphen() {
     HenkiloCreateDTO dto = getHenkiloWithFirstname("Henrikki-Aapeli Testi");
     assertEquals(
-        "Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
+        "Henrikki-Aapeli", dto.kutsumanimi, "Kutsumanimi should be the first one of first names");
   }
 
   @Test
@@ -31,11 +32,11 @@ public class HenkiloCreateDTOTest {
     // testaa konstruktorissa tapahtuvaa nimen trimmausta, huomioi välilyönti edessä
     HenkiloCreateDTO dto = getHenkiloWithFirstname(" Henrikki-Aapeli Testi");
     assertEquals(
-        "Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
+        "Henrikki-Aapeli", dto.kutsumanimi, "Kutsumanimi should be the first one of first names");
 
     dto = getHenkiloWithFirstname(" Henrikki-Aapeli Testi  ");
     assertEquals(
-        "Kutsumanimi should be the first one of first names", "Henrikki-Aapeli", dto.kutsumanimi);
+        "Henrikki-Aapeli", dto.kutsumanimi, "Kutsumanimi should be the first one of first names");
   }
 
   private HenkiloCreateDTO getHenkiloWithFirstname(String firstname) {

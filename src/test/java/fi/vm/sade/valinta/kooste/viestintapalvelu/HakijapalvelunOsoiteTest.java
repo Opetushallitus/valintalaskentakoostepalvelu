@@ -14,13 +14,13 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LueHakijapalvelunO
 import java.io.IOException;
 import java.io.InputStreamReader;
 import org.apache.commons.io.IOUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class HakijapalvelunOsoiteTest {
 
-  @Ignore
+  @Disabled
   @Test
   public void testaaHakijapalvelunOsoitteenHaku3()
       throws JsonSyntaxException, JsonIOException, IOException {
@@ -37,7 +37,7 @@ public class HakijapalvelunOsoiteTest {
             h, KieliUtil.SUOMI, organisaatio, new Teksti());
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testaaHakijapalvelunOsoitteenHaku()
       throws JsonSyntaxException, JsonIOException, IOException {
@@ -49,7 +49,7 @@ public class HakijapalvelunOsoiteTest {
                 OrganisaatioRDTO.class);
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testaaHakijapalvelunOsoitteenHaku2()
       throws JsonSyntaxException, JsonIOException, IOException {

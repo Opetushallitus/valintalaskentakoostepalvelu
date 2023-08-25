@@ -1,13 +1,13 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import java.util.Collection;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PistesyotonTuonti6Test extends PistesyotonTuontiTestBase {
   @Test

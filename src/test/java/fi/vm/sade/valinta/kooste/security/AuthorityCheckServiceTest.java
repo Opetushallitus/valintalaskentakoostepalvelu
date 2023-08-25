@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.security;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -13,9 +13,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.ForbiddenException;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -30,7 +31,7 @@ public class AuthorityCheckServiceTest {
 
   @Mock private TarjontaAsyncResource tarjontaAsyncResource;
 
-  @Before
+  @BeforeEach
   public void initMocks() throws Exception {
     MockitoAnnotations.initMocks(this);
     Mockito.when(organisaatioResource.parentoids("oid.1")).thenReturn("parent.oid.1/oid.1");
@@ -89,9 +90,11 @@ public class AuthorityCheckServiceTest {
     assertFalse(authorized2);
   }
 
-  @Ignore("Causes possibly random failure in CI")
-  @Test(expected = ForbiddenException.class)
+  @Disabled("Causes possibly random failure in CI")
+  @Test
   public void testCheckAuthorizationForHaku() {
-    authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET);
+    Assertions.assertThrows(
+        ForbiddenException.class,
+        () -> authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET));
   }
 }

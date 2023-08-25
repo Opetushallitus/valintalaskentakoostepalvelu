@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -28,24 +28,25 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.jws.WebParam;
 import javax.servlet.http.HttpServletRequest;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /** User: wuoti Date: 20.5.2013 Time: 13.27 */
 @Profile("hakuimport")
+@Disabled
 @Configuration
 @ContextConfiguration(classes = HakuImportKoosteReititysTest.class)
 @PropertySource("classpath:test.properties")
 @ImportResource({"classpath:META-INF/spring/context/hakuimport-context.xml", "test-context.xml"})
-@RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles("hakuimport")
+@ExtendWith(SpringExtension.class)
 public class HakuImportKoosteReititysTest {
 
   private static final String HAKU_OID = "hakuoid1";
@@ -153,7 +154,6 @@ public class HakuImportKoosteReititysTest {
   @Autowired private KoodiService koodiService;
 
   @Test
-  @Ignore
   public void testImportHaku() {
     HttpServletRequest requestMock = mock(HttpServletRequest.class);
     hakuImportAktivointiResource.aktivoiHakuImport(HAKU_OID, requestMock);

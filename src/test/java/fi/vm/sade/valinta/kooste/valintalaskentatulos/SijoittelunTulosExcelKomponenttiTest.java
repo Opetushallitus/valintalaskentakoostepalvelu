@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.valintalaskentatulos;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -23,14 +23,14 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SijoittelunTulosExcelKomponenttiTest {
   private final String HAKEMUS1 = "hakemus1";
   private final String HAKEMUS2 = "hakemus2";
@@ -43,7 +43,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
   @InjectMocks
   SijoittelunTulosExcelKomponentti excelKomponentti = new SijoittelunTulosExcelKomponentti();
 
-  @Before
+  @BeforeEach
   public void setup() {
     when(koodistoResource.haeKoodisto(any())).thenReturn(new HashMap<>());
   }
@@ -169,7 +169,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
             emptyList());
 
     Collection<Rivi> rivit = ExcelImportUtil.importExcel(inputStream);
-    assertTrue("Cell texts should contain text 'SV'", cellTexts(rivit, HAKEMUS1).contains("SV"));
+    assertTrue(cellTexts(rivit, HAKEMUS1).contains("SV"), "Cell texts should contain text 'SV'");
   }
 
   @Test
@@ -220,17 +220,17 @@ public class SijoittelunTulosExcelKomponenttiTest {
 
     Collection<Rivi> rivit = ExcelImportUtil.importExcel(inputStream);
     assertTrue(
-        "Cell texts should contain text 'JOKU_EHTOKOODI'",
-        cellTexts(rivit, HAKEMUS1).contains("JOKU_EHTOKOODI"));
+        cellTexts(rivit, HAKEMUS1).contains("JOKU_EHTOKOODI"),
+        "Cell texts should contain text 'JOKU_EHTOKOODI'");
     assertTrue(
-        "Cell texts should contain text 'ehto suomi'",
-        cellTexts(rivit, HAKEMUS1).contains("ehto suomi"));
+        cellTexts(rivit, HAKEMUS1).contains("ehto suomi"),
+        "Cell texts should contain text 'ehto suomi'");
     assertTrue(
-        "Cell texts should contain text 'ehto ruotsi'",
-        cellTexts(rivit, HAKEMUS1).contains("ehto ruotsi"));
+        cellTexts(rivit, HAKEMUS1).contains("ehto ruotsi"),
+        "Cell texts should contain text 'ehto ruotsi'");
     assertTrue(
-        "Cell texts should contain text 'ehto englanti'",
-        cellTexts(rivit, HAKEMUS1).contains("ehto englanti"));
+        cellTexts(rivit, HAKEMUS1).contains("ehto englanti"),
+        "Cell texts should contain text 'ehto englanti'");
   }
 
   @Test
@@ -263,7 +263,7 @@ public class SijoittelunTulosExcelKomponenttiTest {
             emptyList());
 
     Collection<Rivi> rivit = ExcelImportUtil.importExcel(inputStream);
-    assertTrue("Cell texts should contain text 'FI'", cellTexts(rivit, HAKEMUS1).contains("FI"));
+    assertTrue(cellTexts(rivit, HAKEMUS1).contains("FI"), "Cell texts should contain text 'FI'");
   }
 
   @Test
@@ -301,8 +301,8 @@ public class SijoittelunTulosExcelKomponenttiTest {
 
     Collection<Rivi> rivit = ExcelImportUtil.importExcel(inputStream);
     assertTrue(
-        "Cell texts should contain text 'Lupa sähköiseen asiointiin'",
-        cellTexts(rivit, HAKEMUS1).contains("Lupa sähköiseen asiointiin"));
+        cellTexts(rivit, HAKEMUS1).contains("Lupa sähköiseen asiointiin"),
+        "Cell texts should contain text 'Lupa sähköiseen asiointiin'");
   }
 
   @Test
@@ -336,8 +336,8 @@ public class SijoittelunTulosExcelKomponenttiTest {
 
     Collection<Rivi> rivit = ExcelImportUtil.importExcel(inputStream);
     assertFalse(
-        "Cell texts should not contain text 'Lupa sähköiseen asiointiin'",
-        cellTexts(rivit, HAKEMUS1).contains("Lupa sähköiseen asiointiin"));
+        cellTexts(rivit, HAKEMUS1).contains("Lupa sähköiseen asiointiin"),
+        "Cell texts should not contain text 'Lupa sähköiseen asiointiin'");
   }
 
   @Test
@@ -381,8 +381,8 @@ public class SijoittelunTulosExcelKomponenttiTest {
 
     Collection<Rivi> rivit = ExcelImportUtil.importExcel(inputStream);
     assertTrue(
-        "Cell texts should contain text 'Hakijaryhmä 1'",
-        cellTexts(rivit, HAKEMUS1).contains("Hakijaryhmä 1"));
+        cellTexts(rivit, HAKEMUS1).contains("Hakijaryhmä 1"),
+        "Cell texts should contain text 'Hakijaryhmä 1'");
   }
 
   @Test
@@ -433,8 +433,8 @@ public class SijoittelunTulosExcelKomponenttiTest {
 
     Collection<Rivi> rivit = ExcelImportUtil.importExcel(inputStream);
     assertTrue(
-        "Cell texts should contain text 'Hakijaryhmä 1, Hakijaryhmä 2'",
-        cellTexts(rivit, HAKEMUS1).contains("Hakijaryhmä 1, Hakijaryhmä 2"));
+        cellTexts(rivit, HAKEMUS1).contains("Hakijaryhmä 1, Hakijaryhmä 2"),
+        "Cell texts should contain text 'Hakijaryhmä 1, Hakijaryhmä 2'");
   }
 
   private List<String> cellTexts(Collection<Rivi> rivit, String oid) {

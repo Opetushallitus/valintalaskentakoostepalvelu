@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -29,8 +27,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -50,7 +48,7 @@ public class ApplicationAsyncResourceImplTest {
   private ApplicationAsyncResourceImpl applicationAsyncResource =
       new ApplicationAsyncResourceImpl(mockClient, mock(CasKoosteInterceptor.class));
 
-  @Before
+  @BeforeEach
   public void setMockInsideResourceUnderTest() {
     ReflectionTestUtils.setField(
         applicationAsyncResource, "wrappedHttpResource", wrappedHttpResource);

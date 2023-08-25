@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -38,10 +36,10 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,13 +71,13 @@ public class OppijanSuorituksetProxyResourceTest {
 
   final Gson GSON = DateDeserializer.GSON;
 
-  @BeforeClass
+  @BeforeAll
   public static void startServer() {
     MockResourcesApp.start();
   }
 
-  @Before
-  @After
+  @BeforeEach
+  @AfterEach
   public void resetMocks() {
     Mocks.reset();
   }
@@ -205,9 +203,9 @@ public class OppijanSuorituksetProxyResourceTest {
     assertTrue(oppijanSuoritukset.keySet().stream().allMatch(poids::contains));
 
     assertTrue(
-        "At least some of the response answers should contain 9 as POHJAKOULUTUS",
         oppijanSuoritukset.values().stream()
-            .anyMatch(stringStringMap -> "9".equals(stringStringMap.get("POHJAKOULUTUS"))));
+            .anyMatch(stringStringMap -> "9".equals(stringStringMap.get("POHJAKOULUTUS"))),
+        "At least some of the response answers should contain 9 as POHJAKOULUTUS");
 
     MockSuoritusrekisteriAsyncResource.clear();
   }

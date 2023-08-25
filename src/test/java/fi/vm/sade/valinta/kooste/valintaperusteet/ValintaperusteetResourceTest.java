@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintaperusteet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
@@ -16,8 +16,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.ws.rs.core.Response;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ValintaperusteetResourceTest {
 
@@ -34,7 +34,7 @@ public class ValintaperusteetResourceTest {
               .address(String.format("%s/hakukohde/%s/kayttaaValintalaskentaa", root, hakukohdeOid))
               .buildExposingWebClientDangerously();
 
-  @Before
+  @BeforeEach
   public void startServer() {
     MockResourcesApp.start();
     Mocks.reset();

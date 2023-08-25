@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
@@ -8,8 +9,8 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ErillishaunTuontiHelperTest {
 
@@ -144,7 +145,7 @@ public class ErillishaunTuontiHelperTest {
 
   private HenkiloPerustietoDto henkiloPerustietoDto;
 
-  @Before
+  @BeforeEach
   public void setup() {
     henkiloPerustietoDto = new HenkiloPerustietoDto();
   }
@@ -179,8 +180,12 @@ public class ErillishaunTuontiHelperTest {
     assertEquals(PERSON_1_OID, loytynytRivi.getPersonOid());
   }
 
-  @Test(expected = ErillishaunTuontiHelper.HenkilonRivinPaattelyEpaonnistuiException.class)
+  @Test
   public void testaaEtsiHenkiloaVastaavaRiviJotaEiLoydy() {
-    ErillishaunTuontiHelper.etsiHenkiloaVastaavaRivi(henkiloPerustietoDto, ERILLISHAKU_RIVIT);
+    assertThrows(
+        ErillishaunTuontiHelper.HenkilonRivinPaattelyEpaonnistuiException.class,
+        () ->
+            ErillishaunTuontiHelper.etsiHenkiloaVastaavaRivi(
+                henkiloPerustietoDto, ERILLISHAKU_RIVIT));
   }
 }

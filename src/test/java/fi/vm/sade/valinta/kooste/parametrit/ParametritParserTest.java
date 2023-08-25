@@ -1,12 +1,12 @@
 package fi.vm.sade.valinta.kooste.parametrit;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import java.util.Arrays;
 import java.util.Calendar;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

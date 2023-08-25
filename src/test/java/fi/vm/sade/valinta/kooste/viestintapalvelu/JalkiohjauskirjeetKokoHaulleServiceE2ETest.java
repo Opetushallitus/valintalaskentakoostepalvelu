@@ -44,13 +44,13 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
-  @BeforeClass
+  @BeforeAll
   public static void init() {
     MockServicesApp.start();
     MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
@@ -392,7 +392,7 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     DokumentinLisatiedot lisatiedot =
         new DokumentinLisatiedot(null, "testTag", "letterBodyText", asiointikieli, null);
     Response response = client.post(Entity.json(lisatiedot));
-    Assert.assertEquals(200, response.getStatus());
+    Assertions.assertEquals(200, response.getStatus());
     return response.readEntity(ProsessiId.class);
   }
 
@@ -400,8 +400,8 @@ public class JalkiohjauskirjeetKokoHaulleServiceE2ETest {
     Prosessi valmisProsessi =
         DokumenttiProsessiPoller.pollDokumenttiProsessi(
             MockServicesApp.resourcesAddress, dokumenttiId, Prosessi::valmis);
-    Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
-    Assert.assertEquals(false, valmisProsessi.keskeytetty);
+    Assertions.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
+    Assertions.assertEquals(false, valmisProsessi.keskeytetty);
   }
 
   private void mockKoodisto() throws IOException {

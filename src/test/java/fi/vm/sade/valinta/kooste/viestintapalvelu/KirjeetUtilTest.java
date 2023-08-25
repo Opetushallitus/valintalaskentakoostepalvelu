@@ -10,8 +10,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class KirjeetUtilTest {
 
@@ -33,7 +33,7 @@ public class KirjeetUtilTest {
             .map(prioriteetit)
             .collect(Collectors.toList());
 
-    Assert.assertTrue(priot.equals(ImmutableList.of(5, 6, 7)));
+    Assertions.assertTrue(priot.equals(ImmutableList.of(5, 6, 7)));
   }
 
   @Test
@@ -49,7 +49,7 @@ public class KirjeetUtilTest {
             .map(tilat)
             .collect(Collectors.toList());
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
         tilas.equals(
             ImmutableList.of(
                 HakemuksenTila.HYVAKSYTTY,
@@ -77,7 +77,7 @@ public class KirjeetUtilTest {
             .collect(Collectors.toList());
     List<HakemuksenTila> tilas = jonos.stream().map(tilat).collect(Collectors.toList());
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
         tilas.equals(
             ImmutableList.of(
                 HakemuksenTila.HYVAKSYTTY,
@@ -86,7 +86,7 @@ public class KirjeetUtilTest {
                 HakemuksenTila.VARALLA)));
 
     List<Integer> varasijas = jonos.stream().map(varasijanumerot).collect(Collectors.toList());
-    Assert.assertTrue(varasijas.equals(ImmutableList.of(-1, -1, 1, 2)));
+    Assertions.assertTrue(varasijas.equals(ImmutableList.of(-1, -1, 1, 2)));
   }
 
   private final Function<HakutoiveenValintatapajonoDTO, Integer> varasijanumerot =

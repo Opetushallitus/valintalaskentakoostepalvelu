@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.server;
 
 import static fi.vm.sade.valinta.sharedutils.http.HttpResource.CALLER_ID;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.google.common.collect.Lists;
 import com.sun.net.httpserver.Headers;
@@ -10,7 +11,6 @@ import fi.vm.sade.integrationtest.util.PortChecker;
 import java.net.InetSocketAddress;
 import java.util.List;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 
 /** @author Jussi Jartamo */
 public class MockServer {
@@ -76,7 +76,7 @@ public class MockServer {
       try {
         Headers requestHeaders = exchange.getRequestHeaders();
         List<String> callerIdHeader = requestHeaders.get(CALLER_ID);
-        Assert.assertThat(
+        assertThat(
             "Expected '" + CALLER_ID + "' header in " + requestHeaders.entrySet(),
             callerIdHeader,
             Matchers.contains("1.2.246.562.10.00000000001.valintalaskentakoostepalvelu"));

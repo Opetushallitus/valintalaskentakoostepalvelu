@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 
 import static fi.vm.sade.valinta.sharedutils.http.DateDeserializer.GSON;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -258,7 +258,7 @@ public class ValintatapajonoTest extends ValintatapajonoTestTools {
           re.getMessage());
       exceptionThrown = true;
     }
-    assertTrue("Poikkeus puuttuu.", exceptionThrown);
+    assertTrue(exceptionThrown, "Poikkeus puuttuu.");
   }
 
   private static String classpathResourceAsString(String path) throws Exception {
