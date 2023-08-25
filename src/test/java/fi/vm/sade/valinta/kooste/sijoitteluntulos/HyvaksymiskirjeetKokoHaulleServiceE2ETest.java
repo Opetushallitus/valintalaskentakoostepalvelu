@@ -44,16 +44,16 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
-@Ignore
+@Disabled
 public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
 
-  @Before
+  @BeforeEach
   public void init() {
     MockServicesApp.start();
     mockParams();
@@ -313,7 +313,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
             .query("asiointikieli", asiointikieli)
             .query("letterBodyText", "letterBodyText");
     Response response = client.post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2)));
-    Assert.assertEquals(200, response.getStatus());
+    Assertions.assertEquals(200, response.getStatus());
     return response.readEntity(ProsessiId.class);
   }
 
@@ -412,8 +412,8 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     Prosessi valmisProsessi =
         DokumenttiProsessiPoller.pollDokumenttiProsessi(
             MockServicesApp.resourcesAddress, dokumenttiId, Prosessi::valmis);
-    Assert.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
-    Assert.assertEquals(false, valmisProsessi.keskeytetty);
+    Assertions.assertEquals(0, valmisProsessi.kokonaistyo.ohitettu);
+    Assertions.assertEquals(false, valmisProsessi.keskeytetty);
   }
 
   private void mockKoodisto() throws IOException {

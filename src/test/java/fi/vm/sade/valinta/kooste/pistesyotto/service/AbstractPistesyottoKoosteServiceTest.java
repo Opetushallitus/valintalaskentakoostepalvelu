@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class AbstractPistesyottoKoosteServiceTest {
   private static final List<String> OPPILAITOS =
@@ -116,7 +116,7 @@ public class AbstractPistesyottoKoosteServiceTest {
     tarjoajaThatIsOppilaitos.setOrganisaatiotyypit(OPPILAITOS);
 
     service.etsiOppilaitosHierarkiasta(tarjoajaOid, root, oppilaitosRef);
-    Assert.assertEquals(tarjoajaOid, oppilaitosRef.get());
+    Assertions.assertEquals(tarjoajaOid, oppilaitosRef.get());
   }
 
   @Test
@@ -131,7 +131,7 @@ public class AbstractPistesyottoKoosteServiceTest {
     fifthLevel.get(0).setOrganisaatiotyypit(OPPILAITOS);
 
     service.etsiOppilaitosHierarkiasta(tarjoajaOid, root, oppilaitosRef);
-    Assert.assertEquals(closestOppilaitosAbove.getOid(), oppilaitosRef.get());
+    Assertions.assertEquals(closestOppilaitosAbove.getOid(), oppilaitosRef.get());
   }
 
   @Test
@@ -144,13 +144,13 @@ public class AbstractPistesyottoKoosteServiceTest {
     oppilaitosLowerBelow.setOrganisaatiotyypit(OPPILAITOS);
 
     service.etsiOppilaitosHierarkiasta(tarjoajaOid, root, oppilaitosRef);
-    Assert.assertEquals(closestOppilaitosBelow.getOid(), oppilaitosRef.get());
+    Assertions.assertEquals(closestOppilaitosBelow.getOid(), oppilaitosRef.get());
   }
 
   @Test
   public void nullIsReturnedIfThereIsNoOppilaitosTypeTarjoajaInHierarhy() {
     service.etsiOppilaitosHierarkiasta(tarjoajaOid, root, oppilaitosRef);
-    Assert.assertEquals(null, oppilaitosRef.get());
+    Assertions.assertEquals(null, oppilaitosRef.get());
   }
 
   private static OrganisaatioTyyppi createOrganisation(

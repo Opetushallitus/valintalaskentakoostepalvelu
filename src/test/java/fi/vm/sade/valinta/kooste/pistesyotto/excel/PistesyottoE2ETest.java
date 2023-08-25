@@ -12,6 +12,7 @@ import static javax.ws.rs.HttpMethod.POST;
 import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -55,9 +56,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -68,7 +69,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
   private List<Valintapisteet> pisteetFromValintaPisteService;
   private final MockServer fakeValintaPisteService = new MockServer();
 
-  @Before
+  @BeforeEach
   public void init() throws Throwable {
     Type valintapisteetListType = new TypeToken<List<ValintakoeOsallistuminenDTO>>() {}.getType();
     String valintakoeOstallistuminenDtosJson =
@@ -184,12 +185,12 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
                         .fromJson(
                             IOUtils.toString(exchange.getRequestBody(), "UTF-8"),
                             new TypeToken<List<Valintapisteet>>() {}.getType());
-                Assert.assertEquals(
-                    "209 hakijalle löytyy pistetiedot", 209, valintapisteList.size());
+                Assertions.assertEquals(
+                    209, valintapisteList.size(), "209 hakijalle löytyy pistetiedot");
                 long count =
                     valintapisteList.stream().mapToLong(a -> valintapisteList.size()).sum();
 
-                Assert.assertEquals("Pisteitä tallennetaan ilmeisesti paljon.", 43681, count);
+                Assertions.assertEquals(43681, count, "Pisteitä tallennetaan ilmeisesti paljon.");
                 exchange.getResponseHeaders().add("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().write(gson().toJson(Collections.emptySet()).getBytes());
@@ -201,11 +202,11 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
             }));
     postExcelAndExpectOkResponseWithRetry(http, "1.2.246.562.5.85532589612");
     try {
-      Assert.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
-      Assert.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
-      Assert.assertTrue(counter.tryAcquire(1, 25, TimeUnit.SECONDS));
+      Assertions.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
+      Assertions.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
+      Assertions.assertTrue(counter.tryAcquire(1, 25, TimeUnit.SECONDS));
     } catch (InterruptedException e) {
-      Assert.fail();
+      Assertions.fail();
     }
   }
 
@@ -240,11 +241,11 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
             }));
     postExcelAndExpectOkResponseWithRetry(http, hakukohdeOidFromUiRequest);
     try {
-      Assert.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
-      Assert.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
-      Assert.assertTrue(counter.tryAcquire(1, 25, TimeUnit.SECONDS));
+      Assertions.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
+      Assertions.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
+      Assertions.assertTrue(counter.tryAcquire(1, 25, TimeUnit.SECONDS));
     } catch (InterruptedException e) {
-      Assert.fail();
+      Assertions.fail();
     }
   }
 
@@ -267,11 +268,11 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
             .header("Content-Type", "application/octet-stream")
             .accept(MediaType.APPLICATION_JSON)
             .post(new ClassPathResource("pistesyotto/pistesyotto.xlsx").getInputStream());
-    Assert.assertThat(
+    assertThat(
         IOUtils.toString((InputStream) r.getEntity()),
         CoreMatchers.containsString(
             "ei ole oikeuksia käsitellä hakukohteen 1.2.246.562.5.85532589612 pistetietoja"));
-    Assert.assertEquals(FORBIDDEN.getStatusCode(), r.getStatus());
+    Assertions.assertEquals(FORBIDDEN.getStatusCode(), r.getStatus());
   }
 
   /**
@@ -305,8 +306,8 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
       responseBody = response.readEntity(String.class);
       LOG.info(String.format("Got response '%s'", responseBody));
     } while ((response.getStatus() != expectedHttpResponseStatus) && retryCount < maxRetries);
-    Assert.assertEquals("", responseBody);
-    Assert.assertEquals(expectedHttpResponseStatus, response.getStatus());
+    Assertions.assertEquals("", responseBody);
+    Assertions.assertEquals(expectedHttpResponseStatus, response.getStatus());
   }
 
   private void mockTarjontaOrganisaatioHakuCall(

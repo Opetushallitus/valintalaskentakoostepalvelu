@@ -4,8 +4,8 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.hakemusOsallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
@@ -41,9 +41,9 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /** @author Jussi Jartamo */
@@ -72,12 +72,12 @@ public class ValintalaskentaTulosExcelTest {
   final Haku haku =
       new Haku(HAKU1, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null);
 
-  @Before
+  @BeforeEach
   public void startServer() {
     MockResourcesApp.start();
   }
 
-  @Ignore("This can be used for testing creation of production jsons")
+  @Disabled("This can be used for testing creation of production jsons")
   @Test
   public void testaaExcelinLuontiJsonLahteesta() throws Throwable {
     String listFull = IOUtils.toString(new FileInputStream("listfull.json"));

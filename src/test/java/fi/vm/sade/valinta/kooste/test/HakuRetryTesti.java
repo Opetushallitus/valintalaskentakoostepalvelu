@@ -6,16 +6,16 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusList;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * @author Jussi Jartamo
@@ -23,14 +23,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  *     ratkaistu. Ei tarvi toistaiseksi varautua näihin!
  */
 @Profile("!boottest")
-@Ignore
+@Disabled
 @Configuration
 @ContextConfiguration(classes = HakuRetryTesti.class)
 @ImportResource({
   "classpath:test-context.xml",
   "classpath:META-INF/spring/context/haku-context.xml"
 })
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class HakuRetryTesti {
 
   @Bean

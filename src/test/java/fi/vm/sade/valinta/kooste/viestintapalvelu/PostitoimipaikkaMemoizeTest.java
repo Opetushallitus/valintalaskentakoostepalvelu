@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import fi.vm.sade.koodisto.service.GenericFault;
@@ -9,7 +9,7 @@ import fi.vm.sade.koodisto.service.types.SearchKoodisByKoodistoCriteriaType;
 import fi.vm.sade.koodisto.service.types.SearchKoodisCriteriaType;
 import fi.vm.sade.koodisto.service.types.common.*;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PostitoimipaikkaMemoizeTest {
 

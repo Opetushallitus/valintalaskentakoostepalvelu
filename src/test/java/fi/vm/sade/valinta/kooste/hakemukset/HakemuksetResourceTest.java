@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.hakemukset;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class HakemuksetResourceTest {
@@ -48,7 +48,7 @@ public class HakemuksetResourceTest {
           .address(root + "/hakemukset/valinnanvaihe")
           .buildExposingWebClientDangerously();
 
-  @Before
+  @BeforeEach
   public void startServer() {
     ValintakoeDTO v1 = new ValintakoeDTO();
     v1.setOid("1.2.3.4");

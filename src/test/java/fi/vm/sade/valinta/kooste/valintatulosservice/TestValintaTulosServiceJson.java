@@ -17,8 +17,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -63,7 +63,7 @@ public class TestValintaTulosServiceJson {
 
     Map.Entry<String, Date> newestVastaanotto = newestVastaanottoFieldStatus.get();
 
-    Assert.assertEquals(newestVastaanotto.getKey(), "EHDOLLISESTI_VASTAANOTTANUT");
+    Assertions.assertEquals(newestVastaanotto.getKey(), "EHDOLLISESTI_VASTAANOTTANUT");
   }
 
   @Test

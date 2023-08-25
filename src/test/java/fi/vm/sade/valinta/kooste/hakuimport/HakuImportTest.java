@@ -24,8 +24,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import org.apache.commons.io.IOUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class HakuImportTest {
 
   private HakuImportRouteImpl template = createRouteBuilder();
 
-  @Ignore
+  @Disabled
   @Test
   public void testData() throws JsonSyntaxException, IOException {
     HakukohdeValintaperusteetV1RDTO obj =

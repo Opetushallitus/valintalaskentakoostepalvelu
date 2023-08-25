@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public class AtaruAsyncResourceTest {
@@ -52,7 +52,7 @@ public class AtaruAsyncResourceTest {
         }
       };
 
-  @Before
+  @BeforeEach
   public void setMockInsideResourceUnderTest() {
     ReflectionTestUtils.setField(ataruAsyncResource, "urlConfiguration", urlConfiguration);
   }

@@ -8,13 +8,13 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -74,8 +74,8 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -286,7 +286,7 @@ public class PistesyottoResourceTest {
           Collections.emptyList());
   private List<Valintapisteet> tuodutPisteet;
 
-  @Before
+  @BeforeEach
   public void startServer() {
     MockResourcesApp.start();
   }
@@ -1066,9 +1066,9 @@ public class PistesyottoResourceTest {
               .post(Entity.entity(excel.getExcel().vieXlsx(), MediaType.APPLICATION_OCTET_STREAM));
       assertEquals(204, r.getStatus());
       assertEquals(
-          "Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!",
           3,
-          tuodutPisteet.size());
+          tuodutPisteet.size(),
+          "Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!");
     } finally {
       cleanMocks();
     }
@@ -1259,16 +1259,15 @@ public class PistesyottoResourceTest {
               .post(Entity.entity(excel.getExcel().vieXlsx(), MediaType.APPLICATION_OCTET_STREAM));
       assertEquals(204, r.getStatus());
       assertEquals(
-          "Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!",
           3,
-          tuodutPisteet.size());
+          tuodutPisteet.size(),
+          "Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!");
       assertTrue(
-          "Kielikokeita ei löytyä valinta-piste-servicestä",
           tuodutPisteet.stream()
               .anyMatch(
                   v ->
-                      v.getPisteet().stream()
-                          .anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))));
+                      v.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))),
+          "Kielikokeita ei löytyä valinta-piste-servicestä");
       assertThat(
           "Arvosanoilla on oikea lähde",
           MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().stream()
@@ -1276,25 +1275,25 @@ public class PistesyottoResourceTest {
               .collect(Collectors.toList()),
           hasSize(2));
       assertEquals(
-          "Suorituksilla on oikea myöntäjä",
           1,
           MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream()
               .filter(s -> s.getMyontaja().equals(HAKEMUS1))
-              .count());
+              .count(),
+          "Suorituksilla on oikea myöntäjä");
       assertEquals(
-          "Suorituksilla on oikea myöntäjä",
           1,
           MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream()
               .filter(s -> s.getMyontaja().equals(HAKEMUS2))
-              .count());
+              .count(),
+          "Suorituksilla on oikea myöntäjä");
       assertEquals(
-          "Kielikokeiden suoritukset löytyvät suresta",
           2,
-          MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size());
+          MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size(),
+          "Kielikokeiden suoritukset löytyvät suresta");
       assertEquals(
-          "Kielikokeiden arvosanat löytyvät suresta",
           2,
-          MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().size());
+          MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().size(),
+          "Kielikokeiden arvosanat löytyvät suresta");
     } finally {
       cleanMocks();
     }
@@ -1384,9 +1383,9 @@ public class PistesyottoResourceTest {
       List<ApplicationAdditionalDataDTO> tuodutLisatiedot =
           MockApplicationAsyncResource.getAdditionalDataInput();
       assertEquals(
-          "Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!",
           null,
-          tuodutLisatiedot);
+          tuodutLisatiedot,
+          "Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin lisätiedot!");
     } finally {
       cleanMocks();
     }
@@ -1632,16 +1631,15 @@ public class PistesyottoResourceTest {
               .post(Entity.entity(excel.getExcel().vieXlsx(), MediaType.APPLICATION_OCTET_STREAM));
       assertEquals(204, r.getStatus());
       assertEquals(
-          "Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!",
           3,
-          tuodutPisteet.size());
+          tuodutPisteet.size(),
+          "Oletettiin että hakukohteen hakemukselle että ulkopuoliselle hakemukselle tuotiin pisteet!");
       assertTrue(
-          "Kielikokeita löytyy pisteistä",
           tuodutPisteet.stream()
               .anyMatch(
                   a ->
-                      a.getPisteet().stream()
-                          .anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))));
+                      a.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))),
+          "Kielikokeita löytyy pisteistä");
       assertThat(
           "Kielikokeen suoritus löytyy suresta",
           MockSuoritusrekisteriAsyncResource.suorituksetRef.get(),
@@ -1654,27 +1652,27 @@ public class PistesyottoResourceTest {
           MockSuoritusrekisteriAsyncResource.suorituksetRef.get(),
           not(hasItem(withHenkiloOid(PERSONOID3))));
       assertEquals(
-          "Suorituksella on oikea myöntäjä",
           1,
           MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream()
               .filter(s -> s.getMyontaja().equals(HAKEMUS2))
-              .count());
+              .count(),
+          "Suorituksella on oikea myöntäjä");
       assertEquals(
-          "Suorituksella on oikea myöntäjä",
           0,
           MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream()
               .filter(s -> s.getMyontaja().equals(HAKEMUS3))
-              .count());
+              .count(),
+          "Suorituksella on oikea myöntäjä");
       assertEquals(
-          "Arvosanoilla on oikea lähde",
           1,
           MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().stream()
               .filter(a -> a.getSource().equals("1.2.246.562.10.45698499378"))
-              .count());
+              .count(),
+          "Arvosanoilla on oikea lähde");
       assertEquals(
-          "Kielikokeen arvosana löytyy suresta",
           1,
-          MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().size());
+          MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().size(),
+          "Kielikokeen arvosana löytyy suresta");
       assertThat(
           "Oikea suoritus on deletoitu",
           MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get(),
@@ -1808,12 +1806,11 @@ public class PistesyottoResourceTest {
 
       assertThat("Hakukohteen hakemukselle pisteet", tuodutPisteet, hasSize(1));
       assertTrue(
-          "Myös kielikokeet löytyvät valinta-piste-serviceen tuoduista pisteistä",
           tuodutPisteet.stream()
               .anyMatch(
                   a ->
-                      a.getPisteet().stream()
-                          .anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))));
+                      a.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))),
+          "Myös kielikokeet löytyvät valinta-piste-serviceen tuoduista pisteistä");
       assertThat(MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), hasSize(0));
       assertThat(
           "Suorituksia ei deletoitu",

@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintatapajono;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
 

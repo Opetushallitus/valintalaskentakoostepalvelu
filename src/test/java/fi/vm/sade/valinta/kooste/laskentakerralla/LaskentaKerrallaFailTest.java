@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.laskentakerralla;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -14,10 +14,10 @@ import io.reactivex.Observable;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +25,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.web.context.request.async.DeferredResult;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = LaskentaKerrallaContext.class)
 @TestExecutionListeners({
   DependencyInjectionTestExecutionListener.class,
@@ -43,12 +43,12 @@ public class LaskentaKerrallaFailTest {
 
   @Autowired ValintalaskentaKerrallaResource valintalaskentaKerralla;
 
-  @BeforeClass
+  @BeforeAll
   public static void resetMocks() {
     Mocks.resetMocks();
   }
 
-  @Before
+  @BeforeEach
   public void yksiLaskentaTyonAlleJokaEpaonnistuu() {
     when(Mocks.valintaperusteetAsyncResource.haunHakukohteet(any()))
         .thenReturn(Observable.error(new Throwable("FAIL")));

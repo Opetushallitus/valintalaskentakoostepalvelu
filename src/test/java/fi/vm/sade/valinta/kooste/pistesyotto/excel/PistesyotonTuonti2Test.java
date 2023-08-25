@@ -14,8 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class PistesyotonTuonti2Test extends PistesyotonTuontiTestBase {
 
@@ -24,16 +24,16 @@ public class PistesyotonTuonti2Test extends PistesyotonTuontiTestBase {
       throws FileNotFoundException, IOException, JsonIOException, JsonSyntaxException, Exception {
     List<ValintakoeOsallistuminenDTO> osallistumistiedot =
         lueOsallistumisTiedot("2/valintakoe.json");
-    Assert.assertFalse(osallistumistiedot.isEmpty());
+    Assertions.assertFalse(osallistumistiedot.isEmpty());
     List<ValintaperusteDTO> valintaperusteet = lueValintaperusteet("2/avaimet.json");
-    Assert.assertFalse(valintaperusteet.isEmpty());
+    Assertions.assertFalse(valintaperusteet.isEmpty());
     List<ApplicationAdditionalDataDTO> pistetiedot = luePistetiedot("2/add_data.json");
-    Assert.assertFalse(pistetiedot.isEmpty());
+    Assertions.assertFalse(pistetiedot.isEmpty());
     List<HakemusWrapper> hakemukset =
         lueHakemukset("2/listfull.json").stream()
             .map(HakuappHakemusWrapper::new)
             .collect(Collectors.toList());
-    Assert.assertFalse(hakemukset.isEmpty());
+    Assertions.assertFalse(hakemukset.isEmpty());
     Collection<String> valintakoeTunnisteet = getValintakoeTunnisteet(valintaperusteet);
     PistesyottoExcel pistesyottoExcel =
         new PistesyottoExcel(

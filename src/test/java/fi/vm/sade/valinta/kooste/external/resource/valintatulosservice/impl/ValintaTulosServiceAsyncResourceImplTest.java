@@ -1,15 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class ValintaTulosServiceAsyncResourceImplTest {
 
   private final HttpResource vtsHttpResource = new ValintaTulosServiceAsyncResourceImpl(null);
@@ -32,9 +30,9 @@ public class ValintaTulosServiceAsyncResourceImplTest {
                     + "\"\n"
                     + "    }",
                 VastaanottoAikarajaMennytDTO.class);
-    Assert.assertEquals(hakemusOid, parsedDto.getHakemusOid());
-    Assert.assertEquals(
+    assertEquals(hakemusOid, parsedDto.getHakemusOid());
+    assertEquals(
         new DateTime(2016, 7, 15, 12, 0, 0, DateTimeZone.UTC), parsedDto.getVastaanottoDeadline());
-    Assert.assertEquals(true, parsedDto.isMennyt());
+    assertEquals(true, parsedDto.isMennyt());
   }
 }

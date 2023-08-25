@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ViestintapalveluDtoTest {
 

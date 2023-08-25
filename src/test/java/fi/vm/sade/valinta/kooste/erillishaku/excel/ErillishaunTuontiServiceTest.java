@@ -12,10 +12,7 @@ import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.puutteel
 import static io.reactivex.Observable.just;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -61,14 +58,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-@RunWith(Enclosed.class)
 public class ErillishaunTuontiServiceTest {
   protected static final String PERSON_1_OID = "1.2.246.562.24.64735725450";
   protected static final String PERSON_2_OID = "1.2.246.562.24.64735725451";
@@ -87,7 +82,8 @@ public class ErillishaunTuontiServiceTest {
     return haku;
   }
 
-  public static final class Autotaytto extends ErillisHakuTuontiTestCase {
+  @Nested
+  public final class Autotaytto extends ErillisHakuTuontiTestCase {
     @Test
     public void
         tuodaanHylattyjaJaPeruutettujaJaVarallaOleviaPuutteellisinTiedoinAutosyotonTestaamiseksi() {
@@ -105,7 +101,8 @@ public class ErillishaunTuontiServiceTest {
     }
   }
 
-  public static final class KorkeaKouluHaku extends ErillisHakuTuontiTestCase {
+  @Nested
+  public final class KorkeaKouluHaku extends ErillisHakuTuontiTestCase {
     @Test
     public void tuodaanToisenAsteenValintatilojaKorkeaKoulunHakuun() {
       importData(kkHakuToisenAsteenValintatuloksella());
@@ -124,7 +121,8 @@ public class ErillishaunTuontiServiceTest {
     }
   }
 
-  public static final class HetullaJaSyntymaAjalla extends ErillisHakuTuontiTestCase {
+  @Nested
+  public final class HetullaJaSyntymaAjalla extends ErillisHakuTuontiTestCase {
     @Test
     public void tuontiSuoritetaan() {
       importData(kkHakuToisenAsteenValintatuloksella());
@@ -171,7 +169,8 @@ public class ErillishaunTuontiServiceTest {
     }
   }
 
-  public static final class SyntymaAjalla extends ErillisHakuTuontiTestCase {
+  @Nested
+  public final class SyntymaAjalla extends ErillisHakuTuontiTestCase {
     @Test
     public void tuodaan() {
       importData(erillisHakuSyntymaAjalla());
@@ -192,7 +191,8 @@ public class ErillishaunTuontiServiceTest {
     }
   }
 
-  public static final class HetullaJaSyntymaAjallaJaOidillaJokaOnEriKuinHenkilopalvelustaPalaava
+  @Nested
+  public final class HetullaJaSyntymaAjallaJaOidillaJokaOnEriKuinHenkilopalvelustaPalaava
       extends ErillisHakuTuontiTestCase {
     @Test
     public void tuontiSuoritetaan() {
@@ -277,7 +277,8 @@ public class ErillishaunTuontiServiceTest {
         .build();
   }
 
-  public static final class TuntemattomallaAidinkielella extends ErillisHakuTuontiTestCase {
+  @Nested
+  public final class TuntemattomallaAidinkielella extends ErillisHakuTuontiTestCase {
     @Test
     public void poistetaaanKielikoodistaDesimaalit() {
       importData(erillisHakuTuntemattomallaKielella());
@@ -286,14 +287,16 @@ public class ErillishaunTuontiServiceTest {
     }
   }
 
-  public static final class HakijaOidilla extends ErillisHakuTuontiTestCase {
+  @Nested
+  public final class HakijaOidilla extends ErillisHakuTuontiTestCase {
     @Test
     public void tuodaan() {
       importData(erillisHakuHenkiloOidilla());
     }
   }
 
-  public static final class Errors extends ErillisHakuTuontiTestCase {
+  @Nested
+  public final class Errors extends ErillisHakuTuontiTestCase {
 
     @Test
     public void henkilonLuontiEpaonnistuu() {
@@ -412,7 +415,7 @@ class ErillisHakuTuontiTestCase {
   final ErillishakuDTO erillisHaku =
       new ErillishakuDTO(Hakutyyppi.KORKEAKOULU, "haku1", "kohde1", "tarjoaja1", "jono1");
 
-  @Before
+  @BeforeEach
   public void before() {
     mockKoodisto();
   }

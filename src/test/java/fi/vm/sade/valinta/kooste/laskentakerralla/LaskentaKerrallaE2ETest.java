@@ -20,16 +20,16 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.client.Entity;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
+@Disabled
 public class LaskentaKerrallaE2ETest {
   private final SeurantaServerMock seurantaServerMock = new SeurantaServerMock();
 
-  @Before
+  @BeforeEach
   public void startServer() {
     MockServicesApp.start();
   }
@@ -82,16 +82,16 @@ public class LaskentaKerrallaE2ETest {
                 throw new RuntimeException(t);
               }
             }));
-    Assert.assertEquals(
+    Assertions.assertEquals(
         200,
         http.getWebClient()
             .query("valintakoelaskenta", "true")
             .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2)))
             .getStatus());
     try {
-      Assert.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
+      Assertions.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
     } catch (InterruptedException e) {
-      Assert.fail();
+      Assertions.fail();
     }
   }
 

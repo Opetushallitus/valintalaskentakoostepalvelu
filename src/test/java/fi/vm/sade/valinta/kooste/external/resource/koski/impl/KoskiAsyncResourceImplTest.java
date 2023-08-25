@@ -2,10 +2,10 @@ package fi.vm.sade.valinta.kooste.external.resource.koski.impl;
 
 import static fi.vm.sade.valinta.kooste.test.KoostepalveluTestingHttpUtil.createMockJsonResponse;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class KoskiAsyncResourceImplTest {
   private final String username = "koostepalvelu2koskiUser";

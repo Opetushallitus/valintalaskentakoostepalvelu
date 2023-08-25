@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -55,7 +55,7 @@ public class OsoitetarratServiceTest {
   private final Observable<Response> byteArrayResponse =
       Observable.just(Response.ok(new ByteArrayInputStream("lol".getBytes())).build());
 
-  @Before
+  @BeforeEach
   public void startServer() {
     MockResourcesApp.start();
   }
@@ -72,7 +72,7 @@ public class OsoitetarratServiceTest {
               .query("hakuOid", HAKU2)
               .query("hakukohdeOid", HAKUKOHDE2)
               .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
     } finally {
       Mocks.reset();
     }
@@ -121,15 +121,15 @@ public class OsoitetarratServiceTest {
               .query("hakukohdeOid", HAKUKOHDE1)
               .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
               .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
       // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))
           .haeOsoitetarrat(Mockito.any());
       List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
-      Assert.assertEquals(1, osoitteet.size());
-      Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
+      Assertions.assertEquals(1, osoitteet.size());
+      Assertions.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
     } finally {
       Mocks.reset();
       MockApplicationAsyncResource.clear();
@@ -192,15 +192,15 @@ public class OsoitetarratServiceTest {
               .query("hakukohdeOid", HAKUKOHDE1)
               .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
               .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
       // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))
           .haeOsoitetarrat(Mockito.any());
       List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
-      Assert.assertEquals(1, osoitteet.size());
-      Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
+      Assertions.assertEquals(1, osoitteet.size());
+      Assertions.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
     } finally {
       Mocks.reset();
       MockTarjontaAsyncService.clear();
@@ -249,15 +249,15 @@ public class OsoitetarratServiceTest {
               .query("hakukohdeOid", HAKUKOHDE1)
               .query("valintakoeTunnisteet", VALINTAKOE1)
               .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
       // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))
           .haeOsoitetarrat(Mockito.any());
       List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
-      Assert.assertEquals(1, osoitteet.size());
-      Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
+      Assertions.assertEquals(1, osoitteet.size());
+      Assertions.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
     } finally {
       Mocks.reset();
       MockApplicationAsyncResource.clear();

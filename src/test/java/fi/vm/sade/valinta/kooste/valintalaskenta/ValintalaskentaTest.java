@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -61,8 +61,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.core.Response;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
@@ -159,7 +159,7 @@ public class ValintalaskentaTest {
           "Firefox",
           "127.0.0.1");
 
-  @Before
+  @BeforeEach
   public void setUpTestData() {
     hakemus.setPersonOid("personOid");
     hakemusOids.add(hakemus.getOid());

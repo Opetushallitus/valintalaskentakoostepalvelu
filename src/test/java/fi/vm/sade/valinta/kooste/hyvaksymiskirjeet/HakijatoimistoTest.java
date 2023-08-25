@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.hyvaksymiskirjeet;
 
 import static javax.ws.rs.HttpMethod.GET;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
@@ -15,11 +15,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class HakijatoimistoTest {
-  @Before
+  @BeforeEach
   public void init() {
     MockServicesApp.start();
   }

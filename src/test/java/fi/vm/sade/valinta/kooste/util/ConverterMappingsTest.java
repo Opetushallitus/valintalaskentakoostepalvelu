@@ -4,7 +4,7 @@ import static fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource.getAtaruHak
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class ConverterMappingsTest {
@@ -207,7 +207,7 @@ public class ConverterMappingsTest {
             .findFirst()
             .get();
 
-    Assert.assertNotNull(yleinen_kielitutkinto_sv);
+    Assertions.assertNotNull(yleinen_kielitutkinto_sv);
   }
 
   @Test
@@ -258,23 +258,23 @@ public class ConverterMappingsTest {
             .distinct()
             .collect(toList());
     assertTrue(
-        "Expected to have AvainArvoDTO with avain " + expectedAvain + " but none found",
-        avainArvoDtos.size() > 0);
+        avainArvoDtos.size() > 0,
+        "Expected to have AvainArvoDTO with avain " + expectedAvain + " but none found");
     assertEquals(
-        "HakemusDTO contained multiple AvainArvoDTOs with avain " + expectedAvain,
         1,
-        avainArvoDtos.size());
+        avainArvoDtos.size(),
+        "HakemusDTO contained multiple AvainArvoDTOs with avain " + expectedAvain);
 
     final AvainArvoDTO avainArvoDto = avainArvoDtos.get(0);
     final String actualArvo = avainArvoDto.getArvo();
     assertEquals(
+        expectedArvo,
+        actualArvo,
         "AvainArvoDTO with avain "
             + expectedAvain
             + " had invalid value, expected: "
             + expectedArvo
             + " but was: "
-            + actualArvo,
-        expectedArvo,
-        actualArvo);
+            + actualArvo);
   }
 }

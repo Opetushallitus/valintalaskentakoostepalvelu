@@ -10,8 +10,8 @@ import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
@@ -29,8 +29,8 @@ import java.util.Collection;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
           .address(root + "/erillishaku/tuonti")
           .buildExposingWebClientDangerously();
 
-  @Before
+  @BeforeEach
   public void startServer() {
     MockResourcesApp.start();
 

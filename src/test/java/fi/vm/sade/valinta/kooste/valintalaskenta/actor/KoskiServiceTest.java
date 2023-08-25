@@ -1,11 +1,11 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -31,8 +31,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class KoskiServiceTest {
@@ -54,7 +54,7 @@ public class KoskiServiceTest {
   private Set<KoskiOppija> koskioppijat = Collections.singleton(koskiOppija);
   private final SuoritustiedotDTO suoritustiedotDTO = new SuoritustiedotDTO();
 
-  @Before
+  @BeforeEach
   public void setUpTestdata() {
     when(hakemusWrapper.getPersonOid()).thenReturn(oppijanumero);
     KoskiOppija.KoskiHenkilö koskiHenkilo = new KoskiOppija.KoskiHenkilö();

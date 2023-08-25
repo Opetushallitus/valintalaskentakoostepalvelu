@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintakokeet;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -26,8 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -126,7 +126,7 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     verifyNoMoreInteractions(valintakoeAsyncResource);
     verifyNoMoreInteractions(applicationAsyncResource);
 
-    Assert.assertEquals(HttpStatus.OK, ((ResponseEntity) result.getResult()).getStatusCode());
+    Assertions.assertEquals(HttpStatus.OK, ((ResponseEntity) result.getResult()).getStatusCode());
     List<ValintakoeOsallistuminenDTO> osallistumisetVastauksessa =
         ((ResponseEntity<List<ValintakoeOsallistuminenDTO>>) result.getResult()).getBody();
     assertThat(osallistumisetVastauksessa, Matchers.hasSize(2));
