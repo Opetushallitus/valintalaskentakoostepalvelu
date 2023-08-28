@@ -759,13 +759,22 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <!-- Käytössä on vielä vanhoja kirjastoja jotka käyttävät reflektiota JDK-luokkien käpistelyyn -->
+                    <argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.0.1</version>
+                <version>2.38.0</version>
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.8</version>
+                            <version>1.10.0</version>
                             <style>GOOGLE</style>
                         </googleJavaFormat>
                     </java>
@@ -817,7 +826,7 @@ buildTtime=${maven.build.timestamp}
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
+                    <release>17</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -833,7 +842,7 @@ buildTtime=${maven.build.timestamp}
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>11</version>
+                                    <version>17</version>
                                 </requireJavaVersion>
                                 <dependencyConvergence/>
                             </rules>
@@ -861,6 +870,14 @@ buildTtime=${maven.build.timestamp}
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.0.2</version>
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <!-- Käytössä on vielä vanhoja kirjastoja jotka käyttävät reflektiota JDK-luokkien käpistelyyn -->
+                                <Add-Opens>java.base/java.util java.base/java.time</Add-Opens>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
