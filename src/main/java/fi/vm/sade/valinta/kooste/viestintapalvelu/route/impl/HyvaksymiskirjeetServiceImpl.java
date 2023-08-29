@@ -608,9 +608,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
   }
 
   private CompletableFuture<Map<String, List<SyotettyArvoDTO>>> syotetytArvotByHakukohde(
-      String hakukohdeOid, Executor executor) {
+      String hakukohdeOid) {
     return this.valintalaskentaAsyncResource
-        .laskennantulokset(hakukohdeOid, executor)
+        .laskennantulokset(hakukohdeOid)
         .thenApplyAsync(
             valinnanvaiheet ->
                 valinnanvaiheet.stream()
@@ -649,7 +649,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
               hakukohdeOids.forEach(
                   oid -> {
                     try {
-                      results.put(oid, syotetytArvotByHakukohde(oid, null).get());
+                      results.put(oid, syotetytArvotByHakukohde(oid).get());
                     } catch (Exception e) {
                       LOG.error("Virhe haettaessa hakijoiden syötettyjä arvoja", e);
                       resultFuture.completeExceptionally(e);

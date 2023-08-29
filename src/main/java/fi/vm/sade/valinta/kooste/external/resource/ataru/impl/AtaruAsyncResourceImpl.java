@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
@@ -10,11 +9,11 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KansalaisuusDto;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,17 +32,17 @@ import org.springframework.stereotype.Service;
 public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   private static final int SUITABLE_ATARU_HAKEMUS_CHUNK_SIZE = 1000;
   private final Logger LOG = LoggerFactory.getLogger(getClass());
-  private final HttpClient client;
+  private final RestCasClient casClient;
   private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final KoodistoCachedAsyncResource koodistoCachedAsyncResource;
   private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public AtaruAsyncResourceImpl(
-      @Qualifier("AtaruHttpClient") HttpClient client,
+      @Qualifier("AtaruCasClient") RestCasClient casClient,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
-    this.client = client;
+    this.casClient = casClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
     this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
     this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
@@ -120,12 +119,13 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
     if (withHarkinnanvaraisuustieto) {
       query.put("harkinnanvaraisuustiedotHakutoiveille", "true");
     }
-    return this.client.postJson(
+
+    return this.casClient.post(
         this.urlConfiguration.url("ataru.applications.by-hakukohde", query),
-        Duration.ofMinutes(1),
+        new TypeToken<List<AtaruHakemus>>() {},
         hakemusOids,
-        new TypeToken<List<String>>() {}.getType(),
-        new TypeToken<List<AtaruHakemus>>() {}.getType());
+        Collections.emptyMap(),
+        120000);
   }
 
   private CompletableFuture<List<AtaruHakemus>> getApplicationsInChunks(

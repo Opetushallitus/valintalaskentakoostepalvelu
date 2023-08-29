@@ -2,19 +2,15 @@ package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.impl;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloViiteDto;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import io.reactivex.Observable;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -29,13 +25,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResource
     implements OppijanumerorekisteriAsyncResource {
-  private final HttpClient client;
+  private final RestCasClient client;
 
   @Autowired
   public OppijanumerorekisteriAsyncResourceImpl(
       @Qualifier("OppijanumerorekisteriServiceRestClientCasInterceptor")
           AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("OppijanumerorekisteriHttpClient") HttpClient client) {
+      @Qualifier("OppijanumerorekisteriCasClient") RestCasClient client) {
     super(TimeUnit.HOURS.toMillis(1), casInterceptor);
     this.client = client;
   }
@@ -54,12 +50,12 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
     Map<String, Set<String>> henkiloSearchParams = new HashMap<>();
     henkiloSearchParams.put("henkiloOids", personOids);
     CompletableFuture<List<HenkiloViiteDto>> fut =
-        this.client.postJson(
+        this.client.post(
             url,
-            Duration.ofHours(1),
+            new TypeToken<List<HenkiloViiteDto>>() {},
             henkiloSearchParams,
-            new TypeToken<Map<String, Set<String>>>() {}.getType(),
-            new TypeToken<List<HenkiloViiteDto>>() {}.getType());
+            Collections.emptyMap(),
+            60 * 60 * 1000);
     return fut;
   }
 
@@ -69,12 +65,12 @@ public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResourc
             Lists.partition(personOids, 5000).stream()
                 .map(
                     chunk ->
-                        this.client.<List<String>, Map<String, HenkiloPerustietoDto>>postJson(
+                        this.client.post(
                             url,
-                            Duration.ofHours(1),
+                            new TypeToken<Map<String, HenkiloPerustietoDto>>() {},
                             chunk,
-                            new TypeToken<List<String>>() {}.getType(),
-                            new TypeToken<Map<String, HenkiloPerustietoDto>>() {}.getType()))
+                            Map.of("Content-Type", "application/json"),
+                            60 * 60 * 1000))
                 .collect(Collectors.toList()))
         .thenApplyAsync(
             chunks ->

@@ -2,25 +2,23 @@ package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KansalaisuusDto;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +34,12 @@ public class AtaruAsyncResourceTest {
   private final String hakemusOid2 = "1.2.246.562.11.00000000000000000064";
   private final String hakemusOid3 = "1.2.246.562.11.00000000000000000065";
 
-  private final HttpClient httpClient = mock(HttpClient.class);
+  private final RestCasClient casClient = mock(RestCasClient.class);
   private final OppijanumerorekisteriAsyncResource mockOnr =
       mock(OppijanumerorekisteriAsyncResource.class);
   private final KoodistoCachedAsyncResource mockKoodisto = mock(KoodistoCachedAsyncResource.class);
   private final AtaruAsyncResourceImpl ataruAsyncResource =
-      new AtaruAsyncResourceImpl(httpClient, mockOnr, mockKoodisto);
+      new AtaruAsyncResourceImpl(casClient, mockOnr, mockKoodisto);
   private final String applicationsUrl = "/url/to/applications";
 
   private final UrlConfiguration urlConfiguration =
@@ -86,12 +84,12 @@ public class AtaruAsyncResourceTest {
     onrHenkilo2.setKansalaisuus(Sets.newHashSet(kansalaisuus));
     onrHenkilo3.setKansalaisuus(Sets.newHashSet(kansalaisuus));
 
-    when(httpClient.postJson(
+    when(casClient.post(
             eq(applicationsUrl),
-            any(Duration.class),
+            eq(new TypeToken<List<AtaruHakemus>>() {}),
             eq(Lists.newArrayList(hakemusOid1, hakemusOid2, hakemusOid3)),
-            eq(new TypeToken<List<String>>() {}.getType()),
-            eq(new TypeToken<List<AtaruHakemus>>() {}.getType())))
+            anyMap(),
+            any(Integer.class)))
         .thenReturn(
             CompletableFuture.completedFuture(MockAtaruAsyncResource.getAtaruHakemukset(null)));
 

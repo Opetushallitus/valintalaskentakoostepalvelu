@@ -12,17 +12,11 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import io.reactivex.Observable;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Entity;
@@ -41,12 +35,12 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource
     implements ValintaperusteetAsyncResource {
   private static final Logger LOG =
       LoggerFactory.getLogger(ValintaperusteetAsyncResourceImpl.class);
-  private final HttpClient httpClient;
+  private final RestCasClient httpClient;
 
   @Autowired
   public ValintaperusteetAsyncResourceImpl(
       @Qualifier("ValintaperusteetCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("ValintaperusteetHttpClient") HttpClient httpClient) {
+      @Qualifier("ValintaperusteetCasClient") RestCasClient httpClient) {
     super(TimeUnit.HOURS.toMillis(1L), casInterceptor);
     this.httpClient = httpClient;
   }
@@ -62,12 +56,13 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource
 
   public CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(
       String hakukohdeOid) {
-    return httpClient.getJson(
+    return httpClient.get(
         getUrl(
             "valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.hakijaryhma",
             hakukohdeOid),
-        Duration.ofHours(1),
-        new com.google.gson.reflect.TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType());
+        new com.google.gson.reflect.TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {},
+        Collections.emptyMap(),
+        60 * 60 * 1000);
   }
 
   public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
@@ -85,10 +80,11 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource
             "valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet",
             parameters.toArray());
 
-    return httpClient.getJson(
+    return httpClient.get(
         url,
-        Duration.ofHours(1),
-        new com.google.gson.reflect.TypeToken<List<ValintaperusteetDTO>>() {}.getType());
+        new com.google.gson.reflect.TypeToken<List<ValintaperusteetDTO>>() {},
+        Collections.emptyMap(),
+        60 * 60 * 1000);
   }
 
   public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
@@ -109,12 +105,13 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource
 
   @Override
   public CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-    return httpClient.getJson(
+    return httpClient.get(
         getUrl(
             "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet.oid",
             hakukohdeOid),
-        Duration.ofHours(1),
-        new com.google.gson.reflect.TypeToken<List<ValintaperusteDTO>>() {}.getType());
+        new com.google.gson.reflect.TypeToken<List<ValintaperusteDTO>>() {},
+        Collections.emptyMap(),
+        60 * 60 * 1000);
   }
 
   @Override

@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
@@ -10,11 +9,11 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppiBatch;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ListFullSearchDTO;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.hakemus.dto.ApplicationOidsAndReason;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import io.reactivex.Observable;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,11 +39,11 @@ import org.springframework.stereotype.Service;
 public class ApplicationAsyncResourceImpl extends UrlConfiguredResource
     implements ApplicationAsyncResource {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
-  private final HttpClient client;
+  private final RestCasClient client;
 
   @Autowired
   public ApplicationAsyncResourceImpl(
-      @Qualifier("HakuAppHttpClient") HttpClient client,
+      @Qualifier("HakuAppCasClient") RestCasClient client,
       @Qualifier("HakemusServiceRestClientAsAdminCasInterceptor")
           AbstractPhaseInterceptor casInterceptor) {
     super(TimeUnit.HOURS.toMillis(1), casInterceptor);
@@ -105,10 +104,11 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource
     LOG.info("Calling url {}", url);
 
     return this.client
-        .<List<Hakemus>>getJson(
+        .get(
             url,
-            Duration.ofHours(1),
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {}.getType())
+            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {},
+            Collections.emptyMap(),
+            60 * 60 * 1000)
         .thenApplyAsync(
             hs -> hs.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()));
   }
@@ -121,13 +121,14 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource
     requestBody.put("asIds", Collections.singletonList(hakuOid));
     requestBody.put("aoOids", hakukohdeOids);
     requestBody.put("keys", ApplicationAsyncResource.DEFAULT_KEYS);
+
     return this.client
-        .<Map<String, List<String>>, List<Hakemus>>postJson(
+        .post(
             getUrl("haku-app.applications.listfull"),
-            Duration.ofHours(1),
+            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {},
             requestBody,
-            new com.google.gson.reflect.TypeToken<Map<String, List<String>>>() {}.getType(),
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {}.getType())
+            Collections.emptyMap(),
+            60 * 60 * 1000)
         .thenApplyAsync(this::toHakemusWrapper);
   }
 
@@ -146,13 +147,14 @@ public class ApplicationAsyncResourceImpl extends UrlConfiguredResource
       query.put("state", DEFAULT_STATES);
       query.put("keys", keys);
     }
+
     return this.client
-        .<List<String>, List<Hakemus>>postJson(
+        .post(
             getUrl("haku-app.applications.list", query),
-            Duration.ofHours(1),
+            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {},
             hakemusOids,
-            new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {}.getType())
+            Collections.emptyMap(),
+            60 * 60 * 1000)
         .thenApplyAsync(
             hs ->
                 hs.stream()
