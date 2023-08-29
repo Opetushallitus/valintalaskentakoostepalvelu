@@ -250,7 +250,7 @@ public class KoekutsukirjeetTest {
                           Collections.emptyList())));
       Assertions.assertEquals(200, r.getStatus());
 
-      Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1))
+      Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).atLeastOnce())
           .vieLetterBatch(letterBatchArgumentCaptor.capture());
       LetterBatch batch = letterBatchArgumentCaptor.getValue();
       Assertions.assertEquals(

@@ -2,16 +2,14 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import io.reactivex.Observable;
-import java.lang.reflect.Type;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,14 +31,14 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
     implements SuoritusrekisteriAsyncResource {
   private static final Logger LOG =
       LoggerFactory.getLogger(SuoritusrekisteriAsyncResourceImpl.class);
-  private final HttpClient httpClient;
+  private final RestCasClient httpClient;
   private int maxOppijatPostSize = 5000;
 
   @Autowired
   public SuoritusrekisteriAsyncResourceImpl(
       @Qualifier("SuoritusrekisteriRestClientCasInterceptor")
           AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("SuoritusrekisteriHttpClient") HttpClient httpClient) {
+      @Qualifier("SuoritusrekisteriCasClient") RestCasClient httpClient) {
     super(TimeUnit.MINUTES.toMillis(10), casInterceptor);
     this.httpClient = httpClient;
   }
@@ -65,10 +63,12 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
     parameters.put("haku", hakuOid);
     parameters.put("ensikertalaisuudet", "false");
     String url = getUrl("suoritusrekisteri.oppijat", parameters);
-    return httpClient.getJson(
+
+    return httpClient.get(
         url,
-        Duration.ofMinutes(5),
-        new com.google.gson.reflect.TypeToken<List<Oppija>>() {}.getType());
+        new com.google.gson.reflect.TypeToken<List<Oppija>>() {},
+        Collections.emptyMap(),
+        5 * 60 * 1000);
   }
 
   @Override
@@ -169,16 +169,18 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
         opiskelijaOids.size(),
         oidBatches.size());
 
-    Type inputType = new com.google.gson.reflect.TypeToken<List<String>>() {}.getType();
-    Type outputType = new com.google.gson.reflect.TypeToken<List<Oppija>>() {}.getType();
-
     return CompletableFutureUtil.sequence(
             oidBatches.stream()
                 .map(
                     oidBatch -> {
                       LOG.info("Calling POST url {} with {} opiskelijaOids", url, oidBatch.size());
-                      return httpClient.<List<String>, List<Oppija>>postJson(
-                          url, Duration.ofMinutes(5), oidBatch, inputType, outputType);
+
+                      return httpClient.post(
+                          url,
+                          new com.google.gson.reflect.TypeToken<List<Oppija>>() {},
+                          oidBatch,
+                          Collections.emptyMap(),
+                          5 * 60 * 1000);
                     })
                 .collect(Collectors.toList()))
         .thenApplyAsync(
@@ -188,47 +190,45 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
 
   @Override
   public CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus) {
-    Type suoritusType = new com.google.gson.reflect.TypeToken<Suoritus>() {}.getType();
-    return httpClient.postJson(
+    return httpClient.post(
         getUrl("suoritusrekisteri.suoritukset"),
-        Duration.ofMinutes(10),
+        new com.google.gson.reflect.TypeToken<>() {},
         suoritus,
-        suoritusType,
-        suoritusType);
+        Collections.emptyMap(),
+        10 * 60 * 1000);
   }
 
   @Override
   public CompletableFuture<Arvosana> postArvosana(Arvosana arvosana) {
-    Type arvosanaType = new com.google.gson.reflect.TypeToken<Arvosana>() {}.getType();
-    return httpClient.postJson(
+    return httpClient.post(
         getUrl("suoritusrekisteri.arvosanat"),
-        Duration.ofMinutes(10),
+        new com.google.gson.reflect.TypeToken<Arvosana>() {},
         arvosana,
-        arvosanaType,
-        arvosanaType);
+        Collections.emptyMap(),
+        10 * 6 * 1000);
   }
 
   @Override
   public CompletableFuture<Arvosana> updateExistingArvosana(
       String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
-    Type arvosanaType = new com.google.gson.reflect.TypeToken<Arvosana>() {}.getType();
-    return httpClient.postJson(
+
+    return httpClient.post(
         getUrl("suoritusrekisteri.arvosanat.id", arvosanaId),
-        Duration.ofMinutes(10),
+        new com.google.gson.reflect.TypeToken<Arvosana>() {},
         arvosanaWithUpdatedValues,
-        arvosanaType,
-        arvosanaType);
+        Collections.emptyMap(),
+        10 * 60 * 1000);
   }
 
   @Override
   public CompletableFuture<String> deleteSuoritus(String suoritusId) {
     return httpClient.delete(
-        getUrl("suoritusrekisteri.suoritukset.id", suoritusId), Duration.ofMinutes(1));
+        getUrl("suoritusrekisteri.suoritukset.id", suoritusId), Map.of("Accept", "*/*"), 60 * 1000);
   }
 
   @Override
   public CompletableFuture<String> deleteArvosana(String arvosanaId) {
     return httpClient.delete(
-        getUrl("suoritusrekisteri.arvosanat.id", arvosanaId), Duration.ofMinutes(1));
+        getUrl("suoritusrekisteri.arvosanat.id", arvosanaId), Map.of("Accept", "*/*"), 60 * 1000);
   }
 }

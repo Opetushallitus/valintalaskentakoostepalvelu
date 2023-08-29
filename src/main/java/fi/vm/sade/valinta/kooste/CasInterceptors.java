@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste;
 
-import fi.vm.sade.javautils.cas.ApplicationSession;
-import fi.vm.sade.javautils.cas.CasSession;
 import fi.vm.sade.valinta.kooste.cas.CasKoosteInterceptor;
+import fi.vm.sade.valinta.kooste.external.resource.ApplicationSession;
+import fi.vm.sade.valinta.kooste.external.resource.CasSession;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClients;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import java.net.CookieManager;

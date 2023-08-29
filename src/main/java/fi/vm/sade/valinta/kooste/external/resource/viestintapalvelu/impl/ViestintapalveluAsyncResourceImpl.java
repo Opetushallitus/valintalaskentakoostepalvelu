@@ -3,8 +3,8 @@ package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
 
 import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
@@ -13,11 +13,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDt
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import io.reactivex.Observable;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Entity;
@@ -32,32 +28,33 @@ import org.springframework.stereotype.Service;
 @Service
 public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource
     implements ViestintapalveluAsyncResource {
-  private final HttpClient client;
+  private final RestCasClient client;
 
   @Autowired
   public ViestintapalveluAsyncResourceImpl(
       @Qualifier("viestintapalveluClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("ViestintapalveluHttpClient") HttpClient client) {
+      @Qualifier("ViestintapalveluCasClient") RestCasClient client) {
     super(TimeUnit.HOURS.toMillis(20), casInterceptor);
     this.client = client;
   }
 
   @Override
   public CompletableFuture<LetterResponse> vieLetterBatch(LetterBatch letterBatch) {
-    return this.client.postJson(
+    return this.client.post(
         getUrl("viestintapalvelu.letter.async.letter"),
-        Duration.ofHours(20),
+        new com.google.gson.reflect.TypeToken<LetterResponse>() {},
         letterBatch,
-        new com.google.gson.reflect.TypeToken<LetterBatch>() {}.getType(),
-        new com.google.gson.reflect.TypeToken<LetterResponse>() {}.getType());
+        Collections.emptyMap(),
+        20 * 60 * 60 * 1000);
   }
 
   @Override
   public CompletableFuture<LetterBatchStatusDto> haeLetterBatchStatus(String letterBatchId) {
-    return this.client.getJson(
+    return this.client.get(
         getUrl("viestintapalvelu.letter.async.letter.status", letterBatchId),
-        Duration.ofMinutes(1),
-        new com.google.gson.reflect.TypeToken<LetterBatchStatusDto>() {}.getType());
+        new com.google.gson.reflect.TypeToken<LetterBatchStatusDto>() {},
+        Collections.emptyMap(),
+        69 * 1000);
   }
 
   public Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(
@@ -81,10 +78,11 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource
     query.put("templateName", templateName);
     query.put("languageCode", languageCode);
     query.put("tag", hakukohdeOid);
-    return this.client.getJson(
+    return this.client.get(
         getUrl("viestintapalvelu.template.gethistory", query),
-        Duration.ofMinutes(1),
-        new com.google.gson.reflect.TypeToken<List<TemplateHistory>>() {}.getType());
+        new com.google.gson.reflect.TypeToken<List<TemplateHistory>>() {},
+        Collections.emptyMap(),
+        60 * 1000);
   }
 
   @Override

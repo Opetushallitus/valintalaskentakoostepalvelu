@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource;
 
 import com.google.gson.Gson;
-import fi.vm.sade.javautils.cas.ApplicationSession;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.cas;
 
 import static fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse.CAS_302_REDIRECT_MARKER;
 
-import fi.vm.sade.javautils.cas.ApplicationSession;
-import fi.vm.sade.javautils.cas.SessionToken;
 import fi.vm.sade.javautils.cxf.OphCxfMessageUtil;
+import fi.vm.sade.valinta.kooste.external.resource.ApplicationSession;
+import fi.vm.sade.valinta.kooste.external.resource.SessionToken;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
