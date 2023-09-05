@@ -1,31 +1,32 @@
 package fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.impl;
 
-import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.OppijantunnistusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensRequest;
 import fi.vm.sade.valinta.kooste.external.resource.oppijantunnistus.dto.TokensResponse;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import io.reactivex.Observable;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import java.util.Collections;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource
-    implements OppijantunnistusAsyncResource {
+public class OppijantunnistusAsyncResourceImpl implements OppijantunnistusAsyncResource {
   private static final Logger LOG =
       LoggerFactory.getLogger(OppijantunnistusAsyncResourceImpl.class);
-  private static final MediaType EML_TYPE = new MediaType("message", "rfc822");
+
+  private final RestCasClient restCasClient;
+
+  private final UrlConfiguration urlConfiguration;
 
   public OppijantunnistusAsyncResourceImpl(
-      @Qualifier("OppijantunnistusCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
-    super(TimeUnit.MINUTES.toMillis(20), casInterceptor);
+      @Qualifier("OppijantunnistusCasClient") RestCasClient restCasClient) {
+    this.restCasClient = restCasClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
@@ -33,28 +34,26 @@ public class OppijantunnistusAsyncResourceImpl extends UrlConfiguredResource
     LOG.info(
         "Sending securelinks to {} recipients.",
         tokensRequest.getApplicationOidToEmailAddress().size());
-    return postAsObservableLazily(
-        getUrl("oppijan-tunnistus.tokens"),
-        new TypeToken<TokensResponse>() {}.getType(),
-        Entity.entity(gson().toJson(tokensRequest), MediaType.APPLICATION_JSON_TYPE),
-        client -> {
-          client.accept(MediaType.APPLICATION_JSON_TYPE);
-          return client;
-        });
+    return Observable.fromFuture(
+        this.restCasClient.post(
+            this.urlConfiguration.url("oppijan-tunnistus.tokens"),
+            new com.google.gson.reflect.TypeToken<>() {},
+            tokensRequest,
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
-  public Observable<Response> previewSecureLink(TokensRequest tokensRequest) {
-    return getAsObservableLazily(
-        getUrl(
-            "oppijan-tunnistus.preview.haku.template.lang",
-            tokensRequest.getHakuOid(),
-            tokensRequest.getTemplatename(),
-            tokensRequest.getLang()),
-        client -> {
-          client.accept(EML_TYPE);
-          client.query("callback-url", tokensRequest.getUrl());
-          return client;
-        });
+  public Observable<byte[]> previewSecureLink(TokensRequest tokensRequest) {
+    return Observable.fromFuture(
+        this.restCasClient.get(
+            this.urlConfiguration.url(
+                "oppijan-tunnistus.preview.haku.template.lang",
+                tokensRequest.getHakuOid(),
+                tokensRequest.getTemplatename(),
+                tokensRequest.getLang()),
+            new TypeToken<>() {},
+            Map.of("Accept", "message/rfc822"),
+            10 * 60 * 1000));
   }
 }

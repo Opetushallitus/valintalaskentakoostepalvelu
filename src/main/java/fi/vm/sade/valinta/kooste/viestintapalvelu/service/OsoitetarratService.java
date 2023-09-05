@@ -360,11 +360,10 @@ public class OsoitetarratService {
       viestintapalveluAsyncResource
           .haeOsoitetarrat(osoitteet)
           .subscribe(
-              response -> {
+              inputStream -> {
                 prosessi.inkrementoiTehtyjaToita();
                 String id = UUID.randomUUID().toString();
                 try {
-                  InputStream inputStream = pipeInputStreams((InputStream) response.getEntity());
                   dokumenttiAsyncResource
                       .tallenna(
                           id,

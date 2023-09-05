@@ -2,11 +2,10 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import fi.vm.sade.koodisto.service.KoodiService;
 import fi.vm.sade.koodisto.service.types.common.KieliType;
-import fi.vm.sade.koodisto.service.types.common.KoodiMetadataType;
-import fi.vm.sade.koodisto.service.types.common.KoodiType;
-import fi.vm.sade.koodisto.util.KoodiServiceSearchCriteriaBuilder;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Maakoodi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
@@ -26,10 +25,10 @@ public class HaeOsoiteKomponentti {
   private static final String SUOMI = "fin";
   private final Cache<String, Maakoodi> koodiCache =
       CacheBuilder.newBuilder().expireAfterWrite(12, TimeUnit.HOURS).build();
-  private KoodiService koodiService;
+  private KoodistoAsyncResource koodiService;
 
   @Autowired
-  public HaeOsoiteKomponentti(KoodiService koodiService) {
+  public HaeOsoiteKomponentti(KoodistoAsyncResource koodiService) {
     this.koodiService = koodiService;
   }
 
@@ -52,10 +51,8 @@ public class HaeOsoiteKomponentti {
                 @Override
                 public Maakoodi call() throws Exception {
                   String postitoimipaikka = StringUtils.EMPTY;
-                  List<KoodiType> koodiTypes =
-                      koodiService.searchKoodis(
-                          KoodiServiceSearchCriteriaBuilder.latestKoodisByUris(uri));
-                  for (KoodiType koodi : koodiTypes) {
+                  List<Koodi> koodiTypes = koodiService.haeKoodienUusinVersio(uri).get();
+                  for (Koodi koodi : koodiTypes) {
                     if (koodi.getMetadata() == null) {
                       LOG.error("Koodistosta palautuu tyhjiä koodeja! Koodisto uri {}", uri);
                       continue;
@@ -105,15 +102,15 @@ public class HaeOsoiteKomponentti {
     return StringUtils.EMPTY;
   }
 
-  private static String getNimi(List<KoodiMetadataType> meta) {
-    for (KoodiMetadataType data : meta) {
+  private static String getNimi(List<Metadata> meta) {
+    for (Metadata data : meta) {
       return data.getNimi();
     }
     return null;
   }
 
-  private static String getKuvaus(List<KoodiMetadataType> meta, KieliType kieli) {
-    for (KoodiMetadataType data : meta) {
+  private static String getKuvaus(List<Metadata> meta, KieliType kieli) {
+    for (Metadata data : meta) {
       if (kieli.equals(data.getKieli())) {
         return data.getKuvaus();
       }

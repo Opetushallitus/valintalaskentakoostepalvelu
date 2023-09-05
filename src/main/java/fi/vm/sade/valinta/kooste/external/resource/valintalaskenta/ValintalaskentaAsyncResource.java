@@ -25,4 +25,6 @@ public interface ValintalaskentaAsyncResource {
   Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
   Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
+
+  Observable<List<ValintatietoValinnanvaiheDTO>> hakukohde(String hakukohdeoid);
 }

@@ -1,15 +1,14 @@
 package fi.vm.sade.valinta.kooste.external.resource.sijoittelu.impl;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.sijoittelu.domain.SijoitteluajonTila;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.SijoitteleAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import javax.ws.rs.core.MediaType;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,19 +16,21 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource
-    implements SijoitteleAsyncResource {
+public class SijoitteleAsyncResourceImpl implements SijoitteleAsyncResource {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SijoitteleAsyncResourceImpl.class);
   private static final int MAX_POLL_INTERVALL_IN_SECONDS = 30;
   private static final int ADDED_WAIT_PER_POLL_IN_SECONDS = 3;
 
+  private final RestCasClient restCasClient;
+
+  private final UrlConfiguration urlConfiguration;
+
   @Autowired
   public SijoitteleAsyncResourceImpl(
-      @Qualifier("SijoitteluServiceRestClientCasInterceptor")
-          AbstractPhaseInterceptor casInterceptor) {
-    super(TimeUnit.HOURS.toMillis(1), casInterceptor);
-    LOGGER.info("CAS-INTERCEPTOR: {}", casInterceptor.toString());
+      @Qualifier("SijoitteluServiceCasClient") RestCasClient restCasClient) {
+    this.restCasClient = restCasClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
@@ -43,13 +44,12 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource
 
     // Luodaan sijoitteluajo, saadaan palautusarvona sen id, jota käytetään pollattaessa toista
     // rajapintaa.
-    String luontiUrl = getUrl("sijoittelu-service.sijoittele", hakuOid);
+    String luontiUrl = this.urlConfiguration.url("sijoittelu-service.sijoittele", hakuOid);
     try {
       sijoitteluajoId =
-          this.<Long>getAsObservableLazily(
-                  luontiUrl, Long.class, client -> client.accept(MediaType.WILDCARD_TYPE))
-              .timeout(30, SECONDS)
-              .blockingFirst();
+          this.restCasClient
+              .get(luontiUrl, new TypeToken<Long>() {}, Map.of("Accept", "*/*"), 30 * 1000)
+              .get();
     } catch (Exception e) {
       LOGGER.error(String.format("(Haku %s) sijoittelun rajapintakutsu epäonnistui", hakuOid), e);
     }
@@ -69,7 +69,8 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource
         "(Haku: {}) Sijoittelu on käynnistynyt id:llä {}. Pollataan kunnes se on päättynyt.",
         hakuOid,
         sijoitteluajoId);
-    String pollingUrl = getUrl("sijoittelu-service.sijoittele.ajontila", sijoitteluajoId);
+    String pollingUrl =
+        this.urlConfiguration.url("sijoittelu-service.sijoittele.ajontila", sijoitteluajoId);
     while (!done.get()) {
       try {
         TimeUnit.SECONDS.sleep(secondsUntilNextPoll);
@@ -81,12 +82,10 @@ public class SijoitteleAsyncResourceImpl extends UrlConfiguredResource
       }
       try {
         status =
-            this.<String>getAsObservableLazily(
-                    pollingUrl,
-                    String.class,
-                    webClient -> webClient.accept(MediaType.WILDCARD_TYPE))
-                .timeout(15, SECONDS)
-                .blockingFirst();
+            this.restCasClient
+                .get(pollingUrl, new TypeToken<String>() {}, Map.of("Accept", "*/*"), 15 * 1000)
+                .get();
+
         LOGGER.info("Saatiin ajontila-rajapinnalta palautusarvo {}", status);
         if (SijoitteluajonTila.VALMIS.toString().equals(status)) {
           LOGGER.info("#### Sijoittelu {} haulle {} on valmistunut", sijoitteluajoId, hakuOid);

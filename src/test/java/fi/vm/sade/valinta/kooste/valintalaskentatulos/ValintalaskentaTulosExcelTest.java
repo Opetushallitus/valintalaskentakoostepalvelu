@@ -11,7 +11,6 @@ import com.google.common.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.mocks.*;
 import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
@@ -21,7 +20,7 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
-import fi.vm.sade.valinta.sharedutils.http.HttpResource;
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -51,7 +50,6 @@ public class ValintalaskentaTulosExcelTest {
   final String root =
       "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
 
-  final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null, null);
   final HttpResourceBuilder.WebClientExposingHttpResource valintakoekutsutResource =
       new HttpResourceBuilder(getClass().getName())
           .address(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi")
@@ -84,7 +82,9 @@ public class ValintalaskentaTulosExcelTest {
     String osallistumiset = IOUtils.toString(new FileInputStream("osallistumiset.json"));
     String valintakoe = IOUtils.toString(new FileInputStream("valintakoe.json"));
     List<Hakemus> hakemuses =
-        hakemusResource.gson().fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
+        DateDeserializer.gsonBuilder()
+            .create()
+            .fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
     List<HakemusWrapper> hakemusWrappers =
         hakemuses.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
 

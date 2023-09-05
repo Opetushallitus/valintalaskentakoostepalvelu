@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.valinta.kooste.cas.CasKoosteInterceptor;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
@@ -24,11 +23,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
-import org.springframework.test.util.ReflectionTestUtils;
 
 public class ApplicationAsyncResourceImplTest {
   private final HttpResource wrappedHttpResource = mock(HttpResource.class);
@@ -43,15 +40,7 @@ public class ApplicationAsyncResourceImplTest {
   private final String urlToApplicationsListFull = "/url/to/applications/list/full";
   private final RestCasClient mockClient = mock(RestCasClient.class);
   private ApplicationAsyncResourceImpl applicationAsyncResource =
-      new ApplicationAsyncResourceImpl(mockClient, mock(CasKoosteInterceptor.class));
-
-  @BeforeEach
-  public void setMockInsideResourceUnderTest() {
-    ReflectionTestUtils.setField(
-        applicationAsyncResource, "wrappedHttpResource", wrappedHttpResource);
-    ReflectionTestUtils.setField(
-        applicationAsyncResource, "urlConfiguration", mockUrlConfiguration);
-  }
+      new ApplicationAsyncResourceImpl(mockClient, mockUrlConfiguration);
 
   @Test
   public void stateParameterIsNotAddedWhenFetchingApplicationsByHakemusOidsWithoutKeysList() {

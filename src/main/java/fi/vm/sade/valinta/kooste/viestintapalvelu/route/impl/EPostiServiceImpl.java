@@ -110,9 +110,7 @@ public class EPostiServiceImpl implements EPostiService {
     teeTokensRequest(ePostiRequest, Collections.emptyMap())
         .flatMap(tokensRequest -> oppijantunnistusAsyncResource.previewSecureLink(tokensRequest))
         .subscribe(
-            response ->
-                result.setResult(
-                    ResponseEntity.status(HttpStatus.OK).body(response.readEntity(byte[].class))),
+            response -> result.setResult(ResponseEntity.status(HttpStatus.OK).body(response)),
             throwable -> {
               LOG.error("Securelinkin esikatselu epäonnistui. " + hakuMessage, throwable);
               result.setErrorResult(

@@ -61,7 +61,7 @@ public class EPostinLahetysServiceE2ETest {
   public void testNoBatchIdFound1() throws Exception {
     mockToNotFound("GET", "/viestintapalvelu/api/v1/luotettu/letter/getBatchIdReadyForEPosti");
     String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi", 500);
-    assertTrue(message.contains("getBatchIdReadyForEPosti HTTP 404"));
+    assertTrue(message.contains("Securelinkien lähetys epäonnistui!"));
   }
 
   @Test
@@ -78,7 +78,7 @@ public class EPostinLahetysServiceE2ETest {
     mockToNotFound(
         "GET", "/viestintapalvelu/api/v1/luotettu/letter/getEPostiAddressesForLetterBatch/1234");
     String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi", 500);
-    assertTrue(message.contains("getEPostiAddressesForLetterBatch/1234 HTTP 404"));
+    assertTrue(message.contains("Securelinkien lähetys epäonnistui!"));
   }
 
   @Test
@@ -99,7 +99,7 @@ public class EPostinLahetysServiceE2ETest {
     mockGetOhjausparametrit();
     mockToInternalServerError("POST", "/oppijan-tunnistus/api/v1/tokens");
     String message = sendEPostiExpectFailure("hyvaksymiskirje", "fi", 500);
-    assertTrue(message.contains("tokens HTTP 500"));
+    assertTrue(message.contains("Securelinkien lähetys epäonnistui!"));
   }
 
   @Test

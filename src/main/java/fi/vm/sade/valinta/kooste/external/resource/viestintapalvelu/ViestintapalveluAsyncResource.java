@@ -7,13 +7,13 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDt
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import io.reactivex.Observable;
+import java.io.InputStream;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.Response;
 
 public interface ViestintapalveluAsyncResource {
 
@@ -23,7 +23,7 @@ public interface ViestintapalveluAsyncResource {
 
   CompletableFuture<LetterBatchStatusDto> haeLetterBatchStatus(String batchId);
 
-  Observable<Response> haeOsoitetarrat(Osoitteet osoitteet);
+  Observable<InputStream> haeOsoitetarrat(Osoitteet osoitteet);
 
   CompletableFuture<List<TemplateHistory>> haeKirjepohja(
       String hakuOid,

@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import io.reactivex.Observable;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,8 +53,8 @@ public class OsoitetarratServiceTest {
   final String HAKEMUS1 = "HAKEMUS1";
   final String ATARUHAKEMUS1 = "1.2.246.562.11.00000000000000000063";
   final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
-  private final Observable<Response> byteArrayResponse =
-      Observable.just(Response.ok(new ByteArrayInputStream("lol".getBytes())).build());
+  private final Observable<InputStream> byteArrayResponse =
+      Observable.just(new ByteArrayInputStream("lol".getBytes()));
 
   @BeforeEach
   public void startServer() {

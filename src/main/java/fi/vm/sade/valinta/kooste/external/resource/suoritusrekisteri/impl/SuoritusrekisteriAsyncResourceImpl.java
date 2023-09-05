@@ -1,13 +1,12 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import io.reactivex.Observable;
 import java.util.Collections;
@@ -15,11 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,32 +22,34 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
-    implements SuoritusrekisteriAsyncResource {
+public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyncResource {
   private static final Logger LOG =
       LoggerFactory.getLogger(SuoritusrekisteriAsyncResourceImpl.class);
   private final RestCasClient httpClient;
+
+  private final UrlConfiguration urlConfiguration;
+
   private int maxOppijatPostSize = 5000;
 
   @Autowired
   public SuoritusrekisteriAsyncResourceImpl(
-      @Qualifier("SuoritusrekisteriRestClientCasInterceptor")
-          AbstractPhaseInterceptor casInterceptor,
       @Qualifier("SuoritusrekisteriCasClient") RestCasClient httpClient) {
-    super(TimeUnit.MINUTES.toMillis(10), casInterceptor);
     this.httpClient = httpClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
   public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String hakuOid) {
-    return getAsObservableLazily(
-        getUrl("suoritusrekisteri.oppijat"),
-        new TypeToken<List<Oppija>>() {}.getType(),
-        client -> {
-          client.query("hakukohde", hakukohdeOid);
-          client.query("haku", hakuOid);
-          return client;
-        });
+    return Observable.fromFuture(
+        this.httpClient.get(
+            this.urlConfiguration.url("suoritusrekisteri.oppijat")
+                + "?hakukohde="
+                + hakukohdeOid
+                + "&haku="
+                + hakuOid,
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
@@ -62,7 +59,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
     parameters.put("hakukohde", hakukohdeOid);
     parameters.put("haku", hakuOid);
     parameters.put("ensikertalaisuudet", "false");
-    String url = getUrl("suoritusrekisteri.oppijat", parameters);
+    String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
 
     return httpClient.get(
         url,
@@ -73,15 +70,17 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
 
   @Override
   public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
-    return getAsObservableLazily(
-        getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid),
-        Oppija.class,
-        client -> {
-          client.accept(MediaType.APPLICATION_JSON_TYPE);
-          client.query("haku", hakuOid);
-          LOG.info("Calling url {}", client.getCurrentURI());
-          return client;
-        });
+    String uri =
+        this.urlConfiguration.url("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid)
+            + "?haku="
+            + hakuOid;
+    LOG.info("Calling url {}", uri);
+    return Observable.fromFuture(
+        this.httpClient.get(
+            uri,
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
@@ -90,20 +89,21 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
     Map<String, String> parameters = new HashMap<>();
     parameters.put("ensikertalaisuudet", "true");
     parameters.put("haku", hakuOid);
-    String url = getUrl("suoritusrekisteri.oppijat", parameters);
+    String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
     return batchedPostOppijasFuture(opiskelijaOids, url);
   }
 
   @Override
   public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
-    return getAsObservableLazily(
-        getUrl("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid),
-        Oppija.class,
-        client -> {
-          client.accept(MediaType.APPLICATION_JSON_TYPE);
-          LOG.info("Calling url {}", client.getCurrentURI());
-          return client;
-        });
+    String url =
+        this.urlConfiguration.url("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid);
+    LOG.info("Calling url {}", url);
+    return Observable.fromFuture(
+        this.httpClient.get(
+            url,
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
@@ -111,14 +111,15 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
       List<String> opiskelijaOids) {
     Map<String, String> parameters = new HashMap<>();
     parameters.put("ensikertalaisuudet", "false");
-    String url = getUrl("suoritusrekisteri.oppijat", parameters);
+    String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
     return batchedPostOppijasFuture(opiskelijaOids, url);
   }
 
   @Override
   public Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(
       List<String> opiskelijaOids) {
-    String url = getUrl("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=false";
+    String url =
+        this.urlConfiguration.url("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=false";
     return batchedPostOppijas(opiskelijaOids, url);
   }
 
@@ -137,19 +138,17 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
     Observable<Observable<List<Oppija>>> obses =
         Observable.fromIterable(oidBatches)
             .map(
-                oidBatch ->
-                    postAsObservableLazily(
-                        url,
-                        new TypeToken<List<Oppija>>() {}.getType(),
-                        Entity.entity(oidBatch, MediaType.APPLICATION_JSON_TYPE),
-                        client -> {
-                          client.accept(MediaType.APPLICATION_JSON_TYPE);
-                          LOG.info(
-                              "Calling POST url {} with {} opiskelijaOids",
-                              client.getCurrentURI(),
-                              oidBatch.size());
-                          return client;
-                        }));
+                oidBatch -> {
+                  LOG.info("Calling POST url {} with {} opiskelijaOids", url, oidBatch.size());
+
+                  return Observable.fromFuture(
+                      this.httpClient.post(
+                          url,
+                          new com.google.gson.reflect.TypeToken<>() {},
+                          oidBatch,
+                          Collections.emptyMap(),
+                          10 * 60 * 1000));
+                });
 
     // Add the elements returned by each response to one master list
     Observable<List<Oppija>> allOppijas = Observable.concat(obses);
@@ -191,7 +190,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
   @Override
   public CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus) {
     return httpClient.post(
-        getUrl("suoritusrekisteri.suoritukset"),
+        this.urlConfiguration.url("suoritusrekisteri.suoritukset"),
         new com.google.gson.reflect.TypeToken<>() {},
         suoritus,
         Collections.emptyMap(),
@@ -201,7 +200,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
   @Override
   public CompletableFuture<Arvosana> postArvosana(Arvosana arvosana) {
     return httpClient.post(
-        getUrl("suoritusrekisteri.arvosanat"),
+        this.urlConfiguration.url("suoritusrekisteri.arvosanat"),
         new com.google.gson.reflect.TypeToken<Arvosana>() {},
         arvosana,
         Collections.emptyMap(),
@@ -213,7 +212,7 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
       String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
 
     return httpClient.post(
-        getUrl("suoritusrekisteri.arvosanat.id", arvosanaId),
+        this.urlConfiguration.url("suoritusrekisteri.arvosanat.id", arvosanaId),
         new com.google.gson.reflect.TypeToken<Arvosana>() {},
         arvosanaWithUpdatedValues,
         Collections.emptyMap(),
@@ -223,12 +222,16 @@ public class SuoritusrekisteriAsyncResourceImpl extends UrlConfiguredResource
   @Override
   public CompletableFuture<String> deleteSuoritus(String suoritusId) {
     return httpClient.delete(
-        getUrl("suoritusrekisteri.suoritukset.id", suoritusId), Map.of("Accept", "*/*"), 60 * 1000);
+        this.urlConfiguration.url("suoritusrekisteri.suoritukset.id", suoritusId),
+        Map.of("Accept", "*/*"),
+        60 * 1000);
   }
 
   @Override
   public CompletableFuture<String> deleteArvosana(String arvosanaId) {
     return httpClient.delete(
-        getUrl("suoritusrekisteri.arvosanat.id", arvosanaId), Map.of("Accept", "*/*"), 60 * 1000);
+        this.urlConfiguration.url("suoritusrekisteri.arvosanat.id", arvosanaId),
+        Map.of("Accept", "*/*"),
+        60 * 1000);
   }
 }

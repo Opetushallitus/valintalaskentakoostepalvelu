@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.sijoittelu.resource;
 import com.google.gson.Gson;
 import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.SijoitteluSeurantaResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
@@ -12,7 +13,6 @@ import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoitteluAktivointiRoute;
 import fi.vm.sade.valinta.kooste.sijoittelu.route.SijoittelunValvonta;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
-import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.sharedutils.ValintaResource;
@@ -58,7 +58,7 @@ public class SijoitteluAktivointiResource {
 
   @Autowired private HakuParametritService hakuParametritService;
 
-  @Autowired private SijoittelunSeurantaResource sijoittelunSeurantaResource;
+  @Autowired private SijoitteluSeurantaResource sijoittelunSeurantaResource;
 
   @Autowired private SijoittelunValvonta sijoittelunValvonta;
 

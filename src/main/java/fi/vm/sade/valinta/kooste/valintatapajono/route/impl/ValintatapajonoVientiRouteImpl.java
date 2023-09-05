@@ -5,13 +5,12 @@ import static fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.DokumenttiUt
 
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationResource;
-import fi.vm.sade.valinta.kooste.external.resource.laskenta.HakukohdeResource;
+import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -19,11 +18,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,24 +32,24 @@ import org.springframework.stereotype.Component;
 public class ValintatapajonoVientiRouteImpl implements ValintatapajonoVientiRoute {
   private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoVientiRouteImpl.class);
 
-  private final ApplicationResource applicationResource;
+  private final ApplicationAsyncResource applicationAsyncResource;
   private final AtaruAsyncResource ataruAsyncResource;
   private final DokumenttiAsyncResource dokumenttiAsyncResource;
   private final TarjontaAsyncResource tarjontaAsyncResource;
-  private final HakukohdeResource hakukohdeResource;
+  private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
 
   @Autowired
   public ValintatapajonoVientiRouteImpl(
-      ApplicationResource applicationResource,
+      ApplicationAsyncResource applicationAsyncResource,
       AtaruAsyncResource ataruAsyncResource,
       DokumenttiAsyncResource dokumenttiAsyncResource,
       TarjontaAsyncResource tarjontaAsyncResource,
-      HakukohdeResource hakukohdeResource) {
-    this.applicationResource = applicationResource;
+      ValintalaskentaAsyncResource valintalaskentaAsyncResource) {
+    this.applicationAsyncResource = applicationAsyncResource;
     this.ataruAsyncResource = ataruAsyncResource;
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     this.tarjontaAsyncResource = tarjontaAsyncResource;
-    this.hakukohdeResource = hakukohdeResource;
+    this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
   }
 
   public void valintatapajonoVienti(
@@ -97,15 +96,9 @@ public class ValintatapajonoVientiRouteImpl implements ValintatapajonoVientiRout
             ataruAsyncResource.getApplicationsByHakukohde(hakukohdeOid).get(1, TimeUnit.MINUTES);
       } else {
         hakemukset =
-            applicationResource
-                .getApplicationsByOid(
-                    hakuOid,
-                    hakukohdeOid,
-                    ApplicationResource.ACTIVE_AND_INCOMPLETE,
-                    ApplicationResource.MAX)
-                .stream()
-                .map(HakuappHakemusWrapper::new)
-                .collect(Collectors.toList());
+            applicationAsyncResource
+                .getApplicationsByOids(hakuOid, Collections.singleton(hakukohdeOid))
+                .get();
       }
       LOG.debug("Saatiin hakemukset {}", hakemukset.size());
       dokumenttiprosessi.inkrementoiTehtyjaToita();
@@ -129,7 +122,7 @@ public class ValintatapajonoVientiRouteImpl implements ValintatapajonoVientiRout
     }
     final List<ValintatietoValinnanvaiheDTO> valinnanvaiheet;
     try {
-      valinnanvaiheet = hakukohdeResource.hakukohde(hakukohdeOid);
+      valinnanvaiheet = valintalaskentaAsyncResource.hakukohde(hakukohdeOid).blockingFirst();
       dokumenttiprosessi.inkrementoiTehtyjaToita();
     } catch (Exception e) {
       LOG.error("Valinnanvaiheiden haku virhe", e);

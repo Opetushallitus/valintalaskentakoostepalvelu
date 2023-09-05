@@ -69,4 +69,9 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
       String uuid, List<LaskeDTO> lista, SuoritustiedotDTO suoritustiedot) {
     throw new UnsupportedOperationException();
   }
+
+  @Override
+  public Observable<List<ValintatietoValinnanvaiheDTO>> hakukohde(String hakukohdeoid) {
+    throw new UnsupportedOperationException();
+  }
 }
