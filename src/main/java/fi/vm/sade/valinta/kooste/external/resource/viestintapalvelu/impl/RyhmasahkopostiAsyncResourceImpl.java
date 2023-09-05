@@ -1,37 +1,42 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import io.reactivex.Observable;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RyhmasahkopostiAsyncResourceImpl extends UrlConfiguredResource
-    implements RyhmasahkopostiAsyncResource {
+public class RyhmasahkopostiAsyncResourceImpl implements RyhmasahkopostiAsyncResource {
+
+  private final RestCasClient restCasClient;
+
+  private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public RyhmasahkopostiAsyncResourceImpl(
-      @Qualifier("ryhmasahkopostiClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
-    super(TimeUnit.HOURS.toMillis(20), casInterceptor);
+      @Qualifier("ryhmasahkopostiCasClient") RestCasClient restCasClient) {
+    this.restCasClient = restCasClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
   public Observable<Optional<Long>> haeRyhmasahkopostiIdByLetterObservable(Long letterId) {
-    return getAsObservableLazily(
-            getUrl("viestintapalvelu.reportMessages", letterId),
-            (idAsString) -> Optional.of(Long.parseLong(idAsString)),
-            client -> {
-              client.accept(MediaType.TEXT_PLAIN_TYPE);
-              return client;
-            })
+    return Observable.fromFuture(
+            this.restCasClient
+                .get(
+                    this.urlConfiguration.url("viestintapalvelu.reportMessages", letterId),
+                    new TypeToken<String>() {},
+                    Map.of("Accept", "text/plain"),
+                    10 * 60 * 1000)
+                .thenApply(idAsString -> Optional.of(Long.parseLong(idAsString))))
         .onErrorReturn(
             error -> {
               if (HttpExceptionWithResponse.isResponseWithStatus(

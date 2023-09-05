@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
-import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.SijoitteluSeurantaResource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,12 +16,12 @@ public class SijoitteluRouteConfig {
       @Value("${jatkuvasijoittelu.autostart:true}") boolean autoStartup,
       @Value("${valintalaskentakoostepalvelu.jatkuvasijoittelu.intervalMinutes:5}")
           long jatkuvaSijoitteluPollIntervalInMinutes,
-      SijoittelunSeurantaResource sijoittelunSeurantaResource,
+      SijoitteluSeurantaResource sijoitteluSeurantaResource,
       SchedulerFactoryBean schedulerFactoryBean) {
     return new JatkuvaSijoitteluRouteImpl(
         autoStartup,
         jatkuvaSijoitteluPollIntervalInMinutes,
-        sijoittelunSeurantaResource,
+        sijoitteluSeurantaResource,
         schedulerFactoryBean);
   }
 

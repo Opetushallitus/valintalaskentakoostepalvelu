@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.Response;
 
 public interface ApplicationAsyncResource {
 
@@ -50,5 +49,5 @@ public interface ApplicationAsyncResource {
 
   Observable<List<HakemusWrapper>> getApplicationsByOids(Collection<String> hakemusOids);
 
-  Observable<Response> changeStateOfApplicationsToPassive(List<String> hakemusOid, String reason);
+  Observable<String> changeStateOfApplicationsToPassive(List<String> hakemusOid, String reason);
 }
