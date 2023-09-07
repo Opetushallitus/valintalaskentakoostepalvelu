@@ -18,11 +18,11 @@ import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import io.reactivex.Observable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -96,7 +96,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
   }
 
   @Override
-  public Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
+  public Observable<ResponseEntity> tuoHakukohde(HakukohdeImportDTO hakukohde) {
     return Observable.fromFuture(
         this.httpClient
             .post(
@@ -105,7 +105,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
                 hakukohde,
                 Collections.emptyMap(),
                 10 * 60 * 1000)
-            .thenApply(r -> Response.status(r.getStatusCode()).build()));
+            .thenApply(r -> ResponseEntity.status(r.getStatusCode()).build()));
   }
 
   @Override

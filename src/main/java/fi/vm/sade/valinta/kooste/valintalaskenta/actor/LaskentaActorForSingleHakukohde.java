@@ -21,9 +21,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 
 class LaskentaActorForSingleHakukohde implements LaskentaActor {
   private static final Logger LOG = LoggerFactory.getLogger(LaskentaActorForSingleHakukohde.class);
@@ -239,7 +239,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
   }
 
   public void lopeta() {
-    final Observable<Response> tilanmerkkausObservable;
+    final Observable<ResponseEntity> tilanmerkkausObservable;
     if (!COMPLETE.equals(state.get())) {
       LOG.warn("#### (Uuid={}) Laskenta lopetettu", uuid());
       tilanmerkkausObservable =

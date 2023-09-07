@@ -13,4 +13,6 @@ public interface OrganisaatioAsyncResource {
       String organisaatioOid);
 
   CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId);
+
+  CompletableFuture<String> parentoids(String organisaatioId) throws Exception;
 }

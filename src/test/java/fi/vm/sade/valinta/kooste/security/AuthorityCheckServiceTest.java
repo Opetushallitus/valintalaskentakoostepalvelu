@@ -3,9 +3,9 @@ package fi.vm.sade.valinta.kooste.security;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,16 +27,19 @@ public class AuthorityCheckServiceTest {
 
   @InjectMocks private AuthorityCheckService authorityCheckService;
 
-  @Mock private OrganisaatioResource organisaatioResource;
+  @Mock private OrganisaatioAsyncResource organisaatioAsyncResource;
 
   @Mock private TarjontaAsyncResource tarjontaAsyncResource;
 
   @BeforeEach
   public void initMocks() throws Exception {
     MockitoAnnotations.initMocks(this);
-    Mockito.when(organisaatioResource.parentoids("oid.1")).thenReturn("parent.oid.1/oid.1");
-    Mockito.when(organisaatioResource.parentoids("oid.2")).thenReturn("parent.oid.2/oid.2");
-    Mockito.when(organisaatioResource.parentoids("oid.3")).thenReturn("parent.oid.3/oid.3");
+    Mockito.when(organisaatioAsyncResource.parentoids("oid.1"))
+        .thenReturn(CompletableFuture.completedFuture("parent.oid.1/oid.1"));
+    Mockito.when(organisaatioAsyncResource.parentoids("oid.2"))
+        .thenReturn(CompletableFuture.completedFuture("parent.oid.2/oid.2"));
+    Mockito.when(organisaatioAsyncResource.parentoids("oid.3"))
+        .thenReturn(CompletableFuture.completedFuture("parent.oid.3/oid.3"));
     Mockito.when(tarjontaAsyncResource.haeHaku("haku.oid"))
         .thenReturn(
             CompletableFuture.completedFuture(

@@ -5,13 +5,13 @@ import java.io.InputStream;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.Response;
+import org.springframework.http.ResponseEntity;
 
 public interface DokumenttiAsyncResource {
 
   CompletableFuture<Void> uudelleenNimea(String dokumenttiId, String filename);
 
-  Observable<Response> tallenna(
+  Observable<ResponseEntity> tallenna(
       String id,
       String filename,
       Long expirationDate,

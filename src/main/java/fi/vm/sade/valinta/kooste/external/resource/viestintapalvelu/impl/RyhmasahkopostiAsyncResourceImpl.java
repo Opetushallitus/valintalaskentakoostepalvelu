@@ -1,14 +1,11 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
-import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
-import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import io.reactivex.Observable;
 import java.util.Map;
 import java.util.Optional;
-import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -30,23 +27,17 @@ public class RyhmasahkopostiAsyncResourceImpl implements RyhmasahkopostiAsyncRes
   @Override
   public Observable<Optional<Long>> haeRyhmasahkopostiIdByLetterObservable(Long letterId) {
     return Observable.fromFuture(
-            this.restCasClient
-                .get(
-                    this.urlConfiguration.url("viestintapalvelu.reportMessages", letterId),
-                    new TypeToken<String>() {},
-                    Map.of("Accept", "text/plain"),
-                    10 * 60 * 1000)
-                .thenApply(idAsString -> Optional.of(Long.parseLong(idAsString))))
-        .onErrorReturn(
-            error -> {
-              if (HttpExceptionWithResponse.isResponseWithStatus(
-                  Response.Status.NOT_FOUND, error)) {
-                return Optional.empty();
-              }
-              if (error instanceof RuntimeException) {
-                throw (RuntimeException) error;
-              }
-              throw new RuntimeException(error);
-            });
+        this.restCasClient
+            .get(
+                this.urlConfiguration.url("viestintapalvelu.reportMessages", letterId),
+                Map.of("Accept", "text/plain"),
+                10 * 60 * 1000)
+            .thenApply(
+                response -> {
+                  if (response.getStatusCode() == 404) {
+                    return Optional.empty();
+                  }
+                  return Optional.of(Long.parseLong(response.getResponseBody()));
+                }));
   }
 }

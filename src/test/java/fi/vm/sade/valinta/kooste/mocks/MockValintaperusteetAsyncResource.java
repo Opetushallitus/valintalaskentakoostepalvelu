@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.ws.rs.core.Response;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 /** @author Jussi Jartamo */
@@ -128,7 +128,7 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
   }
 
   @Override
-  public Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
+  public Observable<ResponseEntity> tuoHakukohde(HakukohdeImportDTO hakukohde) {
     throw new UnsupportedOperationException();
   }
 

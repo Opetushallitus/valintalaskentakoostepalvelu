@@ -1,37 +1,39 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredResource
+public class ValintalaskentaValintakoeAsyncResourceImpl
     implements ValintalaskentaValintakoeAsyncResource {
   private final RestCasClient httpClient;
+
+  private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public ValintalaskentaValintakoeAsyncResourceImpl(
       @Qualifier("ValintalaskentaCasClient") RestCasClient httpClient) {
-    super(TimeUnit.HOURS.toMillis(1));
     this.httpClient = httpClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
   public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(
       String hakukohdeOid) {
     return httpClient.get(
-        getUrl("valintalaskenta-laskenta-service.valintakoe.hakutoive.hakukohdeoid", hakukohdeOid),
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.valintakoe.hakutoive.hakukohdeoid", hakukohdeOid),
         new TypeToken<>() {},
         Collections.emptyMap(),
         60 * 1000);
@@ -41,8 +43,8 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
   public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(
       Collection<String> hakukohdeOids) {
     return httpClient.post(
-        getUrl("valintalaskenta-laskenta-service.valintakoe.hakutoive"),
-        new com.google.gson.reflect.TypeToken<List<ValintakoeOsallistuminenDTO>>() {},
+        this.urlConfiguration.url("valintalaskenta-laskenta-service.valintakoe.hakutoive"),
+        new TypeToken<>() {},
         hakukohdeOids,
         Collections.emptyMap(),
         5 * 60 * 1000);
@@ -51,8 +53,9 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
   @Override
   public CompletableFuture<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid) {
     return httpClient.get(
-        getUrl("valintalaskenta-laskenta-service.valintakoe.hakemus", hakemusOid),
-        new TypeToken<ValintakoeOsallistuminenDTO>() {},
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.valintakoe.hakemus", hakemusOid),
+        new TypeToken<>() {},
         Collections.emptyMap(),
         60 * 1000);
   }
@@ -61,8 +64,9 @@ public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredRes
   public CompletableFuture<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(
       String hakukohdeOid, List<String> valintakoeTunnisteet) {
     return httpClient.post(
-        getUrl("valintalaskenta-laskenta-service.valintatieto.hakukohde", hakukohdeOid),
-        new TypeToken<List<HakemusOsallistuminenDTO>>() {},
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.valintatieto.hakukohde", hakukohdeOid),
+        new TypeToken<>() {},
         valintakoeTunnisteet,
         Collections.emptyMap(),
         5 * 60 * 1000);

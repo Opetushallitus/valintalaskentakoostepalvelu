@@ -10,7 +10,7 @@ import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
 import io.reactivex.Observable;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.core.Response;
+import org.springframework.http.ResponseEntity;
 
 public interface LaskentaSeurantaAsyncResource {
 
@@ -23,18 +23,18 @@ public interface LaskentaSeurantaAsyncResource {
   Observable<TunnisteDto> luoLaskenta(
       LaskentaParams laskentaParams, List<HakukohdeDto> hakukohdeOids);
 
-  Observable<Response> merkkaaHakukohteenTila(
+  Observable<ResponseEntity> merkkaaHakukohteenTila(
       String uuid,
       String hakukohdeOid,
       HakukohdeTila tila,
       Optional<IlmoitusDto> ilmoitusDtoOptional);
 
-  Observable<Response> merkkaaLaskennanTila(
+  Observable<ResponseEntity> merkkaaLaskennanTila(
       String uuid,
       LaskentaTila tila,
       HakukohdeTila hakukohdetila,
       Optional<IlmoitusDto> ilmoitusDtoOptional);
 
-  Observable<Response> merkkaaLaskennanTila(
+  Observable<ResponseEntity> merkkaaLaskennanTila(
       String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional);
 }

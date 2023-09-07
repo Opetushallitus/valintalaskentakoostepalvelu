@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
-import static java.util.Collections.emptyList;
-
 import com.google.common.collect.Lists;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
@@ -11,9 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTu
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import io.reactivex.Observable;
@@ -29,17 +25,6 @@ import org.springframework.stereotype.Service;
 @Profile("mockresources")
 @Service
 public class MockValintaTulosServiceAsyncResource implements ValintaTulosServiceAsyncResource {
-
-  @Override
-  public Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid) {
-    return Observable.just(Lists.newArrayList());
-  }
-
-  @Override
-  public Observable<List<Muutoshistoria>> getMuutoshistoria(
-      String hakemusOid, String valintatapajonoOid) {
-    return Observable.just(emptyList());
-  }
 
   @Override
   public Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid) {

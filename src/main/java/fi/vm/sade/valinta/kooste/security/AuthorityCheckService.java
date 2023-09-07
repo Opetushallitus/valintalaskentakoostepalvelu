@@ -8,10 +8,10 @@ import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationGroup
 import static fi.vm.sade.valinta.kooste.util.SecurityUtil.parseOrganizationOidsFromSecurityRoles;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
-import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import io.reactivex.Observable;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +33,7 @@ public class AuthorityCheckService {
   private static final Logger LOG = LoggerFactory.getLogger(AuthorityCheckService.class);
 
   @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
-  @Autowired private OrganisaatioResource organisaatioResource;
+  @Autowired private OrganisaatioAsyncResource organisaatioAsyncResource;
   @Autowired private ValintaperusteetAsyncResource valintaperusteetAsyncResource;
 
   public CompletableFuture<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
@@ -121,7 +121,7 @@ public class AuthorityCheckService {
       Collection<String> requiredRoles) {
     try {
       for (String organisaatioOid : organisaatioOids) {
-        String parentOidsPath = organisaatioResource.parentoids(organisaatioOid);
+        String parentOidsPath = organisaatioAsyncResource.parentoids(organisaatioOid).get();
         String[] parentOids = parentOidsPath.split("/");
 
         for (String oid : parentOids) {

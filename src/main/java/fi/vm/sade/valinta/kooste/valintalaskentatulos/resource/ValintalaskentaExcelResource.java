@@ -41,7 +41,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Response;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -228,7 +227,7 @@ public class ValintalaskentaExcelResource {
                                         Poikkeus.DOKUMENTTIPALVELU,
                                         "Dokumentin generointi",
                                         e.getMessage()));
-                            return Observable.<Response>error(e);
+                            return Observable.<ResponseEntity>error(e);
                           }
                         })
                     .flatMap(o -> o);
@@ -236,13 +235,13 @@ public class ValintalaskentaExcelResource {
           .subscribe(
               ehkaOk -> {
                 LOG.info("Dokumentin generointi valmistui onnistuneesti");
-                if (ehkaOk.getStatus() < 300) {
+                if (ehkaOk.getStatusCode().value() < 300) {
                   p.setDokumenttiId(id);
                   p.inkrementoiTehtyjaToita();
                 } else {
                   LOG.error(
                       "Dokumentin tallennus epäonnistui: Dokumentti palvelun paluuarvo {}",
-                      ehkaOk.getStatus());
+                      ehkaOk.getStatusCode().value());
                   p.getPoikkeukset()
                       .add(
                           new Poikkeus(
@@ -273,7 +272,7 @@ public class ValintalaskentaExcelResource {
   @GetMapping(value = "/valintalaskennantulos/aktivoi")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina", response = Response.class)
+  @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina")
   public DeferredResult<ResponseEntity<InputStream>> haeValintalaskentaTuloksetExcelMuodossa(
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid) {
     DeferredResult<ResponseEntity<InputStream>> result = new DeferredResult<>();

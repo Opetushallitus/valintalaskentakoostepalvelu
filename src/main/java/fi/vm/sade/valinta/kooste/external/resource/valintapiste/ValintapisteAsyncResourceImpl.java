@@ -5,82 +5,57 @@ import static fi.vm.sade.javautils.httpclient.OphHttpClient.Header.CONTENT_TYPE;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
-import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import org.apache.commons.io.IOUtils;
-import org.apache.cxf.jaxrs.impl.ResponseImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource
-    implements ValintapisteAsyncResource {
+public class ValintapisteAsyncResourceImpl implements ValintapisteAsyncResource {
   public static final String OK = "";
   private final RestCasClient casClient;
 
   public static final Gson GSON = DateDeserializer.gsonBuilder().create();
 
+  private final UrlConfiguration urlConfiguration;
+
   Logger LOG = LoggerFactory.getLogger(ValintapisteAsyncResource.class);
 
   public ValintapisteAsyncResourceImpl(
       @Qualifier("ValintapisteServiceCasClient") RestCasClient casClient) {
-    super(TimeUnit.MINUTES.toMillis(30));
     this.casClient = casClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
-  private String body(Response r) {
-    try {
-      InputStream e = (InputStream) r.getEntity();
-      return IOUtils.toString(e, "UTF-8");
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private String getUrl(Response response) {
-    try {
-      ResponseImpl r = (ResponseImpl) response;
-      Object url = r.getOutMessage().get("org.apache.cxf.request.uri");
-      return url.toString();
-    } catch (Exception e) {
-      LOG.error(String.format("Urlin selvittämisessä tapahtui virhe: " + e));
-      return "null";
-    }
-  }
-
-  private Observable<PisteetWithLastModified> handleResponse(Response response) {
-    if (response.getStatus() != 200) {
+  private Observable<PisteetWithLastModified> handleResponse(
+      org.asynchttpclient.Response response) {
+    if (response.getStatusCode() != 200) {
       return Observable.error(new RuntimeException("Valintapisteitä ei saatu luettua palvelusta!"));
     } else {
       try {
-        final String entity = body(response);
         List<Valintapisteet> pisteet =
-            gson().fromJson(entity, new GenericType<List<Valintapisteet>>() {}.getType());
+            GSON.fromJson(
+                response.getResponseBody(), new GenericType<List<Valintapisteet>>() {}.getType());
         if (pisteet == null) {
-          String s = response.readEntity(String.class);
+          String s = response.getResponseBody();
           LOG.error("Valintapisteet null! Response {}", s);
-          String url = getUrl(response);
+          String url = response.getUri().toUrl();
           return Observable.error(
               new RuntimeException(String.format("Null response for url %s", url)));
         } else {
           return Observable.just(
               new PisteetWithLastModified(
-                  Optional.ofNullable(response.getHeaderString(LAST_MODIFIED)), pisteet));
+                  Optional.ofNullable(response.getHeader(LAST_MODIFIED)), pisteet));
         }
       } catch (Exception e) {
         return Observable.error(e);
@@ -100,7 +75,8 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource
       String hakuOID, String hakukohdeOID, AuditSession auditSession) {
     Map<String, String> query = new HashMap<>();
     setAuditInfo(query, auditSession);
-    String url = getUrl("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID, query);
+    String url =
+        this.urlConfiguration.url("valintapiste-service.get.pisteet", hakuOID, hakukohdeOID, query);
 
     return casClient
         .get(url, Map.of("Accept", "application/json"), 10 * 1000)
@@ -118,15 +94,11 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource
       Collection<String> hakemusOIDs, AuditSession auditSession) {
     Map<String, String> query = new HashMap<>();
     setAuditInfo(query, auditSession);
-    String url = getUrl("valintapiste-service.get.pisteet.with.hakemusoids", query);
-    Observable<Response> response =
-        postAsObservableLazily(
-            url,
-            Entity.entity(hakemusOIDs, MediaType.APPLICATION_JSON_TYPE),
-            client -> {
-              client.accept(MediaType.APPLICATION_JSON_TYPE);
-              return client;
-            });
+    String url =
+        this.urlConfiguration.url("valintapiste-service.get.pisteet.with.hakemusoids", query);
+    Observable<org.asynchttpclient.Response> response =
+        Observable.fromFuture(
+            this.casClient.post(url, hakemusOIDs, Collections.emptyMap(), 30 * 60 * 1000));
     return response.switchMap(this::handleResponse);
   }
 
@@ -135,7 +107,8 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource
       List<String> hakemusOIDs, AuditSession auditSession) {
     Map<String, String> query = new HashMap<>();
     setAuditInfo(query, auditSession);
-    String url = getUrl("valintapiste-service.get.pisteet.with.hakemusoids", query);
+    String url =
+        this.urlConfiguration.url("valintapiste-service.get.pisteet.with.hakemusoids", query);
 
     return casClient
         .post(
@@ -158,7 +131,7 @@ public class ValintapisteAsyncResourceImpl extends UrlConfiguredResource
     Map<String, String> query = new HashMap<>();
     query.put("save-partially", "true");
     setAuditInfo(query, auditSession);
-    String url = getUrl("valintapiste-service.put.pisteet", query);
+    String url = this.urlConfiguration.url("valintapiste-service.put.pisteet", query);
 
     return casClient
         .put(
