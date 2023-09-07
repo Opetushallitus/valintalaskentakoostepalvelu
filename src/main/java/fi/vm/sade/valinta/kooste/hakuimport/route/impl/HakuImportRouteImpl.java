@@ -17,12 +17,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -84,8 +84,8 @@ public class HakuImportRouteImpl implements HakuImportRoute, HakukohdeImportRout
       try {
         HakukohdeImportDTO hki =
             tarjontaJaKoodistoHakukohteenHakuKomponentti.suoritaHakukohdeImport(hakukohdeOid);
-        Response response = valintaperusteetRestResource.tuoHakukohde(hki).blockingFirst();
-        LOG.debug("Hakukohde " + hakukohdeOid + " importoitu! " + response.getStatus());
+        ResponseEntity response = valintaperusteetRestResource.tuoHakukohde(hki).blockingFirst();
+        LOG.debug("Hakukohde " + hakukohdeOid + " importoitu! " + response.getStatusCodeValue());
         int t = prosessi.lisaaTuonti();
         if (t % 25 == 0 || t == prosessi.getHakukohteita()) {
           LOG.info("Hakukohde on tuotu onnistuneesti ({}/{}).", t, prosessi.getHakukohteita());

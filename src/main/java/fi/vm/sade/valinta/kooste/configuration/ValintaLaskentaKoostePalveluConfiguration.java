@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.configuration;
 
-import fi.vm.sade.javautils.cxf.OphRequestHeadersCxfInterceptor;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
-import fi.vm.sade.valinta.kooste.ObjectMapperProvider;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,17 +24,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
     },
     ignoreResourceNotFound = true)
 public class ValintaLaskentaKoostePalveluConfiguration {
-
-  @Bean(name = "ophRequestHeaders")
-  public OphRequestHeadersCxfInterceptor ophRequestHeadersCxfInterceptor() {
-    return new OphRequestHeadersCxfInterceptor(
-        "1.2.246.562.10.00000000001.valintalaskentakoostepalvelu");
-  }
-
-  @Bean
-  public ObjectMapperProvider objectMapperProvider() {
-    return new ObjectMapperProvider();
-  }
 
   @Bean
   public KoosteAudit koosteAudit() {

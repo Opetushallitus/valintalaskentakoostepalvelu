@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -101,7 +101,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
             url, new TypeToken<>() {}, hakukohdeOids, Collections.emptyMap(), 10 * 60 * 1000));
   }
 
-  public Observable<Response> merkkaaLaskennanTila(
+  public Observable<ResponseEntity> merkkaaLaskennanTila(
       String uuid, LaskentaTila tila, Optional<IlmoitusDto> ilmoitusDtoOptional) {
     String url =
         this.urlConfiguration.url(
@@ -111,12 +111,12 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
         return Observable.fromFuture(
             this.restCasClient
                 .post(url, ilmoitusDtoOptional.get(), Collections.emptyMap(), 10 * 60 * 1000)
-                .thenApply(r -> Response.ok().build()));
+                .thenApply(r -> ResponseEntity.ok().build()));
       } else {
         return Observable.fromFuture(
             this.restCasClient
                 .put(url, tila, Collections.emptyMap(), 10 * 60 * 1000)
-                .thenApply(r -> Response.ok().build()));
+                .thenApply(r -> ResponseEntity.ok().build()));
       }
     } catch (Exception e) {
       LOG.error("Seurantapalvelun kutsu paatyi virheeseen!" + url, e);
@@ -124,7 +124,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
     }
   }
 
-  public Observable<Response> merkkaaLaskennanTila(
+  public Observable<ResponseEntity> merkkaaLaskennanTila(
       String uuid,
       LaskentaTila tila,
       HakukohdeTila hakukohdetila,
@@ -140,12 +140,12 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
         return Observable.fromFuture(
             this.restCasClient
                 .post(url, ilmoitusDtoOptional.get(), Collections.emptyMap(), 10 * 60 * 1000)
-                .thenApply(r -> Response.ok().build()));
+                .thenApply(r -> ResponseEntity.ok().build()));
       } else {
         return Observable.fromFuture(
             this.restCasClient
                 .put(url, new TypeToken<>() {}, tila, Collections.emptyMap(), 10 * 60 * 1000)
-                .thenApply(r -> Response.ok().build()));
+                .thenApply(r -> ResponseEntity.ok().build()));
       }
     } catch (Exception e) {
       LOG.error("Seurantapalvelun kutsu " + url + " laskennalle " + uuid + " paatyi virheeseen", e);
@@ -154,7 +154,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
   }
 
   @Override
-  public Observable<Response> merkkaaHakukohteenTila(
+  public Observable<ResponseEntity> merkkaaHakukohteenTila(
       String uuid,
       String hakukohdeOid,
       HakukohdeTila tila,
@@ -170,12 +170,12 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
         return Observable.fromFuture(
             this.restCasClient
                 .post(url, ilmoitusDtoOptional.get(), Collections.emptyMap(), 10 * 60 * 1000)
-                .thenApply(r -> Response.ok().build()));
+                .thenApply(r -> ResponseEntity.ok().build()));
       } else {
         return Observable.fromFuture(
             this.restCasClient
                 .put(url, new TypeToken<>() {}, tila, Collections.emptyMap(), 10 * 60 * 1000)
-                .thenApply(r -> Response.ok().build()));
+                .thenApply(r -> ResponseEntity.ok().build()));
       }
     } catch (Exception e) {
       LOG.error(

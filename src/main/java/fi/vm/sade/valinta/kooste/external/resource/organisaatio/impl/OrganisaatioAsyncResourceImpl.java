@@ -7,11 +7,13 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyn
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -65,6 +67,26 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
               }
               return Optional.of(
                   this.client.parseJson(response, new TypeToken<HakutoimistoDTO>() {}.getType()));
+            });
+  }
+
+  @Override
+  public CompletableFuture<String> parentoids(String organisaatioId) throws Exception {
+    return this.client
+        .getResponse(
+            this.urlConfiguration.url("valintalaskentakoostepalvelu.organisaatioService.rest.url")
+                + "/organisaatio/"
+                + organisaatioId
+                + "/parentoids",
+            Duration.ofMinutes(1),
+            x -> x)
+        .thenApply(
+            r -> {
+              try {
+                return IOUtils.toString(r.body(), "UTF-8");
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
             });
   }
 }

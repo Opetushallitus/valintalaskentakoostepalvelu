@@ -3,22 +3,18 @@ package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.jupiter.api.Test;
 
 public class ValintaTulosServiceAsyncResourceImplTest {
 
-  private final HttpResource vtsHttpResource = new ValintaTulosServiceAsyncResourceImpl(null);
-
   @Test
   public void vastaanottoAikarajaMennytDTOsCanBeParsed() {
     String hakemusOid = "1.2.246.562.11.00004697189";
     String vastaanottoDeadline = "2016-07-15T12:00:00Z";
     VastaanottoAikarajaMennytDTO parsedDto =
-        vtsHttpResource
-            .gson()
+        ValintaTulosServiceAsyncResourceImpl.getGson()
             .fromJson(
                 " {\n"
                     + "        \"hakemusOid\": \""

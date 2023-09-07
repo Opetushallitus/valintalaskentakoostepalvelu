@@ -42,4 +42,9 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
   public CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
     return CompletableFuture.failedFuture(new UnsupportedOperationException());
   }
+
+  @Override
+  public CompletableFuture<String> parentoids(String organisaatioId) throws Exception {
+    return CompletableFuture.failedFuture(new UnsupportedOperationException());
+  }
 }

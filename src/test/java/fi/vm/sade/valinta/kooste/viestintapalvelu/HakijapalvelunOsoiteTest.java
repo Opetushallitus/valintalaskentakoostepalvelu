@@ -13,7 +13,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.HaeOsoiteKomponent
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.LueHakijapalvelunOsoite;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -47,18 +46,5 @@ public class HakijapalvelunOsoiteTest {
                 new InputStreamReader(
                     new ClassPathResource("organisaatio/organisaatiodto.json").getInputStream()),
                 OrganisaatioRDTO.class);
-  }
-
-  @Disabled
-  @Test
-  public void testaaHakijapalvelunOsoitteenHaku2()
-      throws JsonSyntaxException, JsonIOException, IOException {
-    com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider provider =
-        new com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider();
-    fi.vm.sade.valinta.kooste.ObjectMapperProvider mapper =
-        new fi.vm.sade.valinta.kooste.ObjectMapperProvider();
-
-    String json = IOUtils.toString(new ClassPathResource("organisaatio/org.json").getInputStream());
-    mapper.getContext(OrganisaatioRDTO.class).readValue(json, OrganisaatioRDTO.class);
   }
 }
