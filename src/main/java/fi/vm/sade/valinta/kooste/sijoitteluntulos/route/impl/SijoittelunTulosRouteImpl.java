@@ -29,7 +29,6 @@ import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Tiedosto;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.dto.Valmis;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosOsoitetarratRoute;
 import fi.vm.sade.valinta.kooste.sijoitteluntulos.route.SijoittelunTulosTaulukkolaskentaRoute;
-import fi.vm.sade.valinta.kooste.tarjonta.komponentti.HaeHakukohteetTarjonnaltaKomponentti;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
@@ -82,7 +81,6 @@ public class SijoittelunTulosRouteImpl
   }
 
   private final boolean pakkaaTiedostotTarriin;
-  private final HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta;
   private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
   private final DokumenttiAsyncResource dokumenttiAsyncResource;
   private final ViestintapalveluAsyncResource viestintapalveluAsyncResource;
@@ -103,7 +101,6 @@ public class SijoittelunTulosRouteImpl
       @Value("${valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url}/dokumentit/lataa/")
           String dokumenttipalveluUrl,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource,
-      HaeHakukohteetTarjonnaltaKomponentti hakukohteetTarjonnalta,
       SijoittelunTulosExcelKomponentti sijoittelunTulosExcel,
       TarjontaAsyncResource tarjontaAsyncResource,
       OrganisaatioAsyncResource organisaatioAsyncResource,
@@ -122,7 +119,6 @@ public class SijoittelunTulosRouteImpl
     this.applicationAsyncResource = applicationAsyncResource;
     this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
     this.dokumenttipalveluUrl = dokumenttipalveluUrl;
-    this.hakukohteetTarjonnalta = hakukohteetTarjonnalta;
     this.sijoittelunTulosExcel = sijoittelunTulosExcel;
     this.dokumenttiAsyncResource = dokumenttiAsyncResource;
     this.valintalaskentaResource = valintalaskentaResource;

@@ -3,11 +3,9 @@ package fi.vm.sade.valinta.kooste.test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import fi.vm.sade.koodisto.service.GenericFault;
 import fi.vm.sade.koodisto.service.KoodiService;
@@ -19,9 +17,6 @@ import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.service.types.common.KoodiUriAndVersioType;
 import fi.vm.sade.koodisto.service.types.common.SuhteenTyyppiType;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.tarjonta.service.TarjontaPublicService;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
-import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource;
 import java.util.ArrayList;
@@ -133,20 +128,6 @@ public class HakuImportKoosteReititysTest {
         };
 
     return koodiService;
-  }
-
-  @Bean
-  public TarjontaPublicService getTarjontaPublicServiceMock() {
-    TarjontaPublicService tarjontaService = mock(TarjontaPublicService.class);
-    TarjontaTyyppi tarjonta = new TarjontaTyyppi();
-    for (String[] uriAndOid : HAKUKOHDE_URIS_AND_OIDS) {
-      HakukohdeTyyppi hakukohde = new HakukohdeTyyppi();
-      hakukohde.setHakukohdeNimi(uriAndOid[0]);
-      hakukohde.setOid(uriAndOid[1]);
-      tarjonta.getHakukohde().add(hakukohde);
-    }
-    when(tarjontaService.haeTarjonta(eq(HAKU_OID))).thenReturn(tarjonta);
-    return tarjontaService;
   }
 
   @Autowired private ValintaperusteetAsyncResource valintaperusteService;
