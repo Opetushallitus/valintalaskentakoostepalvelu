@@ -39,7 +39,6 @@ public class HakijatoimistoTest {
         new OrganisaatioAsyncResourceImpl(
             new HttpClient(
                 java.net.http.HttpClient.newBuilder().build(),
-                null,
                 DateDeserializer.gsonBuilder().create()));
     assertEquals(
         Optional.of(hakutoimisto), o.haeHakutoimisto(tarjoajaOid).get(10, TimeUnit.SECONDS));
@@ -56,7 +55,6 @@ public class HakijatoimistoTest {
         new OrganisaatioAsyncResourceImpl(
             new HttpClient(
                 java.net.http.HttpClient.newBuilder().build(),
-                null,
                 DateDeserializer.gsonBuilder().create()));
     assertEquals(Optional.empty(), o.haeHakutoimisto(tarjoajaOid).get(10, TimeUnit.SECONDS));
   }

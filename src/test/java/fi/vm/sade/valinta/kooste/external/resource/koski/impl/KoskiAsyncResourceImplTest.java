@@ -31,7 +31,7 @@ public class KoskiAsyncResourceImplTest {
   private final int maxOppijatPostSize = 10;
   private java.net.http.HttpClient httpClient = mock(java.net.http.HttpClient.class);
   private final HttpClient koosteHttpClient =
-      new HttpClient(httpClient, null, DateDeserializer.gsonBuilder().create());
+      new HttpClient(httpClient, DateDeserializer.gsonBuilder().create());
   private final UrlConfiguration urlConfiguration = mock(UrlConfiguration.class);
   private final KoskiAsyncResourceImpl koskiAsyncResource =
       new KoskiAsyncResourceImpl(

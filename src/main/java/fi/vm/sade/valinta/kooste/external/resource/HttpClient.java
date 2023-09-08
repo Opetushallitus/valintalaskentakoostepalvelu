@@ -27,12 +27,10 @@ public class HttpClient {
   private static final String CSRF_VALUE = "CSRF";
 
   private final java.net.http.HttpClient client;
-  private final ApplicationSession session;
   private final Gson gson;
 
-  public HttpClient(java.net.http.HttpClient client, ApplicationSession session, Gson gson) {
+  public HttpClient(java.net.http.HttpClient client, Gson gson) {
     this.client = client;
-    this.session = session;
     this.gson = gson;
   }
 
@@ -172,24 +170,7 @@ public class HttpClient {
 
   private CompletableFuture<HttpResponse<InputStream>> makeRequest(
       HttpRequest request, Executor executor) {
-    if (this.session == null) {
-      return this.sendAsync(request, executor);
-    }
-    return this.session
-        .getSessionToken()
-        .thenComposeAsync(
-            sessionToken ->
-                this.sendAsync(request, executor)
-                    .thenComposeAsync(
-                        response -> {
-                          if (isUnauthenticated(response) || isRedirectToCas(response)) {
-                            this.session.invalidateSession(sessionToken);
-                            return this.session
-                                .getSessionToken()
-                                .thenComposeAsync(s -> this.sendAsync(request, executor));
-                          }
-                          return CompletableFuture.completedFuture(response);
-                        }));
+    return this.sendAsync(request, executor);
   }
 
   private CompletableFuture<HttpResponse<InputStream>> sendAsync(
