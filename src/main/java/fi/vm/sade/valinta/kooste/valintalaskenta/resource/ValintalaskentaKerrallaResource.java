@@ -9,15 +9,17 @@ import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyn
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -36,8 +38,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController("ValintalaskentaKerrallaResource")
 @RequestMapping("/resources/valintalaskentakerralla")
 @PreAuthorize("isAuthenticated()")
-@Api(
-    value = "/valintalaskentakerralla",
+@Tag(
+    name = "/valintalaskentakerralla",
     description = "Valintalaskenta kaikille valinnanvaiheille kerralla")
 public class ValintalaskentaKerrallaResource {
   private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaResource.class);
@@ -222,13 +224,25 @@ public class ValintalaskentaKerrallaResource {
   }
 
   @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+  @Operation(
+      summary = "Valintalaskennan tila",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = Laskenta.class)))
+      })
   public List<Laskenta> status() {
     return valintalaskentaValvomo.runningLaskentas();
   }
 
   @GetMapping(value = "/status/{uuid:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+  @Operation(
+      summary = "Valintalaskennan tila",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = Laskenta.class)))
+      })
   public ResponseEntity<? extends Object> status(@PathVariable("uuid") String uuid) {
     checkAuthorizationForLaskentaFromSeuranta(uuid);
     Optional<ResponseEntity<Laskenta>> result =
@@ -243,7 +257,13 @@ public class ValintalaskentaKerrallaResource {
   }
 
   @GetMapping(value = "/status/{uuid}/xls", produces = "application/vnd.ms-excel")
-  @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
+  @Operation(
+      summary = "Valintalaskennan tila",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = byte[].class)))
+      })
   public DeferredResult<ResponseEntity<byte[]>> statusXls(@PathVariable("uuid") final String uuid) {
 
     DeferredResult<ResponseEntity<byte[]>> result = new DeferredResult<>(15 * 60 * 1000l);

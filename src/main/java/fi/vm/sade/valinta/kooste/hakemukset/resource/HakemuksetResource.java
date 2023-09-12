@@ -14,8 +14,11 @@ import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +39,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController("HakemuksetResource")
 @RequestMapping("/resources/hakemukset")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/hakemukset", description = "Hakemusten hakeminen")
+@Tag(name = "/hakemukset", description = "Hakemusten hakeminen")
 public class HakemuksetResource {
   private static final Logger LOG = LoggerFactory.getLogger(HakemuksetResource.class);
 
@@ -47,7 +50,13 @@ public class HakemuksetResource {
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   @GetMapping(value = "/valinnanvaihe", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Valinnanvaiheen hakemusten listaus", response = HakemusDTO.class)
+  @Operation(
+      summary = "Valinnanvaiheen hakemusten listaus",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = HakemusDTO.class)))
+      })
   public DeferredResult<Collection<HakemusDTO>> hakemuksetValinnanvaiheelle(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "valinnanvaiheOid", required = false) String valinnanvaiheOid,

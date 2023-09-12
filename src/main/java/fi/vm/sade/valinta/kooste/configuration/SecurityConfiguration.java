@@ -134,6 +134,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .permitAll()
         .regexMatchers("^/swagger-ui(/.*)?")
         .permitAll()
+        .regexMatchers("^/swagger(/.*)?")
+        .permitAll()
         .regexMatchers("^/v3/api-docs(/.*)?")
         .permitAll()
         .anyRequest()

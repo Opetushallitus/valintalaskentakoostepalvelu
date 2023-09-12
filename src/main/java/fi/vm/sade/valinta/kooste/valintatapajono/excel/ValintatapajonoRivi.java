@@ -4,42 +4,41 @@ import static fi.vm.sade.valinta.kooste.util.KieliUtil.*;
 
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.Kuvaus;
 import fi.vm.sade.valintalaskenta.domain.valinta.JarjestyskriteerituloksenTila;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 
-@ApiModel()
+@Schema()
 public class ValintatapajonoRivi {
-  @ApiModelProperty(required = true, value = "Hakemuksen OID")
+  @Schema(required = true, description = "Hakemuksen OID")
   private final String oid;
 
-  @ApiModelProperty(hidden = true)
+  @Schema(hidden = true)
   private final String nimi;
 
-  @ApiModelProperty(
+  @Schema(
       required = true,
       allowableValues = "HYVAKSYTTAVISSA,HYLATTY,HYVAKSYTTY_HARKINNANVARAISESTI")
   private final String tila;
 
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private final String jonosija;
 
-  @ApiModelProperty(required = false)
+  @Schema(required = false)
   private final String pisteet;
 
-  @ApiModelProperty(
+  @Schema(
       required = false,
-      value = "Kielikoodi ja kuvaus. Esim {\"FI\":\"Suomenkielinen kuvaus\",\"SV\":\"...\"}")
+      description = "Kielikoodi ja kuvaus. Esim {\"FI\":\"Suomenkielinen kuvaus\",\"SV\":\"...\"}")
   private final Map<String, String> kuvaus;
 
-  @ApiModelProperty(hidden = true)
+  @Schema(hidden = true)
   private transient Integer jonosijaNumerona;
 
-  @ApiModelProperty(hidden = true)
+  @Schema(hidden = true)
   private transient JarjestyskriteerituloksenTila tilaEnumeraationa;
 
   public ValintatapajonoRivi() {
@@ -73,14 +72,14 @@ public class ValintatapajonoRivi {
             .collect(Collectors.toMap(k -> k.getKieli(), k -> k.getTeksti()));
   }
 
-  @ApiModelProperty(hidden = true)
+  @Schema(hidden = true)
   public boolean isValidi() {
     boolean hasPisteetTaiJonosija =
         StringUtils.isNotBlank(getJonosija()) || StringUtils.isNotBlank(getPisteet());
     return !isMaarittelematon() || hasPisteetTaiJonosija;
   }
 
-  @ApiModelProperty(hidden = true)
+  @Schema(hidden = true)
   public boolean isMaarittelematon() {
     return asTila() == JarjestyskriteerituloksenTila.MAARITTELEMATON;
   }

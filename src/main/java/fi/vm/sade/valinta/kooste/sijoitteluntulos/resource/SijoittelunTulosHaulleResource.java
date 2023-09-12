@@ -9,8 +9,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.KirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -28,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller("SijoittelunTulosHaulleResource")
 @RequestMapping("/resources/sijoitteluntuloshaulle")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/sijoitteluntuloshaulle", description = "Sijoitteluntulosten generointi koko haulle")
+@Tag(name = "/sijoitteluntuloshaulle", description = "Sijoitteluntulosten generointi koko haulle")
 public class SijoittelunTulosHaulleResource {
   private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosHaulleResource.class);
 
@@ -48,9 +51,13 @@ public class SijoittelunTulosHaulleResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId osoitetarratKokoHaulle(
       @RequestParam(value = "hakuOid", required = false) String hakuOid) {
     try {
@@ -80,9 +87,13 @@ public class SijoittelunTulosHaulleResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId hyvaksymiskirjeetKokoHaulle(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "letterBodyText", required = false) String letterBodyText,
@@ -124,9 +135,13 @@ public class SijoittelunTulosHaulleResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId taulukkolaskennatKokoHaulle(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       HttpServletRequest request) {

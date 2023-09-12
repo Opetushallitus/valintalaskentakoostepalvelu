@@ -18,12 +18,14 @@ import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -41,8 +43,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController("SijoitteluAktivointiResource")
 @RequestMapping("/resources/koostesijoittelu")
 @PreAuthorize("isAuthenticated()")
-@Api(
-    value = "/koostesijoittelu",
+@Tag(
+    name = "/koostesijoittelu",
     description = "Ohjausparametrit palveluiden aktiviteettipäivämäärille")
 public class SijoitteluAktivointiResource {
   private static final Logger LOG = LoggerFactory.getLogger(SijoitteluAktivointiResource.class);
@@ -67,20 +69,38 @@ public class SijoitteluAktivointiResource {
   @Autowired private AuthorityCheckService authorityCheckService;
 
   @GetMapping(value = "/status/{hakuoid:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Sijoittelun status", response = String.class)
+  @Operation(
+      summary = "Sijoittelun status",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = Sijoittelu.class)))
+      })
   public Sijoittelu status(@PathVariable("hakuoid") String hakuOid) {
     return sijoittelunValvonta.haeAktiivinenSijoitteluHaulle(hakuOid);
   }
 
   @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Jatkuvan sijoittelun jonossa olevat sijoittelut", response = String.class)
+  @Operation(
+      summary = "Jatkuvan sijoittelun jonossa olevat sijoittelut",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public List<AjastettuSijoitteluInfo> status() {
     return jatkuvaSijoittelu.haeAjossaOlevatAjastetutSijoittelut();
   }
 
   @PostMapping(value = "/aktivoi")
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD')")
-  @ApiOperation(value = "Sijoittelun aktivointi", response = String.class)
+  @Operation(
+      summary = "Sijoittelun aktivointi",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = Void.class)))
+      })
   public void aktivoiSijoittelu(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       HttpServletRequest request) {
@@ -109,7 +129,13 @@ public class SijoitteluAktivointiResource {
 
   @GetMapping(value = "/jatkuva/aktivoi", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(ANY_CRUD)
-  @ApiOperation(value = "Ajastetun sijoittelun aktivointi", response = String.class)
+  @Operation(
+      summary = "Ajastetun sijoittelun aktivointi",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public String aktivoiJatkuvassaSijoittelussa(
       @RequestParam(value = "hakuOid", required = false) String hakuOid) {
     if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
@@ -137,7 +163,13 @@ public class SijoitteluAktivointiResource {
 
   @GetMapping(value = "/jatkuva/poista", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(ANY_CRUD)
-  @ApiOperation(value = "Ajastetun sijoittelun deaktivointi", response = String.class)
+  @Operation(
+      summary = "Ajastetun sijoittelun deaktivointi",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public String poistaJatkuvastaSijoittelusta(
       @RequestParam(value = "hakuOid", required = false) String hakuOid) {
     if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
@@ -158,14 +190,26 @@ public class SijoitteluAktivointiResource {
 
   @GetMapping(value = "/jatkuva/kaikki", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(OPH_CRUD)
-  @ApiOperation(value = "Kaikki aktiiviset sijoittelut", response = Map.class)
+  @Operation(
+      summary = "Kaikki aktiiviset sijoittelut",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = List.class)))
+      })
   public Collection<SijoitteluDto> aktiivisetSijoittelut() {
     return sijoittelunSeurantaResource.hae();
   }
 
   @GetMapping(value = "/jatkuva", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(ANY_CRUD)
-  @ApiOperation(value = "Haun aktiiviset sijoittelut", response = SijoitteluDto.class)
+  @Operation(
+      summary = "Haun aktiiviset sijoittelut",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public DeferredResult<ResponseEntity<String>> jatkuvaTila(
       @RequestParam(value = "hakuOid", required = false) String hakuOid) {
 
@@ -228,7 +272,13 @@ public class SijoitteluAktivointiResource {
 
   @GetMapping(value = "/jatkuva/paivita", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(ANY_CRUD)
-  @ApiOperation(value = "Ajastetun sijoittelun aloituksen päivitys", response = String.class)
+  @Operation(
+      summary = "Ajastetun sijoittelun aloituksen päivitys",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public String paivitaJatkuvanSijoittelunAloitus(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "aloitusajankohta", required = false) Long aloitusajankohta,

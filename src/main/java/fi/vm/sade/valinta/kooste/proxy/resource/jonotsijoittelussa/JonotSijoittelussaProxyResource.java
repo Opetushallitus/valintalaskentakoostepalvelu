@@ -9,7 +9,7 @@ import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.dto.Jono;
 import fi.vm.sade.valinta.kooste.proxy.resource.jonotsijoittelussa.util.JonoUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController("JonotSijoittelussaProxyResource")
 @RequestMapping("/resources/proxy/jonotsijoittelussa")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/proxy/jonotsijoittelussa", description = "Tarkistaa onko jonot sijoittelussa")
+@Tag(name = "/proxy/jonotsijoittelussa", description = "Tarkistaa onko jonot sijoittelussa")
 public class JonotSijoittelussaProxyResource {
   private static final Logger LOG = LoggerFactory.getLogger(JonotSijoittelussaProxyResource.class);
 
