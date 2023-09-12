@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.12</version>
+        <version>2.7.14</version>
     </parent>
 
     <artifactId>valintalaskentakoostepalvelu</artifactId>
@@ -19,7 +19,7 @@
     <properties>
         <auditlog.api.version>8.3.0-SNAPSHOT</auditlog.api.version>
         <cxf.version>3.3.5</cxf.version>
-        <fasterxml.jackson.version>2.15.2</fasterxml.jackson.version>
+        <fasterxml.jackson.version>2.13.5</fasterxml.jackson.version> <!-- newest version breaks tests -->
         <jetty.version>9.4.27.v20200227</jetty.version>
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
@@ -32,172 +32,16 @@
         <valinta-sharedutils.version>5.11-SNAPSHOT</valinta-sharedutils.version>
         <valintaperusteet.version>5.17-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>5.17.2-SNAPSHOT</valintalaskenta.version>
-
-        <spring.boot.version>3.1.1</spring.boot.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <!-- SADE -->
-            <dependency>
-                <groupId>fi.vm.sade.valintaperusteet</groupId>
-                <artifactId>sharedutils</artifactId>
-                <version>${valinta-sharedutils.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>io.reactivex</groupId>
-                        <artifactId>rxjava</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.cxf</groupId>
-                        <artifactId>cxf-rt-frontend-jaxws</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.cxf</groupId>
-                        <artifactId>cxf-rt-rs-client</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.cxf</groupId>
-                        <artifactId>cxf-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>opintopolku-cas-servlet-filter</artifactId>
-                <version>0.1.2-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.organisaatio</groupId>
-                <artifactId>organisaatio-api</artifactId>
-                <version>2018-7-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>jsr311-api</artifactId>
-                        <groupId>javax.ws.rs</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.tarjonta</groupId>
-                <artifactId>tarjonta-api</artifactId>
-                <version>2018-15-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>jsr311-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.wordnik</groupId>
-                        <artifactId>swagger-jaxrs_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.wordnik</groupId>
-                        <artifactId>swagger-annotations_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.cxf</groupId>
-                        <artifactId>cxf-bundle</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.cxf</groupId>
-                        <artifactId>cxf-core</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.koodisto</groupId>
-                <artifactId>koodisto-api</artifactId>
-                <version>2019-01-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>jsr311-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.sun.jersey</groupId>
-                        <artifactId>jersey-server</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.httpcomponents</groupId>
-                        <artifactId>httpclient</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>java-http</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>java-cas</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-simple</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade</groupId>
-                <artifactId>auditlogger</artifactId>
-                <version>${auditlog.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-rs-client</artifactId>
-                <version>${cxf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.reactivex.rxjava3</groupId>
-                <artifactId>rxjava</artifactId>
-                <version>3.1.6</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.13.0</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-access</artifactId>
-                <version>1.2.12</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>1.2.12</version>
-            </dependency>
 
             <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>2.10</version>
-            </dependency>
-            <dependency>
-                <groupId>joda-time</groupId>
-                <artifactId>joda-time</artifactId>
-                <version>2.10.6</version>
+                <groupId>org.jasig.cas.client</groupId>
+                <artifactId>cas-client-core</artifactId>
+                <version>3.4.1</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger</groupId>
@@ -205,18 +49,35 @@
                 <version>1.6.2</version>
             </dependency>
             <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest</artifactId>
-                <version>2.2</version>
-                <scope>test</scope>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.10.6</version>
             </dependency>
             <dependency>
-                <groupId>org.jasig.cas.client</groupId>
-                <artifactId>cas-client-core</artifactId>
-                <version>3.4.1</version>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.10</version>
             </dependency>
-
-            <!-- needed by enforcer -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.13.0</version>
+            </dependency>
+            <dependency>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>java-http</artifactId>
+                <version>0.6.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>java-cas</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-core</artifactId>
+                <version>3.3.5</version>
+            </dependency>
             <dependency>
                 <groupId>org.jvnet.staxex</groupId>
                 <artifactId>stax-ex</artifactId>
@@ -256,6 +117,11 @@
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>3.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -317,36 +183,25 @@
                 <artifactId>swagger-models</artifactId>
                 <version>2.2.15</version>
             </dependency>
-
-            <!-- result of junit and netty -->
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-core</artifactId>
-                <version>2.1</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <!-- spring boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.3.2</version>
-        </dependency>
+
+        <!-- Sade -->
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-spring-security</artifactId>
@@ -360,22 +215,23 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-http</artifactId>
+            <version>0.6.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-cas</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-cas-servlet-filter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-access</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.rajapinnat</groupId>
@@ -383,34 +239,14 @@
             <version>${kela.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codepoetics</groupId>
-            <artifactId>protonpack</artifactId>
-            <version>1.16</version>
-        </dependency>
-        <dependency>
             <groupId>fi.vm.sade</groupId>
             <artifactId>auditlogger</artifactId>
             <version>${auditlog.api.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-slf4j_2.11</artifactId>
-            <version>2.5.31</version>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-testkit_2.11</artifactId>
-            <version>2.5.31</version>
-            <scope>test</scope>
-        </dependency>
-      <dependency>
-          <groupId>io.reactivex.rxjava3</groupId>
-          <artifactId>rxjava</artifactId>
-      </dependency>
-        <!-- SADE -->
-        <dependency>
             <groupId>fi.vm.sade.tarjonta</groupId>
             <artifactId>tarjonta-api</artifactId>
+            <version>2018-15-SNAPSHOT</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -418,30 +254,23 @@
                     <groupId>javax.ws.rs</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>swagger-jaxrs_2.10</artifactId>
                     <groupId>com.wordnik</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>swagger-annotations_2.10</artifactId>
-                    <groupId>com.wordnik</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
                 <exclusion>
                     <artifactId>*</artifactId>
                     <groupId>org.springframework</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>cxf-bundle</artifactId>
                     <groupId>org.apache.cxf</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                    <groupId>org.apache.cxf</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.koodisto</groupId>
             <artifactId>koodisto-api</artifactId>
+            <version>2019-01-SNAPSHOT</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -451,6 +280,18 @@
                 <exclusion>
                     <groupId>fi.vm.sade.generic</groupId>
                     <artifactId>generic-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-server</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -465,22 +306,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- REST, Json -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-parameter-names</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
         <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
+            <version>2018-7-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jsr311-api</artifactId>
@@ -498,13 +327,6 @@
             <version>${kela.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20200518</version>
-        </dependency>
-
-        <!-- POI -->
-        <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-poi</artifactId>
             <version>1.0.0-SNAPSHOT</version>
@@ -515,7 +337,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- Internal -->
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>valintalaskenta-tulos-api</artifactId>
@@ -542,43 +363,79 @@
             <artifactId>sijoittelu-tulos-api</artifactId>
             <version>${sijoittelu.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>com.fatboyindustrial.gson-javatime-serialisers</groupId>
-            <artifactId>gson-javatime-serialisers</artifactId>
-            <version>1.1.1</version>
+            <groupId>fi.vm.sade.valintaperusteet</groupId>
+            <artifactId>valintalaskenta-domain</artifactId>
+            <version>${valintalaskenta.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>gson</artifactId>
-                    <groupId>com.google.code.gson</groupId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.valintaperusteet</groupId>
+            <artifactId>sharedutils</artifactId>
+            <version>${valinta-sharedutils.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.reactivex</groupId>
+                    <artifactId>rxjava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.cxf</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
 
+        <!-- logging -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.20</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
+            <version>1.2.12</version>
         </dependency>
         <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.2</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+
+        <!-- reactive -->
+        <dependency>
+            <groupId>com.codepoetics</groupId>
+            <artifactId>protonpack</artifactId>
+            <version>1.16</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_2.11</artifactId>
+            <version>2.5.31</version>
+        </dependency>
+      <dependency>
+          <groupId>io.reactivex.rxjava3</groupId>
+          <artifactId>rxjava</artifactId>
+          <version>3.1.6</version>
+      </dependency>
+
+        <!-- REST, Json -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${fasterxml.jackson.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
-        </dependency>
+
+        <!-- swagger -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
@@ -600,15 +457,46 @@
             <version>2.2.15</version>
         </dependency>
 
+        <!-- commons -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.20</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.13.0</version>
+        </dependency>
+
         <!-- Tests -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
+            <version>2.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20200518</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade</groupId>
@@ -619,9 +507,9 @@
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-rs-client</artifactId>
+            <version>${cxf.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
@@ -633,21 +521,6 @@
                     <groupId>ch.qos.logback</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.valintaperusteet</groupId>
-            <artifactId>valintalaskenta-domain</artifactId>
-            <version>${valintalaskenta.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.valintaperusteet</groupId>
-            <artifactId>sharedutils</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
@@ -681,21 +554,22 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <groupId>com.fatboyindustrial.gson-javatime-serialisers</groupId>
+            <artifactId>gson-javatime-serialisers</artifactId>
+            <version>1.1.1</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>gson</artifactId>
+                    <groupId>com.google.code.gson</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.5.0</version>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-testkit_2.11</artifactId>
+            <version>2.5.31</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
