@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collections;
 import java.util.List;
 
-@ApiModel
+@Schema
 public class ErillishakuJson {
   private final List<ErillishakuRivi> rivit;
 

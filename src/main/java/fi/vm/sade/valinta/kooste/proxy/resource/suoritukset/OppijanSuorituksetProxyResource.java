@@ -23,8 +23,11 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +46,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController("SuorituksenArvosanatProxyResource")
 @RequestMapping("/resources/proxy/suoritukset")
 @PreAuthorize("isAuthenticated()")
-@Api(
-    value = "/proxy/suoritukset",
+@Tag(
+    name = "/proxy/suoritukset",
     description = "Käyttöliittymäkutsujen välityspalvelin suoritusrekisteriin")
 public class OppijanSuorituksetProxyResource {
   private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResource.class);
@@ -134,10 +137,16 @@ public class OppijanSuorituksetProxyResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Hakemukset suoritustietoineen tietylle haulle",
-      response = List.class)
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Hakemukset suoritustietoineen tietylle haulle",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = List.class)))
+      })
   public DeferredResult<ResponseEntity<List<Map<String, String>>>> getSuoritukset(
       @PathVariable("hakuOid") String hakuOid,
       @RequestParam(value = "fetchEnsikertalaisuus", defaultValue = "false")

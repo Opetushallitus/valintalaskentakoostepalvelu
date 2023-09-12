@@ -13,8 +13,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,8 +38,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController("ViestintapalveluAktivointiResource")
 @RequestMapping("/resources/viestintapalvelu")
 @PreAuthorize("isAuthenticated()")
-@Api(
-    value = "/viestintapalvelu",
+@Tag(
+    name = "/viestintapalvelu",
     description = "Osoitetarrojen, jälkiohjauskirjeiden ja hyväksymiskirjeiden tuottaminen")
 public class ViestintapalveluAktivointiResource {
   private static final Logger LOG =
@@ -55,7 +58,13 @@ public class ViestintapalveluAktivointiResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Aktivoi osoitetarrojen luonnin hakukohteelle", response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi osoitetarrojen luonnin hakukohteelle",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId aktivoiOsoitetarrojenLuonti(
       @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
@@ -100,9 +109,13 @@ public class ViestintapalveluAktivointiResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi hyväksyttyjen osoitteiden luonnin hakukohteelle haussa",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId aktivoiHyvaksyttyjenOsoitetarrojenLuonti(
       @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
@@ -145,9 +158,13 @@ public class ViestintapalveluAktivointiResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId aktivoiOsoitetarrojenLuontiHakemuksille(
       @RequestBody DokumentinLisatiedot hakemuksillaRajaus) {
     try {
@@ -179,9 +196,13 @@ public class ViestintapalveluAktivointiResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi jälkiohjauskirjeiden luonnin valitsemattomille",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId aktivoiJalkiohjauskirjeidenLuonti(
       @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
@@ -225,9 +246,13 @@ public class ViestintapalveluAktivointiResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi hakukohteessa hylatyille kirjeiden luonnin",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi hakukohteessa hylatyille kirjeiden luonnin",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId aktivoiHakukohteessahylatyilleLuonti(
       @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
@@ -273,9 +298,13 @@ public class ViestintapalveluAktivointiResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi hyväksymiskirjeiden luonnin hakukohteelle haussa",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId aktivoiHyvaksymiskirjeidenLuonti(
       @RequestBody DokumentinLisatiedot hakemuksillaRajaus,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
@@ -364,9 +393,13 @@ public class ViestintapalveluAktivointiResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa",
-      response = ProsessiId.class)
+  @Operation(
+      summary = "Aktivoi koekutsukirjeiden luonnin hakukohteelle haussa",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId aktivoiKoekutsukirjeidenLuonti(
       @RequestParam(OPH.HAKUOID) String hakuOid,
       @RequestParam(OPH.HAKUKOHDEOID) String hakukohdeOid,
@@ -433,9 +466,13 @@ public class ViestintapalveluAktivointiResource {
   @PostMapping(value = "/securelinkit/aktivoi", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Lähettää Secure Linkit ryhmäsähköpostilla",
-      response = EPostiResponse.class)
+  @Operation(
+      summary = "Lähettää Secure Linkit ryhmäsähköpostilla",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public DeferredResult<ResponseEntity<EPostiResponse>> secureLinkkienLahetys(
       @RequestBody EPostiRequest ePostiRequest) {
 
@@ -465,7 +502,13 @@ public class ViestintapalveluAktivointiResource {
   @GetMapping(value = "/securelinkit/esikatselu", produces = "message/rfc822")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Esikatsele Secure Linkin ryhmäsähköposti", response = byte[].class)
+  @Operation(
+      summary = "Esikatsele Secure Linkin ryhmäsähköposti",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = byte[].class)))
+      })
   public DeferredResult<ResponseEntity<byte[]>> secureLinkkienEsikatselu(
       @RequestParam(OPH.HAKUOID) String hakuOid,
       @RequestParam("kirjeenTyyppi") String kirjeenTyyppi,

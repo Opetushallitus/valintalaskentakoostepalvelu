@@ -11,9 +11,13 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
@@ -32,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController("HakuImportResource")
 @RequestMapping("/resources/hakuimport")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/hakuimport", description = "Haun tuontiin tarjonnalta")
+@Tag(name = "/hakuimport", description = "Haun tuontiin tarjonnalta")
 public class HakuImportResource {
   private static final Logger LOG = LoggerFactory.getLogger(HakuImportResource.class);
 
@@ -50,13 +54,25 @@ public class HakuImportResource {
   private ValvomoService<HakuImportProsessi> hakuImportValvomo;
 
   @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Hauntuontireitin tila", response = Collection.class)
+  @Operation(
+      summary = "Hauntuontireitin tila",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = List.class)))
+      })
   public Collection<ProsessiJaStatus<HakuImportProsessi>> status() {
     return hakuImportValvomo.getUusimmatProsessitJaStatukset();
   }
 
   @GetMapping(value = "/aktivoi")
-  @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
+  @Operation(
+      summary = "Haun tuonnin aktivointi",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public String aktivoiHakuImport(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       HttpServletRequest request) {
@@ -101,7 +117,13 @@ public class HakuImportResource {
   @GetMapping(value = "/hakukohde")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Hakukohde tuonnin aktivointi", response = String.class)
+  @Operation(
+      summary = "Hakukohde tuonnin aktivointi",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public String aktivoiHakukohdeImport(
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
       HttpServletRequest request) {
