@@ -37,7 +37,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "AtaruCasClient")
   @Autowired
   public RestCasClient getAtaruCasClient(
@@ -63,7 +63,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "HakuAppCasClient")
   @Autowired
   public RestCasClient getHakuAppCasClient(
@@ -76,7 +76,7 @@ public class HttpClients {
             username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "SijoitteluServiceCasClient")
   @Autowired
   public RestCasClient getSijoitteluServiceCasClient(
@@ -103,7 +103,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "HakukohderyhmapalveluCasClient")
   @Autowired
   public RestCasClient getHakukohderyhmapalveluCasClient(
@@ -124,7 +124,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "KoutaCasClient")
   @Autowired
   public RestCasClient getKoutaCasClient(
@@ -173,7 +173,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "ViestintapalveluCasClient")
   @Autowired
   public RestCasClient getViestintapalveluCasClient(
@@ -200,7 +200,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "OppijanumerorekisteriCasClient")
   @Autowired
   public RestCasClient getOppijanumerorekisteriCasClient(
@@ -220,7 +220,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "ValintapisteServiceCasClient")
   @Autowired
   public RestCasClient getValintapisteServiceCasClient(
@@ -247,7 +247,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "SuoritusrekisteriCasClient")
   @Autowired
   public RestCasClient getSuoritusrekisteriCasClient(
@@ -267,7 +267,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "ValintalaskentaCasClient")
   @Autowired
   public RestCasClient getValintalaskentaCasClient(
@@ -288,7 +288,7 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "ValintaperusteetCasClient")
   @Autowired
   public RestCasClient getValintaperusteetCasClient(
@@ -301,7 +301,7 @@ public class HttpClients {
             username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "ryhmasahkopostiCasClient")
   @Autowired
   public RestCasClient getRyhmasahkopostiCasClient(
@@ -314,7 +314,7 @@ public class HttpClients {
             username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "OppijantunnistusCasClient")
   @Autowired
   public RestCasClient getOppijantunnistusCasClient(
@@ -327,7 +327,7 @@ public class HttpClients {
             username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "ring-session", ""));
   }
 
-  @Profile("default")
+  @Profile({"default", "dev"})
   @Bean(name = "SeurantaCasClient")
   @Autowired
   public RestCasClient getSeurantaCasClient(
