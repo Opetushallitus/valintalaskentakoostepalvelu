@@ -12,6 +12,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.jasig.cas.client.validation.AssertionImpl;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Order(3)
+@Profile({"mockservices", "mockresources"})
 public class MockOpintopolkuCasAuthenticationFilter implements Filter {
   private static CasAuthenticationToken casAuthenticationToken = null;
 
