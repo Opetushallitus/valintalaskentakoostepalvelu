@@ -30,8 +30,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessi
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,7 +60,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController("ValintalaskentaExcelResource")
 @RequestMapping("/resources/valintalaskentaexcel")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/valintalaskentaexcel", description = "Excel-raportteja")
+@Tag(name = "/valintalaskentaexcel", description = "Excel-raportteja")
 public class ValintalaskentaExcelResource {
   private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaExcelResource.class);
   @Autowired private ValintakoekutsutExcelService valintakoekutsutExcelService;
@@ -74,7 +77,13 @@ public class ValintalaskentaExcelResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Hakukohteen hyväksytyt Excel-raporttina", response = ProsessiId.class)
+  @Operation(
+      summary = "Hakukohteen hyväksytyt Excel-raporttina",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId haeTuloksetExcelMuodossa(
       @RequestBody DokumentinLisatiedot lisatiedot,
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
@@ -125,7 +134,13 @@ public class ValintalaskentaExcelResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Sijoittelun tulokset Excel-raporttina", response = ProsessiId.class)
+  @Operation(
+      summary = "Sijoittelun tulokset Excel-raporttina",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId haeSijoittelunTuloksetExcelMuodossa(
       @RequestParam(value = "sijoitteluajoId", required = false) String sijoitteluajoId,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
@@ -272,7 +287,7 @@ public class ValintalaskentaExcelResource {
   @GetMapping(value = "/valintalaskennantulos/aktivoi")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(value = "Valintalaskennan tulokset Excel-raporttina")
+  @Operation(summary = "Valintalaskennan tulokset Excel-raporttina")
   public DeferredResult<ResponseEntity<InputStream>> haeValintalaskentaTuloksetExcelMuodossa(
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid) {
     DeferredResult<ResponseEntity<InputStream>> result = new DeferredResult<>();

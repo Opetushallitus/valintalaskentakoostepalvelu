@@ -3,8 +3,11 @@ package fi.vm.sade.valinta.kooste.valintaperusteet;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +25,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController
 @RequestMapping("/resources/V2valintaperusteet")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/V2valintaperusteet", description = "V2 valintaperusteet")
+@Tag(name = "/V2valintaperusteet", description = "V2 valintaperusteet")
 public class ValintaperusteetResourceV2 {
   private final ValintaperusteetAsyncResource resource;
   private final Logger LOG = LoggerFactory.getLogger(ValintaperusteetResourceV2.class);
@@ -36,9 +39,14 @@ public class ValintaperusteetResourceV2 {
       value = "/hakukohde/{hakukohdeOid}/kayttaaValintalaskentaa",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTAPERUSTEET_READ', 'ROLE_APP_VALINTAPERUSTEET_CRUD')")
-  @ApiOperation(
-      value = "Käyttääkö hakukohde valintalaskentaa",
-      response = ValintaperusteetResourceResult.class)
+  @Operation(
+      summary = "Käyttääkö hakukohde valintalaskentaa",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content =
+                @Content(schema = @Schema(implementation = ValintaperusteetResourceResult.class)))
+      })
   public DeferredResult<ResponseEntity<ValintaperusteetResourceResult>> kayttaaValintalaskentaa(
       @PathVariable("hakukohdeOid") String hakukohdeOid) {
     DeferredResult<ResponseEntity<ValintaperusteetResourceResult>> result =

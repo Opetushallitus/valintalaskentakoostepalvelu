@@ -22,8 +22,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -54,7 +57,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController("PistesyottoResource")
 @RequestMapping("/resources/pistesyotto")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/pistesyotto", description = "Pistesyötön tuonti ja vienti taulukkolaskentaan")
+@Tag(name = "/pistesyotto", description = "Pistesyötön tuonti ja vienti taulukkolaskentaan")
 public class PistesyottoResource {
   private static final Logger LOG = LoggerFactory.getLogger(PistesyottoResource.class);
 
@@ -72,9 +75,11 @@ public class PistesyottoResource {
   @GetMapping(
       value = "/koostetutPistetiedot/hakemus/{hakemusOid:.+}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   public DeferredResult<ResponseEntity> koostaPistetiedotYhdelleHakemukselle(
@@ -133,9 +138,11 @@ public class PistesyottoResource {
       value = "/koostetutPistetiedot/hakemus/{hakemusOid:.+}",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   public DeferredResult<ResponseEntity> tallennaKoostetutPistetiedotHakemukselle(
@@ -220,9 +227,11 @@ public class PistesyottoResource {
   @GetMapping(
       value = "/koostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      value = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   public DeferredResult<ResponseEntity<PistesyottoValilehtiDTO>> koostaPistetiedotHakemuksille(
@@ -290,9 +299,11 @@ public class PistesyottoResource {
       value = "/koostetutPistetiedot/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      value = "Lisätietokenttien tallennus hakemuksille ja suoritusrekisteriin")
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Lisätietokenttien tallennus hakemuksille ja suoritusrekisteriin")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   public DeferredResult<ResponseEntity<Set<TuontiErrorDTO>>> tallennaKoostetutPistetiedot(
@@ -400,10 +411,16 @@ public class PistesyottoResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Pistesyötön vienti taulukkolaskentaan",
-      response = ProsessiId.class)
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Pistesyötön vienti taulukkolaskentaan",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public DeferredResult<ResponseEntity<ProsessiId>> vienti(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
@@ -459,10 +476,16 @@ public class PistesyottoResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Pistesyötön tuonti taulukkolaskentaan",
-      response = ProsessiId.class)
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Pistesyötön tuonti taulukkolaskentaan",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public DeferredResult<ResponseEntity<Set<TuontiErrorDTO>>> tuonti(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
@@ -600,10 +623,16 @@ public class PistesyottoResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Pistesyötön tuonti hakemuksille ulkoisesta järjestelmästä",
-      response = UlkoinenResponseDTO.class)
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Pistesyötön tuonti hakemuksille ulkoisesta järjestelmästä",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = UlkoinenResponseDTO.class)))
+      })
   public DeferredResult<ResponseEntity<UlkoinenResponseDTO>> ulkoinenTuonti(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestBody List<HakemusDTO> hakemukset,

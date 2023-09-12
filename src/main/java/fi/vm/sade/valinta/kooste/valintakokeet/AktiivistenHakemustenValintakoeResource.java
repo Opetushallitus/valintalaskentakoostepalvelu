@@ -7,9 +7,12 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
@@ -28,7 +31,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController
 @PreAuthorize("isAuthenticated()")
 @RequestMapping("/resources/valintakoe")
-@Api(value = "/valintakoe", description = "Resurssi valintakoeosallistumistulosten hakemiseen.")
+@Tag(name = "/valintakoe", description = "Resurssi valintakoeosallistumistulosten hakemiseen.")
 public class AktiivistenHakemustenValintakoeResource {
   private static final String VALINTAKAYTTAJA_ROLE =
       "hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_READ',"
@@ -55,14 +58,18 @@ public class AktiivistenHakemustenValintakoeResource {
 
   @GetMapping(value = "hakutoive/{hakukohdeOid:.+}", produces = MediaType.APPLICATION_JSON)
   @PreAuthorize(VALINTAKAYTTAJA_ROLE)
-  @ApiOperation(
-      value =
+  @Operation(
+      summary =
           "Hakee valintakoeosallistumiset hakukohteelle OID:n perusteella, "
               + "filtteröiden pois passiiviset hakemukset",
-      response = ValintakoeOsallistuminenDTO.class)
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = List.class)))
+      })
   public DeferredResult<ResponseEntity<List<ValintakoeOsallistuminenDTO>>>
       osallistumisetByHakutoive(
-          @ApiParam(value = "Hakukohde OID", required = true) @PathVariable("hakukohdeOid")
+          @Parameter(name = "Hakukohde OID", required = true) @PathVariable("hakukohdeOid")
               String hakukohdeOid) {
 
     DeferredResult<ResponseEntity<List<ValintakoeOsallistuminenDTO>>> result =

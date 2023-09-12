@@ -1,14 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.dto;
 
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
-@ApiModel
+@Schema
 public class ValintatapajonoRivit {
 
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private final List<ValintatapajonoRivi> rivit;
 
   public ValintatapajonoRivit() {

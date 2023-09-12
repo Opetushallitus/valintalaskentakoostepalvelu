@@ -4,8 +4,11 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.parametrit.ParametritParser;
 import fi.vm.sade.valinta.kooste.parametrit.dto.ParametritUIDTO;
 import fi.vm.sade.valinta.kooste.parametrit.service.HakuParametritService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController("ParametritResource")
 @RequestMapping("/resources/parametrit")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/parametrit", description = "Ohjausparametrit palveluiden aktiviteettipäivämäärille")
+@Tag(name = "/parametrit", description = "Ohjausparametrit palveluiden aktiviteettipäivämäärille")
 public class ParametritResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(ParametritResource.class);
@@ -30,7 +33,13 @@ public class ParametritResource {
   @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
 
   @GetMapping(value = "/{hakuOid}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Parametrien listaus", response = ParametritUIDTO.class)
+  @Operation(
+      summary = "Parametrien listaus",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ParametritUIDTO.class)))
+      })
   public ParametritUIDTO listParametrit(@PathVariable("hakuOid") String hakuOid) {
 
     ParametritUIDTO resp = new ParametritUIDTO();
@@ -52,7 +61,13 @@ public class ParametritResource {
   @GetMapping(
       value = "/hakukohderyhmat/{hakukohdeOid}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Hakukohteen hakukohderyhmät", response = List.class)
+  @Operation(
+      summary = "Hakukohteen hakukohderyhmät",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = List.class)))
+      })
   public ResponseEntity<List<String>> listHakukohderyhmat(
       @PathVariable("hakukohdeOid") String hakukohdeOid) {
 

@@ -14,8 +14,11 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -48,8 +51,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RestController
 @RequestMapping("/resources/valintatapajonolaskenta")
 @PreAuthorize("isAuthenticated()")
-@Api(
-    value = "/valintatapajonolaskenta",
+@Tag(
+    name = "/valintatapajonolaskenta",
     description = "Valintatapajonon tuonti ja vienti taulukkolaskentaan")
 public class ValintatapajonoResource {
   public static final String ROLE_TULOSTENTUONTI =
@@ -67,10 +70,16 @@ public class ValintatapajonoResource {
 
   @PostMapping(value = "/vienti", consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Valintatapajonon vienti taulukkolaskentaan",
-      response = ProsessiId.class)
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Valintatapajonon vienti taulukkolaskentaan",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId vienti(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
@@ -89,10 +98,16 @@ public class ValintatapajonoResource {
       consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
       produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-  @ApiOperation(
-      consumes = "application/octet-stream",
-      value = "Valintatapajonon tuonti taulukkolaskennasta",
-      response = List.class)
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)),
+      summary = "Valintatapajonon tuonti taulukkolaskennasta",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public DeferredResult<ResponseEntity<String>> tuonti(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
@@ -160,10 +175,16 @@ public class ValintatapajonoResource {
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Valintatapajonon tuonti jsonista",
-      response = List.class)
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Valintatapajonon tuonti jsonista",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = List.class)))
+      })
   public DeferredResult<ResponseEntity<String>> tuonti(
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
