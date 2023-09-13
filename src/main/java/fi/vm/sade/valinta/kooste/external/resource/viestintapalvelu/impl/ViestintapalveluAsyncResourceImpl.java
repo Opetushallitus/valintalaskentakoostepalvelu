@@ -36,7 +36,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
   public CompletableFuture<LetterResponse> vieLetterBatch(LetterBatch letterBatch) {
     return this.client.post(
         this.urlConfiguration.url("viestintapalvelu.letter.async.letter"),
-        new TypeToken<LetterResponse>() {},
+        new TypeToken<>() {},
         letterBatch,
         Collections.emptyMap(),
         20 * 60 * 60 * 1000);
@@ -46,7 +46,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
   public CompletableFuture<LetterBatchStatusDto> haeLetterBatchStatus(String letterBatchId) {
     return this.client.get(
         this.urlConfiguration.url("viestintapalvelu.letter.async.letter.status", letterBatchId),
-        new TypeToken<LetterBatchStatusDto>() {},
+        new TypeToken<>() {},
         Collections.emptyMap(),
         69 * 1000);
   }
@@ -77,7 +77,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
     query.put("tag", hakukohdeOid);
     return this.client.get(
         this.urlConfiguration.url("viestintapalvelu.template.gethistory", query),
-        new com.google.gson.reflect.TypeToken<List<TemplateHistory>>() {},
+        new TypeToken<>() {},
         Collections.emptyMap(),
         60 * 1000);
   }
@@ -127,7 +127,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
                     + kirjeenTyyppi
                     + "&language="
                     + asiointikieli,
-                new com.google.gson.reflect.TypeToken<String>() {},
+                new TypeToken<String>() {},
                 Map.of("Accept", "text/plain"),
                 10 * 60 * 1000 // TODO: mikä on oikea timeout?
                 )
@@ -145,7 +145,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
             .get(
                 this.urlConfiguration.url(
                     "viestintapalvelu.luotettu.letter.publishletterbatch", batchId),
-                new com.google.gson.reflect.TypeToken<String>() {},
+                new TypeToken<String>() {},
                 Map.of("Accept", "text/plain"),
                 10 * 60 * 1000 // TODO: mikä on oikea timeout?
                 )
@@ -162,7 +162,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
         this.client.get(
             this.urlConfiguration.url(
                 "viestintapalvelu.luotettu.letter.getepostiadressesforletterbatch", batchId),
-            new com.google.gson.reflect.TypeToken<Map<String, String>>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
             10 * 60 * 1000 // TODO: mikä on oikea timeout
             ));
