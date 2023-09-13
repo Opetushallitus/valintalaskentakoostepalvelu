@@ -57,7 +57,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
         this.client.get(
             this.urlConfiguration.url(
                 "viestintapalvelu.luotettu.letter.count.type.language", hakuOid, tyyppi, kieli),
-            new TypeToken<>() {},
+            new TypeToken<LetterBatchCountDto>() {},
             Collections.emptyMap(),
             10 * 1000));
   }
@@ -77,7 +77,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
     query.put("tag", hakukohdeOid);
     return this.client.get(
         this.urlConfiguration.url("viestintapalvelu.template.gethistory", query),
-        new com.google.gson.reflect.TypeToken<List<TemplateHistory>>() {},
+        new TypeToken<List<TemplateHistory>>() {},
         Collections.emptyMap(),
         60 * 1000);
   }
@@ -127,7 +127,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
                     + kirjeenTyyppi
                     + "&language="
                     + asiointikieli,
-                new com.google.gson.reflect.TypeToken<String>() {},
+                new TypeToken<String>() {},
                 Map.of("Accept", "text/plain"),
                 10 * 60 * 1000 // TODO: mikä on oikea timeout?
                 )
@@ -145,7 +145,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
             .get(
                 this.urlConfiguration.url(
                     "viestintapalvelu.luotettu.letter.publishletterbatch", batchId),
-                new com.google.gson.reflect.TypeToken<String>() {},
+                new TypeToken<String>() {},
                 Map.of("Accept", "text/plain"),
                 10 * 60 * 1000 // TODO: mikä on oikea timeout?
                 )
@@ -162,7 +162,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
         this.client.get(
             this.urlConfiguration.url(
                 "viestintapalvelu.luotettu.letter.getepostiadressesforletterbatch", batchId),
-            new com.google.gson.reflect.TypeToken<Map<String, String>>() {},
+            new TypeToken<Map<String, String>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000 // TODO: mikä on oikea timeout
             ));

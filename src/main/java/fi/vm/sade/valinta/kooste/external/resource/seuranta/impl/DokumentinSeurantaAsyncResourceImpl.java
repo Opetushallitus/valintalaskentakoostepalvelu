@@ -33,7 +33,7 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
         this.restCasClient.post(
             this.urlConfiguration.url(
                 "seuranta-service.dokumentinseuranta.paivitadokumenttiid", uuid),
-            new TypeToken<>() {},
+            new TypeToken<DokumenttiDto>() {},
             dokumenttiId,
             Map.of("Content-Type", "text/plain"),
             10 * 60 * 1000));
@@ -43,7 +43,7 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
     return Observable.fromFuture(
         this.restCasClient.post(
             this.urlConfiguration.url("seuranta-service.dokumentinseuranta"),
-            new TypeToken<>() {},
+            new TypeToken<String>() {},
             kuvaus,
             Map.of("Content-Type", "text/plain"),
             10 * 60 * 1000));
@@ -53,7 +53,7 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
     return Observable.fromFuture(
         this.restCasClient.post(
             this.urlConfiguration.url("seuranta-service.dokumentinseuranta.paivitakuvaus", uuid),
-            new TypeToken<>() {},
+            new TypeToken<DokumenttiDto>() {},
             kuvaus,
             Map.of("Content-Type", "text/plain"),
             10 * 60 * 1000));
@@ -64,7 +64,7 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
     return Observable.fromFuture(
         this.restCasClient.post(
             this.urlConfiguration.url("seuranta-service.dokumentinseuranta.lisaavirheita", uuid),
-            new TypeToken<>() {},
+            new TypeToken<DokumenttiDto>() {},
             virheilmoitukset,
             Collections.emptyMap(),
             10 * 60 * 1000));

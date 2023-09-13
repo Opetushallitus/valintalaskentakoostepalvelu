@@ -37,7 +37,7 @@ public class OppijantunnistusAsyncResourceImpl implements OppijantunnistusAsyncR
     return Observable.fromFuture(
         this.restCasClient.post(
             this.urlConfiguration.url("oppijan-tunnistus.tokens"),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<TokensResponse>() {},
             tokensRequest,
             Collections.emptyMap(),
             10 * 60 * 1000));
@@ -52,7 +52,7 @@ public class OppijantunnistusAsyncResourceImpl implements OppijantunnistusAsyncR
                 tokensRequest.getHakuOid(),
                 tokensRequest.getTemplatename(),
                 tokensRequest.getLang()),
-            new TypeToken<>() {},
+            new TypeToken<byte[]>() {},
             Map.of("Accept", "message/rfc822"),
             10 * 60 * 1000));
   }

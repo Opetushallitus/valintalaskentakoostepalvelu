@@ -36,7 +36,7 @@ public class OppijanumerorekisteriAsyncResourceImpl implements Oppijanumerorekis
         this.client.post(
             this.urlConfiguration.url(
                 "oppijanumerorekisteri-service.s2s.henkilo.findOrCreateMultiple"),
-            new TypeToken<>() {},
+            new TypeToken<List<HenkiloPerustietoDto>>() {},
             henkiloPrototyypit,
             Collections.emptyMap(),
             10 * 60 * 1000));

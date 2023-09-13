@@ -117,7 +117,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
               this.hakukohderyhmapalveluClient.get(
                   urlConfiguration.url(
                       "hakukohderyhmapalvelu.hakukohderyhman-hakukohteet", hakukohderyhmaOid),
-                  new TypeToken<List<String>>() {},
+                  new TypeToken<>() {},
                   Collections.emptyMap(),
                   60 * 1000));
     } catch (ExecutionException e) {

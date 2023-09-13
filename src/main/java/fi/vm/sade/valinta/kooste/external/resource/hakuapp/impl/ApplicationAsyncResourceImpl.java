@@ -64,7 +64,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
         this.client
             .put(
                 url,
-                new com.google.gson.reflect.TypeToken<List<Hakemus>>() {},
+                new TypeToken<List<Hakemus>>() {},
                 hakemusPrototyyppiBatch,
                 Collections.emptyMap(),
                 60 * 60 * 1000)
@@ -90,7 +90,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
         this.client
             .post(
                 this.urlConfiguration.url("haku-app.applications.listfull"),
-                new com.google.gson.reflect.TypeToken<List<HakemusOid>>() {},
+                new TypeToken<List<HakemusOid>>() {},
                 s,
                 Collections.emptyMap(),
                 60 * 60 * 1000)
@@ -109,11 +109,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
     LOG.info("Calling url {}", url);
 
     return this.client
-        .get(
-            url,
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {},
-            Collections.emptyMap(),
-            60 * 60 * 1000)
+        .get(url, new TypeToken<List<Hakemus>>() {}, Collections.emptyMap(), 60 * 60 * 1000)
         .thenApplyAsync(
             hs -> hs.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList()));
   }
@@ -130,7 +126,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
     return this.client
         .post(
             this.urlConfiguration.url("haku-app.applications.listfull"),
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {},
+            new TypeToken<List<Hakemus>>() {},
             requestBody,
             Collections.emptyMap(),
             60 * 60 * 1000)
@@ -156,7 +152,7 @@ public class ApplicationAsyncResourceImpl implements ApplicationAsyncResource {
     return this.client
         .post(
             this.urlConfiguration.url("haku-app.applications.list", query),
-            new com.google.gson.reflect.TypeToken<List<Hakemus>>() {},
+            new TypeToken<List<Hakemus>>() {},
             hakemusOids,
             Collections.emptyMap(),
             60 * 60 * 1000)
