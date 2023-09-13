@@ -194,7 +194,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
       CompletableFuture<KoutaHaku> koutaF =
           this.koutaClient.get(
               urlConfiguration.url("kouta-internal.haku.hakuoid", hakuOid),
-              new TypeToken<KoutaHaku>() {},
+              new TypeToken<>() {},
               Collections.emptyMap(),
               10 * 1000);
       return koutaF.thenApplyAsync(Haku::new);
@@ -209,7 +209,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
       CompletableFuture<KoutaHakukohdeDTO> koutaF =
           this.koutaClient.get(
               urlConfiguration.url("kouta-internal.hakukohde.hakukohdeoid", hakukohdeOid),
-              new TypeToken<KoutaHakukohdeDTO>() {},
+              new TypeToken<>() {},
               Collections.emptyMap(),
               10 * 1000);
       return koutaF.thenApplyAsync(KoutaHakukohde::new);
@@ -233,7 +233,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
       CompletableFuture<Set<KoutaHakukohde>> koutaF =
           this.koutaClient.get(
               urlConfiguration.url("kouta-internal.hakukohde.search", koutaParameters),
-              new TypeToken<Set<KoutaHakukohde>>() {},
+              new TypeToken<>() {},
               Collections.emptyMap(),
               10 * 1000);
       return koutaF.thenApplyAsync(
@@ -250,7 +250,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
       CompletableFuture<KoutaToteutus> koutaF =
           this.koutaClient.get(
               urlConfiguration.url("kouta-internal.toteutus.toteutusoid", toteutusOid),
-              new TypeToken<KoutaToteutus>() {},
+              new TypeToken<>() {},
               Collections.emptyMap(),
               5 * 60 * 1000);
       return koutaF.thenApplyAsync(Toteutus::new);
