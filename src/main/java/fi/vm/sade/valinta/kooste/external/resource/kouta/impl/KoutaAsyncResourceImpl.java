@@ -27,7 +27,7 @@ public class KoutaAsyncResourceImpl implements KoutaAsyncResource {
     CompletableFuture<KoutaHakukohdeDTO> koutaF =
         this.koutaClient.get(
             urlConfiguration.url("kouta-internal.hakukohde.hakukohdeoid", hakukohdeOid),
-            new TypeToken<KoutaHakukohdeDTO>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
             10 * 1000);
     return koutaF.thenApplyAsync(KoutaHakukohde::new);
