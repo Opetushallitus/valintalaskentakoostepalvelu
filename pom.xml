@@ -28,7 +28,7 @@
         <mockito.version>5.4.0</mockito.version>
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
-        <sijoittelu.version>7.5.0-SNAPSHOT</sijoittelu.version>
+        <sijoittelu.version>8.0.0-SNAPSHOT</sijoittelu.version>
         <valinta-sharedutils.version>5.11-SNAPSHOT</valinta-sharedutils.version>
         <valintaperusteet.version>5.17-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>5.17.2-SNAPSHOT</valintalaskenta.version>
@@ -38,6 +38,16 @@
         <dependencies>
             <!-- SADE -->
 
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>1.7.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-webmvc-core</artifactId>
+                <version>1.7.0</version>
+            </dependency>
             <dependency>
                 <groupId>org.jasig.cas.client</groupId>
                 <artifactId>cas-client-core</artifactId>
@@ -67,6 +77,11 @@
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>java-http</artifactId>
                 <version>0.6.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>0.4.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
@@ -205,12 +220,18 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-spring-security</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>0.6.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-user-details-service</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
+            <version>0.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
@@ -270,7 +291,7 @@
         <dependency>
             <groupId>fi.vm.sade.koodisto</groupId>
             <artifactId>koodisto-api</artifactId>
-            <version>2019-01-SNAPSHOT</version>
+            <version>2020.01-SNAPSHOT</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -298,7 +319,7 @@
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>seuranta-api</artifactId>
-            <version>5.3-SNAPSHOT</version>
+            <version>5.4-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.cxf</groupId>
@@ -309,7 +330,7 @@
         <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
-            <version>2018-7-SNAPSHOT</version>
+            <version>2023.09.111204.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jsr311-api</artifactId>
@@ -320,11 +341,6 @@
                     <groupId>org.springframework</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.rajapinnat</groupId>
-            <artifactId>kela-tkuva</artifactId>
-            <version>${kela.version}</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
@@ -461,7 +477,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.20</version>
+            <version>1.24.0</version>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
