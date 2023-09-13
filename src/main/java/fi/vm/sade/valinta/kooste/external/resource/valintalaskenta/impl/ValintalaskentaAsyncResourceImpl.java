@@ -68,7 +68,7 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
     return this.httpclient.get(
         this.urlConfiguration.url(
             "valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid),
-        new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {},
+        new TypeToken<>() {},
         Collections.emptyMap(),
         10 * 60 * 1000);
   }

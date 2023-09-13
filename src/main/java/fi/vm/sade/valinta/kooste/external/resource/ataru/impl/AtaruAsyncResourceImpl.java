@@ -122,7 +122,7 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
 
     return this.casClient.post(
         this.urlConfiguration.url("ataru.applications.by-hakukohde", query),
-        new TypeToken<List<AtaruHakemus>>() {},
+        new TypeToken<>() {},
         hakemusOids,
         Collections.emptyMap(),
         120000);
