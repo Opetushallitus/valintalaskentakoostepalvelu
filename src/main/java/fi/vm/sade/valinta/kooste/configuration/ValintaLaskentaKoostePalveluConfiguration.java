@@ -1,7 +1,9 @@
 package fi.vm.sade.valinta.kooste.configuration;
 
+import fi.vm.sade.valinta.dokumenttipalvelu.Dokumenttipalvelu;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -22,7 +24,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
     },
     ignoreResourceNotFound = true)
 public class ValintaLaskentaKoostePalveluConfiguration {
-
   @Bean
   public KoosteAudit koosteAudit() {
     return new KoosteAudit();
@@ -31,5 +32,12 @@ public class ValintaLaskentaKoostePalveluConfiguration {
   @Bean
   public UrlConfiguration urlConfiguration() {
     return UrlConfiguration.getInstance();
+  }
+
+  @Bean
+  public Dokumenttipalvelu dokumenttipalvelu(
+      @Value("${aws.region}") final String region,
+      @Value("${aws.bucket.name}") final String bucketName) {
+    return new Dokumenttipalvelu(region, bucketName);
   }
 }

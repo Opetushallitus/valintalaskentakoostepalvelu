@@ -79,7 +79,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
               String id = UUID.randomUUID().toString();
-              Observable<ResponseEntity> tallennus =
+              Observable<ResponseEntity<Object>> tallennus =
                   dokumenttiAsyncResource.tallenna(
                       id,
                       "pistesyotto.xlsx",

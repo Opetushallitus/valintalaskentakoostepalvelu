@@ -57,7 +57,7 @@ public class ValintatapajonoTuontiService {
       final String valintatapajonoOid,
       DeferredResult<ResponseEntity<String>> result,
       User user) {
-    AtomicReference<String> dokumenttiIdRef = new AtomicReference<>(null);
+    AtomicReference<String> keyRef = new AtomicReference<>(null);
     AtomicInteger counter =
         new AtomicInteger(
             1 // valinnanvaiheet
@@ -79,7 +79,7 @@ public class ValintatapajonoTuontiService {
               rivit = riviFunction.apply(valinnanvaiheetRef.get(), hakemuksetRef.get());
             } catch (Throwable t) {
               poikkeusKasittelija(
-                      "Rivien lukeminen annetuista tiedoista epäonnistui", result, dokumenttiIdRef)
+                      "Rivien lukeminen annetuista tiedoista epäonnistui", result, keyRef)
                   .accept(t);
               return null;
             }
@@ -132,20 +132,20 @@ public class ValintatapajonoTuontiService {
                           LOG.error("Audit logitus epäonnistui", t);
                         }
                         dokumentinSeurantaAsyncResource
-                            .paivitaDokumenttiId(dokumenttiIdRef.get(), VALMIS)
+                            .paivitaDokumenttiId(keyRef.get(), VALMIS)
                             .subscribe(
                                 dontcare -> LOG.error("Saatiin paivitettya dokId"),
                                 dontcare -> LOG.error("Ei saatu paivitettya!", dontcare));
                       },
                       poikkeusKasittelija(
-                          "Tallennus valintapalveluun epäonnistui", result, dokumenttiIdRef));
+                          "Tallennus valintapalveluun epäonnistui", result, keyRef));
               LOG.info(
                   "Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.",
                   hakukohdeOid,
                   hakuOid);
               dokumentinSeurantaAsyncResource
                   .paivitaKuvaus(
-                      dokumenttiIdRef.get(),
+                      keyRef.get(),
                       "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...")
                   .subscribe(
                       dontcare -> {},
@@ -153,7 +153,7 @@ public class ValintatapajonoTuontiService {
                         LOG.error("Onnistumisen ilmoittamisessa virhe!", dontcare);
                       });
             } catch (Throwable t) {
-              poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", result, dokumenttiIdRef)
+              poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", result, keyRef)
                   .accept(t);
               return null;
             }
@@ -165,8 +165,7 @@ public class ValintatapajonoTuontiService {
         .whenComplete(
             (valinnanvaiheet, t) -> {
               if (t != null) {
-                poikkeusKasittelija(
-                        "Valinnanvaiheiden hakeminen epäonnistui", result, dokumenttiIdRef)
+                poikkeusKasittelija("Valinnanvaiheiden hakeminen epäonnistui", result, keyRef)
                     .accept(t);
               } else {
                 valinnanvaiheetRef.set(valinnanvaiheet);
@@ -180,7 +179,7 @@ public class ValintatapajonoTuontiService {
               valintaperusteetRef.set(valintaperusteet);
               mergeSuplier.get();
             },
-            poikkeusKasittelija("Hakemusten hakeminen epäonnistui", result, dokumenttiIdRef));
+            poikkeusKasittelija("Hakemusten hakeminen epäonnistui", result, keyRef));
     Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
         .flatMap(
             haku -> {
@@ -195,32 +194,32 @@ public class ValintatapajonoTuontiService {
         .subscribe(
             hakemukset -> {
               if (hakemukset == null || hakemukset.isEmpty()) {
-                poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", result, dokumenttiIdRef)
+                poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", result, keyRef)
                     .accept(null);
               } else {
                 hakemuksetRef.set(hakemukset);
                 mergeSuplier.get();
               }
             },
-            poikkeusKasittelija("Hakemusten hakeminen epäonnistui", result, dokumenttiIdRef));
+            poikkeusKasittelija("Hakemusten hakeminen epäonnistui", result, keyRef));
 
     dokumentinSeurantaAsyncResource
         .luoDokumentti("Valintatapajonon tuonti")
         .subscribe(
-            dokumenttiId -> {
+            key -> {
               try {
                 result.setResult(
                     ResponseEntity.status(HttpStatus.OK)
                         .header("Content-Type", "text/plain")
-                        .body(dokumenttiId));
-                dokumenttiIdRef.set(dokumenttiId);
+                        .body(key));
+                keyRef.set(key);
                 mergeSuplier.get();
               } catch (Throwable t) {
                 LOG.error(
                     "Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuorman alla.", t);
               }
             },
-            poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", result, dokumenttiIdRef));
+            poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", result, keyRef));
   }
 
   private PoikkeusKasittelijaSovitin poikkeusKasittelija(

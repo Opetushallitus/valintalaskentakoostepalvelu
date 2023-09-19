@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -237,7 +238,7 @@ public class SijoittelunTulosRouteImpl
                     id,
                     "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
                     getTimeToLive(),
-                    prosessi.getTags(),
+                    Stream.concat(prosessi.getTags().stream(), Stream.of(hakukohdeOid)).toList(),
                     "application/vnd.ms-excel",
                     input)
                 .subscribe(
@@ -398,7 +399,7 @@ public class SijoittelunTulosRouteImpl
                   id,
                   "osoitetarrat_" + hakukohdeOid + ".pdf",
                   getTimeToLive(),
-                  prosessi.getTags(),
+                  Stream.concat(prosessi.getTags().stream(), Stream.of(hakukohdeOid)).toList(),
                   "application/pdf",
                   input)
               .subscribe(

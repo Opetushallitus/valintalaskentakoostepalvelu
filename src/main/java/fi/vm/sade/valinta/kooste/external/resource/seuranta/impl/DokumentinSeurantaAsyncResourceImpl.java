@@ -10,12 +10,16 @@ import io.reactivex.Observable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAsyncResource {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DokumentinSeurantaAsyncResourceImpl.class);
 
   private final RestCasClient restCasClient;
 
@@ -28,11 +32,13 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
     this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
-  public Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId) {
+  public Observable<DokumenttiDto> paivitaDokumenttiId(String key, String dokumenttiId) {
+    final String url =
+        this.urlConfiguration.url("seuranta-service.dokumentinseuranta.paivitadokumenttiid", key);
+    LOG.info("Kutsutaan urlia {}", url);
     return Observable.fromFuture(
         this.restCasClient.post(
-            this.urlConfiguration.url(
-                "seuranta-service.dokumentinseuranta.paivitadokumenttiid", uuid),
+            url,
             new TypeToken<DokumenttiDto>() {},
             dokumenttiId,
             Map.of("Content-Type", "text/plain"),
@@ -49,10 +55,10 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
             10 * 60 * 1000));
   }
 
-  public Observable<DokumenttiDto> paivitaKuvaus(String uuid, String kuvaus) {
+  public Observable<DokumenttiDto> paivitaKuvaus(String key, String kuvaus) {
     return Observable.fromFuture(
         this.restCasClient.post(
-            this.urlConfiguration.url("seuranta-service.dokumentinseuranta.paivitakuvaus", uuid),
+            this.urlConfiguration.url("seuranta-service.dokumentinseuranta.paivitakuvaus", key),
             new TypeToken<DokumenttiDto>() {},
             kuvaus,
             Map.of("Content-Type", "text/plain"),
