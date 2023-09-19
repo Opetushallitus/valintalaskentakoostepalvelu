@@ -37,7 +37,11 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
       TimerTask repeatedTask =
           new TimerTask() {
             public void run() {
-              JatkuvaSijoitteluRouteImpl.this.teeJatkuvaSijoittelu();
+              try {
+                JatkuvaSijoitteluRouteImpl.this.teeJatkuvaSijoittelu();
+              } catch (Exception e) {
+                LOG.error("Exception in JatkuvaSijoitteluTimerTask", e);
+              }
             }
           };
       long delay = 1000L;
