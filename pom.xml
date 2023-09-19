@@ -408,6 +408,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.dokumenttipalvelu</groupId>
+            <artifactId>dokumenttipalvelu</artifactId>
+            <version>6.9-SNAPSHOT</version>
+        </dependency>
 
         <!-- logging -->
         <dependency>
