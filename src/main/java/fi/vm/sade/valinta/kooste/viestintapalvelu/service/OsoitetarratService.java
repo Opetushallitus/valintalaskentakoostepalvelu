@@ -105,7 +105,8 @@ public class OsoitetarratService {
                         haetutHakemuksetRef.get(),
                         maatJaValtiot1Ref.get(),
                         postiRef.get(),
-                        prosessi);
+                        prosessi,
+                        Optional.ofNullable(hakukohdeOid));
                   })
               .build();
       maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
@@ -170,7 +171,8 @@ public class OsoitetarratService {
                           haetutHakemuksetRef.get(),
                           maatJaValtiot1Ref.get(),
                           postiRef.get(),
-                          prosessi))
+                          prosessi,
+                          Optional.ofNullable(hakukohdeOid)))
               .build();
       final SynkronoituLaskuri laskuriHakukohteenUlkopuolisilleHakijoille =
           SynkronoituLaskuri.builder()
@@ -302,7 +304,8 @@ public class OsoitetarratService {
                         haetutHakemuksetRef.get(),
                         maatJaValtiot1Ref.get(),
                         postiRef.get(),
-                        prosessi);
+                        prosessi,
+                        Optional.empty());
                   })
               .build();
       maatJaValtiot1(laskuri, maatJaValtiot1Ref, poikkeuskasittelija);
@@ -328,7 +331,8 @@ public class OsoitetarratService {
       List<HakemusWrapper> haetutHakemukset,
       Map<String, Koodi> maatJaValtiot1,
       Map<String, Koodi> posti,
-      DokumenttiProsessi prosessi) {
+      DokumenttiProsessi prosessi,
+      Optional<String> hakukohdeOid) {
     Consumer<Throwable> poikkeuskasittelija = poikkeuskasittelija(prosessi);
     try {
       Osoitteet osoitteet =
@@ -369,7 +373,10 @@ public class OsoitetarratService {
                           id,
                           "osoitetarrat.pdf",
                           defaultExpirationDate().getTime(),
-                          prosessi.getTags(),
+                          Stream.concat(
+                                  prosessi.getTags().stream(),
+                                  Stream.concat(hakukohdeOid.stream(), Stream.of(id)))
+                              .collect(Collectors.toList()),
                           "application/pdf",
                           inputStream)
                       .subscribe(
