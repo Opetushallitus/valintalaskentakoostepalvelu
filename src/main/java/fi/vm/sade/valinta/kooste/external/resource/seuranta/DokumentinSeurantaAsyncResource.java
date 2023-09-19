@@ -9,10 +9,10 @@ public interface DokumentinSeurantaAsyncResource {
 
   Observable<String> luoDokumentti(String kuvaus);
 
-  Observable<DokumenttiDto> paivitaKuvaus(String uuid, String kuvaus);
+  Observable<DokumenttiDto> paivitaKuvaus(String key, String kuvaus);
 
-  Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId);
+  Observable<DokumenttiDto> paivitaDokumenttiId(String key, String dokumenttiId);
 
   Observable<DokumenttiDto> lisaaVirheilmoituksia(
-      String uuid, List<VirheilmoitusDto> virheilmoitukset);
+      String key, List<VirheilmoitusDto> virheilmoitukset);
 }

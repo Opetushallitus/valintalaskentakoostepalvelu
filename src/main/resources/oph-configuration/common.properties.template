@@ -46,7 +46,6 @@ valintalaskentakoostepalvelu.app.password.to.suoritusrekisteri={{valintalaskenta
 # Oletusarvoja
 cas.callback.valintalaskentakoostepalvelu=http://{{ cluster_valinta_host | default("${server.name}") }}:{{ cluster_valinta_port | default("8309") }}/valintalaskentakoostepalvelu
 cas.sendRenew=false
-cas.service.dokumenttipalvelu=https://${host.virkailija}/dokumenttipalvelu-service/j_spring_cas_security_check
 cas.service.seuranta=https://${host.virkailija}/seuranta-service/j_spring_cas_security_check
 cas.service.haku-service=https://${host.virkailija}/haku-app/j_spring_cas_security_check
 cas.service.sijoittelu-service=https://${host.virkailija}/sijoittelu-service/j_spring_cas_security_check
@@ -79,7 +78,7 @@ valintalaskentakoostepalvelu.valintaperusteet-service.baseurl={{ valintalaskenta
 valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl={{ valintalaskentakoostepalvelu_valintalaskenta_laskenta_service_baseurl | default(host_ilb)}}
 valintalaskentakoostepalvelu.valintalaskenta.rest.url=${valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl}/valintalaskenta-laskenta-service/resources
 valintalaskentakoostepalvelu.koodiService.url=https://${host.virkailija}/koodisto-service/services/koodiService
-valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url=https://${host.virkailija}/dokumenttipalvelu-service/resources
+valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url=https://${host.virkailija}/valintalaskentakoostepalvelu/resources
 valintalaskentakoostepalvelu.swagger.basepath=/valintalaskentakoostepalvelu/resources
 valintalaskentakoostepalvelu.maxWorkerCount={{valintalaskentakoostepalvelu_maxWorkerCount}}
 valintalaskentakoostepalvelu.laskennan.splittaus={{valintalaskentakoostepalvelu_laskennan_splittaus}}
@@ -126,3 +125,6 @@ url-haku-sv=https://${host.haku.sv}
 omatsivut.email.application.modify.link.en=${url-haku-en}/omatsivut/tuloskirjeet/
 omatsivut.email.application.modify.link.fi=${url-haku}/omatsivut/tuloskirjeet/
 omatsivut.email.application.modify.link.sv=${url-haku-sv}/omatsivut/tuloskirjeet/
+
+aws.region={{aws_region}}
+aws.bucket.name={{dokumenttipalvelu_aws_bucket_name}}

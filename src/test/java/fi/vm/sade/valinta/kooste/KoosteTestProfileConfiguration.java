@@ -49,6 +49,8 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("valintalaskentakoostepalvelu.koodiService.url", "http://localhost");
     p0.setProperty("cas.callback.valintalaskentakoostepalvelu", "http://localhost");
     p0.setProperty("valintalaskentakoostepalvelu.dokumenttipalvelu.rest.url", "http://localhost");
+    p0.setProperty("aws.region", "eu-west-1");
+    p0.setProperty("aws.bucket.name", "opintopolku-local-dokumenttipalvelu");
 
     p0.setProperty("valintalaskentakoostepalvelu.koski.username", "koostepalvelu2koski");
     p0.setProperty("valintalaskentakoostepalvelu.koski.password", "secret");
@@ -94,7 +96,6 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("cas.service.valintalaskenta-service", "");
     p0.setProperty("cas.service.valintaperusteet-service", "");
     p0.setProperty("cas.service.valintapiste-service", "");
-    p0.setProperty("cas.service.dokumenttipalvelu", "");
     p0.setProperty(
         "valintalaskentakoostepalvelu.swagger.basepath", "/valintalaskentakoostepalvelu/resources");
     p0.setProperty("host.scheme", "http");
