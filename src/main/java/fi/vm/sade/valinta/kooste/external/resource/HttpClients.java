@@ -46,8 +46,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.ataru}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "ring-session", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("ring-session")
+            .build());
   }
 
   @Bean(name = "HakuAppInternalHttpClient")
@@ -72,8 +74,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Profile({"default", "dev"})
@@ -85,8 +89,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.sijoittelu}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Bean(name = "TarjontaHttpClient")
@@ -114,8 +120,10 @@ public class HttpClients {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     String service = UrlConfiguration.getInstance().url("hakukohderyhmapalvelu.auth.login");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "ring-session", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("ring-session")
+            .build());
   }
 
   @Bean(name = "KoutaInternalHttpClient")
@@ -133,8 +141,10 @@ public class HttpClients {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     String service = UrlConfiguration.getInstance().url("kouta-internal.auth.login");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "session", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("session")
+            .build());
   }
 
   @Bean(name = "ValintaTulosServiceHttpClient")
@@ -182,8 +192,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Bean(name = "KoodistoHttpClient")
@@ -209,8 +221,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Bean(name = "ValintapisteServiceInternalHttpClient")
@@ -229,8 +243,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "ring-session", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("ring-session")
+            .build());
   }
 
   @Bean(name = "ValintalaskentaValintakoeHttpClient")
@@ -256,8 +272,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Bean(name = "ValintalaskentaInternalHttpClient")
@@ -276,8 +294,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""),
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build(),
         DateDeserializer.gsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create());
   }
 
@@ -297,8 +317,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Profile({"default", "dev"})
@@ -310,8 +332,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Profile({"default", "dev"})
@@ -323,8 +347,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "ring-session", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("ring-session")
+            .build());
   }
 
   @Profile({"default", "dev"})
@@ -336,8 +362,10 @@ public class HttpClients {
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     return new RestCasClient(
-        CasConfig.CasConfig(
-            username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "JSESSIONID", ""));
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   public static java.net.http.HttpClient.Builder defaultHttpClientBuilder(

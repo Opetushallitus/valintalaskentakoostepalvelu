@@ -31,7 +31,9 @@ jobs:
           timezoneLinux: "Europe/Helsinki"
 
       - name: Build with Maven
-        run: mvn clean spotless:check verify -B -Dbranch=${GITHUB_REF_NAME} -Drevision=${GITHUB_SHA} -DbuildNumber=${GITHUB_RUN_NUMBER}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn --settings settings.xml clean spotless:check verify -B -Dbranch=${GITHUB_REF_NAME} -Drevision=${GITHUB_SHA} -DbuildNumber=${GITHUB_RUN_NUMBER}
 
       - uses: actions/cache@v2
         id: restore-build

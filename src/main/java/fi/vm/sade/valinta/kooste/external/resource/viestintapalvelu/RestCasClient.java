@@ -3,9 +3,11 @@ package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.javautils.nio.cas.CasClient;
+import fi.vm.sade.javautils.nio.cas.CasClientBuilder;
 import fi.vm.sade.javautils.nio.cas.CasConfig;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import org.asynchttpclient.Request;
@@ -28,8 +30,10 @@ public class RestCasClient {
   }
 
   public RestCasClient(CasConfig casConfig, Gson gson) {
-    CasClient casClient = new CasClient(casConfig);
-    this.executor = request -> casClient.execute(request);
+    CasClient casClient = CasClientBuilder.build(casConfig);
+    this.executor =
+        request ->
+            casClient.executeAndRetryWithCleanSessionOnStatusCodes(request, Set.of(302, 401));
     this.gson = gson;
   }
 
