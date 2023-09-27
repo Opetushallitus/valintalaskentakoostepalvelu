@@ -56,7 +56,7 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
                 + this.urlConfiguration.url("host.virkailija")
                 + "/valintalaskenta-laskenta-service/resources/valintatapajono/jonotsijoittelussa/"
                 + hakuOid,
-            new TypeToken<>() {},
+            new TypeToken<List<JonoDto>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }
@@ -330,7 +330,7 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
                 return Observable.fromFuture(
                         this.httpclient.get(
                             url,
-                            new TypeToken<>() {},
+                            new TypeToken<String>() {},
                             Map.of("Accept", "text/plain"),
                             10 * 60 * 1000))
                     .switchMap(
@@ -417,7 +417,7 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
             this.urlConfiguration.url(
                 "https://${host.virkailija}/valintalaskenta-laskenta-service/resources/hakukohde/$1/valinnanvaihe",
                 hakukohdeoid),
-            new TypeToken<>() {},
+            new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }

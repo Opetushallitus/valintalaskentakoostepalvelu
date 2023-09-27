@@ -105,6 +105,6 @@ public class KoodistoAsyncResourceImpl implements KoodistoAsyncResource {
             + Arrays.stream(koodiUris).collect(Collectors.joining(","))
             + "&koodiversioSelection=LATEST",
         Duration.ofMinutes(1),
-        new TypeToken<List<String>>() {}.getType());
+        new TypeToken<List<Koodi>>() {}.getType());
   }
 }

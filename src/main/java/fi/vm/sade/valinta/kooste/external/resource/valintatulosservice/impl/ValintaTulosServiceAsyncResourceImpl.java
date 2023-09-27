@@ -145,7 +145,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 hakuOid,
                 hakukohdeOid),
             Duration.ofMinutes(30),
-            new TypeToken<>() {}.getType()));
+            new TypeToken<List<Valintatulos>>() {}.getType()));
   }
 
   @Override
@@ -160,7 +160,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
             Duration.ofMinutes(30l),
             Map.of("auditSession", session),
             new TypeToken<>() {}.getType(),
-            new TypeToken<>() {}.getType()));
+            new TypeToken<List<Lukuvuosimaksu>>() {}.getType()));
   }
 
   @Override
@@ -190,7 +190,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 hakuOid,
                 hakukohdeOid),
             Duration.ofMinutes(30),
-            new TypeToken<>() {}.getType()));
+            new TypeToken<List<Valintatulos>>() {}.getType()));
   }
 
   @Override
@@ -201,7 +201,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakemus", hakuOid, hakemusOid),
             Duration.ofMinutes(30),
-            new TypeToken<>() {}.getType()));
+            new TypeToken<List<Valintatulos>>() {}.getType()));
   }
 
   @Override
@@ -216,7 +216,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
             Duration.ofMinutes(30l),
             hakemusOids,
             new TypeToken<>() {}.getType(),
-            new TypeToken<>() {}.getType()));
+            new TypeToken<List<VastaanottoAikarajaMennytDTO>>() {}.getType()));
   }
 
   @Override
@@ -232,7 +232,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
             Duration.ofMinutes(30l),
             hakemusOids,
             new TypeToken<>() {}.getType(),
-            new TypeToken<>() {}.getType()));
+            new TypeToken<List<TilaHakijalleDto>>() {}.getType()));
   }
 
   @Override
@@ -245,7 +245,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
             Duration.ofMinutes(30l),
             new ValinnantulosRequest(auditSession, valinnantulokset),
             new TypeToken<>() {}.getType(),
-            new TypeToken<>() {}.getType(),
+            new TypeToken<List<ValintatulosUpdateStatus>>() {}.getType(),
             builder ->
                 builder.setHeader(
                     "X-If-Unmodified-Since", auditSession.getIfUnmodifiedSince().get())));
@@ -264,7 +264,8 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     url += "&hyvaksymiskirjeet=true";
 
     return Observable.fromFuture(
-        this.client.getJson(url, Duration.ofMinutes(30), new TypeToken<>() {}.getType()));
+        this.client.getJson(
+            url, Duration.ofMinutes(30), new TypeToken<List<Valinnantulos>>() {}.getType()));
   }
 
   @Override
@@ -278,7 +279,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 "latest",
                 hakukohdeOid),
             Duration.ofMinutes(30),
-            new TypeToken<>() {}.getType()));
+            new TypeToken<HakukohdeDTO>() {}.getType()));
   }
 
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {

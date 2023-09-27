@@ -59,7 +59,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
     return Observable.fromFuture(
         this.restCasClient.get(
             this.urlConfiguration.url("seuranta-service.seuranta.kuormantasaus.laskenta", uuid),
-            new TypeToken<>() {},
+            new TypeToken<LaskentaDto>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }
@@ -69,7 +69,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
         this.restCasClient.put(
             this.urlConfiguration.url(
                 "seuranta-service.seuranta.kuormantasaus.laskenta.resetoi", uuid),
-            new TypeToken<>() {},
+            new TypeToken<LaskentaDto>() {},
             uuid,
             Collections.emptyMap(),
             10 * 60 * 1000));

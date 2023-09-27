@@ -47,7 +47,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
             this.urlConfiguration.url(
                 "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.ilmanlaskentaa",
                 hakukohdeOid),
-            new TypeToken<>() {},
+            new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }
@@ -58,7 +58,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         this.urlConfiguration.url(
             "valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.hakijaryhma",
             hakukohdeOid),
-        new TypeToken<>() {},
+        new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {},
         Collections.emptyMap(),
         60 * 60 * 1000);
   }
@@ -78,7 +78,8 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
             "valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet",
             parameters.toArray());
 
-    return httpClient.get(url, new TypeToken<>() {}, Collections.emptyMap(), 60 * 60 * 1000);
+    return httpClient.get(
+        url, new TypeToken<List<ValintaperusteetDTO>>() {}, Collections.emptyMap(), 60 * 60 * 1000);
   }
 
   public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
@@ -86,7 +87,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         this.httpClient.get(
             this.urlConfiguration.url(
                 "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku", hakuOid),
-            new TypeToken<>() {},
+            new TypeToken<List<HakukohdeViiteDTO>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }
@@ -110,7 +111,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         this.urlConfiguration.url(
             "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet.oid",
             hakukohdeOid),
-        new TypeToken<>() {},
+        new TypeToken<List<ValintaperusteDTO>>() {},
         Collections.emptyMap(),
         60 * 60 * 1000);
   }
@@ -122,7 +123,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         this.httpClient.post(
             this.urlConfiguration.url(
                 "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet"),
-            new TypeToken<>() {},
+            new TypeToken<List<HakukohdeJaValintaperusteDTO>>() {},
             Lists.newArrayList(hakukohdeOids),
             Collections.emptyMap(),
             10 * 60 * 1000));
@@ -135,7 +136,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
             this.urlConfiguration.url(
                 "valintaperusteet-service.valintalaskentakoostepalvelu.valinnanvaihe.valintaperusteet",
                 valinnanvaiheOid),
-            new TypeToken<>() {},
+            new TypeToken<List<ValintaperusteetDTO>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }
@@ -147,7 +148,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         this.httpClient.post(
             this.urlConfiguration.url(
                 "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new com.google.gson.reflect.TypeToken<List<HakukohdeJaValintakoeDTO>>() {},
             hakukohdeOids,
             Collections.emptyMap(),
             10 * 60 * 1000));
@@ -160,7 +161,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         this.httpClient.post(
             this.urlConfiguration.url(
                 "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new com.google.gson.reflect.TypeToken<List<HakukohdeJaValintakoeDTO>>() {},
             Lists.newArrayList(hakukohdeOids),
             Collections.emptyMap(),
             10 * 60 * 1000));
@@ -173,7 +174,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         this.httpClient.post(
             this.urlConfiguration.url(
                 "valintaperusteet-service.valintalaskentakoostepalvelu.valintatapajono"),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new com.google.gson.reflect.TypeToken<Map<String, List<ValintatapajonoDTO>>>() {},
             hakukohdeOids,
             Collections.emptyMap(),
             10 * 60 * 1000));
@@ -185,7 +186,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         this.httpClient.get(
             this.urlConfiguration.url(
                 "valintaperusteet-service.valintalaskentakoostepalvelu.valintakoe", hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new com.google.gson.reflect.TypeToken<List<ValintakoeDTO>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }
@@ -200,7 +201,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
     return Observable.fromFuture(
         this.httpClient.get(
             url,
-            new com.google.gson.reflect.TypeToken<>() {},
+            new com.google.gson.reflect.TypeToken<Set<String>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }
@@ -214,6 +215,6 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
     LOG.info("Calling url {}", url);
     return Observable.fromFuture(
         this.httpClient.get(
-            url, new TypeToken<>() {}, Map.of("Accept", "text/plain"), 10 * 60 * 1000));
+            url, new TypeToken<String>() {}, Map.of("Accept", "text/plain"), 10 * 60 * 1000));
   }
 }

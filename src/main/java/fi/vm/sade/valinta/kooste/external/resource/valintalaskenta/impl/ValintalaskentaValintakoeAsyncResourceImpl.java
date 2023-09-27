@@ -34,7 +34,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl
     return httpClient.get(
         this.urlConfiguration.url(
             "valintalaskenta-laskenta-service.valintakoe.hakutoive.hakukohdeoid", hakukohdeOid),
-        new TypeToken<>() {},
+        new TypeToken<List<ValintakoeOsallistuminenDTO>>() {},
         Collections.emptyMap(),
         60 * 1000);
   }
@@ -44,7 +44,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl
       Collection<String> hakukohdeOids) {
     return httpClient.post(
         this.urlConfiguration.url("valintalaskenta-laskenta-service.valintakoe.hakutoive"),
-        new TypeToken<>() {},
+        new TypeToken<List<ValintakoeOsallistuminenDTO>>() {},
         hakukohdeOids,
         Collections.emptyMap(),
         5 * 60 * 1000);
@@ -55,7 +55,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl
     return httpClient.get(
         this.urlConfiguration.url(
             "valintalaskenta-laskenta-service.valintakoe.hakemus", hakemusOid),
-        new TypeToken<>() {},
+        new TypeToken<ValintakoeOsallistuminenDTO>() {},
         Collections.emptyMap(),
         60 * 1000);
   }
@@ -66,7 +66,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl
     return httpClient.post(
         this.urlConfiguration.url(
             "valintalaskenta-laskenta-service.valintatieto.hakukohde", hakukohdeOid),
-        new TypeToken<>() {},
+        new TypeToken<List<HakemusOsallistuminenDTO>>() {},
         valintakoeTunnisteet,
         Collections.emptyMap(),
         5 * 60 * 1000);

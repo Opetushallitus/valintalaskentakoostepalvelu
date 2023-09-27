@@ -48,7 +48,7 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
                 + hakukohdeOid
                 + "&haku="
                 + hakuOid,
-            new TypeToken<>() {},
+            new TypeToken<List<Oppija>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
   }
@@ -62,7 +62,8 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
     parameters.put("ensikertalaisuudet", "false");
     String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
 
-    return httpClient.get(url, new TypeToken<>() {}, Collections.emptyMap(), 5 * 60 * 1000);
+    return httpClient.get(
+        url, new TypeToken<List<Oppija>>() {}, Collections.emptyMap(), 5 * 60 * 1000);
   }
 
   @Override
@@ -73,7 +74,8 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
             + hakuOid;
     LOG.info("Calling url {}", uri);
     return Observable.fromFuture(
-        this.httpClient.get(uri, new TypeToken<>() {}, Collections.emptyMap(), 10 * 60 * 1000));
+        this.httpClient.get(
+            uri, new TypeToken<Oppija>() {}, Collections.emptyMap(), 10 * 60 * 1000));
   }
 
   @Override
@@ -92,7 +94,8 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
         this.urlConfiguration.url("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid);
     LOG.info("Calling url {}", url);
     return Observable.fromFuture(
-        this.httpClient.get(url, new TypeToken<>() {}, Collections.emptyMap(), 10 * 60 * 1000));
+        this.httpClient.get(
+            url, new TypeToken<Oppija>() {}, Collections.emptyMap(), 10 * 60 * 1000));
   }
 
   @Override
@@ -133,7 +136,7 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
                   return Observable.fromFuture(
                       this.httpClient.post(
                           url,
-                          new TypeToken<>() {},
+                          new TypeToken<List<Oppija>>() {},
                           oidBatch,
                           Collections.emptyMap(),
                           10 * 60 * 1000));
@@ -180,7 +183,7 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
   public CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus) {
     return httpClient.post(
         this.urlConfiguration.url("suoritusrekisteri.suoritukset"),
-        new com.google.gson.reflect.TypeToken<>() {},
+        new com.google.gson.reflect.TypeToken<Suoritus>() {},
         suoritus,
         Collections.emptyMap(),
         10 * 60 * 1000);
