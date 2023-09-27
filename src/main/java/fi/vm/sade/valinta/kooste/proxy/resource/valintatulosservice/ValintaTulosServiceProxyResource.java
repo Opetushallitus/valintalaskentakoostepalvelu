@@ -90,7 +90,7 @@ public class ValintaTulosServiceProxyResource {
       tietoSiitaEttaVastaanottoAikarajaOnMennyt(
           @PathVariable("hakuOid") String hakuOid,
           @PathVariable("hakukohdeOid") String hakukohdeOid,
-          Set<String> hakemusOids) {
+          @RequestBody Set<String> hakemusOids) {
 
     DeferredResult<ResponseEntity<List<VastaanottoAikarajaMennytDTO>>> result =
         new DeferredResult<>(5 * 60 * 1000l);
@@ -137,7 +137,7 @@ public class ValintaTulosServiceProxyResource {
       @PathVariable("hakuOid") String hakuOid,
       @PathVariable("hakukohdeOid") String hakukohdeOid,
       @PathVariable("valintatapajonoOid") String valintatapajonoOid,
-      Set<String> hakemusOids) {
+      @RequestBody Set<String> hakemusOids) {
 
     DeferredResult<ResponseEntity<List<TilaHakijalleDto>>> result =
         new DeferredResult<>(5 * 60 * 1000l);
