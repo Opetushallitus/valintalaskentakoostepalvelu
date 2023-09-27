@@ -49,7 +49,11 @@ public class OppijanumerorekisteriAsyncResourceImpl implements Oppijanumerorekis
     henkiloSearchParams.put("henkiloOids", personOids);
     CompletableFuture<List<HenkiloViiteDto>> fut =
         this.client.post(
-            url, new TypeToken<>() {}, henkiloSearchParams, Collections.emptyMap(), 60 * 60 * 1000);
+            url,
+            new TypeToken<List<HenkiloViiteDto>>() {},
+            henkiloSearchParams,
+            Collections.emptyMap(),
+            60 * 60 * 1000);
     return fut;
   }
 
