@@ -186,7 +186,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return Observable.fromFuture(
         this.client.getJson(
             this.urlConfiguration.url(
-                "valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde"),
+                "valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde",
+                hakuOid,
+                hakukohdeOid),
             Duration.ofMinutes(30),
             new TypeToken<>() {}.getType()));
   }

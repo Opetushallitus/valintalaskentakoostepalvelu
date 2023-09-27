@@ -29,9 +29,7 @@ public class ValintaTulosServiceProxyResource {
 
   @Autowired private ValintaTulosServiceAsyncResource valintaTulosServiceResource;
 
-  @GetMapping(
-      value = "/ilmanhakijantilaa/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}",
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/ilmanhakijantilaa/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
   public DeferredResult<ResponseEntity<List<Valintatulos>>> valintatuloksetIlmanTilaaHakijalle(
