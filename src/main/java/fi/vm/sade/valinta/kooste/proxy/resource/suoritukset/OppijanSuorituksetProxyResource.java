@@ -358,7 +358,7 @@ public class OppijanSuorituksetProxyResource {
   public DeferredResult<ResponseEntity<Map<String, Map<String, String>>>>
       getSuorituksetForAtaruOpiskelijas(
           @PathVariable("hakuOid") String hakuOid,
-          final List<String> hakemusOids,
+          @RequestBody final List<String> hakemusOids,
           @RequestParam(value = "fetchEnsikertalaisuus", defaultValue = "false")
               Boolean fetchEnsikertalaisuus,
           @RequestParam(value = "shouldUseApplicationPersonOid", defaultValue = "false")
