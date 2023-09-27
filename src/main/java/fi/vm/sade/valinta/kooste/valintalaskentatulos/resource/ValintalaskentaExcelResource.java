@@ -44,6 +44,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -285,9 +286,9 @@ public class ValintalaskentaExcelResource {
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @Operation(summary = "Valintalaskennan tulokset Excel-raporttina")
-  public DeferredResult<ResponseEntity<InputStream>> haeValintalaskentaTuloksetExcelMuodossa(
+  public DeferredResult<ResponseEntity<byte[]>> haeValintalaskentaTuloksetExcelMuodossa(
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid) {
-    DeferredResult<ResponseEntity<InputStream>> result = new DeferredResult<>();
+    DeferredResult<ResponseEntity<byte[]>> result = new DeferredResult<>();
 
     Observable<AbstractHakukohde> hakukohdeObservable =
         Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
@@ -331,7 +332,7 @@ public class ValintalaskentaExcelResource {
                         "content-type",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
                     .header("content-disposition", "inline; filename=valintalaskennantulos.xlsx")
-                    .body(Excel.export(workbook))),
+                    .body(IOUtils.toByteArray(Excel.export(workbook)))),
         (e) -> {
           LOG.error(
               "Valintalaskennan tulokset -excelin luonti epäonnistui hakukohteelle " + hakukohdeOid,
@@ -341,13 +342,14 @@ public class ValintalaskentaExcelResource {
                   .header("content-type", "application/vnd.ms-excel")
                   .header("content-disposition", "inline; filename=yritauudelleen.xls")
                   .body(
-                      ExcelExportUtil.exportGridAsXls(
-                          new Object[][] {
-                            new Object[] {
-                              "Tarvittavien tietojen hakeminen epäonnistui!",
-                              "Virhe: " + e.getMessage()
-                            }
-                          })));
+                      IOUtils.toByteArray(
+                          ExcelExportUtil.exportGridAsXls(
+                              new Object[][] {
+                                new Object[] {
+                                  "Tarvittavien tietojen hakeminen epäonnistui!",
+                                  "Virhe: " + e.getMessage()
+                                }
+                              }))));
         });
 
     return result;
