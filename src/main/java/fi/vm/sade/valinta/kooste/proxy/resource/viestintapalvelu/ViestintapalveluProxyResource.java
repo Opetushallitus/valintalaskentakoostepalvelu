@@ -94,7 +94,7 @@ public class ViestintapalveluProxyResource {
         .orElse(countDto);
   }
 
-  @GetMapping(value = "/count/haku/{hakuOid}", consumes = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/count/haku/{hakuOid}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
   public DeferredResult<ResponseEntity<ImmutableMap<String, ImmutableMap<String, Object>>>>
