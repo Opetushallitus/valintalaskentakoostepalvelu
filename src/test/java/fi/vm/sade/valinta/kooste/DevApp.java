@@ -29,6 +29,7 @@ public class DevApp {
 
     System.setProperty("url-ilb", "http://alb.hahtuvaopintopolku.fi:8888");
     System.setProperty("baseurl-sijoittelu-service", "http://alb.hahtuvaopintopolku.fi:8888");
+    System.setProperty("baseurl-viestintapalvelu", "http://alb.hahtuvaopintopolku.fi:8888");
     System.setProperty(
         "kayttooikeus-service.userDetails.byUsername",
         "https://virkailija.hahtuvaopintopolku.fi/kayttooikeus-service/userDetails/$1");
