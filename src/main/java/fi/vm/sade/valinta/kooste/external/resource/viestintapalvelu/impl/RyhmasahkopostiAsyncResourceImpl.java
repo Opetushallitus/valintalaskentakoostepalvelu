@@ -6,6 +6,7 @@ import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import io.reactivex.Observable;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -32,12 +33,21 @@ public class RyhmasahkopostiAsyncResourceImpl implements RyhmasahkopostiAsyncRes
                 this.urlConfiguration.url("viestintapalvelu.reportMessages", letterId),
                 Map.of("Accept", "text/plain"),
                 10 * 60 * 1000)
-            .thenApply(
-                response -> {
-                  if (response.getStatusCode() == 404) {
+            .thenApply(response -> Optional.of(Long.parseLong(response.getResponseBody())))
+            .exceptionally(
+                e -> {
+                  Throwable cause = e.getCause();
+                  if (cause instanceof RestCasClient.RestCasClientException
+                      && ((RestCasClient.RestCasClientException) cause)
+                              .getResponse()
+                              .getStatusCode()
+                          == 404) {
                     return Optional.empty();
                   }
-                  return Optional.of(Long.parseLong(response.getResponseBody()));
+                  if (e instanceof CompletionException) {
+                    throw (RuntimeException) e;
+                  }
+                  throw new RuntimeException(e);
                 }));
   }
 }

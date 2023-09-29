@@ -95,6 +95,20 @@ public class RestCasClient {
         .thenApply(r -> r.getResponseBody());
   }
 
+  public static class RestCasClientException extends RuntimeException {
+
+    private Response response;
+
+    public RestCasClientException(Response response, String message) {
+      super(message);
+      this.response = response;
+    }
+
+    public Response getResponse() {
+      return this.response;
+    }
+  }
+
   private CompletableFuture<Response> executeAndThrowOnError(Request request) {
     return this.executor
         .apply(request)
@@ -103,7 +117,8 @@ public class RestCasClient {
               if (response.getStatusCode() == 200 || response.getStatusCode() == 204) {
                 return response;
               } else {
-                throw new RuntimeException(
+                throw new RestCasClientException(
+                    response,
                     String.format(
                         "Error calling url %s with method %s, response code %s",
                         request.getUrl(), request.getMethod(), response.getStatusCode()));
