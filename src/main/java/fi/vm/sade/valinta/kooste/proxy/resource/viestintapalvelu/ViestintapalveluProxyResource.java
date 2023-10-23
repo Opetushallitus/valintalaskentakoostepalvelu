@@ -44,7 +44,7 @@ public class ViestintapalveluProxyResource {
       @PathVariable("hakuOid") String hakuOid,
       @RequestParam(value = "asiointikieli", required = false) String asiointikieli,
       @RequestParam(value = "kirjeenTyyppi", required = false) String kirjeenTyyppi) {
-    DeferredResult<ResponseEntity<Long>> result = new DeferredResult<>();
+    DeferredResult<ResponseEntity<Long>> result = new DeferredResult<>(10 * 60 * 1000l);
 
     viestintapalveluAsyncResource
         .haeKirjelahetysJulkaistavaksi(hakuOid, kirjeenTyyppi, asiointikieli)
