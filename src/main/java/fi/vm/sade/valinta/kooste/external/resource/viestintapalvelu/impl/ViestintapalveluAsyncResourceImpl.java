@@ -121,7 +121,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
         this.client
             .get(
                 url
-                    + "?hakuoid="
+                    + "?hakuOid="
                     + hakuOid
                     + "&type="
                     + kirjeenTyyppi
