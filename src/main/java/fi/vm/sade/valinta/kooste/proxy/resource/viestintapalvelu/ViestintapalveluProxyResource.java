@@ -43,11 +43,11 @@ public class ViestintapalveluProxyResource {
       produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-  public DeferredResult<ResponseEntity<Long>> julkaiseKirjeetOmillaSivuilla(
+  public DeferredResult<ResponseEntity<String>> julkaiseKirjeetOmillaSivuilla(
       @PathVariable("hakuOid") String hakuOid,
       @RequestParam(value = "asiointikieli", required = false) String asiointikieli,
       @RequestParam(value = "kirjeenTyyppi", required = false) String kirjeenTyyppi) {
-    DeferredResult<ResponseEntity<Long>> result = new DeferredResult<>(10 * 60 * 1000l);
+    DeferredResult<ResponseEntity<String>> result = new DeferredResult<>(10 * 60 * 1000l);
 
     viestintapalveluAsyncResource
         .haeKirjelahetysJulkaistavaksi(hakuOid, kirjeenTyyppi, asiointikieli)
@@ -61,7 +61,8 @@ public class ViestintapalveluProxyResource {
             })
         .subscribe(
             batchIdOptional ->
-                result.setResult(ResponseEntity.status(HttpStatus.OK).body(batchIdOptional.get())),
+                result.setResult(
+                    ResponseEntity.status(HttpStatus.OK).body(batchIdOptional.get().toString())),
             throwable ->
                 result.setErrorResult(
                     ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
