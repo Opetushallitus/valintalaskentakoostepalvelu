@@ -28,8 +28,8 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
@@ -138,12 +138,11 @@ public class ErillishaunTuontiServiceTest {
 
       assertEquals(1, applicationAsyncResource.results.size());
       applicationAsyncResource.results.get(0);
-      final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
-      assertEquals("haku1", appResult.hakuOid);
-      assertEquals("kohde1", appResult.hakukohdeOid);
-      assertEquals("tarjoaja1", appResult.tarjoajaOid);
+      final MockAtaruAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
       assertEquals(1, appResult.hakemusPrototyypit.size());
-      final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
+      final AtaruHakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
+      assertEquals("haku1", hakemusProto.getHakuOid());
+      assertEquals("kohde1", hakemusProto.getHakukohdeOid());
       assertEquals("hakija1", hakemusProto.getHakijaOid());
       assertEquals(MockData.hetu, hakemusProto.getHenkilotunnus());
       assertEquals("Tuomas", hakemusProto.getEtunimi());
@@ -177,12 +176,11 @@ public class ErillishaunTuontiServiceTest {
 
       assertEquals(1, applicationAsyncResource.results.size());
       applicationAsyncResource.results.get(0);
-      final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
-      assertEquals("haku1", appResult.hakuOid);
-      assertEquals("kohde1", appResult.hakukohdeOid);
-      assertEquals("tarjoaja1", appResult.tarjoajaOid);
+      final MockAtaruAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
       assertEquals(1, appResult.hakemusPrototyypit.size());
-      final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
+      final AtaruHakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
+      assertEquals("haku1", hakemusProto.getHakuOid());
+      assertEquals("kohde1", hakemusProto.getHakukohdeOid());
       assertEquals("hakija1", hakemusProto.getHakijaOid());
       assertEquals("Tuomas", hakemusProto.getEtunimi());
       assertEquals("Hakkarainen", hakemusProto.getSukunimi());
@@ -365,9 +363,8 @@ public class ErillishaunTuontiServiceTest {
 
     @Test
     public void hakemustenLuontiEpaonnistuu() {
-      final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
-      when(failingResource.putApplicationPrototypes(
-              Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+      final AtaruAsyncResource failingResource = mock(AtaruAsyncResource.class);
+      when(failingResource.putApplicationPrototypes(Mockito.any()))
           .thenReturn(Observable.error(new RuntimeException("simulated HTTP fail")));
       final TarjontaAsyncResource tarjontaAsyncResource = mockTarjonta();
       final ErillishaunTuontiService tuontiService =
@@ -403,7 +400,7 @@ class ErillisHakuTuontiTestCase {
 
   final MockOppijanumerorekisteriAsyncResource henkiloAsyncResource =
       new MockOppijanumerorekisteriAsyncResource();
-  final MockApplicationAsyncResource applicationAsyncResource = new MockApplicationAsyncResource();
+  final MockAtaruAsyncResource applicationAsyncResource = new MockAtaruAsyncResource();
   final KirjeProsessi prosessi = mock(KirjeProsessi.class);
   final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource =
       new MockValintaTulosServiceAsyncResource();
