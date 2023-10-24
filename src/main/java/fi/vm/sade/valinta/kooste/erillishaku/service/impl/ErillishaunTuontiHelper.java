@@ -12,7 +12,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import java.util.Arrays;
@@ -136,8 +136,8 @@ public class ErillishaunTuontiHelper {
             .filter(r -> r.getSukunimi() != null && henkilo.getSukunimi() != null)
             .filter(
                 r ->
-                    HakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate())
-                            .equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
+                    AtaruHakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate())
+                            .equals(AtaruHakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
                         && r.getSukupuoli()
                             .equals(Sukupuoli.toSukupuoliEnum(henkilo.getSukupuoli()))
                         && r.getEtunimi().equals(henkilo.getEtunimet())
@@ -173,7 +173,7 @@ public class ErillishaunTuontiHelper {
         .etunimi(henkilo.getEtunimet())
         .henkilotunnus(henkilo.getHetu())
         .sahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()))
-        .syntymaAika(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
+        .syntymaAika(AtaruHakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
         .sukupuoli(
             isNotBlank(sukupuoli) ? Sukupuoli.toSukupuoliEnum(sukupuoli) : rivi.getSukupuoli())
         .personOid(henkilo.getOidHenkilo())
@@ -182,9 +182,11 @@ public class ErillishaunTuontiHelper {
         .build();
   }
 
-  public static HakemusPrototyyppi createHakemusprototyyppi(
-      ErillishakuRivi rivi, String kotikunta) {
-    HakemusPrototyyppi hakemus = new HakemusPrototyyppi();
+  public static AtaruHakemusPrototyyppi createHakemusprototyyppi(
+      ErillishakuRivi rivi, String kotikunta, String hakuOid, String hakukohdeOid) {
+    AtaruHakemusPrototyyppi hakemus = new AtaruHakemusPrototyyppi();
+    hakemus.setHakuOid(hakuOid);
+    hakemus.setHakukohdeOid(hakukohdeOid);
     hakemus.setAidinkieli(rivi.getAidinkieli());
     hakemus.setAsiointikieli(rivi.getAsiointikieli());
     hakemus.setAsuinmaa(rivi.getAsuinmaa());

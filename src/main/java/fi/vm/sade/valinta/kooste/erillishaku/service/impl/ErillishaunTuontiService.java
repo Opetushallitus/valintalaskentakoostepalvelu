@@ -25,8 +25,8 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
@@ -69,7 +69,7 @@ import org.springframework.stereotype.Service;
 public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
   private static final Logger LOG = LoggerFactory.getLogger(ErillishaunTuontiService.class);
 
-  private final ApplicationAsyncResource applicationAsyncResource;
+  private final AtaruAsyncResource ataruAsyncResource;
   private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
   private final Scheduler scheduler;
@@ -77,14 +77,14 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
   private final TarjontaAsyncResource hakuV1AsyncResource;
 
   public ErillishaunTuontiService(
-      ApplicationAsyncResource applicationAsyncResource,
+      AtaruAsyncResource ataruAsyncResource,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource,
       TarjontaAsyncResource hakuV1AsyncResource,
       Scheduler scheduler) {
     super(koodistoCachedAsyncResource);
-    this.applicationAsyncResource = applicationAsyncResource;
+    this.ataruAsyncResource = ataruAsyncResource;
     this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
     this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
     this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
@@ -94,13 +94,13 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
 
   @Autowired
   public ErillishaunTuontiService(
-      ApplicationAsyncResource applicationAsyncResource,
+      AtaruAsyncResource ataruAsyncResource,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource,
       TarjontaAsyncResource hakuV1AsyncResource) {
     this(
-        applicationAsyncResource,
+        ataruAsyncResource,
         oppijanumerorekisteriAsyncResource,
         valintaTulosServiceAsyncResource,
         koodistoCachedAsyncResource,
@@ -290,19 +290,9 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             });
   }
 
+  // TODO: dead code, should be done in ataru side after the change.
   private Observable<Boolean> passivoiHakemukset(List<ErillishakuRivi> poistettavat) {
-    if (!poistettavat.isEmpty()) {
-      List<String> hakemusOidit =
-          poistettavat.stream().map(ErillishakuRivi::getHakemusOid).collect(Collectors.toList());
-
-      return applicationAsyncResource
-          .changeStateOfApplicationsToPassive(
-              hakemusOidit, "Passivoitu erillishaun valintalaskennan käyttöliittymästä")
-          .timeout(1, MINUTES)
-          .map(resp -> true);
-    } else {
-      return Observable.just(true);
-    }
+    return Observable.just(true);
   }
 
   private Observable<String> maksutilojenTallennus(
@@ -505,24 +495,23 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
               .map(h -> riviWithHenkiloData(h, lisattavatTaiKeskeneraiset))
               .collect(Collectors.toList());
       if (saveApplications) {
-        List<HakemusPrototyyppi> hakemusPrototyypit =
+        List<AtaruHakemusPrototyyppi> hakemusPrototyypit =
             rivitWithHenkiloData.stream()
                 .map(
                     rivi ->
                         createHakemusprototyyppi(
-                            rivi, convertKuntaNimiToKuntaKoodi(rivi.getKotikunta())))
+                            rivi,
+                            convertKuntaNimiToKuntaKoodi(rivi.getKotikunta()),
+                            haku.getHakuOid(),
+                            haku.getHakukohdeOid()))
                 .collect(Collectors.toList());
         LOG.info(
             "Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
         final List<HakemusWrapper> hakemukset;
         try {
           hakemukset =
-              applicationAsyncResource
-                  .putApplicationPrototypes(
-                      haku.getHakuOid(),
-                      haku.getHakukohdeOid(),
-                      haku.getTarjoajaOid(),
-                      hakemusPrototyypit)
+              ataruAsyncResource
+                  .putApplicationPrototypes(hakemusPrototyypit)
                   .timeout(1, MINUTES)
                   .blockingFirst();
         } catch (Exception e) {
