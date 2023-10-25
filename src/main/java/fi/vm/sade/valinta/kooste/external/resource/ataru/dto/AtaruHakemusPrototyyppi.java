@@ -42,7 +42,7 @@ public class AtaruHakemusPrototyyppi {
   }
 
   public void setHakukohdeOid(String hakukohdeOid) {
-    this.hakuOid = hakuOid;
+    this.hakukohdeOid = hakukohdeOid;
   }
 
   public String getHakijaOid() {
