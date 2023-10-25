@@ -18,6 +18,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
@@ -122,7 +123,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
   @Test
   public void tuontiVirheHakemuspalveluKutsussaPalaute() {
     try {
-      MockApplicationAsyncResource.serviceIsAvailable.set(false);
+      MockAtaruAsyncResource.serviceIsAvailable.set(false);
       final ProsessiId prosessiId =
           excelClient()
               .post(
@@ -136,7 +137,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
               .poikkeukset,
           equalTo(asList(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE))));
     } finally {
-      MockApplicationAsyncResource.serviceIsAvailable.set(true);
+      MockAtaruAsyncResource.serviceIsAvailable.set(true);
     }
   }
 

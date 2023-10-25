@@ -231,6 +231,10 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   @Override
   public Observable<List<HakemusWrapper>> putApplicationPrototypes(
       Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
-    return Observable.just(new ArrayList<HakemusWrapper>());
+    String url = this.urlConfiguration.url("ataru.post-synthetic-applications");
+
+    return Observable.fromFuture(
+        this.casClient.post(
+            url, new TypeToken<>() {}, hakemusPrototyypit, Collections.emptyMap(), 60 * 60 * 1000));
   }
 }
