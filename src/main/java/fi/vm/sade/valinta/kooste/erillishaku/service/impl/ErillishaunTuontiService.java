@@ -2,14 +2,12 @@ package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import static com.codepoetics.protonpack.StreamUtils.zip;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.HenkilonRivinPaattelyEpaonnistuiException;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.ainoastaanHakemuksenTilaPaivitys;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.autoTaytto;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.createHakemusprototyyppi;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.isKesken;
-import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.riviWithHenkiloData;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toErillishaunHakijaDTO;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.toPoistettavaErillishaunHakijaDTO;
 import static io.reactivex.schedulers.Schedulers.newThread;
@@ -29,8 +27,6 @@ import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -191,7 +187,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     validoiRivit(prosessi, haku, rivit, saveApplications);
 
     List<ErillishakuRivi> lisattavatTaiKeskeneraiset =
-        luoHenkilotJaKasitteleHakemukset(
+        kasitteleHakemukset(
             prosessi,
             haku,
             rivit.stream().filter(rivi -> !rivi.isPoistetaankoRivi()).collect(Collectors.toList()),
@@ -334,45 +330,6 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             });
   }
 
-  private List<ErillishakuRivi> luoHenkilotJaKasitteleHakemukset(
-      final KirjeProsessi prosessi,
-      final ErillishakuDTO haku,
-      final List<ErillishakuRivi> lisattavatTaiKeskeneraiset,
-      final boolean saveApplications) {
-    LOG.info("lisattavatTaiKeskeneraiset=" + lisattavatTaiKeskeneraiset.size());
-    if (!lisattavatTaiKeskeneraiset.isEmpty()) {
-      LOG.info("Haetaan/luodaan henkilöt");
-      final List<HenkiloPerustietoDto> henkilot;
-      List<HenkiloCreateDTO> henkiloCreateDTOS =
-          lisattavatTaiKeskeneraiset.stream()
-              .map(
-                  rivi -> rivi.toHenkiloCreateDTO(convertKansalaisuusKoodi(rivi.getKansalaisuus())))
-              .collect(Collectors.toList());
-      try {
-        henkilot =
-            oppijanumerorekisteriAsyncResource
-                .haeTaiLuoHenkilot(henkiloCreateDTOS)
-                .timeout(1, MINUTES)
-                .blockingFirst();
-        LOG.info(
-            "Luotiin henkilot="
-                + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
-      } catch (Exception e) {
-        LOG.error(
-            POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE + ". lisattavatTaiKeskeneraiset: {}",
-            henkiloCreateDTOS,
-            e);
-        prosessi.keskeyta(
-            Poikkeus.oppijanumerorekisteripoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE));
-        throw e;
-      }
-      LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
-      return kasitteleHakemukset(
-          haku, henkilot, lisattavatTaiKeskeneraiset, saveApplications, prosessi);
-    }
-    return lisattavatTaiKeskeneraiset;
-  }
-
   private Observable<List<Poikkeus>> vastaanotonJaValinnantuloksenTallennus(
       final AuditSession auditSession,
       final ErillishakuDTO haku,
@@ -484,19 +441,19 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
   }
 
   private List<ErillishakuRivi> kasitteleHakemukset(
+      KirjeProsessi prosessi,
       ErillishakuDTO haku,
-      List<HenkiloPerustietoDto> henkilot,
       List<ErillishakuRivi> lisattavatTaiKeskeneraiset,
-      boolean saveApplications,
-      KirjeProsessi prosessi) {
+      boolean saveApplications) {
+    LOG.info("lisattavatTaiKeskeneraiset=" + lisattavatTaiKeskeneraiset.size());
+    if (lisattavatTaiKeskeneraiset.isEmpty()) {
+      return lisattavatTaiKeskeneraiset;
+    }
     try {
-      final List<ErillishakuRivi> rivitWithHenkiloData =
-          henkilot.stream()
-              .map(h -> riviWithHenkiloData(h, lisattavatTaiKeskeneraiset))
-              .collect(Collectors.toList());
+      LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
       if (saveApplications) {
         List<AtaruHakemusPrototyyppi> hakemusPrototyypit =
-            rivitWithHenkiloData.stream()
+            lisattavatTaiKeskeneraiset.stream()
                 .map(
                     rivi ->
                         createHakemusprototyyppi(
@@ -520,7 +477,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                   "Error updating application prototypes %s",
                   Arrays.toString(hakemusPrototyypit.toArray())),
               e);
-          LOG.error("Rivi with henkilodata={}", Arrays.toString(rivitWithHenkiloData.toArray()));
+          LOG.error("Rivit={}", Arrays.toString(lisattavatTaiKeskeneraiset.toArray()));
           throw e;
         }
         if (hakemukset.size() != lisattavatTaiKeskeneraiset.size()) { // 1-1 relationship assumed
@@ -531,11 +488,12 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         }
         return zip(
                 hakemukset.stream(),
-                rivitWithHenkiloData.stream(),
+                lisattavatTaiKeskeneraiset.stream(),
+                // TODO: ADD HENKILÖ DATA
                 (hakemus, rivi) -> rivi.withHakemusOid(hakemus.getOid()))
             .collect(Collectors.toList());
       } else {
-        return rivitWithHenkiloData;
+        return lisattavatTaiKeskeneraiset;
       }
     } catch (HenkilonRivinPaattelyEpaonnistuiException e) {
       errorLogIncludingHttpResponse(POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE, e);
