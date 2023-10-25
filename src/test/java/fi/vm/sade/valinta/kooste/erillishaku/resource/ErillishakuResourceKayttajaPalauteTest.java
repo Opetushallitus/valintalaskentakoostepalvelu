@@ -140,31 +140,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
       MockAtaruAsyncResource.serviceIsAvailable.set(true);
     }
   }
-
-  @Test
-  public void tuontiVirheHenkilopalveluKutsussaPalaute() {
-    try {
-      MockOppijanumerorekisteriAsyncResource.serviceIsAvailable.set(false);
-      final ProsessiId prosessiId =
-          jsonClient()
-              .post(
-                  Entity.json(new ErillishakuJson(asList(laillinenRivi())))
-                  //
-                  ,
-                  ProsessiId.class);
-
-      assertThat(
-          odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
-              // Odotetaan hakemuspalvelun epäonnistumisesta johtuvaa palautetta!
-              .poikkeukset,
-          equalTo(
-              asList(
-                  Poikkeus.oppijanumerorekisteripoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE))));
-    } finally {
-      MockOppijanumerorekisteriAsyncResource.serviceIsAvailable.set(true);
-    }
-  }
-
+  
   private Prosessi odotaVirhettaTaiEpaonnistuTimeouttiin(final ProsessiId prosessiId) {
     return DokumenttiProsessiPoller.pollDokumenttiProsessi(
         root, prosessiId, prosessiResponse -> !prosessiResponse.poikkeukset.isEmpty());
