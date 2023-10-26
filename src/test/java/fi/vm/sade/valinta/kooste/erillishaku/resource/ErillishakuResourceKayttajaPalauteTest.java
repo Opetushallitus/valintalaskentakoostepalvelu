@@ -2,10 +2,8 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.KORKEAKOULU;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO;
-import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.laillinenRivi;
 import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.viallinenJsonRiviPuuttuvillaTunnisteilla;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -19,7 +17,6 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;

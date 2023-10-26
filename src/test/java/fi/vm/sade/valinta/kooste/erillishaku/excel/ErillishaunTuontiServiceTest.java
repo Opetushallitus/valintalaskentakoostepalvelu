@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT_JSON;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishaunTuontiServiceTest.PERSON_1_OID;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishaunTuontiServiceTest.getDummyHaku;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHenkiloOidilla;
@@ -35,7 +33,6 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -48,7 +45,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
