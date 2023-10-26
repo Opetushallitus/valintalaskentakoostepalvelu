@@ -45,10 +45,7 @@ public class SijoittelunTulosHaulleResource {
 
   @Autowired private HyvaksymiskirjeetService hyvaksymiskirjeetService;
 
-  @PostMapping(
-      value = "/osoitetarrat",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/osoitetarrat", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @Operation(
@@ -81,10 +78,7 @@ public class SijoittelunTulosHaulleResource {
     }
   }
 
-  @PostMapping(
-      value = "/hyvaksymiskirjeet",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/hyvaksymiskirjeet", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @Operation(
@@ -129,10 +123,7 @@ public class SijoittelunTulosHaulleResource {
     }
   }
 
-  @PostMapping(
-      value = "/taulukkolaskennat",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/taulukkolaskennat", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @Operation(
