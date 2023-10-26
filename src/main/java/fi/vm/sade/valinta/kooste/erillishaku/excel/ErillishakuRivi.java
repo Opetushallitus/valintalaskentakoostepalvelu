@@ -393,6 +393,13 @@ public class ErillishakuRivi {
     return ErillishakuRiviBuilder.fromRivi(this).hakemusOid(hakemusOid).build();
   }
 
+  public ErillishakuRivi withHakemusAndPersonOid(String hakemusOid, String personOid) {
+    return ErillishakuRiviBuilder.fromRivi(this)
+        .hakemusOid(hakemusOid)
+        .personOid(personOid)
+        .build();
+  }
+
   public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
     return new HenkiloCreateDTO(
         getAidinkieli(),
