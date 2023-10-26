@@ -79,7 +79,9 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   public Observable<List<AtaruSyntheticApplicationResponse>> putApplicationPrototypes(
       Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
     return Observable.fromFuture(
-        Optional.ofNullable(MockAtaruAsyncResource.<List<AtaruSyntheticApplicationResponse>>serviceAvailableCheck())
+        Optional.ofNullable(
+                MockAtaruAsyncResource
+                    .<List<AtaruSyntheticApplicationResponse>>serviceAvailableCheck())
             .orElseGet(
                 () -> {
                   results.add(new Result(hakemusPrototyypit));
@@ -138,7 +140,8 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
     return new AtaruHakemusWrapper(hakemus, createHenkilo());
   }
 
-  private AtaruSyntheticApplicationResponse toSyntheticApplicationResponse(AtaruHakemusPrototyyppi prototyyppi) {
+  private AtaruSyntheticApplicationResponse toSyntheticApplicationResponse(
+      AtaruHakemusPrototyyppi prototyyppi) {
     final AtaruSyntheticApplicationResponse response = new AtaruSyntheticApplicationResponse();
 
     response.setHakemusOid(MockData.hakemusOid);
@@ -146,5 +149,4 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
     return response;
   }
-
 }
