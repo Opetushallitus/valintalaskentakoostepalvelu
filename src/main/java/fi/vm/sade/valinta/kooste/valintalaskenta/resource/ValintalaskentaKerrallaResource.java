@@ -56,10 +56,7 @@ public class ValintalaskentaKerrallaResource {
   @Autowired private LaskentaSeurantaAsyncResource seurantaAsyncResource;
   @Autowired private AuthorityCheckService authorityCheckService;
 
-  @PostMapping(
-      value = "/haku/{hakuOid}/tyyppi/HAKU",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/haku/{hakuOid}/tyyppi/HAKU", produces = MediaType.APPLICATION_JSON_VALUE)
   public DeferredResult<ResponseEntity<Vastaus>> valintalaskentaKokoHaulle(
       @PathVariable("hakuOid") String hakuOid,
       @RequestParam(value = "erillishaku", required = false) Boolean erillishaku,
@@ -181,10 +178,7 @@ public class ValintalaskentaKerrallaResource {
     return result;
   }
 
-  @PostMapping(
-      value = "/uudelleenyrita/{uuid:.+}",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/uudelleenyrita/{uuid:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
   public DeferredResult<ResponseEntity<Vastaus>> uudelleenajoLaskennalle(
       @PathVariable("uuid") String uuid) {
     DeferredResult<ResponseEntity<Vastaus>> result = new DeferredResult<>(1 * 60 * 1000l);

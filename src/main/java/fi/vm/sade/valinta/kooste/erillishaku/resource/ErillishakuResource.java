@@ -67,10 +67,7 @@ public class ErillishakuResource {
   @Autowired private TarjontaAsyncResource tarjontaResource;
 
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
-  @PostMapping(
-      value = "/vienti",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/vienti", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(

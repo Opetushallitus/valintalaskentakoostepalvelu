@@ -81,6 +81,7 @@ public class ValintaTulosServiceProxyResource {
 
   @PostMapping(
       value = "/myohastyneet/haku/{hakuOid}/hakukohde/{hakukohdeOid:.+}",
+      produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
@@ -128,6 +129,7 @@ public class ValintaTulosServiceProxyResource {
   @PostMapping(
       value =
           "/tilahakijalle/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid:.+}",
+      produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
@@ -177,7 +179,7 @@ public class ValintaTulosServiceProxyResource {
   @GetMapping(
       value =
           "/hakemus/{hakemusOid}/haku/{hakuOid}/hakukohde/{hakukohdeOid}/valintatapajono/{valintatapajonoOid:.+}",
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
   public DeferredResult<ResponseEntity<List<Valintatulos>>> hakemuksenSijoittelunTulos(
@@ -228,7 +230,7 @@ public class ValintaTulosServiceProxyResource {
 
   @GetMapping(
       value = "/hakemus/{hakemusOid}/haku/{hakuOid:.+}",
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
   public DeferredResult<ResponseEntity<List<Valintatulos>>> kaikkiHakemuksenSijoittelunTulokset(

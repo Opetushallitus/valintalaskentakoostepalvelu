@@ -37,10 +37,7 @@ public class ViestintapalveluProxyResource {
     this.ryhmasahkopostiAsyncResource = ryhmasahkopostiAsyncResource;
   }
 
-  @PostMapping(
-      value = "/publish/haku/{hakuOid}",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.TEXT_PLAIN_VALUE)
+  @PostMapping(value = "/publish/haku/{hakuOid}", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
   public DeferredResult<ResponseEntity<String>> julkaiseKirjeetOmillaSivuilla(

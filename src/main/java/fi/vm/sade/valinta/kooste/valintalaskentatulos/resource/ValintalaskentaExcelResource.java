@@ -129,10 +129,7 @@ public class ValintalaskentaExcelResource {
   @Autowired private DokumenttiAsyncResource dokumenttiAsyncResource;
   @Autowired private TarjontaAsyncResource tarjontaAsyncResource;
 
-  @PostMapping(
-      value = "/sijoitteluntulos/aktivoi",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/sijoitteluntulos/aktivoi", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
   @Operation(

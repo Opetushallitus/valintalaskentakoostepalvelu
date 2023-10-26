@@ -35,10 +35,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 /** @Autowired(required = false) Camelin pois refaktorointi */
@@ -68,12 +65,9 @@ public class ValintatapajonoResource {
   @Autowired private DokumenttiProsessiKomponentti dokumenttiProsessiKomponentti;
   @Autowired private TarjontaAsyncResource tarjontaResource;
 
-  @PostMapping(value = "/vienti", consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/vienti", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI')")
   @Operation(
-      requestBody =
-          @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
       summary = "Valintatapajonon vienti taulukkolaskentaan",
       responses = {
         @ApiResponse(
@@ -189,7 +183,7 @@ public class ValintatapajonoResource {
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
       @RequestParam(value = "valintatapajonoOid", required = false) String valintatapajonoOid,
-      ValintatapajonoRivit rivit,
+      @RequestBody ValintatapajonoRivit rivit,
       HttpServletRequest request) {
     final User user = AuditLog.getUser(request);
     DeferredResult<ResponseEntity<String>> result = new DeferredResult<>(5 * 60 * 1000l);
