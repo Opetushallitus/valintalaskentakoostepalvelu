@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruSyntheticApplicationResponse;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
@@ -227,9 +228,8 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
     return getApplications(null, oids, true);
   }
 
-  // TODO: implement
   @Override
-  public Observable<List<HakemusWrapper>> putApplicationPrototypes(
+  public Observable<List<AtaruSyntheticApplicationResponse>> putApplicationPrototypes(
       Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
     String url = this.urlConfiguration.url("ataru.post-synthetic-applications");
 
