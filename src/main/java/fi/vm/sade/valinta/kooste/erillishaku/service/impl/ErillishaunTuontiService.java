@@ -55,7 +55,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -205,12 +204,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid()))
             .switchMap(
                 hk -> {
-                  final boolean hakuAppHaku = StringUtils.isBlank(hk.ataruLomakeAvain);
-                  if (hakuAppHaku) {
-                    return passivoiHakemukset(poistettavat);
-                  } else {
-                    return Observable.just(true);
-                  }
+                  return Observable.just(true);
                 });
 
     Observable<String> maksuntilojenTallennus =
@@ -284,11 +278,6 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
               errorLogIncludingHttpResponse("Erillishaun tallennus epäonnistui", t);
               prosessi.keskeyta(new Poikkeus(Poikkeus.KOOSTEPALVELU, "", t.getMessage()));
             });
-  }
-
-  // TODO: dead code, should be done in ataru side after the change.
-  private Observable<Boolean> passivoiHakemukset(List<ErillishakuRivi> poistettavat) {
-    return Observable.just(true);
   }
 
   private Observable<String> maksutilojenTallennus(
@@ -489,8 +478,8 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
         return zip(
                 hakemukset.stream(),
                 lisattavatTaiKeskeneraiset.stream(),
-                // TODO: ADD HENKILÖ DATA
-                (hakemus, rivi) -> rivi.withHakemusOid(hakemus.getHakemusOid()))
+                (hakemus, rivi) ->
+                    rivi.withHakemusAndPersonOid(hakemus.getHakemusOid(), hakemus.getPersonOid()))
             .collect(Collectors.toList());
       } else {
         return lisattavatTaiKeskeneraiset;
