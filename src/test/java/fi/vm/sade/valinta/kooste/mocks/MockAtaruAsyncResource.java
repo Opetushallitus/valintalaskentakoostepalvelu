@@ -6,13 +6,12 @@ import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruSyntheticApplicationResponse;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import io.reactivex.Observable;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -77,16 +76,16 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   }
 
   @Override
-  public Observable<List<HakemusWrapper>> putApplicationPrototypes(
+  public Observable<List<AtaruSyntheticApplicationResponse>> putApplicationPrototypes(
       Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
     return Observable.fromFuture(
-        Optional.ofNullable(MockAtaruAsyncResource.<List<HakemusWrapper>>serviceAvailableCheck())
+        Optional.ofNullable(MockAtaruAsyncResource.<List<AtaruSyntheticApplicationResponse>>serviceAvailableCheck())
             .orElseGet(
                 () -> {
                   results.add(new Result(hakemusPrototyypit));
                   return CompletableFuture.completedFuture(
                       hakemusPrototyypit.stream()
-                          .map(prototyyppi -> toHakemus(prototyyppi))
+                          .map(prototyyppi -> toSyntheticApplicationResponse(prototyyppi))
                           .collect(Collectors.toList()));
                 }));
   }
@@ -139,19 +138,13 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
     return new AtaruHakemusWrapper(hakemus, createHenkilo());
   }
 
-  private HakemusWrapper toHakemus(AtaruHakemusPrototyyppi prototyyppi) {
-    final AtaruHakemus hakemus = new AtaruHakemus();
+  private AtaruSyntheticApplicationResponse toSyntheticApplicationResponse(AtaruHakemusPrototyyppi prototyyppi) {
+    final AtaruSyntheticApplicationResponse response = new AtaruSyntheticApplicationResponse();
 
-    HenkiloPerustietoDto henkilo = new HenkiloPerustietoDto();
-    henkilo.setSukunimi(prototyyppi.getSukunimi());
-    henkilo.setEtunimet(prototyyppi.getEtunimi());
-    henkilo.setHetu(prototyyppi.getHenkilotunnus());
-    henkilo.setKutsumanimi(prototyyppi.getEtunimi()); // TODO
-    henkilo.setSyntymaaika(
-        LocalDate.parse(prototyyppi.getSyntymaAika(), DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+    response.setHakemusOid(MockData.hakemusOid);
+    response.setPersonOid(MockData.hakijaOid);
 
-    hakemus.setHakemusOid(MockData.hakemusOid);
-    hakemus.setPersonOid(prototyyppi.getHakijaOid());
-    return new AtaruHakemusWrapper(hakemus, henkilo);
+    return response;
   }
+
 }

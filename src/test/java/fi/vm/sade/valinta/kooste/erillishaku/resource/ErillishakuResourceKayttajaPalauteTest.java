@@ -140,7 +140,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
       MockAtaruAsyncResource.serviceIsAvailable.set(true);
     }
   }
-  
+
   private Prosessi odotaVirhettaTaiEpaonnistuTimeouttiin(final ProsessiId prosessiId) {
     return DokumenttiProsessiPoller.pollDokumenttiProsessi(
         root, prosessiId, prosessiResponse -> !prosessiResponse.poikkeukset.isEmpty());

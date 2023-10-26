@@ -25,6 +25,7 @@ import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.exception.ErillishaunDataException;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruSyntheticApplicationResponse;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -464,7 +465,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 .collect(Collectors.toList());
         LOG.info(
             "Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
-        final List<HakemusWrapper> hakemukset;
+        final List<AtaruSyntheticApplicationResponse> hakemukset;
         try {
           hakemukset =
               ataruAsyncResource
@@ -490,7 +491,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 hakemukset.stream(),
                 lisattavatTaiKeskeneraiset.stream(),
                 // TODO: ADD HENKILÖ DATA
-                (hakemus, rivi) -> rivi.withHakemusOid(hakemus.getOid()))
+                (hakemus, rivi) -> rivi.withHakemusOid(hakemus.getHakemusOid()))
             .collect(Collectors.toList());
       } else {
         return lisattavatTaiKeskeneraiset;
