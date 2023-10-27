@@ -217,6 +217,7 @@ public class ErillishaunTuontiServiceTest {
       assertEquals(erillishakuSyntymaAika, henkiloSyntymaAika);
       assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi); */
 
+      assertEquals(MockData.hakijaOid, erillishakuRivi.getPersonOid());
       assertEquals(1, erillishaunValinnantulokset.size());
       assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
       erillishaunValinnantulokset
