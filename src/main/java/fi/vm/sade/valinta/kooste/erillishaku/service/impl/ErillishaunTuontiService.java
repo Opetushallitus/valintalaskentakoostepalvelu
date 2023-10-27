@@ -200,12 +200,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     List<ErillishakuRivi> poistettavat =
         rivit.stream().filter(rivi -> rivi.isPoistetaankoRivi()).collect(Collectors.toList());
 
-    Observable<Boolean> passivointi =
-        Observable.fromFuture(hakuV1AsyncResource.haeHaku(haku.getHakuOid()))
-            .switchMap(
-                hk -> {
-                  return Observable.just(true);
-                });
+    Observable<Boolean> passivointi = Observable.just(true);
 
     Observable<String> maksuntilojenTallennus =
         maksutilojenTallennus(auditSession, haku, lisattavatTaiKeskeneraiset);
