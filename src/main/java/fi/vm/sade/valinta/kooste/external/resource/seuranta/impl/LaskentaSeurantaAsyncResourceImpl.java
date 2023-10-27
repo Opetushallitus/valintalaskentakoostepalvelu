@@ -12,6 +12,8 @@ import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.TunnisteDto;
 import io.reactivex.Observable;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -83,11 +85,11 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
             "seuranta-service.seuranta.kuormantasaus.laskenta.tyyppi",
             laskentaParams.getHakuOid(),
             laskentaParams.getLaskentatyyppi());
-    url += "?userOID=" + laskentaParams.getUserOID();
+    url += "?userOID=" + URLEncoder.encode(laskentaParams.getUserOID(), StandardCharsets.UTF_8);
     if (laskentaParams.getNimi() != null) {
-      url += "&nimi=" + laskentaParams.getNimi();
+      url += "&nimi=" + URLEncoder.encode(laskentaParams.getNimi(), StandardCharsets.UTF_8);
     }
-    url += "&haunnimi=" + laskentaParams.getHaunNimi();
+    url += "&haunnimi=" + URLEncoder.encode(laskentaParams.getHaunNimi(), StandardCharsets.UTF_8);
     url += "&erillishaku=" + laskentaParams.isErillishaku();
     if (laskentaParams.getValinnanvaihe() != null) {
       url += "&valinnanvaihe=" + laskentaParams.getValinnanvaihe();

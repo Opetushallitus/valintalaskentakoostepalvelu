@@ -7,8 +7,10 @@ import io.reactivex.Observable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -65,11 +67,14 @@ public class DokumenttiAsyncResourceImpl implements DokumenttiAsyncResource {
 
     try {
       String url = this.urlConfiguration.url("dokumenttipalvelu-service.dokumentit.tallenna");
-      url += "?id=" + id;
-      url += "&filename=" + filename;
+      url += "?id=" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+      url += "&filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8);
       url += "&expirationDate=" + expirationDate;
-      url += "&tags=" + tags.stream().collect(Collectors.joining(","));
-      url += "&mimetype=" + mimeType;
+      url +=
+          "&tags="
+              + URLEncoder.encode(
+                  tags.stream().collect(Collectors.joining(",")), StandardCharsets.UTF_8);
+      url += "&mimetype=" + URLEncoder.encode(mimeType, StandardCharsets.UTF_8);
 
       return Observable.fromFuture(
           this.client

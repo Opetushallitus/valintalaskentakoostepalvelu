@@ -28,6 +28,8 @@ import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -257,10 +259,11 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     String url =
         this.urlConfiguration.url(
             "valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid);
-    url += "?sessionId=" + auditSession.getSessionId();
-    url += "&uid=" + auditSession.getUid();
-    url += "&inetAddress=" + auditSession.getInetAddress();
-    url += "&userAgent=" + auditSession.getUserAgent();
+    url += "?sessionId=" + URLEncoder.encode(auditSession.getSessionId(), StandardCharsets.UTF_8);
+    url += "&uid=" + URLEncoder.encode(auditSession.getUid(), StandardCharsets.UTF_8);
+    url +=
+        "&inetAddress=" + URLEncoder.encode(auditSession.getInetAddress(), StandardCharsets.UTF_8);
+    url += "&userAgent=" + URLEncoder.encode(auditSession.getUserAgent(), StandardCharsets.UTF_8);
     url += "&hyvaksymiskirjeet=true";
 
     return Observable.fromFuture(
