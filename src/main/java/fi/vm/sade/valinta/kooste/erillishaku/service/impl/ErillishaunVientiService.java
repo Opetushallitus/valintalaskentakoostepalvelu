@@ -31,7 +31,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +124,7 @@ public class ErillishaunVientiService {
                       uuid,
                       "erillishaku.xlsx",
                       DateTime.now().plusHours(1).toDate().getTime(),
-                      Collections.singletonList("erillishaku"),
+                      List.of("erillishaku", uuid),
                       "application/octet-stream",
                       excel.getExcel().vieXlsx())
                   .subscribe(

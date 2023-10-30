@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.mocks;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import io.reactivex.Observable;
 import java.io.InputStream;
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +22,7 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
   }
 
   @Override
-  public synchronized Observable<ResponseEntity> tallenna(
+  public synchronized Observable<ResponseEntity<Void>> tallenna(
       String id,
       String filename,
       Long expirationDate,
@@ -31,17 +30,7 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
       String mimeType,
       InputStream filedata) {
     docs.put(id, filedata);
-    return Observable.just(ResponseEntity.ok(filedata));
-  }
-
-  @Override
-  public CompletableFuture<HttpResponse<InputStream>> lataa(String documentId) {
-    return CompletableFuture.completedFuture(null);
-  }
-
-  @Override
-  public CompletableFuture<Void> tyhjenna() {
-    return CompletableFuture.completedFuture(null);
+    return Observable.just(ResponseEntity.ok().build());
   }
 
   public static synchronized InputStream getStoredDocument(String id) {
