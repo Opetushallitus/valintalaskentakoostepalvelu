@@ -9,12 +9,16 @@ public class AtaruHakemusPrototyyppi {
 
   private String hakukohdeOid;
   private String hakuOid;
-  private String hakijaOid;
   private String etunimi;
+  private String kutsumanimi;
   private String sukunimi;
   private String henkilotunnus;
   private String sahkoposti;
   private String syntymaAika;
+  private String passinNumero;
+  private String kaupunkiJaMaa;
+  private String syntymapaikka;
+  private String idTunnus;
   private String sukupuoli;
   private String aidinkieli;
   private String asiointikieli;
@@ -25,9 +29,8 @@ public class AtaruHakemusPrototyyppi {
   private String asuinmaa;
   private String kansalaisuus;
   private String kotikunta;
-  private Boolean toisenAsteenSuoritus;
+  private String toisenAsteenSuoritus;
   private String toisenAsteenSuoritusmaa;
-  private String maksuvelvollisuus;
 
   public String getHakuOid() {
     return hakuOid;
@@ -43,14 +46,6 @@ public class AtaruHakemusPrototyyppi {
 
   public void setHakukohdeOid(String hakukohdeOid) {
     this.hakukohdeOid = hakukohdeOid;
-  }
-
-  public String getHakijaOid() {
-    return hakijaOid;
-  }
-
-  public void setHakijaOid(String hakijaOid) {
-    this.hakijaOid = hakijaOid;
   }
 
   public String getEtunimi() {
@@ -177,11 +172,18 @@ public class AtaruHakemusPrototyyppi {
     this.kotikunta = kotikunta;
   }
 
-  public Boolean getToisenAsteenSuoritus() {
-    return toisenAsteenSuoritus;
-  }
+  public String getToisenAsteenSuoritus() { return toisenAsteenSuoritus; }
 
   public void setToisenAsteenSuoritus(Boolean toisenAsteenSuoritus) {
+    if (toisenAsteenSuoritus == null) {
+      this.toisenAsteenSuoritus = "0";
+    }
+    else {
+      this.toisenAsteenSuoritus = toisenAsteenSuoritus ? "1" : "0";
+    }
+  }
+
+  public void setToisenAsteenSuoritus(String toisenAsteenSuoritus) {
     this.toisenAsteenSuoritus = toisenAsteenSuoritus;
   }
 
@@ -193,12 +195,44 @@ public class AtaruHakemusPrototyyppi {
     this.toisenAsteenSuoritusmaa = toisenAsteenSuoritusmaa;
   }
 
-  public String getMaksuvelvollisuus() {
-    return maksuvelvollisuus;
+  public String getKutsumanimi() {
+    return kutsumanimi;
   }
 
-  public void setMaksuvelvollisuus(String maksuvelvollisuus) {
-    this.maksuvelvollisuus = maksuvelvollisuus;
+  public void setKutsumanimi(String kutsumanimi) {
+    this.kutsumanimi = kutsumanimi;
+  }
+
+  public String getPassinNumero() {
+    return passinNumero;
+  }
+
+  public void setPassinNumero(String passinNumero) {
+    this.passinNumero = passinNumero;
+  }
+
+  public String getKaupunkiJaMaa() {
+    return kaupunkiJaMaa;
+  }
+
+  public void setKaupunkiJaMaa(String kaupunkiJaMaa) {
+    this.kaupunkiJaMaa = kaupunkiJaMaa;
+  }
+
+  public String getSyntymapaikka() {
+    return syntymapaikka;
+  }
+
+  public void setSyntymapaikka(String syntymapaikka) {
+    this.syntymapaikka = syntymapaikka;
+  }
+
+  public String getIdTunnus() {
+    return idTunnus;
+  }
+
+  public void setIdTunnus(String idTunnus) {
+    this.idTunnus = idTunnus;
   }
 
   public static String parseDate(final Date syntymaAika) {
@@ -230,14 +264,14 @@ public class AtaruHakemusPrototyyppi {
   @Override
   public String toString() {
     return "AtaruHakemusPrototyyppi{"
-        + "hakijaOid='"
-        + hakijaOid
-        + '\''
         + ", etunimi='"
         + etunimi
         + '\''
         + ", sukunimi='"
         + sukunimi
+        + '\''
+        + ", kutsumanimi='"
+        + kutsumanimi
         + '\''
         + ", henkilotunnus='"
         + getCensoredHETUIfExists()
@@ -247,6 +281,18 @@ public class AtaruHakemusPrototyyppi {
         + '\''
         + ", syntymaAika='"
         + syntymaAika
+        + '\''
+        + ", passinNumero='"
+        + passinNumero
+        + '\''
+        + ", kaupunkiJaMaa='"
+        + kaupunkiJaMaa
+        + '\''
+        + ", syntymapaikka='"
+        + syntymapaikka
+        + '\''
+        + ", idTunnus='"
+        + idTunnus
         + '\''
         + ", sukupuoli='"
         + sukupuoli
@@ -282,9 +328,6 @@ public class AtaruHakemusPrototyyppi {
         + toisenAsteenSuoritus
         + ", toisenAsteenSuoritusmaa='"
         + toisenAsteenSuoritusmaa
-        + '\''
-        + ", maksuvelvollisuus='"
-        + maksuvelvollisuus
         + '\''
         + '}';
   }
