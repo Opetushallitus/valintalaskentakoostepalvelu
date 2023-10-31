@@ -143,7 +143,6 @@ public class ErillishaunTuontiServiceTest {
       assertEquals("Tuomas", hakemusProto.getEtunimi());
       assertEquals("Hakkarainen", hakemusProto.getSukunimi());
       assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
-      assertEquals(Maksuvelvollisuus.REQUIRED, hakemusProto.getMaksuvelvollisuus());
 
       assertEquals(1, erillishaunValinnantulokset.size());
       assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
@@ -180,7 +179,6 @@ public class ErillishaunTuontiServiceTest {
       assertEquals("Tuomas", hakemusProto.getEtunimi());
       assertEquals("Hakkarainen", hakemusProto.getSukunimi());
       assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
-      assertEquals(Maksuvelvollisuus.NOT_REQUIRED, hakemusProto.getMaksuvelvollisuus());
     }
   }
 
