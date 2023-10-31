@@ -191,7 +191,6 @@ public class ErillishaunTuontiHelper {
     hakemus.setAsiointikieli(rivi.getAsiointikieli());
     hakemus.setAsuinmaa(rivi.getAsuinmaa());
     hakemus.setEtunimi(rivi.getEtunimi());
-    hakemus.setHakijaOid(rivi.getPersonOid());
     hakemus.setHenkilotunnus(rivi.getHenkilotunnus());
     hakemus.setKansalaisuus(rivi.getKansalaisuus());
     hakemus.setKotikunta(kotikunta);
@@ -205,7 +204,6 @@ public class ErillishaunTuontiHelper {
     hakemus.setSyntymaAika(rivi.getSyntymaAika());
     hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
     hakemus.setToisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa());
-    hakemus.setMaksuvelvollisuus(rivi.getMaksuvelvollisuus());
     return hakemus;
   }
 
