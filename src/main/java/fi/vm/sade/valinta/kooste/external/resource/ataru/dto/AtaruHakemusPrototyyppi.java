@@ -172,13 +172,14 @@ public class AtaruHakemusPrototyyppi {
     this.kotikunta = kotikunta;
   }
 
-  public String getToisenAsteenSuoritus() { return toisenAsteenSuoritus; }
+  public String getToisenAsteenSuoritus() {
+    return toisenAsteenSuoritus;
+  }
 
   public void setToisenAsteenSuoritus(Boolean toisenAsteenSuoritus) {
     if (toisenAsteenSuoritus == null) {
       this.toisenAsteenSuoritus = "0";
-    }
-    else {
+    } else {
       this.toisenAsteenSuoritus = toisenAsteenSuoritus ? "1" : "0";
     }
   }
