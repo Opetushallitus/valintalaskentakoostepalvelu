@@ -26,6 +26,7 @@ public class MockServicesApp {
   }
 
   public static void start() {
+    System.setProperty("mockserver.logLevel", "WARN");
     Integraatiopalvelimet.mockServer.reset();
 
     if (isRunning) {
