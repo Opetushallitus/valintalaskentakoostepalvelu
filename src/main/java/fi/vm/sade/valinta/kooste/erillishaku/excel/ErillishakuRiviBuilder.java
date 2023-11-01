@@ -40,6 +40,12 @@ public class ErillishakuRiviBuilder {
   private Boolean toisenAsteenSuoritus;
   private String toisenAsteenSuoritusmaa;
 
+  private String kutsumanimi;
+  private String syntymapaikka;
+  private String passinNumero;
+  private String idTunnus;
+  private String kaupunkiJaMaa;
+
   public ErillishakuRiviBuilder() {}
 
   public static ErillishakuRiviBuilder fromRivi(ErillishakuRivi rivi) {
@@ -78,7 +84,12 @@ public class ErillishakuRiviBuilder {
         .toisenAsteenSuoritus(rivi.getToisenAsteenSuoritus())
         .toisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa())
         .maksuvelvollisuus(rivi.getMaksuvelvollisuus())
-        .maksuntila(rivi.getMaksuntila());
+        .maksuntila(rivi.getMaksuntila())
+        .kutsumanimi(rivi.getKutsumanimi())
+        .syntymapaikka(rivi.getSyntymapaikka())
+        .passinNumero(rivi.getPassinNumero())
+        .idTunnus(rivi.getIdTunnus())
+        .kaupunkiJaMaa(rivi.getKaupunkiJaMaa());
   }
 
   public ErillishakuRiviBuilder etunimi(String etunimi) {
@@ -266,6 +277,32 @@ public class ErillishakuRiviBuilder {
     return this;
   }
 
+  public ErillishakuRiviBuilder kutsumanimi(String kutsumanimi) {
+    this.kutsumanimi = kutsumanimi;
+    return this;
+  }
+
+  public ErillishakuRiviBuilder syntymapaikka(String syntymapaikka) {
+    this.syntymapaikka = syntymapaikka;
+    return this;
+  }
+
+  public ErillishakuRiviBuilder passinNumero(String passinNumero) {
+    this.passinNumero = passinNumero;
+    return this;
+  }
+
+  public ErillishakuRiviBuilder idTunnus(String idTunnus) {
+    this.idTunnus = idTunnus;
+    return this;
+  }
+
+  public ErillishakuRiviBuilder kaupunkiJaMaa(String kaupunkiJaMaa) {
+    this.kaupunkiJaMaa = kaupunkiJaMaa;
+    return this;
+  }
+
+
   public ErillishakuRivi build() {
     return new ErillishakuRivi(
         hakemusOid,
@@ -302,6 +339,11 @@ public class ErillishakuRiviBuilder {
         toisenAsteenSuoritus,
         toisenAsteenSuoritusmaa,
         maksuvelvollisuus,
-        maksuntila);
+        maksuntila,
+        kutsumanimi,
+        syntymapaikka,
+        passinNumero,
+        idTunnus,
+        kaupunkiJaMaa);
   }
 }

@@ -97,7 +97,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
                     POIKKEUS_VIALLINEN_DATAJOUKKO,
                     asList(
                         new Tunniste(
-                            "Rivi 2: Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid olivat tyhjiä (vähintään yksi tunniste on syötettävä). Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat. : Etunimi, Sukunimi, , HYVAKSYTTY, Ei, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, false, null, VASTAANOTTANUT_SITOVASTI, null, null, true, null, null, null, null, null, null, null, null, , null",
+                            "Rivi 2: Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid olivat tyhjiä (vähintään yksi tunniste on syötettävä). Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat. : Etunimi, Sukunimi, , HYVAKSYTTY, Ei, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, false, null, VASTAANOTTANUT_SITOVASTI, null, null, true, null, null, null, null, null, null, null, null, , null, null, null, null, null, null",
                             ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN))))));
   }
 
