@@ -302,7 +302,6 @@ public class ErillishakuRiviBuilder {
     return this;
   }
 
-
   public ErillishakuRivi build() {
     return new ErillishakuRivi(
         hakemusOid,
