@@ -204,6 +204,12 @@ public class ErillishaunTuontiHelper {
     hakemus.setSyntymaAika(rivi.getSyntymaAika());
     hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
     hakemus.setToisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa());
+    hakemus.setKutsumanimi(rivi.getKutsumanimi());
+    hakemus.setSyntymapaikka(rivi.getSyntymapaikka());
+    hakemus.setPassinNumero(rivi.getPassinNumero());
+    hakemus.setIdTunnus(rivi.getIdTunnus());
+    hakemus.setKaupunkiJaMaa(rivi.getKaupunkiJaMaa());
+
     return hakemus;
   }
 
