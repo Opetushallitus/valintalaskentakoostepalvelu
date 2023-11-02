@@ -176,11 +176,12 @@ public class AtaruHakemusPrototyyppi {
     return toisenAsteenSuoritus;
   }
 
+  // NB: This is correct: ataru form answer for this question maps YES = 0, NO = 1
   public void setToisenAsteenSuoritus(Boolean toisenAsteenSuoritus) {
     if (toisenAsteenSuoritus == null) {
-      this.toisenAsteenSuoritus = "0";
+      this.toisenAsteenSuoritus = "1";
     } else {
-      this.toisenAsteenSuoritus = toisenAsteenSuoritus ? "1" : "0";
+      this.toisenAsteenSuoritus = toisenAsteenSuoritus ? "0" : "1";
     }
   }
 
