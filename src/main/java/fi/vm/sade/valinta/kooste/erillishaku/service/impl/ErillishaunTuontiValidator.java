@@ -52,25 +52,6 @@ public class ErillishaunTuontiValidator {
         .orElse(null);
   }
 
-  protected String convertKansalaisuusKoodi(String kansalaisuus) {
-    Map<String, Koodi> maaKoodit1 =
-        koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
-    Map<String, Koodi> maaKoodit2 =
-        koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_2);
-
-    String maaNimi =
-        KoodistoCachedAsyncResource.haeKoodistaArvo(maaKoodit1.get(kansalaisuus), "FI", null);
-    return maaKoodit2.values().stream()
-        .flatMap(
-            koodi ->
-                koodi.getMetadata().stream()
-                    .map(metadata -> new ImmutablePair<>(metadata.getNimi(), koodi.getKoodiArvo())))
-        .filter(x -> x.getLeft().equalsIgnoreCase(maaNimi))
-        .map(ImmutablePair::getRight)
-        .findFirst()
-        .orElse(null);
-  }
-
   protected void validoiRivit(
       final KirjeProsessi prosessi,
       final ErillishakuDTO haku,
