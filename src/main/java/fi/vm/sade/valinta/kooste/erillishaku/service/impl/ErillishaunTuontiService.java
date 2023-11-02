@@ -444,7 +444,8 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                             rivi,
                             convertKuntaNimiToKuntaKoodi(rivi.getKotikunta()),
                             haku.getHakuOid(),
-                            haku.getHakukohdeOid()))
+                            haku.getHakukohdeOid(),
+                            koodistoCachedAsyncResource))
                 .collect(Collectors.toList());
         LOG.info(
             "Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
