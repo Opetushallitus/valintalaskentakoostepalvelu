@@ -26,12 +26,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.async.DeferredResult;
 
 @Service
 public class ValintatapajonoTuontiService {
@@ -54,7 +55,7 @@ public class ValintatapajonoTuontiService {
       final String hakukohdeOid,
       final String tarjoajaOid,
       final String valintatapajonoOid,
-      AsyncResponse asyncResponse,
+      DeferredResult<ResponseEntity<String>> result,
       User user) {
     AtomicReference<String> dokumenttiIdRef = new AtomicReference<>(null);
     AtomicInteger counter =
@@ -78,9 +79,7 @@ public class ValintatapajonoTuontiService {
               rivit = riviFunction.apply(valinnanvaiheetRef.get(), hakemuksetRef.get());
             } catch (Throwable t) {
               poikkeusKasittelija(
-                      "Rivien lukeminen annetuista tiedoista epäonnistui",
-                      asyncResponse,
-                      dokumenttiIdRef)
+                      "Rivien lukeminen annetuista tiedoista epäonnistui", result, dokumenttiIdRef)
                   .accept(t);
               return null;
             }
@@ -139,9 +138,7 @@ public class ValintatapajonoTuontiService {
                                 dontcare -> LOG.error("Ei saatu paivitettya!", dontcare));
                       },
                       poikkeusKasittelija(
-                          "Tallennus valintapalveluun epäonnistui",
-                          asyncResponse,
-                          dokumenttiIdRef));
+                          "Tallennus valintapalveluun epäonnistui", result, dokumenttiIdRef));
               LOG.info(
                   "Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.",
                   hakukohdeOid,
@@ -156,8 +153,7 @@ public class ValintatapajonoTuontiService {
                         LOG.error("Onnistumisen ilmoittamisessa virhe!", dontcare);
                       });
             } catch (Throwable t) {
-              poikkeusKasittelija(
-                      "Tallennus valintapalveluun epäonnistui", asyncResponse, dokumenttiIdRef)
+              poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", result, dokumenttiIdRef)
                   .accept(t);
               return null;
             }
@@ -170,7 +166,7 @@ public class ValintatapajonoTuontiService {
             (valinnanvaiheet, t) -> {
               if (t != null) {
                 poikkeusKasittelija(
-                        "Valinnanvaiheiden hakeminen epäonnistui", asyncResponse, dokumenttiIdRef)
+                        "Valinnanvaiheiden hakeminen epäonnistui", result, dokumenttiIdRef)
                     .accept(t);
               } else {
                 valinnanvaiheetRef.set(valinnanvaiheet);
@@ -184,8 +180,7 @@ public class ValintatapajonoTuontiService {
               valintaperusteetRef.set(valintaperusteet);
               mergeSuplier.get();
             },
-            poikkeusKasittelija(
-                "Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
+            poikkeusKasittelija("Hakemusten hakeminen epäonnistui", result, dokumenttiIdRef));
     Observable.fromFuture(tarjontaAsyncResource.haeHaku(hakuOid))
         .flatMap(
             haku -> {
@@ -200,40 +195,38 @@ public class ValintatapajonoTuontiService {
         .subscribe(
             hakemukset -> {
               if (hakemukset == null || hakemukset.isEmpty()) {
-                poikkeusKasittelija(
-                        "Ei yhtään hakemusta hakukohteessa", asyncResponse, dokumenttiIdRef)
+                poikkeusKasittelija("Ei yhtään hakemusta hakukohteessa", result, dokumenttiIdRef)
                     .accept(null);
               } else {
                 hakemuksetRef.set(hakemukset);
                 mergeSuplier.get();
               }
             },
-            poikkeusKasittelija(
-                "Hakemusten hakeminen epäonnistui", asyncResponse, dokumenttiIdRef));
+            poikkeusKasittelija("Hakemusten hakeminen epäonnistui", result, dokumenttiIdRef));
 
     dokumentinSeurantaAsyncResource
         .luoDokumentti("Valintatapajonon tuonti")
         .subscribe(
             dokumenttiId -> {
               try {
-                asyncResponse.resume(
-                    Response.ok()
+                result.setResult(
+                    ResponseEntity.status(HttpStatus.OK)
                         .header("Content-Type", "text/plain")
-                        .entity(dokumenttiId)
-                        .build());
+                        .body(dokumenttiId));
                 dokumenttiIdRef.set(dokumenttiId);
                 mergeSuplier.get();
               } catch (Throwable t) {
                 LOG.error(
-                    "Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuormanalla.", t);
+                    "Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuorman alla.", t);
               }
             },
-            poikkeusKasittelija(
-                "Seurantapalveluun ei saatu yhteyttä", asyncResponse, dokumenttiIdRef));
+            poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", result, dokumenttiIdRef));
   }
 
   private PoikkeusKasittelijaSovitin poikkeusKasittelija(
-      String viesti, AsyncResponse asyncResponse, AtomicReference<String> dokumenttiIdRef) {
+      String viesti,
+      DeferredResult<ResponseEntity<String>> result,
+      AtomicReference<String> dokumenttiIdRef) {
     return new PoikkeusKasittelijaSovitin(
         poikkeus -> {
           if (poikkeus == null) {
@@ -242,11 +235,10 @@ public class ValintatapajonoTuontiService {
             LOG.error("###Poikkeus tuonnissa :" + viesti + "###", poikkeus);
           }
           try {
-            asyncResponse.resume(
-                Response.serverError()
-                    .entity(
-                        viesti + (poikkeus != null ? " poikkeus: " + poikkeus.getMessage() : ""))
-                    .build());
+            result.setErrorResult(
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(
+                        viesti + (poikkeus != null ? " poikkeus: " + poikkeus.getMessage() : "")));
           } catch (Throwable t) {
             // ei väliä vaikka response jos tehty
           }

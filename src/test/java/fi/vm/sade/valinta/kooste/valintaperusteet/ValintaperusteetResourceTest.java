@@ -1,23 +1,23 @@
 package fi.vm.sade.valinta.kooste.valintaperusteet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2.ValintaperusteetResourceResult;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.ws.rs.core.Response;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ValintaperusteetResourceTest {
 
@@ -25,17 +25,18 @@ public class ValintaperusteetResourceTest {
 
   private final String root =
       "http://localhost:"
-          + ValintaKoosteJetty.port
+          + MockResourcesApp.port
           + "/valintalaskentakoostepalvelu/resources/V2valintaperusteet";
+
   private final HttpResourceBuilder.WebClientExposingHttpResource
       hakukohteenValintaperusteetResource =
           new HttpResourceBuilder(getClass().getName())
               .address(String.format("%s/hakukohde/%s/kayttaaValintalaskentaa", root, hakukohdeOid))
               .buildExposingWebClientDangerously();
 
-  @Before
+  @BeforeEach
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
     Mocks.reset();
   }
 

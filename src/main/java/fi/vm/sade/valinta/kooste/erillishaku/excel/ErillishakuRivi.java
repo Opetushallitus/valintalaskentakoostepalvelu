@@ -7,8 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -17,7 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ApiModel
+@Schema
 public class ErillishakuRivi {
   private static final Logger LOG = LoggerFactory.getLogger(ErillishakuRivi.class);
   public static final DateTimeFormatter SYNTYMAAIKAFORMAT =
@@ -36,12 +35,12 @@ public class ErillishakuRivi {
   @JsonDeserialize(using = SukupuoliDeserializer.class)
   private final Sukupuoli sukupuoli;
 
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private final String aidinkieli;
 
   private final String personOid;
 
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private final String hakemuksenTila;
 
   private final boolean ehdollisestiHyvaksyttavissa;
@@ -56,7 +55,7 @@ public class ErillishakuRivi {
   private final String vastaanottoTila;
   private final String ilmoittautumisTila;
 
-  @ApiModelProperty(required = true)
+  @Schema(required = true)
   private final boolean julkaistaankoTiedot;
 
   private final boolean poistetaankoRivi;

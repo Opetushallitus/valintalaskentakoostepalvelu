@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta;
 
 import static fi.vm.sade.valinta.kooste.valintalaskenta.actor.laskenta.LaskentaStarterActor.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import akka.actor.ActorRef;
@@ -11,8 +11,8 @@ import akka.testkit.TestActorRef;
 import com.typesafe.config.ConfigFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaSupervisor;
 import java.util.stream.IntStream;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class LaskentaStarterActorTest {
 
@@ -21,7 +21,7 @@ public class LaskentaStarterActorTest {
   private LaskentaStarterActor actor;
   private TestActorRef<LaskentaStarterActor> ref;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     Props props = props(laskentaSupervisor, MAX_WORKER_COUNT);
     ActorSystem actorSystem =

@@ -17,3 +17,6 @@ bower_components
 .DS_Store
 .~lock*
 .opintopolku-local
+
+# tänne talletetaan lokaalin setupin hahtuva-salasanat
+src/test/resources/application-dev.properties

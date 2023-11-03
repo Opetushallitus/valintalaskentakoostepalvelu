@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.ws.rs.core.Response;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+@Profile("mockresources")
 @Service
 public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
   private static Map<String, InputStream> docs = new ConcurrentHashMap<>();
@@ -21,7 +23,7 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
   }
 
   @Override
-  public synchronized Observable<Response> tallenna(
+  public synchronized Observable<ResponseEntity> tallenna(
       String id,
       String filename,
       Long expirationDate,
@@ -29,7 +31,7 @@ public class MockDokumenttiAsyncResource implements DokumenttiAsyncResource {
       String mimeType,
       InputStream filedata) {
     docs.put(id, filedata);
-    return Observable.just(Response.ok(filedata).build());
+    return Observable.just(ResponseEntity.ok(filedata));
   }
 
   @Override

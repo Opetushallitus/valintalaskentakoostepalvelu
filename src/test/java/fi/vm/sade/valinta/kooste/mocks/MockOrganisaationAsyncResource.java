@@ -7,8 +7,10 @@ import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+@Profile("mockresources")
 @Service
 public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource {
 
@@ -38,6 +40,11 @@ public class MockOrganisaationAsyncResource implements OrganisaatioAsyncResource
 
   @Override
   public CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
+    return CompletableFuture.failedFuture(new UnsupportedOperationException());
+  }
+
+  @Override
+  public CompletableFuture<String> parentoids(String organisaatioId) throws Exception {
     return CompletableFuture.failedFuture(new UnsupportedOperationException());
   }
 }

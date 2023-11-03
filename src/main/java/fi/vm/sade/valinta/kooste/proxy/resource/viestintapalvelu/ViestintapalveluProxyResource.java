@@ -11,25 +11,18 @@ import io.reactivex.Observable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller("ViestintapalveluProxyResource")
-@Path("/proxy/viestintapalvelu")
+@RestController("ViestintapalveluProxyResource")
+@RequestMapping("/resources/proxy/viestintapalvelu")
 public class ViestintapalveluProxyResource {
   private static final Logger LOG = LoggerFactory.getLogger(ViestintapalveluProxyResource.class);
 
@@ -44,17 +37,15 @@ public class ViestintapalveluProxyResource {
     this.ryhmasahkopostiAsyncResource = ryhmasahkopostiAsyncResource;
   }
 
-  @POST
+  @PostMapping(value = "/publish/haku/{hakuOid}", produces = MediaType.TEXT_PLAIN_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-  @Path("/publish/haku/{hakuOid}")
-  @Consumes("application/json")
-  @Produces("text/plain")
-  public void julkaiseKirjeetOmillaSivuilla(
-      @PathParam("hakuOid") String hakuOid,
-      @QueryParam("asiointikieli") String asiointikieli,
-      @QueryParam("kirjeenTyyppi") String kirjeenTyyppi,
-      @Suspended AsyncResponse asyncResponse) {
+  public DeferredResult<ResponseEntity<String>> julkaiseKirjeetOmillaSivuilla(
+      @PathVariable("hakuOid") String hakuOid,
+      @RequestParam(value = "asiointikieli", required = false) String asiointikieli,
+      @RequestParam(value = "kirjeenTyyppi", required = false) String kirjeenTyyppi) {
+    DeferredResult<ResponseEntity<String>> result = new DeferredResult<>(10 * 60 * 1000l);
+
     viestintapalveluAsyncResource
         .haeKirjelahetysJulkaistavaksi(hakuOid, kirjeenTyyppi, asiointikieli)
         .flatMap(
@@ -66,11 +57,15 @@ public class ViestintapalveluProxyResource {
               }
             })
         .subscribe(
-            batchIdOptional -> asyncResponse.resume(Response.ok(batchIdOptional.get()).build()),
+            batchIdOptional ->
+                result.setResult(
+                    ResponseEntity.status(HttpStatus.OK).body(batchIdOptional.get().toString())),
             throwable ->
-                errorResponse(
-                    String.format("Viestintäpalvelukutsu epäonnistui! %s", throwable.getMessage()),
-                    asyncResponse));
+                result.setErrorResult(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(throwable.getMessage())));
+
+    return result;
   }
 
   private LetterBatchCountDto haeRyhmasahkopostiId(LetterBatchCountDto countDto) {
@@ -97,18 +92,22 @@ public class ViestintapalveluProxyResource {
         .orElse(countDto);
   }
 
-  @GET
+  @GetMapping(value = "/count/haku/{hakuOid}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
-  @Path("/count/haku/{hakuOid}")
-  @Consumes("application/json")
-  public void countLettersForHaku(
-      @PathParam("hakuOid") String hakuOid, @Suspended AsyncResponse asyncResponse) {
-    setAsyncTimeout(
-        asyncResponse,
-        String.format(
-            "ViestintapalveluProxyResource -palvelukutsu on aikakatkaistu: /viestintapalvelu/haku/%s/tyyppi/--/kieli/--",
-            hakuOid));
+  public DeferredResult<ResponseEntity<ImmutableMap<String, ImmutableMap<String, Object>>>>
+      countLettersForHaku(@PathVariable("hakuOid") String hakuOid) {
+    DeferredResult<ResponseEntity<ImmutableMap<String, ImmutableMap<String, Object>>>> result =
+        new DeferredResult<>(5 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body(
+                      String.format(
+                          "ViestintapalveluProxyResource -palvelukutsu on aikakatkaistu: /viestintapalvelu/haku/%s/tyyppi/--/kieli/--",
+                          hakuOid)));
+        });
 
     Observable<LetterBatchCountDto> hyvaksymiskirjeFi =
         viestintapalveluAsyncResource
@@ -189,27 +188,13 @@ public class ViestintapalveluProxyResource {
                     "jalkiohjauskirje_huoltajille",
                     ImmutableMap.of("fi", args[9], "sv", args[10], "en", args[11])))
         .subscribe(
-            letterCount ->
-                asyncResponse.resume(
-                    Response.ok(letterCount, MediaType.APPLICATION_JSON_TYPE).build()),
+            letterCount -> result.setResult(ResponseEntity.status(HttpStatus.OK).body(letterCount)),
             error -> {
               LOG.error("Viestintäpalvelukutsu epäonnistui!", error);
-              errorResponse(
-                  String.format("Viestintäpalvelukutsu epäonnistui! %s", error.getMessage()),
-                  asyncResponse);
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error.getMessage()));
             });
-  }
 
-  private void setAsyncTimeout(AsyncResponse response, String timeoutMessage) {
-    response.setTimeout(5L, MINUTES);
-    response.setTimeoutHandler(asyncResponse -> errorResponse(timeoutMessage, asyncResponse));
-  }
-
-  private void errorResponse(String timeoutMessage, AsyncResponse asyncResponse) {
-    asyncResponse.resume(
-        Response.serverError()
-            .entity(ImmutableMap.of("error", timeoutMessage))
-            .type(MediaType.APPLICATION_JSON_TYPE)
-            .build());
+    return result;
   }
 }

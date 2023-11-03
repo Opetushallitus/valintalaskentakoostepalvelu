@@ -5,9 +5,11 @@ import fi.vm.sade.valinta.seuranta.dto.DokumenttiDto;
 import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
 import io.reactivex.Observable;
 import java.util.List;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /** @author Jussi Jartamo */
+@Profile("mockresources")
 @Service
 public class MockDokumentinSeurantaAsyncResource implements DokumentinSeurantaAsyncResource {
 

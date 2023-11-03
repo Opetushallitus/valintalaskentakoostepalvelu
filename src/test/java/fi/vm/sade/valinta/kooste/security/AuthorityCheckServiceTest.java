@@ -1,11 +1,11 @@
 package fi.vm.sade.valinta.kooste.security;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
-import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,9 +13,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.ForbiddenException;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -26,16 +27,19 @@ public class AuthorityCheckServiceTest {
 
   @InjectMocks private AuthorityCheckService authorityCheckService;
 
-  @Mock private OrganisaatioResource organisaatioResource;
+  @Mock private OrganisaatioAsyncResource organisaatioAsyncResource;
 
   @Mock private TarjontaAsyncResource tarjontaAsyncResource;
 
-  @Before
+  @BeforeEach
   public void initMocks() throws Exception {
     MockitoAnnotations.initMocks(this);
-    Mockito.when(organisaatioResource.parentoids("oid.1")).thenReturn("parent.oid.1/oid.1");
-    Mockito.when(organisaatioResource.parentoids("oid.2")).thenReturn("parent.oid.2/oid.2");
-    Mockito.when(organisaatioResource.parentoids("oid.3")).thenReturn("parent.oid.3/oid.3");
+    Mockito.when(organisaatioAsyncResource.parentoids("oid.1"))
+        .thenReturn(CompletableFuture.completedFuture("parent.oid.1/oid.1"));
+    Mockito.when(organisaatioAsyncResource.parentoids("oid.2"))
+        .thenReturn(CompletableFuture.completedFuture("parent.oid.2/oid.2"));
+    Mockito.when(organisaatioAsyncResource.parentoids("oid.3"))
+        .thenReturn(CompletableFuture.completedFuture("parent.oid.3/oid.3"));
     Mockito.when(tarjontaAsyncResource.haeHaku("haku.oid"))
         .thenReturn(
             CompletableFuture.completedFuture(
@@ -89,9 +93,11 @@ public class AuthorityCheckServiceTest {
     assertFalse(authorized2);
   }
 
-  @Ignore("Causes possibly random failure in CI")
-  @Test(expected = ForbiddenException.class)
+  @Disabled("Causes possibly random failure in CI")
+  @Test
   public void testCheckAuthorizationForHaku() {
-    authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET);
+    Assertions.assertThrows(
+        ForbiddenException.class,
+        () -> authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET));
   }
 }

@@ -1,12 +1,8 @@
 package fi.vm.sade.valinta.kooste;
 
-import fi.vm.sade.javautils.cas.ApplicationSession;
-import fi.vm.sade.javautils.cas.ServiceTicket;
-import fi.vm.sade.javautils.cas.SessionToken;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import java.io.IOException;
-import java.net.HttpCookie;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -18,13 +14,15 @@ import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Dsl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("test")
+@Profile("mockservices")
 @Configuration
 public class KoosteTestProfileConfiguration {
   private static final Logger LOG = LoggerFactory.getLogger(KoosteTestProfileConfiguration.class);
@@ -36,6 +34,7 @@ public class KoosteTestProfileConfiguration {
       getPropertyPlaceholderConfigurer() {
     final String proxyServer = PROXY_SERVER.get();
     Properties p0 = new Properties();
+
     p0.setProperty(
         "valintalaskentakoostepalvelu.jatkuvasijoittelu.timer",
         "time=2018-12-12 10:12:12&delay=10000000");
@@ -136,68 +135,79 @@ public class KoosteTestProfileConfiguration {
         public void handleMessage(Message message) throws Fault {}
       };
 
-  private static ApplicationSession APPLICATION_SESSION =
-      new ApplicationSession(null, null, null, null, null, null, null) {
-        @Override
-        public CompletableFuture<SessionToken> getSessionToken() {
-          return CompletableFuture.completedFuture(
-              new SessionToken(
-                  new ServiceTicket("http://localhost/service", "service-ticket"),
-                  new HttpCookie("session", "session-uuid")));
-        }
+  private static final AsyncHttpClient asyncHttpClient = Dsl.asyncHttpClient();
+  private static RestCasClient REST_CAS_CLIENT =
+      new RestCasClient(
+          request -> asyncHttpClient.executeRequest(request).toCompletableFuture()) {};
 
-        @Override
-        public void invalidateSession(SessionToken session) {}
-      };
-
-  @Bean(name = "AtaruApplicationSession")
-  public ApplicationSession getAtaruApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "AtaruCasClient")
+  public RestCasClient getAtaruCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "KoutaApplicationSession")
-  public ApplicationSession getKoutaApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "HakuAppCasClient")
+  public RestCasClient getHakuAppCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "HakuAppApplicationSession")
-  public ApplicationSession getHakuAppApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "SijoitteluServiceCasClient")
+  public RestCasClient getSijoitteluServiceCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "HakukohderyhmapalveluApplicationSession")
-  public ApplicationSession getHakukohderyhmapalveluApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "HakukohderyhmapalveluCasClient")
+  public RestCasClient getHakukohderyhmapalveluCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "ViestintapalveluApplicationSession")
-  public ApplicationSession getViestintapalveluApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "KoutaCasClient")
+  public RestCasClient getKoutaCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "OppijanumerorekisteriApplicationSession")
-  public ApplicationSession getOppijanumerorekisteriApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "ViestintapalveluCasClient")
+  public RestCasClient getViestintapalveluCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "SuoritusrekisteriApplicationSession")
-  public ApplicationSession getSuoritusrekisteriApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "OppijanumerorekisteriCasClient")
+  public RestCasClient getOppijanumerorekisteriCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "ValintalaskentaApplicationSession")
-  public ApplicationSession getValintalaskentaApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "ValintapisteServiceCasClient")
+  public RestCasClient getValintapisteServiceCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "ValintaperusteetApplicationSession")
-  public ApplicationSession getValintaperusteetApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "SuoritusrekisteriCasClient")
+  public RestCasClient getSuoritusrekisteriCasClient() {
+    return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "ValintapisteServiceApplicationSession")
-  public ApplicationSession getValintapisteServiceApplicationSession() {
-    return APPLICATION_SESSION;
+  @Bean(name = "ValintalaskentaCasClient")
+  public RestCasClient getValintalaskentaCasClient() {
+    return REST_CAS_CLIENT;
+  }
+
+  @Bean(name = "ValintaperusteetCasClient")
+  public RestCasClient getValintaperusteetCasClient() {
+    return REST_CAS_CLIENT;
+  }
+
+  @Bean(name = "ryhmasahkopostiCasClient")
+  public RestCasClient getRyhmasahkopostiCasClient() {
+    return REST_CAS_CLIENT;
+  }
+
+  @Bean(name = "OppijantunnistusCasClient")
+  public RestCasClient getOppijantunnistusCasClient() {
+    return REST_CAS_CLIENT;
+  }
+
+  @Bean(name = "SeurantaCasClient")
+  public RestCasClient getSeurantaCasClient() {
+    return REST_CAS_CLIENT;
   }
 
   @Bean(name = "springSecurityFilterChain")
@@ -223,69 +233,9 @@ public class KoosteTestProfileConfiguration {
     return INTERCEPTOR;
   }
 
-  @Bean(name = "ryhmasahkopostiClientCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getRyhmasahkopostiClientCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "AuthenticationServiceRestClientCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getAuthenticationServiceRestClientCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
   @Bean(name = "OppijanumerorekisteriServiceRestClientCasInterceptor")
   public AbstractPhaseInterceptor<Message>
       getOppijanumerorekisteriServiceRestClientCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "HakemusServiceRestClientAsAdminCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getHakemusServiceRestClientAsAdminCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "SijoitteluServiceRestClientCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getSijoitteluServiceRestClientCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "adminDokumenttipalveluRestClientCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getAdminDokumenttipalveluRestClientCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "ValintalaskentaCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getValintalaskentaCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "ValintaperusteetCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getValintaperusteetCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "OppijantunnistusCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getOppijantunnistusCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "SeurantaRestClientCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getSeurantaRestClientCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "SuoritusrekisteriRestClientCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getSuoritusrekisteriRestClientCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "koodiServiceCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getKoodiServiceCasInterceptor() {
-    return INTERCEPTOR;
-  }
-
-  @Bean(name = "OrganisaatioResourceClientCasInterceptor")
-  public AbstractPhaseInterceptor<Message> getOrganisaatioResourceClientCasInterceptor() {
     return INTERCEPTOR;
   }
 }

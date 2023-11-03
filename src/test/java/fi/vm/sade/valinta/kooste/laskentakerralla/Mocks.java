@@ -9,6 +9,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResou
 import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -16,7 +17,6 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.tarjonta.api.OrganisaatioResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.KoskiService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorFactory;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.LaskentaActorSystem;
@@ -26,7 +26,9 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRo
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 
 public class Mocks {
-  static OrganisaatioResource organisaatioResource = mock(OrganisaatioResource.class);
+
+  static OrganisaatioAsyncResource organisaatioAsyncResource =
+      mock(OrganisaatioAsyncResource.class);
   static ValintalaskentaKerrallaRouteValvomo valintalaskentaKerrallaRouteValvomo =
       mock(ValintalaskentaKerrallaRouteValvomo.class);
   static ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
@@ -78,6 +80,7 @@ public class Mocks {
               8));
 
   public static void resetMocks() {
+    reset(organisaatioAsyncResource);
     reset(valintalaskentaKerrallaRouteValvomo);
     reset(applicationAsyncResource);
     reset(ataruAsyncResource);

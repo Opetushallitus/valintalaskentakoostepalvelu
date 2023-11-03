@@ -1,26 +1,20 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
-import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.Test;
 
-@RunWith(JUnit4.class)
 public class ValintaTulosServiceAsyncResourceImplTest {
-
-  private final HttpResource vtsHttpResource = new ValintaTulosServiceAsyncResourceImpl(null);
 
   @Test
   public void vastaanottoAikarajaMennytDTOsCanBeParsed() {
     String hakemusOid = "1.2.246.562.11.00004697189";
     String vastaanottoDeadline = "2016-07-15T12:00:00Z";
     VastaanottoAikarajaMennytDTO parsedDto =
-        vtsHttpResource
-            .gson()
+        ValintaTulosServiceAsyncResourceImpl.getGson()
             .fromJson(
                 " {\n"
                     + "        \"hakemusOid\": \""
@@ -32,9 +26,9 @@ public class ValintaTulosServiceAsyncResourceImplTest {
                     + "\"\n"
                     + "    }",
                 VastaanottoAikarajaMennytDTO.class);
-    Assert.assertEquals(hakemusOid, parsedDto.getHakemusOid());
-    Assert.assertEquals(
+    assertEquals(hakemusOid, parsedDto.getHakemusOid());
+    assertEquals(
         new DateTime(2016, 7, 15, 12, 0, 0, DateTimeZone.UTC), parsedDto.getVastaanottoDeadline());
-    Assert.assertEquals(true, parsedDto.isMennyt());
+    assertEquals(true, parsedDto.isMennyt());
   }
 }

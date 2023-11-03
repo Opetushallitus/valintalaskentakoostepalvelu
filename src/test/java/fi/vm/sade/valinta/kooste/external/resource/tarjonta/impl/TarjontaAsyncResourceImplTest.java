@@ -1,10 +1,9 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl;
 
 import static java.util.Collections.emptyList;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.or;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +16,7 @@ import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.HakukohderyhmaHakuk
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import java.io.IOException;
 import java.time.Duration;
@@ -34,8 +34,8 @@ public class TarjontaAsyncResourceImplTest {
   private static final String HKR_URL = "http://test/search/by-hakukohteet";
 
   private final HttpClient tarjontaClient = mock(HttpClient.class);
-  private final HttpClient koutaClient = mock(HttpClient.class);
-  private final HttpClient hakukohderyhmapalveluClient = mock(HttpClient.class);
+  private final RestCasClient koutaClient = mock(RestCasClient.class);
+  private final RestCasClient hakukohderyhmapalveluClient = mock(RestCasClient.class);
 
   private final TarjontaAsyncResourceImpl tarjontaAsyncResource =
       new TarjontaAsyncResourceImpl(tarjontaClient, koutaClient, hakukohderyhmapalveluClient);
@@ -75,10 +75,8 @@ public class TarjontaAsyncResourceImplTest {
     KoutaHakukohde hk2 = Mockito.mock(KoutaHakukohde.class);
     ReflectionTestUtils.setField(hk1, "oid", "1.2.246.562.20.1");
     ReflectionTestUtils.setField(hk2, "oid", "1.2.246.562.20.2");
-    when(koutaClient.getJson(
-            eq(KOUTA_URL),
-            any(Duration.class),
-            eq(new TypeToken<Set<KoutaHakukohde>>() {}.getType())))
+    when(koutaClient.get(
+            eq(KOUTA_URL), eq(new TypeToken<Set<KoutaHakukohde>>() {}), any(), anyInt()))
         .thenReturn(CompletableFuture.completedFuture(Set.of(hk1, hk2)));
 
     HakukohderyhmaHakukohde hkr1 =
@@ -89,14 +87,14 @@ public class TarjontaAsyncResourceImplTest {
         new HakukohderyhmaHakukohde(
             "1.2.246.562.20.2", Arrays.asList("1.2.246.562.28.1", "1.2.246.562.28.3"));
 
-    when(hakukohderyhmapalveluClient.postJson(
+    when(hakukohderyhmapalveluClient.post(
             eq(HKR_URL),
-            any(Duration.class),
+            eq(new TypeToken<List<HakukohderyhmaHakukohde>>() {}),
             or(
                 eq(Arrays.asList("1.2.246.562.20.2", "1.2.246.562.20.1")),
                 eq(Arrays.asList("1.2.246.562.20.1", "1.2.246.562.20.2"))),
-            eq(new TypeToken<List<String>>() {}.getType()),
-            eq(new TypeToken<List<HakukohderyhmaHakukohde>>() {}.getType())))
+            anyMap(),
+            anyInt()))
         .thenReturn(CompletableFuture.completedFuture(Arrays.asList(hkr1, hkr2)));
   }
 

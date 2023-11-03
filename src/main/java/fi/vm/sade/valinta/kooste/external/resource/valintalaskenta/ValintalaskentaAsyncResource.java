@@ -8,7 +8,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import io.reactivex.Observable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public interface ValintalaskentaAsyncResource {
   Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid);
@@ -21,12 +20,11 @@ public interface ValintalaskentaAsyncResource {
 
   CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(String hakukohdeOid);
 
-  CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
-      String hakukohdeOid, Executor executor);
-
   Observable<String> valintakokeet(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
   Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
   Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
+
+  Observable<List<ValintatietoValinnanvaiheDTO>> hakukohde(String hakukohdeoid);
 }

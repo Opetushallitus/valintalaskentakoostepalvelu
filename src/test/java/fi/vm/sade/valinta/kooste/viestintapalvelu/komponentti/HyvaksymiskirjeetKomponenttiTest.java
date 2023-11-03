@@ -1,9 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import static java.util.Optional.ofNullable;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -32,7 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HyvaksymiskirjeetKomponenttiTest {
   private final String TEMPLATE_NAME = "templateName";
@@ -121,7 +119,7 @@ public class HyvaksymiskirjeetKomponenttiTest {
     assertEquals(ORGANIZATION_OID, batch.getOrganizationOid());
     assertEquals(APPLICATION_PERIOD, batch.getApplicationPeriod());
     assertEquals(
-        "FetchTarget was null, the default is used", HAKUKOHDE_OID, batch.getFetchTarget());
+        HAKUKOHDE_OID, batch.getFetchTarget(), "FetchTarget was null, the default is used");
     assertEquals(TAG, batch.getTag());
     assertEquals(skipDokumenttipalvelu, batch.isSkipDokumenttipalvelu());
 
@@ -153,8 +151,8 @@ public class HyvaksymiskirjeetKomponenttiTest {
     assertNull(letter.getEmailAddress());
     assertEquals(HAKIJA_OID, letter.getPersonOid());
     assertTrue(
-        "Hakija OID has to be also available to template",
-        letter.getTemplateReplacements().containsKey("hakijaOid"));
+        letter.getTemplateReplacements().containsKey("hakijaOid"),
+        "Hakija OID has to be also available to template");
     assertEquals(HAKIJA_OID, letter.getTemplateReplacements().get("hakijaOid"));
     assertEquals(HAKEMUS_OID, letter.getApplicationOid());
     assertEquals(skipIPosti, letter.isSkipIPosti());

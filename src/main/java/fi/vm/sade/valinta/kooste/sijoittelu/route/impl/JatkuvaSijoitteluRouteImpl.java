@@ -1,10 +1,10 @@
 package fi.vm.sade.valinta.kooste.sijoittelu.route.impl;
 
+import fi.vm.sade.valinta.kooste.external.resource.seuranta.SijoitteluSeurantaResource;
 import fi.vm.sade.valinta.kooste.sijoittelu.dto.AjastettuSijoitteluInfo;
 import fi.vm.sade.valinta.kooste.sijoittelu.job.AjastettuSijoitteluJob;
 import fi.vm.sade.valinta.kooste.sijoittelu.komponentti.JatkuvaSijoittelu;
 import fi.vm.sade.valinta.kooste.util.Formatter;
-import fi.vm.sade.valinta.seuranta.resource.SijoittelunSeurantaResource;
 import fi.vm.sade.valinta.seuranta.sijoittelu.dto.SijoitteluDto;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +24,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
   private static final Logger LOG = LoggerFactory.getLogger(JatkuvaSijoitteluRouteImpl.class);
 
-  private final SijoittelunSeurantaResource sijoittelunSeurantaResource;
+  private final SijoitteluSeurantaResource sijoittelunSeurantaResource;
   private final int VAKIO_AJOTIHEYS = 24;
   private final Timer timer;
   private final Scheduler sijoitteluScheduler;
@@ -37,7 +37,11 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
       TimerTask repeatedTask =
           new TimerTask() {
             public void run() {
-              JatkuvaSijoitteluRouteImpl.this.teeJatkuvaSijoittelu();
+              try {
+                JatkuvaSijoitteluRouteImpl.this.teeJatkuvaSijoittelu();
+              } catch (Exception e) {
+                LOG.error("Exception in JatkuvaSijoitteluTimerTask", e);
+              }
             }
           };
       long delay = 1000L;
@@ -52,7 +56,7 @@ public class JatkuvaSijoitteluRouteImpl implements JatkuvaSijoittelu {
       @Value("${jatkuvasijoittelu.autostart:true}") boolean autoStartup,
       @Value("${valintalaskentakoostepalvelu.jatkuvasijoittelu.intervalMinutes:5}")
           long jatkuvaSijoitteluPollIntervalInMinutes,
-      SijoittelunSeurantaResource sijoittelunSeurantaResource,
+      SijoitteluSeurantaResource sijoittelunSeurantaResource,
       SchedulerFactoryBean schedulerFactoryBean) {
     this.sijoittelunSeurantaResource = sijoittelunSeurantaResource;
     this.timer =

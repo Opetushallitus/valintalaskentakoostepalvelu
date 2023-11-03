@@ -1,55 +1,72 @@
 package fi.vm.sade.valinta.kooste.external.resource.seuranta.impl;
 
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.seuranta.dto.DokumenttiDto;
 import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
 import io.reactivex.Observable;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DokumentinSeurantaAsyncResourceImpl extends UrlConfiguredResource
-    implements DokumentinSeurantaAsyncResource {
+public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAsyncResource {
+
+  private final RestCasClient restCasClient;
+
+  private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public DokumentinSeurantaAsyncResourceImpl(
-      @Qualifier("SeurantaRestClientCasInterceptor") AbstractPhaseInterceptor casInterceptor) {
-    super(TimeUnit.HOURS.toMillis(1), casInterceptor);
+      @Qualifier("SeurantaCasClient") RestCasClient restCasClient) {
+    this.restCasClient = restCasClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   public Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId) {
-    return postAsObservableLazily(
-        getUrl("seuranta-service.dokumentinseuranta.paivitadokumenttiid", uuid),
-        DokumenttiDto.class,
-        Entity.entity(dokumenttiId, MediaType.TEXT_PLAIN));
+    return Observable.fromFuture(
+        this.restCasClient.post(
+            this.urlConfiguration.url(
+                "seuranta-service.dokumentinseuranta.paivitadokumenttiid", uuid),
+            new TypeToken<DokumenttiDto>() {},
+            dokumenttiId,
+            Map.of("Content-Type", "text/plain"),
+            10 * 60 * 1000));
   }
 
   public Observable<String> luoDokumentti(String kuvaus) {
-    return postAsObservableLazily(
-        getUrl("seuranta-service.dokumentinseuranta"),
-        String.class,
-        Entity.entity(kuvaus, MediaType.TEXT_PLAIN));
+    return Observable.fromFuture(
+        this.restCasClient.post(
+            this.urlConfiguration.url("seuranta-service.dokumentinseuranta"),
+            new TypeToken<String>() {},
+            kuvaus,
+            Map.of("Content-Type", "text/plain"),
+            10 * 60 * 1000));
   }
 
   public Observable<DokumenttiDto> paivitaKuvaus(String uuid, String kuvaus) {
-    return postAsObservableLazily(
-        getUrl("seuranta-service.dokumentinseuranta.paivitakuvaus", uuid),
-        DokumenttiDto.class,
-        Entity.entity(kuvaus, MediaType.TEXT_PLAIN));
+    return Observable.fromFuture(
+        this.restCasClient.post(
+            this.urlConfiguration.url("seuranta-service.dokumentinseuranta.paivitakuvaus", uuid),
+            new TypeToken<DokumenttiDto>() {},
+            kuvaus,
+            Map.of("Content-Type", "text/plain"),
+            10 * 60 * 1000));
   }
 
   public Observable<DokumenttiDto> lisaaVirheilmoituksia(
       String uuid, List<VirheilmoitusDto> virheilmoitukset) {
-    return postAsObservableLazily(
-        getUrl("seuranta-service.dokumentinseuranta.lisaavirheita", uuid),
-        DokumenttiDto.class,
-        Entity.json(virheilmoitukset));
+    return Observable.fromFuture(
+        this.restCasClient.post(
+            this.urlConfiguration.url("seuranta-service.dokumentinseuranta.lisaavirheita", uuid),
+            new TypeToken<DokumenttiDto>() {},
+            virheilmoitukset,
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 }

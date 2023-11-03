@@ -2,12 +2,12 @@ package fi.vm.sade.valinta.kooste.erillishaku.util;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.util.ValidoiTilatUtil.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
 import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** @author Jussi Jartamo */
 public class ValidoiTilatUtilTest {

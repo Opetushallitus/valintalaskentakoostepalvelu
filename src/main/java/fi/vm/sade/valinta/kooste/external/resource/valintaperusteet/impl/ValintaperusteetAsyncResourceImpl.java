@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl;
 
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
@@ -12,62 +12,55 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import io.reactivex.Observable;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource
-    implements ValintaperusteetAsyncResource {
+public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncResource {
   private static final Logger LOG =
       LoggerFactory.getLogger(ValintaperusteetAsyncResourceImpl.class);
-  private final HttpClient httpClient;
+  private final RestCasClient httpClient;
+
+  private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public ValintaperusteetAsyncResourceImpl(
-      @Qualifier("ValintaperusteetCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("ValintaperusteetHttpClient") HttpClient httpClient) {
-    super(TimeUnit.HOURS.toMillis(1L), casInterceptor);
+      @Qualifier("ValintaperusteetCasClient") RestCasClient httpClient) {
     this.httpClient = httpClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
     LOG.info("Valinnanvaiheiden haku...");
-    return getAsObservableLazily(
-        getUrl(
-            "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.ilmanlaskentaa",
-            hakukohdeOid),
-        new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {}.getType());
+    return Observable.fromFuture(
+        this.httpClient.get(
+            this.urlConfiguration.url(
+                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.ilmanlaskentaa",
+                hakukohdeOid),
+            new TypeToken<List<ValinnanVaiheJonoillaDTO>>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   public CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(
       String hakukohdeOid) {
-    return httpClient.getJson(
-        getUrl(
+    return httpClient.get(
+        this.urlConfiguration.url(
             "valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.hakijaryhma",
             hakukohdeOid),
-        Duration.ofHours(1),
-        new com.google.gson.reflect.TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {}.getType());
+        new TypeToken<List<ValintaperusteetHakijaryhmaDTO>>() {},
+        Collections.emptyMap(),
+        60 * 60 * 1000);
   }
 
   public CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
@@ -81,126 +74,147 @@ public class ValintaperusteetAsyncResourceImpl extends UrlConfiguredResource
     }
 
     String url =
-        getUrl(
+        this.urlConfiguration.url(
             "valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet",
             parameters.toArray());
 
-    return httpClient.getJson(
-        url,
-        Duration.ofHours(1),
-        new com.google.gson.reflect.TypeToken<List<ValintaperusteetDTO>>() {}.getType());
+    return httpClient.get(
+        url, new TypeToken<List<ValintaperusteetDTO>>() {}, Collections.emptyMap(), 60 * 60 * 1000);
   }
 
   public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
-    return getAsObservableLazily(
-        getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku", hakuOid),
-        new TypeToken<List<HakukohdeViiteDTO>>() {}.getType(),
-        ACCEPT_JSON);
+    return Observable.fromFuture(
+        this.httpClient.get(
+            this.urlConfiguration.url(
+                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku", hakuOid),
+            new TypeToken<List<HakukohdeViiteDTO>>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
-  public Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde) {
-    return postAsObservableLazily(
-        getUrl(
-            "valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.tuohakukohde"),
-        Entity.entity(hakukohde, MediaType.APPLICATION_JSON_TYPE),
-        ACCEPT_JSON);
+  public Observable<ResponseEntity> tuoHakukohde(HakukohdeImportDTO hakukohde) {
+    return Observable.fromFuture(
+        this.httpClient
+            .post(
+                this.urlConfiguration.url(
+                    "valintaperusteet-service.valintalaskentakoostepalvelu.valintaperusteet.tuohakukohde"),
+                hakukohde,
+                Collections.emptyMap(),
+                10 * 60 * 1000)
+            .thenApply(r -> ResponseEntity.status(r.getStatusCode()).build()));
   }
 
   @Override
   public CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
-    return httpClient.getJson(
-        getUrl(
+    return httpClient.get(
+        this.urlConfiguration.url(
             "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet.oid",
             hakukohdeOid),
-        Duration.ofHours(1),
-        new com.google.gson.reflect.TypeToken<List<ValintaperusteDTO>>() {}.getType());
+        new TypeToken<List<ValintaperusteDTO>>() {},
+        Collections.emptyMap(),
+        60 * 60 * 1000);
   }
 
   @Override
   public Observable<List<HakukohdeJaValintaperusteDTO>> findAvaimet(
       Collection<String> hakukohdeOids) {
-    return postAsObservableLazily(
-        getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet"),
-        new TypeToken<List<HakukohdeJaValintaperusteDTO>>() {}.getType(),
-        Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
-        client -> {
-          client.accept(MediaType.APPLICATION_JSON_TYPE);
-          return client;
-        });
+    return Observable.fromFuture(
+        this.httpClient.post(
+            this.urlConfiguration.url(
+                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.avaimet"),
+            new TypeToken<List<HakukohdeJaValintaperusteDTO>>() {},
+            Lists.newArrayList(hakukohdeOids),
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
   public Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid) {
-    return getAsObservableLazily(
-        getUrl(
-            "valintaperusteet-service.valintalaskentakoostepalvelu.valinnanvaihe.valintaperusteet",
-            valinnanvaiheOid),
-        new TypeToken<List<ValintaperusteetDTO>>() {}.getType());
+    return Observable.fromFuture(
+        this.httpClient.get(
+            this.urlConfiguration.url(
+                "valintaperusteet-service.valintalaskentakoostepalvelu.valinnanvaihe.valintaperusteet",
+                valinnanvaiheOid),
+            new TypeToken<List<ValintaperusteetDTO>>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
   public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
       Collection<String> hakukohdeOids) {
-    return postAsObservableLazily(
-        getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
-        new GenericType<List<HakukohdeJaValintakoeDTO>>() {}.getType(),
-        Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE),
-        ACCEPT_JSON);
+    return Observable.fromFuture(
+        this.httpClient.post(
+            this.urlConfiguration.url(
+                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
+            new com.google.gson.reflect.TypeToken<List<HakukohdeJaValintakoeDTO>>() {},
+            hakukohdeOids,
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
   public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
       Collection<String> hakukohdeOids) {
-    return postAsObservableLazily(
-        getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
-        new TypeToken<List<HakukohdeJaValintakoeDTO>>() {}.getType(),
-        Entity.entity(Lists.newArrayList(hakukohdeOids), MediaType.APPLICATION_JSON_TYPE),
-        client -> {
-          client.accept(MediaType.APPLICATION_JSON_TYPE);
-          return client;
-        });
+    return Observable.fromFuture(
+        this.httpClient.post(
+            this.urlConfiguration.url(
+                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
+            new com.google.gson.reflect.TypeToken<List<HakukohdeJaValintakoeDTO>>() {},
+            Lists.newArrayList(hakukohdeOids),
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
   public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle(
       Collection<String> hakukohdeOids) {
-    return postAsObservableLazily(
-        getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintatapajono"),
-        new TypeToken<Map<String, List<ValintatapajonoDTO>>>() {}.getType(),
-        Entity.entity(hakukohdeOids, MediaType.APPLICATION_JSON_TYPE));
+    return Observable.fromFuture(
+        this.httpClient.post(
+            this.urlConfiguration.url(
+                "valintaperusteet-service.valintalaskentakoostepalvelu.valintatapajono"),
+            new com.google.gson.reflect.TypeToken<Map<String, List<ValintatapajonoDTO>>>() {},
+            hakukohdeOids,
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
   public Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid) {
-    return getAsObservableLazily(
-        getUrl("valintaperusteet-service.valintalaskentakoostepalvelu.valintakoe", hakukohdeOid),
-        new GenericType<List<ValintakoeDTO>>() {}.getType(),
-        ACCEPT_JSON);
+    return Observable.fromFuture(
+        this.httpClient.get(
+            this.urlConfiguration.url(
+                "valintaperusteet-service.valintalaskentakoostepalvelu.valintakoe", hakukohdeOid),
+            new com.google.gson.reflect.TypeToken<List<ValintakoeDTO>>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
   public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
     String url =
-        getUrl(
+        this.urlConfiguration.url(
             "valintaperusteet-service.valintalaskentakoostepalvelu.valinnanvaihe.hakukohteet", oid);
     LOG.info("Calling url {}", url);
-    return getAsObservableLazily(url, new TypeToken<Set<String>>() {}.getType());
+
+    return Observable.fromFuture(
+        this.httpClient.get(
+            url,
+            new com.google.gson.reflect.TypeToken<Set<String>>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
   public Observable<String> haeValintaryhmaVastuuorganisaatio(String valintaryhmaOid) {
     String url =
-        getUrl(
+        this.urlConfiguration.url(
             "valintaperusteet-service.valintalaskentakoostepalvelu.valintaryhma.vastuuorganisaatio",
             valintaryhmaOid);
     LOG.info("Calling url {}", url);
-    return getAsObservableLazily(
-        url,
-        String.class,
-        client -> {
-          client.accept(MediaType.TEXT_PLAIN_TYPE);
-          return client;
-        });
+    return Observable.fromFuture(
+        this.httpClient.get(
+            url, new TypeToken<String>() {}, Map.of("Accept", "text/plain"), 10 * 60 * 1000));
   }
 }

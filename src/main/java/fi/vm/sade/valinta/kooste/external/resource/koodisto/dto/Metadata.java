@@ -4,6 +4,8 @@ public class Metadata {
   private String nimi;
   private String kieli;
 
+  private String kuvaus;
+
   public void setKieli(String kieli) {
     this.kieli = kieli;
   }
@@ -12,11 +14,19 @@ public class Metadata {
     this.nimi = nimi;
   }
 
+  public void setKuvaus(String kuvaus) {
+    this.kuvaus = kuvaus;
+  }
+
   public String getKieli() {
     return kieli;
   }
 
   public String getNimi() {
     return nimi;
+  }
+
+  public String getKuvaus() {
+    return kuvaus;
   }
 }

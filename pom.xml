@@ -4,28 +4,31 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.14</version>
+    </parent>
+
     <artifactId>valintalaskentakoostepalvelu</artifactId>
     <groupId>fi.vm.sade.valinta</groupId>
-    <version>5.1-SNAPSHOT</version>
+    <version>6.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Valintalaskentakoostepalvelu</name>
 
     <properties>
         <auditlog.api.version>8.3.0-SNAPSHOT</auditlog.api.version>
-        <jsch.version>0.1.55</jsch.version>
-        <fake-sftp-server-rule.version>2.0.1</fake-sftp-server-rule.version>
         <cxf.version>3.3.5</cxf.version>
-        <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
+        <fasterxml.jackson.version>2.13.5</fasterxml.jackson.version> <!-- newest version breaks tests -->
         <jetty.version>9.4.27.v20200227</jetty.version>
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
-        <spring.security.version>5.1.8.RELEASE</spring.security.version>
-        <spring.version>5.1.14.RELEASE</spring.version>
-        <jaxb.version>2.3.0</jaxb.version>
-        <mockito.version>3.2.4</mockito.version>
+        <spring.security.version>5.8.3</spring.security.version>
+        <spring.version>5.3.27</spring.version>
+        <mockito.version>5.4.0</mockito.version>
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
-        <sijoittelu.version>7.5.0-SNAPSHOT</sijoittelu.version>
+        <sijoittelu.version>8.0.0-SNAPSHOT</sijoittelu.version>
         <valinta-sharedutils.version>5.11-SNAPSHOT</valinta-sharedutils.version>
         <valintaperusteet.version>5.17-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>5.17.2-SNAPSHOT</valintalaskenta.version>
@@ -34,239 +37,105 @@
     <dependencyManagement>
         <dependencies>
             <!-- SADE -->
+
             <dependency>
-                <groupId>fi.vm.sade.valintaperusteet</groupId>
-                <artifactId>sharedutils</artifactId>
-                <version>${valinta-sharedutils.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>io.reactivex</groupId>
-                        <artifactId>rxjava</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>1.7.0</version>
             </dependency>
             <dependency>
-                <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>opintopolku-cas-servlet-filter</artifactId>
-                <version>0.1.2-SNAPSHOT</version>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-webmvc-core</artifactId>
+                <version>1.7.0</version>
             </dependency>
             <dependency>
-                <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>java-cxf</artifactId>
-                <version>0.4.0-SNAPSHOT</version>
+                <groupId>org.jasig.cas.client</groupId>
+                <artifactId>cas-client-core</artifactId>
+                <version>3.4.1</version>
             </dependency>
             <dependency>
-                <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>0.3.0-SNAPSHOT</version>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>1.6.2</version>
             </dependency>
             <dependency>
-                <groupId>fi.vm.sade.organisaatio</groupId>
-                <artifactId>organisaatio-api</artifactId>
-                <version>2018-7-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>jsr311-api</artifactId>
-                        <groupId>javax.ws.rs</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.10.6</version>
             </dependency>
             <dependency>
-              <groupId>io.swagger</groupId>
-              <artifactId>swagger-jaxrs</artifactId>
-              <version>1.5.21</version>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.tarjonta</groupId>
-                <artifactId>tarjonta-api</artifactId>
-                <version>2018-15-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>jsr311-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.wordnik</groupId>
-                        <artifactId>swagger-jaxrs_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.wordnik</groupId>
-                        <artifactId>swagger-annotations_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.cxf</groupId>
-                        <artifactId>cxf-bundle</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.koodisto</groupId>
-                <artifactId>koodisto-api</artifactId>
-                <version>2019-01-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>jsr311-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.sun.jersey</groupId>
-                        <artifactId>jersey-server</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.httpcomponents</groupId>
-                        <artifactId>httpclient</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>java-http</artifactId>
-                <version>0.2.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>java-cas</artifactId>
-                <version>0.6.2-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade</groupId>
-                <artifactId>auditlogger</artifactId>
-                <version>${auditlog.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-expression</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-aop</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-tx</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context-support</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-core</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security</groupId>
-                <artifactId>spring-security-config</artifactId>
-                <version>${spring.security.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-core</artifactId>
-                <version>${cxf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                <version>${cxf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-rs-service-description-swagger</artifactId>
-                <version>${cxf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.13</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.github.baev</groupId>
-                <artifactId>hamcrest-optional</artifactId>
-                <version>1.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mongodb</groupId>
-                <artifactId>mongo-java-driver</artifactId>
-                <version>3.12.7</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>29.0-jre</version>
-            </dependency>
-            <dependency>
-                <groupId>io.reactivex.rxjava2</groupId>
-                <artifactId>rxjava</artifactId>
-                <version>2.2.19</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>1.14</version>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.10</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.11</version>
+                <version>3.13.0</version>
             </dependency>
             <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>2.7</version>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>java-http</artifactId>
+                <version>0.6.0-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>javax.validation</groupId>
-                <artifactId>validation-api</artifactId>
-                <version>2.0.1.Final</version>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>0.4.1-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>2.4.0-b180830.0359</version>
+                <groupId>fi.vm.sade.java-utils</groupId>
+                <artifactId>java-cas</artifactId>
+                <version>1.1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-core</artifactId>
+                <version>3.3.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jvnet.staxex</groupId>
+                <artifactId>stax-ex</artifactId>
+                <version>1.8.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.java-json-tools</groupId>
+                <artifactId>json-schema-validator</artifactId>
+                <version>2.2.14</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>2.11.12</version>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>3.3.0</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>2.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.messaging.saaj</groupId>
+                <artifactId>saaj-impl</artifactId>
+                <version>2.0.0-M1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>9.0-beta</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>3.0.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
+                <artifactId>jackson-databind</artifactId>
                 <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
@@ -275,298 +144,114 @@
                 <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-parameter-names</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.4.0-b180830.0359</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-jaxb-annotations</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>2.0.1.Final</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jdk8</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.7</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.14</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>29.0-jre</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongo-java-driver</artifactId>
+                <version>3.12.7</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <groupId>org.reactivestreams</groupId>
+                <artifactId>reactive-streams</artifactId>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-joda</artifactId>
-                <version>${fasterxml.jackson.version}</version>
+                <groupId>org.opentest4j</groupId>
+                <artifactId>opentest4j</artifactId>
+                <version>1.2.0</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.woodstox</groupId>
-                <artifactId>woodstox-core</artifactId>
-                <version>6.2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>3.0.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-webapp</artifactId>
-                <version>${jetty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-access</artifactId>
-                <version>1.3.0-alpha5</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-core</artifactId>
-                <version>${jaxb.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>${jaxb.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>2.10</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>joda-time</groupId>
-                <artifactId>joda-time</artifactId>
-                <version>2.10.6</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.spec.javax.transaction</groupId>
-                <artifactId>jboss-transaction-api_1.1_spec</artifactId>
-                <version>1.0.1.Final</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.spec.javax.interceptor</groupId>
-                <artifactId>jboss-interceptors-api_1.1_spec</artifactId>
-                <version>1.0.1.Final</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.sf.ehcache</groupId>
-                <artifactId>ehcache-core</artifactId>
-                <version>2.6.11</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mongodb.morphia</groupId>
-                <artifactId>morphia</artifactId>
-                <version>1.3.2</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.xml.ws</groupId>
-                <artifactId>jaxws-api</artifactId>
-                <version>2.3.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.ws</groupId>
-                <artifactId>jaxws-ri</artifactId>
-                <version>3.0.0-M3</version>
-                <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jaxb</groupId>
-                <artifactId>txw2</artifactId>
-                <version>3.0.0-M4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jvnet.mimepull</groupId>
-                <artifactId>mimepull</artifactId>
-                <version>1.9.13</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.annotation</groupId>
-                <artifactId>javax.annotation-api</artifactId>
-                <version>1.3.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.woodstox</groupId>
-                <artifactId>stax2-api</artifactId>
-                <version>4.2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections</artifactId>
-                <version>0.9.10</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm</artifactId>
-                <version>9.0-beta</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm-commons</artifactId>
-                <version>9.0-beta</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.messaging.saaj</groupId>
-                <artifactId>saaj-impl</artifactId>
-                <version>2.0.0-M1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-collections4</artifactId>
-                <version>4.4</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.xml.fastinfoset</groupId>
-                <artifactId>FastInfoset</artifactId>
-                <version>2.0.0-M2</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.ws.rs</groupId>
-                <artifactId>javax.ws.rs-api</artifactId>
-                <version>2.1.1</version>
-            </dependency>
-            <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib-nodep</artifactId>
-                <version>3.3.0</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.activation</groupId>
-                <artifactId>activation</artifactId>
-                <version>1.1.1</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
+                <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-core</artifactId>
-                <version>1.6.2</version>
+                <version>2.2.15</version>
             </dependency>
             <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-library</artifactId>
-                <version>2.11.12</version>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>2.2.15</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.mail</groupId>
-                <artifactId>jakarta.mail</artifactId>
-                <version>2.0.0-RC6</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-ext</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.java-json-tools</groupId>
-                <artifactId>json-schema-validator</artifactId>
-                <version>2.2.14</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-core</artifactId>
-                <version>1.3</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jvnet.staxex</groupId>
-                <artifactId>stax-ex</artifactId>
-                <version>1.8.1</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.activation</groupId>
-                <artifactId>jakarta.annotation</artifactId>
-                <version>2.0.0-RC5</version>
-            </dependency>
-            <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>2.3.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jasig.cas.client</groupId>
-                <artifactId>cas-client-core</artifactId>
-                <version>3.4.1</version>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>2.2.15</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <!-- spring boot -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.3.2</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
-            <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>opintopolku-jetty</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
         </dependency>
+
+        <!-- Sade -->
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-spring-security</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>0.6.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-user-details-service</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
+            <version>0.3.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-http</artifactId>
+            <version>0.6.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-cas</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-cas-servlet-filter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>java-cxf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-access</artifactId>
+            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.rajapinnat</groupId>
@@ -574,51 +259,14 @@
             <version>${kela.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.codepoetics</groupId>
-            <artifactId>protonpack</artifactId>
-            <version>1.16</version>
-        </dependency>
-        <dependency>
             <groupId>fi.vm.sade</groupId>
             <artifactId>auditlogger</artifactId>
             <version>${auditlog.api.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-slf4j_2.11</artifactId>
-            <version>2.5.31</version>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-testkit_2.11</artifactId>
-            <version>2.5.31</version>
-            <scope>test</scope>
-        </dependency>
-      <dependency>
-          <groupId>io.reactivex.rxjava2</groupId>
-          <artifactId>rxjava</artifactId>
-      </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.spec</groupId>
-            <artifactId>jboss-javaee-6.0</artifactId>
-            <version>1.0.0.Final</version>
-            <type>pom</type>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jaxrs-api</artifactId>
-                    <groupId>org.jboss.resteasy</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- SADE -->
-        <dependency>
             <groupId>fi.vm.sade.tarjonta</groupId>
             <artifactId>tarjonta-api</artifactId>
+            <version>2018-15-SNAPSHOT</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -626,30 +274,23 @@
                     <groupId>javax.ws.rs</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>swagger-jaxrs_2.10</artifactId>
                     <groupId>com.wordnik</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>swagger-annotations_2.10</artifactId>
-                    <groupId>com.wordnik</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
                 <exclusion>
                     <artifactId>*</artifactId>
                     <groupId>org.springframework</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>cxf-bundle</artifactId>
                     <groupId>org.apache.cxf</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                    <groupId>org.apache.cxf</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.koodisto</groupId>
             <artifactId>koodisto-api</artifactId>
+            <version>2020.01-SNAPSHOT</version>
             <scope>compile</scope>
             <exclusions>
                 <exclusion>
@@ -660,29 +301,35 @@
                     <groupId>fi.vm.sade.generic</groupId>
                     <artifactId>generic-common</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-server</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>seuranta-api</artifactId>
-            <version>5.3-SNAPSHOT</version>
-        </dependency>
-        <!-- REST, Json -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-parameter-names</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>5.4-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.cxf</groupId>
+                    <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
+            <version>2023.09.111204.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jsr311-api</artifactId>
@@ -694,18 +341,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.rajapinnat</groupId>
-            <artifactId>kela-tkuva</artifactId>
-            <version>${kela.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20200518</version>
-        </dependency>
-
-        <!-- POI -->
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>java-poi</artifactId>
@@ -717,7 +352,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- Internal -->
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>valintalaskenta-tulos-api</artifactId>
@@ -744,33 +378,110 @@
             <artifactId>sijoittelu-tulos-api</artifactId>
             <version>${sijoittelu.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>com.fatboyindustrial.gson-javatime-serialisers</groupId>
-            <artifactId>gson-javatime-serialisers</artifactId>
-            <version>1.1.1</version>
+            <groupId>fi.vm.sade.valintaperusteet</groupId>
+            <artifactId>valintalaskenta-domain</artifactId>
+            <version>${valintalaskenta.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>gson</artifactId>
-                    <groupId>com.google.code.gson</groupId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>fi.vm.sade.valintaperusteet</groupId>
+            <artifactId>sharedutils</artifactId>
+            <version>${valinta-sharedutils.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.reactivex</groupId>
+                    <artifactId>rxjava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.cxf</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
 
+        <!-- logging -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+
+        <!-- reactive -->
+        <dependency>
+            <groupId>com.codepoetics</groupId>
+            <artifactId>protonpack</artifactId>
+            <version>1.16</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_2.11</artifactId>
+            <version>2.5.31</version>
+        </dependency>
+      <dependency>
+          <groupId>io.reactivex.rxjava3</groupId>
+          <artifactId>rxjava</artifactId>
+          <version>3.1.6</version>
+      </dependency>
+
+        <!-- REST, Json -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${fasterxml.jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>${fasterxml.jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10</version>
+        </dependency>
+
+        <!-- swagger -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-webmvc-core</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-security</artifactId>
+            <version>1.7.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.2.15</version>
+        </dependency>
+
+        <!-- commons -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.20</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-rs-service-description-swagger</artifactId>
-            <version>${cxf.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>${jsch.version}</version>
+            <version>1.24.0</version>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
@@ -778,63 +489,34 @@
             <version>3.2.2</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-        </dependency>
-        <!-- Commons-Logging on loggaus jarjestelma siina missa SLF4J jos halutaan
-          logitus SLF4J:lla niin taytyy kayttaa JCL-OVER-SLF4J:ta eli java commons
-          logging over slf4j !!! -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <!-- spring security -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <version>4.2.18.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-        </dependency>
-        <!-- Tests -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.13.0</version>
         </dependency>
 
+        <!-- Tests -->
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.baev</groupId>
-            <artifactId>hamcrest-optional</artifactId>
-            <version>1.0</version>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20200518</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.stefanbirkner</groupId>
-            <artifactId>fake-sftp-server-rule</artifactId>
-            <version>${fake-sftp-server-rule.version}</version>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade</groupId>
@@ -843,18 +525,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.kubek2k</groupId>
-            <artifactId>springockito</artifactId>
-            <version>1.0.9</version>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-client</artifactId>
+            <version>${cxf.version}</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <artifactId>mockito-all</artifactId>
-                    <groupId>org.mockito</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
-
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
@@ -866,15 +541,6 @@
                     <groupId>ch.qos.logback</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.valintaperusteet</groupId>
-            <artifactId>valintalaskenta-domain</artifactId>
-            <version>${valintalaskenta.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.valintaperusteet</groupId>
-            <artifactId>sharedutils</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jasig.cas.client</groupId>
@@ -892,28 +558,38 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.ws</groupId>
-            <artifactId>jaxws-api</artifactId>
-        </dependency>
-      <dependency>
-          <groupId>com.sun.xml.ws</groupId>
-          <artifactId>jaxws-ri</artifactId>
-          <type>zip</type>
-      </dependency>
-      <dependency>
-          <groupId>io.mikael</groupId>
-          <artifactId>urlbuilder</artifactId>
-          <version>2.0.9</version>
-      </dependency>
-        <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
             <artifactId>sharedutils</artifactId>
             <version>${valinta-sharedutils.version}</version>
             <type>test-jar</type>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.cxf</groupId>
+                    <artifactId>cxf-rt-frontend-jaxws</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.fatboyindustrial.gson-javatime-serialisers</groupId>
+            <artifactId>gson-javatime-serialisers</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>gson</artifactId>
+                    <groupId>com.google.code.gson</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-testkit_2.11</artifactId>
+            <version>2.5.31</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -938,13 +614,26 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <!-- Käytössä on vielä vanhoja kirjastoja jotka käyttävät reflektiota JDK-luokkien käpistelyyn -->
+                    <argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.0.1</version>
+                <version>2.38.0</version>
                 <configuration>
                     <java>
                         <googleJavaFormat>
-                            <version>1.8</version>
+                            <version>1.10.0</version>
                             <style>GOOGLE</style>
                         </googleJavaFormat>
                     </java>
@@ -971,8 +660,8 @@
                         </goals>
                         <configuration>
                             <target>
-                                <echo message="writing ${project.build.outputDirectory}/webapp/buildversion.txt"/>
-                                <echo file="${project.build.outputDirectory}/webapp/buildversion.txt">
+                                <echo message="writing ${project.build.outputDirectory}/static/buildversion.txt"/>
+                                <echo file="${project.build.outputDirectory}/static/buildversion.txt">
                                     <![CDATA[artifactId=${project.artifactId}
 version=${project.version}
 buildNumber=${build}
@@ -982,7 +671,7 @@ buildTtime=${maven.build.timestamp}
 ]]>
                                 </echo>
                                 <loadfile property="buildversiontxt"
-                                          srcFile="${project.build.outputDirectory}/webapp/buildversion.txt"/>
+                                          srcFile="${project.build.outputDirectory}/static/buildversion.txt"/>
                                 <echo message="${buildversiontxt}"/>
                                 <echo file="target/mavenversion.txt">${project.version}</echo>
                             </target>
@@ -996,76 +685,8 @@ buildTtime=${maven.build.timestamp}
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <release>11</release>
+                    <release>17</release>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty.version}</version>
-                <configuration>
-                    <systemProperties>
-                        <systemProperty>
-                            <name>log4j.configuration</name>
-                            <value>file:///${basedir}/src/test/resources/log4j.properties</value>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>spring.profiles.active</name>
-                            <value>test</value>
-                        </systemProperty>
-                    </systemProperties>
-                    <webAppConfig>
-                        <contextPath>/${project.artifactId}</contextPath>
-                        <descriptor>${basedir}/src/main/resources/webapp/WEB-INF/web.xml</descriptor>
-                    </webAppConfig>
-                    <stopPort>21079</stopPort>
-                    <stopKey>STOP</stopKey>
-                    <httpConnector>
-                        <port>18180</port>
-                        <idleTimeout>30000000</idleTimeout>
-                    </httpConnector>
-                    <contextHandlers>
-                        <contextHandler implementation="org.eclipse.jetty.webapp.WebAppContext">
-                            <contextPath>/valintalaskentakoostepalvelu</contextPath>
-                            <resourceBase>
-                                ${basedir}/target/valintalaskentakoostepalvelu
-                            </resourceBase>
-                            <configurationClasses>
-                                <configurationClass>org.eclipse.jetty.webapp.WebInfConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.webapp.WebXmlConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.webapp.MetaInfConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.webapp.FragmentConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.plus.webapp.EnvConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.plus.webapp.PlusConfiguration</configurationClass>
-                                <configurationClass>org.eclipse.jetty.webapp.JettyWebXmlConfiguration
-                                </configurationClass>
-                            </configurationClasses>
-                        </contextHandler>
-                    </contextHandlers>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-servlets</artifactId>
-                        <version>${jetty.version}</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>org.javassist</groupId>
-                                <artifactId>javassist</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm</artifactId>
-                        <version>9.0-beta</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm-commons</artifactId>
-                        <version>9.0-beta</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -1080,54 +701,10 @@ buildTtime=${maven.build.timestamp}
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>11</version>
+                                    <version>17</version>
                                 </requireJavaVersion>
                                 <dependencyConvergence/>
                             </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>allinone</shadedClassifierName>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Main-Class>fi.vm.sade.valinta.kooste.KoosteProductionJetty</Main-Class>
-                                    </manifestEntries>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.handlers</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.schemas</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                     <resource>META-INF/cxf/bus-extensions.txt</resource>
-                                </transformer>
-                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
@@ -1152,12 +729,33 @@ buildTtime=${maven.build.timestamp}
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.0.2</version>
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <!-- Käytössä on vielä vanhoja kirjastoja jotka käyttävät reflektiota JDK-luokkien käpistelyyn -->
+                                <Add-Opens>java.base/java.util java.base/java.time</Add-Opens>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
 
     <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/opetushallitus/packages</url>
+            <releases>
+                <enabled>false</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
         <repository>
             <id>oph-sade-artifactory-snapshots</id>
             <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
@@ -1182,11 +780,6 @@ buildTtime=${maven.build.timestamp}
                 <enabled>false</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
-        </repository>
-        <repository>
-            <id>repository.jboss.org</id>
-            <name>JBoss Repository</name>
-            <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
         </repository>
     </repositories>
 

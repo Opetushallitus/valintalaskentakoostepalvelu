@@ -2,13 +2,11 @@ package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class VastaanottoRecordDTOTest {
   private final VastaanottoRecordDTO dto = new VastaanottoRecordDTO();
-  @Rule public final ExpectedException exception = ExpectedException.none();
 
   @Test
   public void acceptsNonNullValues() {
@@ -24,7 +22,6 @@ public class VastaanottoRecordDTOTest {
 
   @Test
   public void mayNotHaveNullProperties() throws JsonProcessingException {
-    exception.expect(IllegalArgumentException.class);
-    dto.setHakemusOid(null);
+    Assertions.assertThrows(IllegalArgumentException.class, () -> dto.setHakemusOid(null));
   }
 }

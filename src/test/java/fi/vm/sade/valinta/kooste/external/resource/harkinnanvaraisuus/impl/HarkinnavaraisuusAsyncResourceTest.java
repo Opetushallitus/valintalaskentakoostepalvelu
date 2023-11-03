@@ -1,10 +1,7 @@
 package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl;
 
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.POO_KOMO;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +20,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.impl.Op
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl.SuoritusrekisteriAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
@@ -34,8 +32,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class HarkinnavaraisuusAsyncResourceTest {
 
@@ -44,9 +42,9 @@ public class HarkinnavaraisuusAsyncResourceTest {
   OppijanumerorekisteriAsyncResource mockOnr = mock(OppijanumerorekisteriAsyncResourceImpl.class);
   public static final String PK_KOMO = "1.2.246.562.13.62959769647";
 
-  @Before
+  @BeforeEach
   public void init() {
-    startShared();
+    MockServicesApp.start();
   }
 
   @Test

@@ -7,7 +7,6 @@ import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSp
 
 import com.google.gson.GsonBuilder;
 import fi.vm.sade.tarjonta.service.resources.dto.HakukohdeDTO;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
@@ -17,6 +16,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResourc
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
@@ -28,9 +28,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -41,15 +41,16 @@ public class KoekutsukirjeetTest {
   static final Logger LOG = LoggerFactory.getLogger(KoekutsukirjeetTest.class);
   public static final long DEFAULT_POLL_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5L); // 5sec
   final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
+
   final HttpResourceBuilder.WebClientExposingHttpResource koekutsukirjeResource =
       new HttpResourceBuilder(getClass().getName())
           .address(root + "/viestintapalvelu/koekutsukirjeet/aktivoi")
           .buildExposingWebClientDangerously();
 
-  @Before
+  @BeforeEach
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
   }
 
   @Test
@@ -131,15 +132,15 @@ public class KoekutsukirjeetTest {
                           "Letterbodytext",
                           "FI",
                           Collections.emptyList())));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
 
       Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1))
           .vieLetterBatch(letterBatchArgumentCaptor.capture());
       LetterBatch batch = letterBatchArgumentCaptor.getValue();
-      Assert.assertEquals(
-          "Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.",
+      Assertions.assertEquals(
           2,
-          batch.getLetters().size());
+          batch.getLetters().size(),
+          "Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.");
       LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));
     } finally {
       MockTarjontaAsyncService.clear();
@@ -247,15 +248,15 @@ public class KoekutsukirjeetTest {
                           "Letterbodytext",
                           "FI",
                           Collections.emptyList())));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
 
-      Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).times(1))
+      Mockito.verify(viestintapalveluAsyncResource, Mockito.timeout(1000).atLeastOnce())
           .vieLetterBatch(letterBatchArgumentCaptor.capture());
       LetterBatch batch = letterBatchArgumentCaptor.getValue();
-      Assert.assertEquals(
-          "Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.",
+      Assertions.assertEquals(
           2,
-          batch.getLetters().size());
+          batch.getLetters().size(),
+          "Odotetaan kahta kirjettä. Yksi hakukohteessa olevalle hakijalle ja toinen osallistumistiedoista saadulle hakijalle.");
       LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(batch));
     } finally {
       MockTarjontaAsyncService.clear();

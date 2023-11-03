@@ -9,29 +9,29 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.model.types.KirjeenVastaanottaja;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /** @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa. */
 @Controller("SijoittelunTulosHaulleResource")
-@Path("sijoitteluntuloshaulle")
+@RequestMapping("/resources/sijoitteluntuloshaulle")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/sijoitteluntuloshaulle", description = "Sijoitteluntulosten generointi koko haulle")
+@Tag(name = "/sijoitteluntuloshaulle", description = "Sijoitteluntulosten generointi koko haulle")
 public class SijoittelunTulosHaulleResource {
   private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosHaulleResource.class);
 
@@ -45,18 +45,18 @@ public class SijoittelunTulosHaulleResource {
 
   @Autowired private HyvaksymiskirjeetService hyvaksymiskirjeetService;
 
-  @Context private HttpServletRequest httpServletRequestJaxRS;
-
-  @POST
-  @Path("/osoitetarrat")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(value = "/osoitetarrat", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = Response.class)
-  public ProsessiId osoitetarratKokoHaulle(@QueryParam("hakuOid") String hakuOid) {
+  @Operation(
+      summary = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
+  public ProsessiId osoitetarratKokoHaulle(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid) {
     try {
       SijoittelunTulosProsessi prosessi =
           new SijoittelunTulosProsessi(
@@ -78,19 +78,20 @@ public class SijoittelunTulosHaulleResource {
     }
   }
 
-  @POST
-  @Path("/hyvaksymiskirjeet")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(value = "/hyvaksymiskirjeet", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = Response.class)
+  @Operation(
+      summary = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
   public ProsessiId hyvaksymiskirjeetKokoHaulle(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("letterBodyText") String letterBodyText,
-      @QueryParam("asiointikieli") String asiointikieli) {
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "letterBodyText", required = false) String letterBodyText,
+      @RequestParam(value = "asiointikieli", required = false) String asiointikieli) {
     try {
       HyvaksymiskirjeDTO hyvaksymiskirjeDTO =
           new HyvaksymiskirjeDTO(
@@ -122,16 +123,19 @@ public class SijoittelunTulosHaulleResource {
     }
   }
 
-  @POST
-  @Path("/taulukkolaskennat")
-  @Consumes("application/json")
-  @Produces("application/json")
+  @PostMapping(value = "/taulukkolaskennat", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @ApiOperation(
-      value = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
-      response = Response.class)
-  public ProsessiId taulukkolaskennatKokoHaulle(@QueryParam("hakuOid") String hakuOid) {
+  @Operation(
+      summary = "Aktivoi osoitetarrojen luonnin annetuille hakemuksille",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = ProsessiId.class)))
+      })
+  public ProsessiId taulukkolaskennatKokoHaulle(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      HttpServletRequest request) {
     try {
       SijoittelunTulosProsessi prosessi =
           new SijoittelunTulosProsessi(
@@ -144,7 +148,7 @@ public class SijoittelunTulosHaulleResource {
           prosessi,
           hakuOid,
           "latest",
-          AuthorizationUtil.createAuditSession(httpServletRequestJaxRS),
+          AuthorizationUtil.createAuditSession(request),
           SecurityContextHolder.getContext().getAuthentication());
       dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
       return prosessi.toProsessiId();

@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
@@ -9,7 +9,7 @@ import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HakijapalveluTest {
 

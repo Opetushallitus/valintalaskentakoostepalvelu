@@ -1,13 +1,11 @@
 package fi.vm.sade.valinta.kooste.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import fi.vm.sade.koodisto.service.GenericFault;
 import fi.vm.sade.koodisto.service.KoodiService;
@@ -19,33 +17,31 @@ import fi.vm.sade.koodisto.service.types.common.KoodiType;
 import fi.vm.sade.koodisto.service.types.common.KoodiUriAndVersioType;
 import fi.vm.sade.koodisto.service.types.common.SuhteenTyyppiType;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.tarjonta.service.TarjontaPublicService;
-import fi.vm.sade.tarjonta.service.types.HakukohdeTyyppi;
-import fi.vm.sade.tarjonta.service.types.TarjontaTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.hakuimport.resource.HakuImportResource;
 import java.util.ArrayList;
 import java.util.List;
 import javax.jws.WebParam;
 import javax.servlet.http.HttpServletRequest;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /** User: wuoti Date: 20.5.2013 Time: 13.27 */
+@Profile("hakuimport")
+@Disabled
 @Configuration
 @ContextConfiguration(classes = HakuImportKoosteReititysTest.class)
 @PropertySource("classpath:test.properties")
 @ImportResource({"classpath:META-INF/spring/context/hakuimport-context.xml", "test-context.xml"})
-@RunWith(SpringJUnit4ClassRunner.class)
+@ActiveProfiles("hakuimport")
+@ExtendWith(SpringExtension.class)
 public class HakuImportKoosteReititysTest {
 
   private static final String HAKU_OID = "hakuoid1";
@@ -134,26 +130,11 @@ public class HakuImportKoosteReititysTest {
     return koodiService;
   }
 
-  @Bean
-  public TarjontaPublicService getTarjontaPublicServiceMock() {
-    TarjontaPublicService tarjontaService = mock(TarjontaPublicService.class);
-    TarjontaTyyppi tarjonta = new TarjontaTyyppi();
-    for (String[] uriAndOid : HAKUKOHDE_URIS_AND_OIDS) {
-      HakukohdeTyyppi hakukohde = new HakukohdeTyyppi();
-      hakukohde.setHakukohdeNimi(uriAndOid[0]);
-      hakukohde.setOid(uriAndOid[1]);
-      tarjonta.getHakukohde().add(hakukohde);
-    }
-    when(tarjontaService.haeTarjonta(eq(HAKU_OID))).thenReturn(tarjonta);
-    return tarjontaService;
-  }
-
   @Autowired private ValintaperusteetAsyncResource valintaperusteService;
 
   @Autowired private KoodiService koodiService;
 
   @Test
-  @Ignore
   public void testImportHaku() {
     HttpServletRequest requestMock = mock(HttpServletRequest.class);
     hakuImportAktivointiResource.aktivoiHakuImport(HAKU_OID, requestMock);

@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintalaskenta;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -70,10 +70,10 @@ public class SureKonvertointiTest {
             .get()
             .getAvain()
             .replace("_OPPIAINE", "");
-    Assert.assertEquals(
+    assertEquals(
         "5",
         aa.stream().filter(a -> a1ESAinetunniste.equals(a.getAvain())).findAny().get().getArvo());
-    Assert.assertEquals(
+    assertEquals(
         "6",
         aa.stream()
             .filter(a -> (a1ESAinetunniste + "_VAL1").equals(a.getAvain()))
@@ -81,14 +81,14 @@ public class SureKonvertointiTest {
             .get()
             .getArvo());
 
-    Assert.assertEquals(
-        "HI:lla on lisäksi kaksi valinnaista",
+    assertEquals(
         3L,
-        aa.stream().filter(a -> a.getAvain().startsWith("PK_HI")).count());
+        aa.stream().filter(a -> a.getAvain().startsWith("PK_HI")).count(),
+        "HI:lla on lisäksi kaksi valinnaista");
 
-    Assert.assertTrue(
-        "PK_A12_VAL1 löytyy",
-        aa.stream().filter(a -> a.getAvain().equals("PK_A12_VAL1")).count() == 1L);
+    assertTrue(
+        aa.stream().filter(a -> a.getAvain().equals("PK_A12_VAL1")).count() == 1L,
+        "PK_A12_VAL1 löytyy");
   }
 
   @Test
@@ -101,7 +101,7 @@ public class SureKonvertointiTest {
 
     Oppija oppija = oppijat.get(0);
 
-    Assert.assertTrue(oppija.getSuoritukset().get(0).getSuoritus().isVahvistettu());
+    assertTrue(oppija.getSuoritukset().get(0).getSuoritus().isVahvistettu());
 
     final List<AvainMetatiedotDTO> konvertoitu = YoToAvainSuoritustietoDTOConverter.convert(oppija);
 
@@ -190,7 +190,7 @@ public class SureKonvertointiTest {
         a -> {
           final List values =
               konvertoitu.stream().filter(k -> k.getAvain().equals(a)).collect(Collectors.toList());
-          assertEquals("values for " + a + ": " + values, 1, values.size());
+          assertEquals(1, values.size(), "values for " + a + ": " + values);
         });
 
     final List<Map<String, String>> ainereaali =
@@ -292,7 +292,7 @@ public class SureKonvertointiTest {
         OppijaToAvainArvoDTOConverter.convert(
             o.getOppijanumero(), o.getSuoritukset(), hakemus, null);
 
-    Assert.assertEquals(4, arvot.size());
+    assertEquals(4, arvot.size());
     String b1SVAinetunniste =
         arvot.stream()
             .filter(a -> a.getAvain().startsWith("PK_B1") && "SV".equals(a.getArvo()))
@@ -333,13 +333,15 @@ public class SureKonvertointiTest {
     assertEquals("4", a.arvosana);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testEriAsteikkojenArvosanojaEiVertailla() {
-    OppiaineArvosana a =
-        ArvosanaToAvainArvoDTOConverter.parasArvosana(
-            ImmutableList.of(
-                new OppiaineArvosana("", "", false, 1, "4", "4-10"),
-                new OppiaineArvosana("", "", false, 1, "4", "0-5")));
+    Assertions.assertThrows(
+        RuntimeException.class,
+        () ->
+            ArvosanaToAvainArvoDTOConverter.parasArvosana(
+                ImmutableList.of(
+                    new OppiaineArvosana("", "", false, 1, "4", "4-10"),
+                    new OppiaineArvosana("", "", false, 1, "4", "0-5"))));
   }
 
   @Test

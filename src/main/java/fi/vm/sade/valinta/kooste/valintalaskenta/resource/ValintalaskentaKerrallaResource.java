@@ -2,51 +2,44 @@ package fi.vm.sade.valinta.kooste.valintalaskenta.resource;
 
 import static fi.vm.sade.valinta.seuranta.dto.IlmoitusDto.ilmoitus;
 import static java.util.Arrays.asList;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
+import fi.vm.sade.valinta.kooste.dto.Vastaus;
 import fi.vm.sade.valinta.kooste.external.resource.seuranta.LaskentaSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Laskenta;
-import fi.vm.sade.valinta.kooste.valintalaskenta.dto.LaskentaStartParams;
 import fi.vm.sade.valinta.kooste.valintalaskenta.dto.Maski;
 import fi.vm.sade.valinta.kooste.valintalaskenta.route.ValintalaskentaKerrallaRouteValvomo;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller("ValintalaskentaKerrallaResource")
-@Path("valintalaskentakerralla")
+@RestController("ValintalaskentaKerrallaResource")
+@RequestMapping("/resources/valintalaskentakerralla")
 @PreAuthorize("isAuthenticated()")
-@Api(
-    value = "/valintalaskentakerralla",
+@Tag(
+    name = "/valintalaskentakerralla",
     description = "Valintalaskenta kaikille valinnanvaiheille kerralla")
 public class ValintalaskentaKerrallaResource {
   private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaKerrallaResource.class);
@@ -63,30 +56,30 @@ public class ValintalaskentaKerrallaResource {
   @Autowired private LaskentaSeurantaAsyncResource seurantaAsyncResource;
   @Autowired private AuthorityCheckService authorityCheckService;
 
-  @POST
-  @Path("/haku/{hakuOid}/tyyppi/HAKU")
-  @Consumes(APPLICATION_JSON)
-  @Produces(APPLICATION_JSON)
-  public void valintalaskentaKokoHaulle(
-      @PathParam("hakuOid") String hakuOid,
-      @QueryParam("erillishaku") Boolean erillishaku,
-      @QueryParam("valinnanvaihe") Integer valinnanvaihe,
-      @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
-      @QueryParam("haunnimi") String haunnimi,
-      @QueryParam("nimi") String nimi,
-      @Suspended AsyncResponse asyncResponse) {
+  @PostMapping(value = "/haku/{hakuOid}/tyyppi/HAKU", produces = MediaType.APPLICATION_JSON_VALUE)
+  public DeferredResult<ResponseEntity<Vastaus>> valintalaskentaKokoHaulle(
+      @PathVariable("hakuOid") String hakuOid,
+      @RequestParam(value = "erillishaku", required = false) Boolean erillishaku,
+      @RequestParam(value = "valinnanvaihe", required = false) Integer valinnanvaihe,
+      @RequestParam(value = "valintakoelaskenta", required = false) Boolean valintakoelaskenta,
+      @RequestParam(value = "haunnimi", required = false) String haunnimi,
+      @RequestParam(value = "nimi", required = false) String nimi) {
     authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
+    DeferredResult<ResponseEntity<Vastaus>> result = new DeferredResult<>(1 * 60 * 1000l);
+
     try {
-      asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-      asyncResponse.setTimeoutHandler(
-          (AsyncResponse asyncResponseTimeout) -> {
+      result.onTimeout(
+          () -> {
             LOG.error(
                 "Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/HAKU?valinnanvaihe={}&valintakoelaskenta={}\r\n{}",
                 hakuOid,
                 valinnanvaihe,
                 valintakoelaskenta);
-            asyncResponse.resume(errorResponse("Ajo laskennalle aikakatkaistu!"));
+            result.setErrorResult(
+                ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                    .body("Ajo laskennalle aikakatkaistu!"));
           });
+
       final String userOID = AuthorizationUtil.getCurrentUser();
       valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(
           new LaskentaParams(
@@ -99,35 +92,37 @@ public class ValintalaskentaKerrallaResource {
               hakuOid,
               Optional.empty(),
               Boolean.TRUE.equals(erillishaku)),
-          asyncResponse::resume);
+          result);
     } catch (Throwable e) {
       LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
-      asyncResponse.resume(
-          errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
-      throw e;
+      result.setErrorResult(
+          ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .body("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
     }
+
+    return result;
   }
 
-  @POST
-  @Path("/haku/{hakuOid}/tyyppi/{tyyppi}/whitelist/{whitelist}")
-  @Consumes(APPLICATION_JSON)
-  @Produces(APPLICATION_JSON)
-  public void valintalaskentaHaulle(
-      @PathParam("hakuOid") String hakuOid,
-      @QueryParam("erillishaku") Boolean erillishaku,
-      @QueryParam("valinnanvaihe") Integer valinnanvaihe,
-      @QueryParam("valintakoelaskenta") Boolean valintakoelaskenta,
-      @QueryParam("haunnimi") String haunnimi,
-      @QueryParam("nimi") String nimi,
-      @QueryParam("valintaryhma") String valintaryhmaOid,
-      @PathParam("tyyppi") LaskentaTyyppi laskentatyyppi,
-      @PathParam("whitelist") boolean whitelist,
-      List<String> stringMaski,
-      @Suspended AsyncResponse asyncResponse) {
+  @PostMapping(
+      value = "/haku/{hakuOid}/tyyppi/{tyyppi}/whitelist/{whitelist:.+}",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DeferredResult<ResponseEntity<Vastaus>> valintalaskentaHaulle(
+      @PathVariable("hakuOid") String hakuOid,
+      @RequestParam(value = "erillishaku", required = false) Boolean erillishaku,
+      @RequestParam(value = "valinnanvaihe", required = false) Integer valinnanvaihe,
+      @RequestParam(value = "valintakoelaskenta", required = false) Boolean valintakoelaskenta,
+      @RequestParam(value = "haunnimi", required = false) String haunnimi,
+      @RequestParam(value = "nimi", required = false) String nimi,
+      @RequestParam(value = "valintaryhma", required = false) String valintaryhmaOid,
+      @PathVariable("tyyppi") LaskentaTyyppi laskentatyyppi,
+      @PathVariable("whitelist") boolean whitelist,
+      @RequestBody List<String> stringMaski) {
+    DeferredResult<ResponseEntity<Vastaus>> result = new DeferredResult<>(1 * 60 * 1000l);
+
     try {
-      asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-      asyncResponse.setTimeoutHandler(
-          (AsyncResponse asyncResponseTimeout) -> {
+      result.onTimeout(
+          () -> {
             final String hakukohdeOids = hakukohdeOidsFromMaskiToString(stringMaski);
             LOG.error(
                 "Laskennan kaynnistys timeouttasi kutsulle /haku/{}/tyyppi/{}/whitelist/{}?valinnanvaihe={}&valintakoelaskenta={}\r\n{}",
@@ -137,7 +132,9 @@ public class ValintalaskentaKerrallaResource {
                 valinnanvaihe,
                 valintakoelaskenta,
                 hakukohdeOids);
-            asyncResponse.resume(errorResponse("Uudelleen ajo laskennalle aikakatkaistu!"));
+            result.setErrorResult(
+                ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                    .body("Uudelleen ajo laskennalle aikakatkaistu!"));
           });
 
       Maski maski = whitelist ? Maski.whitelist(stringMaski) : Maski.blacklist(stringMaski);
@@ -150,7 +147,8 @@ public class ValintalaskentaKerrallaResource {
         authorityCheckObservable = Observable.empty();
       } else {
         authorityCheckObservable =
-            authorityCheckService.getAuthorityCheckForRoles(valintalaskentaAllowedRoles);
+            Observable.fromFuture(
+                authorityCheckService.getAuthorityCheckForRoles(valintalaskentaAllowedRoles));
       }
 
       valintalaskentaKerrallaService.kaynnistaLaskentaHaulle(
@@ -164,113 +162,139 @@ public class ValintalaskentaKerrallaResource {
               hakuOid,
               Optional.of(maski),
               Boolean.TRUE.equals(erillishaku)),
-          asyncResponse::resume,
+          result,
           authorityCheckObservable);
 
-    } catch (ForbiddenException fe) {
-      asyncResponse.resume(fe);
-      throw fe;
+    } catch (AccessDeniedException e) {
+      result.setErrorResult(ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage()));
     } catch (Throwable e) {
       LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe!", e);
-      asyncResponse.resume(
-          errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
+      result.setErrorResult(
+          ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .body("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
       throw e;
     }
+
+    return result;
   }
 
-  @POST
-  @Path("/uudelleenyrita/{uuid}")
-  @Consumes(APPLICATION_JSON)
-  @Produces(APPLICATION_JSON)
-  public void uudelleenajoLaskennalle(
-      @PathParam("uuid") String uuid, @Suspended AsyncResponse asyncResponse) {
-    asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-    asyncResponse.setTimeoutHandler(
-        (AsyncResponse asyncResponseTimeout) -> {
+  @PostMapping(value = "/uudelleenyrita/{uuid:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public DeferredResult<ResponseEntity<Vastaus>> uudelleenajoLaskennalle(
+      @PathVariable("uuid") String uuid) {
+    DeferredResult<ResponseEntity<Vastaus>> result = new DeferredResult<>(1 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
           LOG.error("Uudelleen ajo laskennalle({}) timeouttasi!", uuid);
-          asyncResponseTimeout.resume(errorResponse("Uudelleen ajo laskennalle timeouttasi!"));
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Uudelleen ajo laskennalle timeouttasi!"));
         });
+
     checkAuthorizationForLaskentaFromSeuranta(uuid)
         .subscribe(
             allowed -> {
-              kaynnistaLaskentaUudelleen(uuid, asyncResponse);
+              kaynnistaLaskentaUudelleen(uuid, result);
             },
             error -> {
               LOG.error(
                   "Valintalaskennan uudelleenajo epäonnistui, koska käyttöoikeudet eivät riittäneet!");
-              asyncResponse.resume(error);
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.FORBIDDEN).body(error.getMessage()));
             });
+
+    return result;
   }
 
-  private void kaynnistaLaskentaUudelleen(String uuid, AsyncResponse asyncResponse) {
+  private void kaynnistaLaskentaUudelleen(
+      String uuid, DeferredResult<ResponseEntity<Vastaus>> result) {
     try {
-      valintalaskentaKerrallaService.kaynnistaLaskentaUudelleen(
-          uuid, (Response response) -> asyncResponse.resume(response));
+      valintalaskentaKerrallaService.kaynnistaLaskentaUudelleen(uuid, result);
     } catch (Throwable e) {
       LOG.error("Laskennan kaynnistamisessa tapahtui odottamaton virhe", e);
-      asyncResponse.resume(
-          errorResponse("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
-      throw e;
+      result.setErrorResult(
+          ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .body("Odottamaton virhe laskennan kaynnistamisessa! " + e.getMessage()));
     }
   }
 
-  @GET
-  @Path("/status")
-  @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
+  @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Valintalaskennan tila",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = Laskenta.class)))
+      })
   public List<Laskenta> status() {
     return valintalaskentaValvomo.runningLaskentas();
   }
 
-  @GET
-  @Path("/status/{uuid}")
-  @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Valintalaskennan tila", response = Laskenta.class)
-  public Laskenta status(@PathParam("uuid") String uuid) {
+  @GetMapping(value = "/status/{uuid:.+}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Valintalaskennan tila",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = Laskenta.class)))
+      })
+  public ResponseEntity<? extends Object> status(@PathVariable("uuid") String uuid) {
     checkAuthorizationForLaskentaFromSeuranta(uuid);
-    return valintalaskentaValvomo
-        .fetchLaskenta(uuid)
-        .orElseThrow(() -> new NotFoundException("Valintalaskenta ei ole muistissa!"));
+    Optional<ResponseEntity<Laskenta>> result =
+        valintalaskentaValvomo
+            .fetchLaskenta(uuid)
+            .map(l -> ResponseEntity.status(HttpStatus.OK).body(l));
+
+    if (result.isPresent()) {
+      return result.get();
+    }
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Valintalaskenta ei ole muistissa!");
   }
 
-  @GET
-  @Path("/status/{uuid}/xls")
-  @Produces("application/vnd.ms-excel")
-  @ApiOperation(value = "Valintalaskennan tila", response = LaskentaStartParams.class)
-  public void statusXls(
-      @PathParam("uuid") final String uuid, @Suspended final AsyncResponse asyncResponse) {
-    asyncResponse.setTimeout(15L, TimeUnit.MINUTES);
-    asyncResponse.setTimeoutHandler(
-        (AsyncResponse asyncResponseTimeout) ->
-            asyncResponseTimeout.resume(
-                valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid)));
+  @GetMapping(value = "/status/{uuid}/xls", produces = "application/vnd.ms-excel")
+  @Operation(
+      summary = "Valintalaskennan tila",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = byte[].class)))
+      })
+  public DeferredResult<ResponseEntity<byte[]>> statusXls(@PathVariable("uuid") final String uuid) {
+
+    DeferredResult<ResponseEntity<byte[]>> result = new DeferredResult<>(15 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
+          result.setErrorResult(valintalaskentaStatusExcelHandler.createTimeoutErrorXls(uuid));
+        });
+
     checkAuthorizationForLaskentaFromSeuranta(uuid)
         .subscribe(
             allowed -> {
-              valintalaskentaStatusExcelHandler.getStatusXls(
-                  uuid, (Response response) -> asyncResponse.resume(response));
+              valintalaskentaStatusExcelHandler.getStatusXls(uuid, result);
             },
             error -> {
               LOG.error(
                   "Valintalaskennan tilan haku epäonnistui, koska käyttöoikeudet eivät riittäneet!");
-              asyncResponse.resume(error);
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.FORBIDDEN).body(error.getMessage()));
             });
+
+    return result;
   }
 
-  @DELETE
-  @Path("/haku/{uuid}")
-  public Response lopetaLaskenta(
-      @PathParam("uuid") String uuid,
-      @QueryParam("lopetaVainJonossaOlevaLaskenta") Boolean lopetaVainJonossaOlevaLaskenta) {
+  @DeleteMapping(value = "/haku/{uuid:.+}")
+  public ResponseEntity<String> lopetaLaskenta(
+      @PathVariable("uuid") String uuid,
+      @RequestParam(value = "lopetaVainJonossaOlevaLaskenta", required = false)
+          Boolean lopetaVainJonossaOlevaLaskenta) {
     if (uuid == null) {
-      return errorResponse("Uuid on pakollinen");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Uuid on pakollinen");
     }
     // Jos käyttöoikeustarkastelu epäonnistuu, tulee poikkeus, tämän suoritus
     // keskeytyy ja poikkeus muuttuu http-virhekoodiksi.
     checkAuthorizationForLaskentaFromSeuranta(uuid).blockingFirst();
     peruutaLaskenta(uuid, lopetaVainJonossaOlevaLaskenta);
     // Palauta OK odottamatta vastausta peruutuspyyntöön
-    return Response.ok().build();
+    return ResponseEntity.status(HttpStatus.OK).build();
   }
 
   private void peruutaLaskenta(String uuid, Boolean lopetaVainJonossaOlevaLaskenta) {
@@ -291,10 +315,6 @@ public class ValintalaskentaKerrallaResource {
 
   private void stop(String uuid) {
     valintalaskentaValvomo.fetchLaskenta(uuid).ifPresent(Laskenta::lopeta);
-  }
-
-  private Response errorResponse(final String errorMessage) {
-    return Response.serverError().entity(errorMessage).build();
   }
 
   private String hakukohdeOidsFromMaskiToString(List<String> maski) {

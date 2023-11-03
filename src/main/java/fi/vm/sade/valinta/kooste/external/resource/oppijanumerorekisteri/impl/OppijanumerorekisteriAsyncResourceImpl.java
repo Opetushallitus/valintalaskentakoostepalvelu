@@ -2,79 +2,74 @@ package fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.impl;
 
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloViiteDto;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import io.reactivex.Observable;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OppijanumerorekisteriAsyncResourceImpl extends UrlConfiguredResource
-    implements OppijanumerorekisteriAsyncResource {
-  private final HttpClient client;
+public class OppijanumerorekisteriAsyncResourceImpl implements OppijanumerorekisteriAsyncResource {
+  private final RestCasClient client;
+
+  private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public OppijanumerorekisteriAsyncResourceImpl(
-      @Qualifier("OppijanumerorekisteriServiceRestClientCasInterceptor")
-          AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("OppijanumerorekisteriHttpClient") HttpClient client) {
-    super(TimeUnit.HOURS.toMillis(1), casInterceptor);
+      @Qualifier("OppijanumerorekisteriCasClient") RestCasClient client) {
     this.client = client;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   public Observable<List<HenkiloPerustietoDto>> haeTaiLuoHenkilot(
       List<HenkiloCreateDTO> henkiloPrototyypit) {
-    return postAsObservableLazily(
-        getUrl("oppijanumerorekisteri-service.s2s.henkilo.findOrCreateMultiple"),
-        new GenericType<List<HenkiloPerustietoDto>>() {}.getType(),
-        Entity.entity(gson().toJson(henkiloPrototyypit), MediaType.APPLICATION_JSON_TYPE),
-        ACCEPT_JSON);
+    return Observable.fromFuture(
+        this.client.post(
+            this.urlConfiguration.url(
+                "oppijanumerorekisteri-service.s2s.henkilo.findOrCreateMultiple"),
+            new TypeToken<List<HenkiloPerustietoDto>>() {},
+            henkiloPrototyypit,
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   public CompletableFuture<List<HenkiloViiteDto>> haeHenkiloOidDuplikaatit(Set<String> personOids) {
-    String url = getUrl("oppijanumerorekisteri-service.s2s.duplicatesByPersonOids");
+    String url =
+        this.urlConfiguration.url("oppijanumerorekisteri-service.s2s.duplicatesByPersonOids");
     Map<String, Set<String>> henkiloSearchParams = new HashMap<>();
     henkiloSearchParams.put("henkiloOids", personOids);
     CompletableFuture<List<HenkiloViiteDto>> fut =
-        this.client.postJson(
+        this.client.post(
             url,
-            Duration.ofHours(1),
+            new TypeToken<List<HenkiloViiteDto>>() {},
             henkiloSearchParams,
-            new TypeToken<Map<String, Set<String>>>() {}.getType(),
-            new TypeToken<List<HenkiloViiteDto>>() {}.getType());
+            Collections.emptyMap(),
+            60 * 60 * 1000);
     return fut;
   }
 
   public CompletableFuture<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
-    String url = getUrl("oppijanumerorekisteri-service.henkilo.masterHenkilosByOidList");
+    String url =
+        this.urlConfiguration.url("oppijanumerorekisteri-service.henkilo.masterHenkilosByOidList");
     return CompletableFutureUtil.sequence(
             Lists.partition(personOids, 5000).stream()
                 .map(
                     chunk ->
-                        this.client.<List<String>, Map<String, HenkiloPerustietoDto>>postJson(
+                        this.client.post(
                             url,
-                            Duration.ofHours(1),
+                            new TypeToken<Map<String, HenkiloPerustietoDto>>() {},
                             chunk,
-                            new TypeToken<List<String>>() {}.getType(),
-                            new TypeToken<Map<String, HenkiloPerustietoDto>>() {}.getType()))
+                            Map.of("Content-Type", "application/json"),
+                            60 * 60 * 1000))
                 .collect(Collectors.toList()))
         .thenApplyAsync(
             chunks ->

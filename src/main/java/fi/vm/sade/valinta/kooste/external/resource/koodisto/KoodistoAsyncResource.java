@@ -12,4 +12,6 @@ public interface KoodistoAsyncResource {
   CompletableFuture<List<Koodi>> alakoodit(String koodiUri);
 
   CompletableFuture<Koodi> maatjavaltiot2ToMaatjavaltiot1(String koodiUri);
+
+  public CompletableFuture<List<Koodi>> haeKoodienUusinVersio(String... koodiUris);
 }

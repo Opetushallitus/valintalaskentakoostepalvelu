@@ -19,13 +19,15 @@ import io.reactivex.Observable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
+@Service
 public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
   private static final Logger LOG = LoggerFactory.getLogger(PistesyottoVientiService.class);
   private final DokumenttiAsyncResource dokumenttiAsyncResource;
@@ -77,7 +79,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
               String id = UUID.randomUUID().toString();
-              Observable<Response> tallennus =
+              Observable<ResponseEntity> tallennus =
                   dokumenttiAsyncResource.tallenna(
                       id,
                       "pistesyotto.xlsx",

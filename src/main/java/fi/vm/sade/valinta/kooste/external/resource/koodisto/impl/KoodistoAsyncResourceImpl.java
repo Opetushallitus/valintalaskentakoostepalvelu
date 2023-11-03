@@ -6,11 +6,9 @@ import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,5 +95,16 @@ public class KoodistoAsyncResourceImpl implements KoodistoAsyncResource {
         this.urlConfiguration.url("koodisto-service.json.koodi", koodiUri),
         Duration.ofMinutes(1),
         new TypeToken<Koodi>() {}.getType());
+  }
+
+  @Override
+  public CompletableFuture<List<Koodi>> haeKoodienUusinVersio(String... koodiUris) {
+    return this.client.getJson(
+        this.urlConfiguration.url("baseurl-koodisto-service")
+            + "/koodisto-service/rest/json/searchKoodis?koodiUris="
+            + Arrays.stream(koodiUris).collect(Collectors.joining(","))
+            + "&koodiversioSelection=LATEST",
+        Duration.ofMinutes(1),
+        new TypeToken<List<Koodi>>() {}.getType());
   }
 }

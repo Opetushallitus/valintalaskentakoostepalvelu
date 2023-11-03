@@ -1,71 +1,65 @@
 package fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.impl;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_OCTET_STREAM_TYPE;
-
-import com.google.common.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatch;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterBatchStatusDto;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.LetterResponse;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import io.reactivex.Observable;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.InputStream;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource
-    implements ViestintapalveluAsyncResource {
-  private final HttpClient client;
+public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncResource {
+  private final RestCasClient client;
+
+  private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public ViestintapalveluAsyncResourceImpl(
-      @Qualifier("viestintapalveluClientCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("ViestintapalveluHttpClient") HttpClient client) {
-    super(TimeUnit.HOURS.toMillis(20), casInterceptor);
+      @Qualifier("ViestintapalveluCasClient") RestCasClient client) {
     this.client = client;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
   public CompletableFuture<LetterResponse> vieLetterBatch(LetterBatch letterBatch) {
-    return this.client.postJson(
-        getUrl("viestintapalvelu.letter.async.letter"),
-        Duration.ofHours(20),
+    return this.client.post(
+        this.urlConfiguration.url("viestintapalvelu.letter.async.letter"),
+        new TypeToken<LetterResponse>() {},
         letterBatch,
-        new com.google.gson.reflect.TypeToken<LetterBatch>() {}.getType(),
-        new com.google.gson.reflect.TypeToken<LetterResponse>() {}.getType());
+        Collections.emptyMap(),
+        20 * 60 * 60 * 1000);
   }
 
   @Override
   public CompletableFuture<LetterBatchStatusDto> haeLetterBatchStatus(String letterBatchId) {
-    return this.client.getJson(
-        getUrl("viestintapalvelu.letter.async.letter.status", letterBatchId),
-        Duration.ofMinutes(1),
-        new com.google.gson.reflect.TypeToken<LetterBatchStatusDto>() {}.getType());
+    return this.client.get(
+        this.urlConfiguration.url("viestintapalvelu.letter.async.letter.status", letterBatchId),
+        new TypeToken<LetterBatchStatusDto>() {},
+        Collections.emptyMap(),
+        69 * 1000);
   }
 
   public Observable<LetterBatchCountDto> haeTuloskirjeenMuodostuksenTilanne(
       String hakuOid, String tyyppi, String kieli) {
-    return getAsObservableLazily(
-        getUrl("viestintapalvelu.luotettu.letter.count.type.language", hakuOid, tyyppi, kieli),
-        LetterBatchCountDto.class,
-        ACCEPT_JSON);
+    return Observable.fromFuture(
+        this.client.get(
+            this.urlConfiguration.url(
+                "viestintapalvelu.luotettu.letter.count.type.language", hakuOid, tyyppi, kieli),
+            new TypeToken<LetterBatchCountDto>() {},
+            Collections.emptyMap(),
+            10 * 1000));
   }
 
   @Override
@@ -81,25 +75,31 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource
     query.put("templateName", templateName);
     query.put("languageCode", languageCode);
     query.put("tag", hakukohdeOid);
-    return this.client.getJson(
-        getUrl("viestintapalvelu.template.gethistory", query),
-        Duration.ofMinutes(1),
-        new com.google.gson.reflect.TypeToken<List<TemplateHistory>>() {}.getType());
+    return this.client.get(
+        this.urlConfiguration.url("viestintapalvelu.template.gethistory", query),
+        new TypeToken<List<TemplateHistory>>() {},
+        Collections.emptyMap(),
+        60 * 1000);
   }
 
   @Override
-  public Observable<Response> haeOsoitetarrat(Osoitteet osoitteet) {
-    return postAsObservableLazily(
-        getUrl("viestintapalvelu.addresslabel.sync.pdf"),
-        Entity.json(osoitteet),
-        webClient -> webClient.accept(APPLICATION_OCTET_STREAM_TYPE));
+  public Observable<InputStream> haeOsoitetarrat(Osoitteet osoitteet) {
+    return Observable.fromFuture(
+        this.client
+            .post(
+                this.urlConfiguration.url("viestintapalvelu.addresslabel.sync.pdf"),
+                osoitteet,
+                Map.of("Accept", "application/octet-stream"),
+                10 * 60 * 1000 // TODO: mikä on oikea timeout?
+                )
+            .thenApply(r -> r.getResponseBodyAsStream()));
   }
 
   @Override
   public Observable<Optional<Long>> haeKirjelahetysEPostille(
       String hakuOid, String kirjeenTyyppi, String asiointikieli) {
     return haeKirjelahetys(
-        getUrl("viestintapalvelu.luotettu.letter.getbatchidreadyforeposti"),
+        this.urlConfiguration.url("viestintapalvelu.luotettu.letter.getbatchidreadyforeposti"),
         hakuOid,
         kirjeenTyyppi,
         asiointikieli);
@@ -109,7 +109,7 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource
   public Observable<Optional<Long>> haeKirjelahetysJulkaistavaksi(
       String hakuOid, String kirjeenTyyppi, String asiointikieli) {
     return haeKirjelahetys(
-        getUrl("viestintapalvelu.luotettu.letter.getbatchidreadyforpublish"),
+        this.urlConfiguration.url("viestintapalvelu.luotettu.letter.getbatchidreadyforpublish"),
         hakuOid,
         kirjeenTyyppi,
         asiointikieli);
@@ -117,37 +117,54 @@ public class ViestintapalveluAsyncResourceImpl extends UrlConfiguredResource
 
   private Observable<Optional<Long>> haeKirjelahetys(
       String url, String hakuOid, String kirjeenTyyppi, String asiointikieli) {
-    return getAsObservableLazily(
-        url,
-        (batchIdAsString) ->
-            StringUtils.isNumeric(batchIdAsString)
-                ? Optional.of(Long.parseLong(batchIdAsString))
-                : Optional.empty(),
-        client -> {
-          client.accept(MediaType.TEXT_PLAIN_TYPE);
-          client.query("hakuOid", hakuOid);
-          client.query("type", kirjeenTyyppi);
-          client.query("language", asiointikieli);
-          return client;
-        });
+    return Observable.fromFuture(
+        this.client
+            .get(
+                url
+                    + "?hakuOid="
+                    + hakuOid
+                    + "&type="
+                    + kirjeenTyyppi
+                    + "&language="
+                    + asiointikieli,
+                new TypeToken<String>() {},
+                Map.of("Accept", "text/plain"),
+                10 * 60 * 1000 // TODO: mikä on oikea timeout?
+                )
+            .thenApply(
+                batchIdAsString ->
+                    StringUtils.isNumeric(batchIdAsString)
+                        ? Optional.of(Long.parseLong(batchIdAsString))
+                        : Optional.empty()));
   }
 
   @Override
   public Observable<Optional<Long>> julkaiseKirjelahetys(Long batchId) {
-    return getAsObservableLazily(
-        getUrl("viestintapalvelu.luotettu.letter.publishletterbatch", batchId),
-        (batchIdAsString) ->
-            StringUtils.isNumeric(batchIdAsString)
-                ? Optional.of(Long.parseLong(batchIdAsString))
-                : Optional.empty(),
-        client -> client.accept(MediaType.TEXT_PLAIN_TYPE));
+    return Observable.fromFuture(
+        this.client
+            .get(
+                this.urlConfiguration.url(
+                    "viestintapalvelu.luotettu.letter.publishletterbatch", batchId),
+                new TypeToken<String>() {},
+                Map.of("Accept", "text/plain"),
+                10 * 60 * 1000 // TODO: mikä on oikea timeout?
+                )
+            .thenApply(
+                batchIdAsString ->
+                    StringUtils.isNumeric(batchIdAsString)
+                        ? Optional.of(Long.parseLong(batchIdAsString))
+                        : Optional.empty()));
   }
 
   @Override
   public Observable<Map<String, String>> haeEPostiOsoitteet(Long batchId) {
-    return getAsObservableLazily(
-        getUrl("viestintapalvelu.luotettu.letter.getepostiadressesforletterbatch", batchId),
-        new TypeToken<Map<String, String>>() {}.getType(),
-        ACCEPT_JSON);
+    return Observable.fromFuture(
+        this.client.get(
+            this.urlConfiguration.url(
+                "viestintapalvelu.luotettu.letter.getepostiadressesforletterbatch", batchId),
+            new TypeToken<Map<String, String>>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000 // TODO: mikä on oikea timeout
+            ));
   }
 }

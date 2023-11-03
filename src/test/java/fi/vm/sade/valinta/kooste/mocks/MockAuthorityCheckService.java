@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
-import io.reactivex.Observable;
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.ForbiddenException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 public class MockAuthorityCheckService extends AuthorityCheckService {
 
   @Override
-  public Observable<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
+  public CompletableFuture<HakukohdeOIDAuthorityCheck> getAuthorityCheckForRoles(
       Collection<String> roles) {
-    return Observable.just((oid) -> true);
+    return CompletableFuture.completedFuture((oid) -> true);
   }
 
   @Override

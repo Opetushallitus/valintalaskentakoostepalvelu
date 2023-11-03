@@ -1,10 +1,9 @@
 package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
@@ -19,6 +18,7 @@ import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.Hen
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
 import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
@@ -30,8 +30,8 @@ import java.util.List;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import org.apache.cxf.jaxrs.client.WebClient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ErillishakuResourceTest {
   private String hakuOid = "1.2.246.562.5.2013080813081926341928";
@@ -40,13 +40,13 @@ public class ErillishakuResourceTest {
   private String valintatapajonoOid = "14090336922663576781797489829886";
   private String henkiloOid = "hakija1";
   private final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
   final MockKoodistoCachedAsyncResource mockKoodistoCachedAsyncResource =
       new MockKoodistoCachedAsyncResource(mock(KoodistoAsyncResource.class));
 
-  @Before
+  @BeforeEach
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
   }
 
   private void testVientiExcelTiedostoon(Hakutyyppi hakutyyppi) {

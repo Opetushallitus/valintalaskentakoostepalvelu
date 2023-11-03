@@ -3,28 +3,26 @@ package fi.vm.sade.valinta.kooste.valintaperusteet;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import java.util.concurrent.TimeUnit;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.stream.Collectors;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller
-@Path("valintaperusteet")
+@RestController
+@RequestMapping("/resources/valintaperusteet")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/valintaperusteet", description = "Valintaperusteet")
+@Tag(name = "/valintaperusteet", description = "Valintaperusteet")
 public class ValintaperusteetResource {
   private final ValintaperusteetAsyncResource resource;
   private final Logger LOG = LoggerFactory.getLogger(ValintaperusteetResource.class);
@@ -34,23 +32,31 @@ public class ValintaperusteetResource {
     this.resource = resource;
   }
 
+  @GetMapping(
+      value = "/hakukohde/{hakukohdeOid}/kayttaaValintalaskentaa",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasAnyRole('ROLE_APP_VALINTAPERUSTEET_READ', 'ROLE_APP_VALINTAPERUSTEET_CRUD')")
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("/hakukohde/{hakukohdeOid}/kayttaaValintalaskentaa")
-  @ApiOperation(
-      value = "Käyttääkö hakukohde valintalaskentaa",
-      response = ValintaperusteetResourceResult.class)
-  public void kayttaaValintalaskentaa(
-      @PathParam("hakukohdeOid") String hakukohdeOid, @Suspended AsyncResponse asyncResponse) {
+  @Operation(
+      summary = "Käyttääkö hakukohde valintalaskentaa",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content =
+                @Content(schema = @Schema(implementation = ValintaperusteetResourceResult.class)))
+      })
+  public DeferredResult<ResponseEntity<ValintaperusteetResourceResult>> kayttaaValintalaskentaa(
+      @PathVariable("hakukohdeOid") String hakukohdeOid) {
+    DeferredResult<ResponseEntity<ValintaperusteetResourceResult>> result =
+        new DeferredResult<>(1 * 60 * 1000l);
     try {
-      asyncResponse.setTimeout(1L, TimeUnit.MINUTES);
-      asyncResponse.setTimeoutHandler(
-          asyncResponse1 -> {
+      result.onTimeout(
+          () -> {
             LOG.error("Valintaperusteet -kutsu aikakatkaistiin hakukohteelle {}", hakukohdeOid);
-            asyncResponse1.resume(
-                Response.serverError().entity("Valintaperusteet -kutsu aikakatkaistiin").build());
+            result.setErrorResult(
+                ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                    .body("Valintaperusteet -kutsu aikakatkaistiin"));
           });
+
       Observable.fromFuture(resource.haeValintaperusteet(hakukohdeOid, null))
           .subscribe(
               valintaperusteetDTOs -> {
@@ -69,23 +75,23 @@ public class ValintaperusteetResource {
                         .collect(Collectors.toList())
                         .isEmpty();
 
-                asyncResponse.resume(
-                    Response.ok()
-                        .entity(new ValintaperusteetResourceResult(kayttaaValintalaskentaa))
-                        .build());
+                result.setResult(
+                    ResponseEntity.status(HttpStatus.OK)
+                        .body(new ValintaperusteetResourceResult(kayttaaValintalaskentaa)));
               },
               e -> {
                 LOG.error("Valintaperusteet -kutsu epäonnistui hakukohteelle " + hakukohdeOid, e);
-                asyncResponse.resume(
-                    Response.serverError()
-                        .entity("Valintaperusteet -kutsu epäonnistui" + e.getMessage())
-                        .build());
+                result.setErrorResult(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Valintaperusteet -kutsu epäonnistui" + e.getMessage()));
               });
     } catch (Exception e) {
       String msg = "Odottamaton virhe valintalaskentapäättelyssä hakukohteelle " + hakukohdeOid;
       LOG.error(msg, e);
-      asyncResponse.resume(Response.serverError().entity(msg).build());
+      result.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg));
     }
+
+    return result;
   }
 
   public static class ValintaperusteetResourceResult {

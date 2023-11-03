@@ -1,8 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
@@ -13,8 +11,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -23,7 +21,7 @@ public class AtaruHakemusDTOTest {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   @Test
-  @Ignore // Tätä testiä on tarkoitus ajaa ainoastaan paikallisesti kehittäjän koneelta
+  @Disabled // Tätä testiä on tarkoitus ajaa ainoastaan paikallisesti kehittäjän koneelta
   public void testCreatingHakemusDTOFromAtaruHakemusWrapperWithRealData()
       throws ExecutionException, InterruptedException {
     final String hakemusOid = "1.2.246.562.11.00000000000000196362";
@@ -64,11 +62,11 @@ public class AtaruHakemusDTOTest {
   private void assertAvainArvo(
       List<AvainArvoDTO> avaimet, String expectedAvain, String expectedArvo) {
     assertTrue(
-        "HakemusDTO did not have avain " + expectedAvain + " with arvo " + expectedArvo,
         avaimet.stream()
             .anyMatch(
                 avainArvoDto ->
                     avainArvoDto.getAvain().equals(expectedAvain)
-                        && avainArvoDto.getArvo().equals(expectedArvo)));
+                        && avainArvoDto.getArvo().equals(expectedArvo)),
+        "HakemusDTO did not have avain " + expectedAvain + " with arvo " + expectedArvo);
   }
 }

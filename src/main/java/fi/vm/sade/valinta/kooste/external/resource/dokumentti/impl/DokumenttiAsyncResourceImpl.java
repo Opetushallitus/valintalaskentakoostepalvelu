@@ -1,44 +1,47 @@
 package fi.vm.sade.valinta.kooste.external.resource.dokumentti.impl;
 
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import io.reactivex.Observable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URLEncoder;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.util.stream.Collectors;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource
-    implements DokumenttiAsyncResource {
+public class DokumenttiAsyncResourceImpl implements DokumenttiAsyncResource {
   private static final Logger LOG = LoggerFactory.getLogger(DokumenttiAsyncResourceImpl.class);
   private final HttpClient client;
 
+  private final UrlConfiguration urlConfiguration;
+
   @Autowired
   public DokumenttiAsyncResourceImpl(@Qualifier("DokumenttiHttpClient") HttpClient client) {
-    super(TimeUnit.HOURS.toMillis(1));
     this.client = client;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
   public CompletableFuture<Void> uudelleenNimea(String dokumenttiId, String filename) {
     return this.client
         .putResponse(
-            getUrl("dokumenttipalvelu-service.dokumentit.uudelleennimea", dokumenttiId),
+            this.urlConfiguration.url(
+                "dokumenttipalvelu-service.dokumentit.uudelleennimea", dokumenttiId),
             Duration.ofMinutes(1),
             filename.getBytes(Charset.forName("UTF-8")),
             "text/plain")
@@ -54,32 +57,43 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource
   }
 
   @Override
-  public Observable<Response> tallenna(
+  public Observable<ResponseEntity> tallenna(
       String id,
       String filename,
       Long expirationDate,
       List<String> tags,
       String mimeType,
       InputStream filedata) {
-    return putAsObservableLazily(
-        getUrl("dokumenttipalvelu-service.dokumentit.tallenna"),
-        Entity.entity(filedata, MediaType.APPLICATION_OCTET_STREAM),
-        client -> {
-          client.query("id", id);
-          client.query("filename", filename);
-          client.query("expirationDate", expirationDate);
-          client.query("tags", tags.toArray());
-          client.query("mimeType", mimeType);
-          client.accept(MediaType.WILDCARD_TYPE);
-          return client;
-        });
+
+    try {
+      String url = this.urlConfiguration.url("dokumenttipalvelu-service.dokumentit.tallenna");
+      url += "?id=" + URLEncoder.encode(id, StandardCharsets.UTF_8);
+      url += "&filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8);
+      url += "&expirationDate=" + expirationDate;
+      url +=
+          "&tags="
+              + URLEncoder.encode(
+                  tags.stream().collect(Collectors.joining(",")), StandardCharsets.UTF_8);
+      url += "&mimetype=" + URLEncoder.encode(mimeType, StandardCharsets.UTF_8);
+
+      return Observable.fromFuture(
+          this.client
+              .putResponse(
+                  url,
+                  Duration.ofHours(1l),
+                  IOUtils.toByteArray(filedata),
+                  "application/octet-stream")
+              .thenApply(r -> ResponseEntity.ok().build()));
+    } catch (IOException e) {
+      return Observable.error(e);
+    }
   }
 
   @Override
   public CompletableFuture<HttpResponse<InputStream>> lataa(String documentId) {
     return this.client
         .getResponse(
-            getUrl("dokumenttipalvelu-service.dokumentit.lataa", documentId),
+            this.urlConfiguration.url("dokumenttipalvelu-service.dokumentit.lataa", documentId),
             Duration.ofMinutes(1),
             x -> x)
         .thenApply(
@@ -95,7 +109,7 @@ public class DokumenttiAsyncResourceImpl extends UrlConfiguredResource
   public CompletableFuture<Void> tyhjenna() {
     return this.client
         .putResponse(
-            getUrl("dokumenttipalvelu-service.dokumentit.tyhjenna"),
+            this.urlConfiguration.url("dokumenttipalvelu-service.dokumentit.tyhjenna"),
             Duration.ofMinutes(1),
             "I wanna be some body".getBytes(),
             "text/plain")

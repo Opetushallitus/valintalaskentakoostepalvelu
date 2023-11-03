@@ -1,14 +1,11 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusHakija;
@@ -20,6 +17,7 @@ import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockSuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
@@ -38,10 +36,10 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +49,7 @@ public class OppijanSuorituksetProxyResourceTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(OppijanSuorituksetProxyResourceTest.class);
   private static final String URL =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
   private static final String opiskelijaOid = "1.2.246.562.24.71943835646";
   private static final String hakemusOid = "1.2.246.562.11.00000000615";
   private static final String hakuOid = "1.2.246.562.29.90697286251";
@@ -73,13 +71,13 @@ public class OppijanSuorituksetProxyResourceTest {
 
   final Gson GSON = DateDeserializer.GSON;
 
-  @BeforeClass
+  @BeforeAll
   public static void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
   }
 
-  @Before
-  @After
+  @BeforeEach
+  @AfterEach
   public void resetMocks() {
     Mocks.reset();
   }
@@ -192,7 +190,8 @@ public class OppijanSuorituksetProxyResourceTest {
     Response response =
         proxyBatchResource.getWebClient().type(MediaType.APPLICATION_JSON_TYPE).post(allHakemus);
     assertEquals(200, response.getStatus());
-    assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+    assertTrue(
+        response.getMediaType().toString().startsWith(MediaType.APPLICATION_JSON_TYPE.toString()));
     String json = getJsonFromResponse(response);
 
     Map<String, Map<String, String>> oppijanSuoritukset =
@@ -204,9 +203,9 @@ public class OppijanSuorituksetProxyResourceTest {
     assertTrue(oppijanSuoritukset.keySet().stream().allMatch(poids::contains));
 
     assertTrue(
-        "At least some of the response answers should contain 9 as POHJAKOULUTUS",
         oppijanSuoritukset.values().stream()
-            .anyMatch(stringStringMap -> "9".equals(stringStringMap.get("POHJAKOULUTUS"))));
+            .anyMatch(stringStringMap -> "9".equals(stringStringMap.get("POHJAKOULUTUS"))),
+        "At least some of the response answers should contain 9 as POHJAKOULUTUS");
 
     MockSuoritusrekisteriAsyncResource.clear();
   }

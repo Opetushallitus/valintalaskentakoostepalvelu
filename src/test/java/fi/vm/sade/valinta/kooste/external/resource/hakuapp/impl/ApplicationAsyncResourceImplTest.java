@@ -1,25 +1,19 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
-import fi.vm.sade.valinta.kooste.cas.CasKoosteInterceptor;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.sharedutils.http.HttpResource;
-import java.lang.reflect.Type;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,11 +23,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.stubbing.Answer;
-import org.springframework.test.util.ReflectionTestUtils;
 
 public class ApplicationAsyncResourceImplTest {
   private final HttpResource wrappedHttpResource = mock(HttpResource.class);
@@ -46,17 +38,9 @@ public class ApplicationAsyncResourceImplTest {
       new Hakemus(null, null, null, null, null, "hakemus3", "INCOMPLETE", "person3");
   private final String urlToApplicationsList = "/url/to/applications/list";
   private final String urlToApplicationsListFull = "/url/to/applications/list/full";
-  private final HttpClient mockClient = mock(HttpClient.class);
+  private final RestCasClient mockClient = mock(RestCasClient.class);
   private ApplicationAsyncResourceImpl applicationAsyncResource =
-      new ApplicationAsyncResourceImpl(mockClient, mock(CasKoosteInterceptor.class));
-
-  @Before
-  public void setMockInsideResourceUnderTest() {
-    ReflectionTestUtils.setField(
-        applicationAsyncResource, "wrappedHttpResource", wrappedHttpResource);
-    ReflectionTestUtils.setField(
-        applicationAsyncResource, "urlConfiguration", mockUrlConfiguration);
-  }
+      new ApplicationAsyncResourceImpl(mockClient, mockUrlConfiguration);
 
   @Test
   public void stateParameterIsNotAddedWhenFetchingApplicationsByHakemusOidsWithoutKeysList() {
@@ -64,9 +48,9 @@ public class ApplicationAsyncResourceImplTest {
     when(mockUrlConfiguration.url(eq("haku-app.applications.list"), queryCaptor.capture()))
         .thenReturn(urlToApplicationsList);
     ArrayList<String> hakemusOids = Lists.newArrayList("hakemus1Oid", "hakemus2Oid");
-    when(mockClient.postJson(
-            eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
+    when(mockClient.post(eq(urlToApplicationsList), any(), eq(hakemusOids), anyMap(), anyInt()))
         .thenReturn(CompletableFuture.completedFuture(Lists.newArrayList(hakemus1, hakemus2)));
+
     List<HakemusWrapper> applications =
         applicationAsyncResource
             .getApplicationsByHakemusOids(hakemusOids)
@@ -95,10 +79,11 @@ public class ApplicationAsyncResourceImplTest {
     when(mockUrlConfiguration.url(eq("haku-app.applications.list"), queryCaptor.capture()))
         .thenReturn(urlToApplicationsList);
     ArrayList<String> hakemusOids = Lists.newArrayList("hakemus1Oid", "hakemus2Oid", "hakemus3Oid");
-    when(mockClient.postJson(
-            eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
+
+    when(mockClient.post(eq(urlToApplicationsList), any(), eq(hakemusOids), anyMap(), anyInt()))
         .thenReturn(
             CompletableFuture.completedFuture(Lists.newArrayList(hakemus1, hakemus2, hakemus3)));
+
     List<HakemusWrapper> applications =
         applicationAsyncResource
             .getApplicationsByHakemusOids(
@@ -127,9 +112,10 @@ public class ApplicationAsyncResourceImplTest {
     when(mockUrlConfiguration.url(eq("haku-app.applications.list"), queryCaptor.capture()))
         .thenReturn(urlToApplicationsList);
     ArrayList<String> hakemusOids = Lists.newArrayList("hakemus1Oid", "hakemus2Oid");
-    when(mockClient.postJson(
-            eq(urlToApplicationsList), any(Duration.class), eq(hakemusOids), any(), any()))
+
+    when(mockClient.post(eq(urlToApplicationsList), any(), eq(hakemusOids), anyMap(), anyInt()))
         .thenReturn(CompletableFuture.completedFuture(Lists.newArrayList(hakemus1, hakemus2)));
+
     List<String> keys = Collections.singletonList("hakemusOid");
     List<HakemusWrapper> applications =
         applicationAsyncResource
@@ -160,13 +146,14 @@ public class ApplicationAsyncResourceImplTest {
     when(mockUrlConfiguration.url(eq("haku-app.applications.listfull"), any(Map.class)))
         .thenReturn(eventualUrl);
 
-    when(mockClient.getJson(any(String.class), any(Duration.class), any(Type.class)))
+    when(mockClient.get(anyString(), any(), any(), anyInt()))
         .thenAnswer(
             (Answer<CompletableFuture<List<Hakemus>>>)
                 invocation -> {
                   assertEquals(eventualUrl, invocation.getArgument(0));
                   return CompletableFuture.completedFuture(Arrays.asList(hakemus1, hakemus2));
                 });
+
     List<HakemusWrapper> applications =
         applicationAsyncResource.getApplicationsByOid(hakuOid, hakukohdeOid).get(1L, SECONDS);
 

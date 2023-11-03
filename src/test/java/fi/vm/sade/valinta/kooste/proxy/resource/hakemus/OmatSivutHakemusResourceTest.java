@@ -1,21 +1,20 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.hakemus;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnString;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static javax.ws.rs.HttpMethod.GET;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.kooste.util.SecurityUtil;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class OmatSivutHakemusResourceTest {
@@ -24,14 +23,14 @@ public class OmatSivutHakemusResourceTest {
   public static final String PROXY_VALINTA_TULOS_SERVICE_JSON =
       "/proxy/vts/1.2.246.562.11.00003935855.json";
 
-  @Before
+  @BeforeEach
   public void init() {
-    startShared();
+    MockServicesApp.start();
     MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
         "ROLE_APP_HAKEMUS_READ_UPDATE_" + SecurityUtil.ROOTOID);
   }
 
-  @After
+  @AfterEach
   public void reset() {
     Integraatiopalvelimet.mockServer.reset();
   }
@@ -44,7 +43,7 @@ public class OmatSivutHakemusResourceTest {
     final HttpResourceBuilder.WebClientExposingHttpResource proxyResource =
         new HttpResourceBuilder(getClass().getName())
             .address(
-                resourcesAddress
+                MockServicesApp.resourcesAddress
                     + "/proxy/valintatulos/haku/"
                     + hakuOid
                     + "/hakemusOid/"

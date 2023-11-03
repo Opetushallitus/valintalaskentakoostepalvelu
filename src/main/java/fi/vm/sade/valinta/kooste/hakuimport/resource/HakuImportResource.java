@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.hakuimport.resource;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-
 import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.haku.dto.HakuImportProsessi;
@@ -13,29 +11,32 @@ import fi.vm.sade.valinta.kooste.valvomo.service.ValvomoService;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller("HakuImportResource")
-@Path("hakuimport")
+@RestController("HakuImportResource")
+@RequestMapping("/resources/hakuimport")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/hakuimport", description = "Haun tuontiin tarjonnalta")
+@Tag(name = "/hakuimport", description = "Haun tuontiin tarjonnalta")
 public class HakuImportResource {
   private static final Logger LOG = LoggerFactory.getLogger(HakuImportResource.class);
 
@@ -52,19 +53,29 @@ public class HakuImportResource {
   @Qualifier("hakuImportValvomo")
   private ValvomoService<HakuImportProsessi> hakuImportValvomo;
 
-  @GET
-  @Path("/status")
-  @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Hauntuontireitin tila", response = Collection.class)
+  @GetMapping(value = "/status", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Hauntuontireitin tila",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = List.class)))
+      })
   public Collection<ProsessiJaStatus<HakuImportProsessi>> status() {
     return hakuImportValvomo.getUusimmatProsessitJaStatukset();
   }
 
-  @GET
-  @Path("/aktivoi")
-  @ApiOperation(value = "Haun tuonnin aktivointi", response = String.class)
+  @GetMapping(value = "/aktivoi")
+  @Operation(
+      summary = "Haun tuonnin aktivointi",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public String aktivoiHakuImport(
-      @QueryParam("hakuOid") String hakuOid, @Context HttpServletRequest request) {
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      HttpServletRequest request) {
     if (!hakuParametritService.getParametritForHaku(hakuOid).valinnanhallintaEnabled()) {
       String errorMessage = "no privileges";
       AuditLog.log(
@@ -103,13 +114,19 @@ public class HakuImportResource {
     }
   }
 
+  @GetMapping(value = "/hakukohde")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_OPO')")
-  @GET
-  @Path("/hakukohde")
-  @ApiOperation(value = "Hakukohde tuonnin aktivointi", response = String.class)
+  @Operation(
+      summary = "Hakukohde tuonnin aktivointi",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = String.class)))
+      })
   public String aktivoiHakukohdeImport(
-      @QueryParam("hakukohdeOid") String hakukohdeOid, @Context HttpServletRequest request) {
+      @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
+      HttpServletRequest request) {
 
     if (StringUtils.isBlank(hakukohdeOid)) {
       String errorMessage = "get parameter 'hakukohde' required";

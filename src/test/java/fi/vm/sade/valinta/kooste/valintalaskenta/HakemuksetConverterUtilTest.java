@@ -7,15 +7,14 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec.laskennanalkamisparametri;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.github.npathai.hamcrestopt.OptionalMatchers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -49,15 +48,11 @@ import java.util.stream.Stream;
 import org.hamcrest.collection.IsMapContaining;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class HakemuksetConverterUtilTest {
-
-  @Rule public ExpectedException expected = ExpectedException.none();
 
   private final HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource =
       mock(HarkinnanvaraisuusAsyncResource.class);
@@ -349,7 +344,7 @@ public class HakemuksetConverterUtilTest {
 
   private HakemuksetConverterUtil hakemuksetConverterUtil;
 
-  @Before
+  @BeforeEach
   public void setup() {
     hakemuksetConverterUtil =
         new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
@@ -458,7 +453,7 @@ public class HakemuksetConverterUtilTest {
           }
         });
     List<SuoritusJaArvosanat> suoritukset = new ArrayList<>();
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.KESKEYTYNYT,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -483,7 +478,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistamatonLukioKeskeytynytHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YLIOPPILAS,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -508,7 +503,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.PERUSKOULU,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -527,12 +522,12 @@ public class HakemuksetConverterUtilTest {
             this.add(new AvainArvoDTO("lukioPaattotodistusVuosi", "2014"));
           }
         });
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YLIOPPILAS,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>()).get());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void
       pohjakoulutusHeittaaPoikkeuksenJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessa() {
     hakemuksetConverterUtil =
@@ -545,7 +540,9 @@ public class HakemuksetConverterUtilTest {
             this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.YLIOPPILAS));
           }
         });
-    hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>());
+    Assertions.assertThrows(
+        RuntimeException.class,
+        () -> hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>()));
   }
 
   @Test
@@ -560,7 +557,7 @@ public class HakemuksetConverterUtilTest {
             this.add(new AvainArvoDTO("lukioPaattotodistusVuosi", "2014"));
           }
         });
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YLIOPPILAS,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, new ArrayList<>()).get());
   }
@@ -580,7 +577,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistamatonLukioValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YLIOPPILAS,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -600,7 +597,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuYOValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YLIOPPILAS,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -621,7 +618,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusKeskeytynytHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.KESKEYTYNYT,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -642,7 +639,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusKeskeytynytHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.KESKEYTYNYT,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -664,7 +661,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusKeskenHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.PERUSKOULU,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -687,13 +684,13 @@ public class HakemuksetConverterUtilTest {
           }
         };
     Map<String, String> answers = hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset);
-    Assert.assertEquals("true", answers.get("preference1-discretionary"));
-    Assert.assertEquals(
+    Assertions.assertEquals("true", answers.get("preference1-discretionary"));
+    Assertions.assertEquals(
         "todistustenpuuttuminen", answers.get("preference1-discretionary-follow-up"));
-    Assert.assertEquals("true", answers.get("preference2-discretionary"));
-    Assert.assertEquals(
+    Assertions.assertEquals("true", answers.get("preference2-discretionary"));
+    Assertions.assertEquals(
         "todistustenpuuttuminen", answers.get("preference2-discretionary-follow-up"));
-    Assert.assertFalse(answers.containsKey("preference3-discretionary"));
+    Assertions.assertFalse(answers.containsKey("preference3-discretionary"));
   }
 
   @Test
@@ -712,7 +709,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuLukioValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YLIOPPILAS,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -732,7 +729,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.PERUSKOULU,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -753,7 +750,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuYksilollistettyPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YKSILOLLISTETTY,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -776,7 +773,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuOsittainYksilollistettyPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -799,7 +796,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuAlueittainYksilollistettyPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -819,7 +816,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuAlueittainYksilollistettyPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -840,7 +837,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuUlkomainenValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.PERUSKOULU,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -856,11 +853,11 @@ public class HakemuksetConverterUtilTest {
           }
         });
     List<SuoritusJaArvosanat> suoritukset = new ArrayList<>();
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
     suoritukset.add(vahvistettuUlkomainenValmisHakukaudella);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -881,7 +878,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistamatonYksilollistettyPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YKSILOLLISTETTY,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -902,7 +899,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistamatonOsittainYksilollistettyPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -923,7 +920,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistamatonAlueittainYksilollistettyPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -944,7 +941,7 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusValmisHakukaudella);
           }
         };
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.PERUSKOULU,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
   }
@@ -1088,7 +1085,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("PK_PAATTOTODISTUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
-    Assert.assertEquals(oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+    Assertions.assertEquals(
+        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
@@ -1122,7 +1120,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("PK_PAATTOTODISTUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
-    Assert.assertEquals(oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+    Assertions.assertEquals(
+        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
@@ -1165,7 +1164,7 @@ public class HakemuksetConverterUtilTest {
           }
         });
     String edellisenaVuonna = "1.1.2014";
-    Assert.assertEquals(
+    Assertions.assertEquals(
         "1.1.2015", HAKUKAUDELLA); // edellisenaVuonna needs to be fixed if HAKUKAUDELLA changes
 
     List<SuoritusJaArvosanat> suoritukset =
@@ -1223,7 +1222,7 @@ public class HakemuksetConverterUtilTest {
           }
         });
     String edellisenaVuonna = "1.1.2014";
-    Assert.assertEquals(
+    Assertions.assertEquals(
         "1.1.2015", HAKUKAUDELLA); // edellisenaVuonna needs to be fixed if HAKUKAUDELLA changes
     List<SuoritusJaArvosanat> suoritukset =
         new ArrayList<>() {
@@ -1266,7 +1265,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("AM_TILA", "false");
     oletettu.put("LK_TILA", "false");
     oletettu.put("YO_TILA", "false");
-    Assert.assertEquals(oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+    Assertions.assertEquals(
+        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
@@ -1293,7 +1293,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("LK_TILA", "false");
     oletettu.put("YO_TILA", "false");
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
-    Assert.assertEquals(oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+    Assertions.assertEquals(
+        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
@@ -1320,7 +1321,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("YO_TILA", "false");
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
     oletettu.put(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true");
-    Assert.assertEquals(oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+    Assertions.assertEquals(
+        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
@@ -1348,7 +1350,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("YO_TILA", "false");
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
     oletettu.put(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true");
-    Assert.assertEquals(oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+    Assertions.assertEquals(
+        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
@@ -1376,7 +1379,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("PK_PAATTOTODISTUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
-    Assert.assertEquals(oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+    Assertions.assertEquals(
+        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
@@ -1436,9 +1440,9 @@ public class HakemuksetConverterUtilTest {
         });
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), o, h, true);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(h, "POHJAKOULUTUS"));
-    Assert.assertEquals("2015", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
+    Assertions.assertEquals("2015", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
   }
 
   @Test
@@ -1462,9 +1466,9 @@ public class HakemuksetConverterUtilTest {
         });
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), o, h, true);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.YKSILOLLISTETTY, getFirstHakemusArvo(h, "POHJAKOULUTUS"));
-    Assert.assertEquals("2015", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
+    Assertions.assertEquals("2015", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
   }
 
   @Test
@@ -1490,10 +1494,10 @@ public class HakemuksetConverterUtilTest {
         });
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), o, h, true);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(h, "POHJAKOULUTUS"));
-    Assert.assertEquals("2012", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
-    Assert.assertEquals(
+    Assertions.assertEquals("2012", getFirstHakemusArvo(h, "PK_PAATTOTODISTUSVUOSI"));
+    Assertions.assertEquals(
         "true", getFirstHakemusArvo(h, Lisapistekoulutus.LISAKOULUTUS_AMMATTISTARTTI.name()));
   }
 
@@ -1669,7 +1673,7 @@ public class HakemuksetConverterUtilTest {
               .map(a -> a.getArvo())
               .findFirst()
               .get();
-      Assert.assertEquals("8", pk_arvosana);
+      Assertions.assertEquals("8", pk_arvosana);
     }
   }
 
@@ -2466,29 +2470,29 @@ public class HakemuksetConverterUtilTest {
 
       hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
           false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
-      Assert.assertTrue(
-          "PK_SUORITUSVUOSI löytyy ja sen arvo on 2015",
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(
                       a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo()))
                   .count()
-              == 1L);
-      Assert.assertEquals(
-          "PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
+              == 1L,
+          "PK_SUORITUSVUOSI löytyy ja sen arvo on 2015");
+      Assertions.assertEquals(
           new AvainArvoDTO("PK_SUORITUSLUKUKAUSI", "2"),
           hakemus.getAvaimet().stream()
               .filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()))
               .findFirst()
-              .get());
-      Assert.assertTrue(
-          "PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2015",
+              .get(),
+          "PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2");
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(
                       a ->
                           "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain())
                               && "2015".equals(a.getArvo()))
                   .count()
-              == 1L);
+              == 1L,
+          "PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2015");
     }
     {
       HakemusDTO hakemus = new HakemusDTO();
@@ -2504,29 +2508,29 @@ public class HakemuksetConverterUtilTest {
 
       hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
           false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
-      Assert.assertTrue(
-          "PK_SUORITUSVUOSI löytyy ja sen arvo on 2015",
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(
                       a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo()))
                   .count()
-              == 1L);
-      Assert.assertEquals(
-          "PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2",
+              == 1L,
+          "PK_SUORITUSVUOSI löytyy ja sen arvo on 2015");
+      Assertions.assertEquals(
           new AvainArvoDTO("PK_SUORITUSLUKUKAUSI", "2"),
           hakemus.getAvaimet().stream()
               .filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()))
               .findFirst()
-              .get());
-      Assert.assertTrue(
-          "PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2015",
+              .get(),
+          "PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 2");
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(
                       a ->
                           "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain())
                               && "2015".equals(a.getArvo()))
                   .count()
-              == 1L);
+              == 1L,
+          "PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2015");
     }
     {
       HakemusDTO hakemus = new HakemusDTO();
@@ -2542,29 +2546,29 @@ public class HakemuksetConverterUtilTest {
 
       hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
           false, haku_syksy, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
-      Assert.assertTrue(
-          "PK_SUORITUSVUOSI löytyy ja sen arvo on 2015",
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(
                       a -> "PK_SUORITUSVUOSI".equals(a.getAvain()) && "2015".equals(a.getArvo()))
                   .count()
-              == 1L);
-      assertTrue(
-          "PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1",
+              == 1L,
+          "PK_SUORITUSVUOSI löytyy ja sen arvo on 2015");
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(
                       a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()) && "1".equals(a.getArvo()))
                   .count()
-              == 1L);
-      assertTrue(
-          "PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2015",
+              == 1L,
+          "PK_SUORITUSLUKUKAUSI löytyy ja sen arvo on 1");
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(
                       a ->
                           "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain())
                               && "2015".equals(a.getArvo()))
                   .count()
-              == 1L);
+              == 1L,
+          "PK_PAATTOTODISTUSVUOSI löytyy ja sen arvo on 2015");
     }
     {
       HakemusDTO hakemus = new HakemusDTO();
@@ -2580,22 +2584,22 @@ public class HakemuksetConverterUtilTest {
 
       hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
           false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
-      Assert.assertTrue(
-          "PK_SUORITUSVUOSI ei löydy",
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream().filter(a -> "PK_SUORITUSVUOSI".equals(a.getAvain())).count()
-              == 0L);
-      assertTrue(
-          "PK_SUORITUSLUKUKAUSI ei löydy",
+              == 0L,
+          "PK_SUORITUSVUOSI ei löydy");
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(a -> "PK_SUORITUSLUKUKAUSI".equals(a.getAvain()))
                   .count()
-              == 0L);
-      assertTrue(
-          "PK_PAATTOTODISTUSVUOSI ei löydy",
+              == 0L,
+          "PK_SUORITUSLUKUKAUSI ei löydy");
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(a -> "PK_PAATTOTODISTUSVUOSI".equals(a.getAvain()))
                   .count()
-              == 0L);
+              == 0L,
+          "PK_PAATTOTODISTUSVUOSI ei löydy");
     }
   }
 
@@ -2621,13 +2625,10 @@ public class HakemuksetConverterUtilTest {
         oikeinKoskaVainValmisSuoritus,
         hakemus,
         true);
-    Assert.assertEquals(
-        "PK_TILA löytyy ja sen arvo on true",
+    Assertions.assertEquals(
         new AvainArvoDTO("PK_TILA", "true"),
-        hakemus.getAvaimet().stream()
-            .filter(a -> "PK_TILA".equals(a.getAvain()))
-            .findFirst()
-            .get());
+        hakemus.getAvaimet().stream().filter(a -> "PK_TILA".equals(a.getAvain())).findFirst().get(),
+        "PK_TILA löytyy ja sen arvo on true");
   }
 
   @Test
@@ -2651,12 +2652,12 @@ public class HakemuksetConverterUtilTest {
         oikeinKoskaEiSuorituksia,
         hakemus,
         true);
-    Assert.assertTrue(
-        "PK_TILA löytyy ja sen arvo on false",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "PK_TILA".equals(a.getAvain()) && "false".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "PK_TILA löytyy ja sen arvo on false");
   }
 
   @Test
@@ -2688,18 +2689,18 @@ public class HakemuksetConverterUtilTest {
         suoritus,
         hakemus,
         true);
-    Assert.assertTrue(
-        "PK_AI ei löydy ja sen arvo ei ole S",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "PK_AI".equals(a.getAvain()) && "S".equals(a.getArvo()))
                 .count()
-            == 0L);
-    Assert.assertTrue(
-        "PK_AI_SUORITETTU löytyy arvolla true",
+            == 0L,
+        "PK_AI ei löydy ja sen arvo ei ole S");
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "PK_AI_SUORITETTU".equals(a.getAvain()) && "true".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "PK_AI_SUORITETTU löytyy arvolla true");
   }
 
   @Test
@@ -2743,12 +2744,12 @@ public class HakemuksetConverterUtilTest {
           suoritus,
           hakemus,
           true);
-      Assert.assertTrue(
-          "PK_AI löytyy ja sen arvo on 8",
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(a -> "PK_AI".equals(a.getAvain()) && "8".equals(a.getArvo()))
                   .count()
-              == 1L);
+              == 1L,
+          "PK_AI löytyy ja sen arvo on 8");
     }
   }
 
@@ -2796,12 +2797,12 @@ public class HakemuksetConverterUtilTest {
           suoritus,
           hakemus,
           true);
-      Assert.assertTrue(
-          "PK_AI löytyy ja sen arvo on 6",
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(a -> "PK_AI".equals(a.getAvain()) && "6".equals(a.getArvo()))
                   .count()
-              == 1L);
+              == 1L,
+          "PK_AI löytyy ja sen arvo on 6");
     }
   }
 
@@ -2846,21 +2847,21 @@ public class HakemuksetConverterUtilTest {
 
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
-    Assert.assertTrue(
-        "PK_AI löytyy ja sen arvo on 6",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "PK_AI".equals(a.getAvain()) && "6".equals(a.getArvo()))
                 .count()
-            == 1L);
-    Assert.assertTrue(
-        "PK_AI_VAL1 löytyy",
-        hakemus.getAvaimet().stream().filter(a -> "PK_AI_VAL1".equals(a.getAvain())).count() == 1L);
-    Assert.assertTrue(
-        "PK_AI_VAL2 löytyy",
-        hakemus.getAvaimet().stream().filter(a -> "PK_AI_VAL2".equals(a.getAvain())).count() == 1L);
-    Assert.assertTrue(
-        "PK_AI_VAL3 löytyy",
-        hakemus.getAvaimet().stream().filter(a -> "PK_AI_VAL3".equals(a.getAvain())).count() == 1L);
+            == 1L,
+        "PK_AI löytyy ja sen arvo on 6");
+    Assertions.assertTrue(
+        hakemus.getAvaimet().stream().filter(a -> "PK_AI_VAL1".equals(a.getAvain())).count() == 1L,
+        "PK_AI_VAL1 löytyy");
+    Assertions.assertTrue(
+        hakemus.getAvaimet().stream().filter(a -> "PK_AI_VAL2".equals(a.getAvain())).count() == 1L,
+        "PK_AI_VAL2 löytyy");
+    Assertions.assertTrue(
+        hakemus.getAvaimet().stream().filter(a -> "PK_AI_VAL3".equals(a.getAvain())).count() == 1L,
+        "PK_AI_VAL3 löytyy");
   }
 
   /** Eri asteikot yhdistettavilla arvosanoilla. Yhdistaminen ei mahdollista. */
@@ -2886,16 +2887,20 @@ public class HakemuksetConverterUtilTest {
             .build()
             .build()
             .build();
-    expected.expectMessage("Asteikot ei täsmää: 1-5 4-10");
-    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
-        false,
-        haku,
-        "",
-        new ParametritDTO(),
-        new HashMap<>(),
-        samaArvoMuttaAsteikotEiTasmaa,
-        hakemus,
-        true);
+    Exception expected =
+        Assertions.assertThrows(
+            Exception.class,
+            () ->
+                hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+                    false,
+                    haku,
+                    "",
+                    new ParametritDTO(),
+                    new HashMap<>(),
+                    samaArvoMuttaAsteikotEiTasmaa,
+                    hakemus,
+                    true));
+    Assertions.assertEquals("Asteikot ei täsmää: 1-5 4-10", expected.getMessage());
   }
 
   @Test
@@ -2930,12 +2935,12 @@ public class HakemuksetConverterUtilTest {
         tuntematonAsteikkoMuttaTunnistetaanNumeroksi,
         hakemus,
         true);
-    Assert.assertTrue(
-        "PK_AI löytyy ja sen arvo on 8",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "PK_AI".equals(a.getAvain()) && "8".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "PK_AI löytyy ja sen arvo on 8");
   }
 
   /** Poikkeus koska yhdistaminen ei mahdollista */
@@ -2961,16 +2966,18 @@ public class HakemuksetConverterUtilTest {
             .build()
             .build()
             .build();
-    expected.expect(NumberFormatException.class);
-    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
-        false,
-        haku,
-        "",
-        new ParametritDTO(),
-        new HashMap<>(),
-        tunnistamatonArvosana,
-        hakemus,
-        true);
+    Assertions.assertThrows(
+        NumberFormatException.class,
+        () ->
+            hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+                false,
+                haku,
+                "",
+                new ParametritDTO(),
+                new HashMap<>(),
+                tunnistamatonArvosana,
+                hakemus,
+                true));
   }
 
   @Test
@@ -3004,7 +3011,7 @@ public class HakemuksetConverterUtilTest {
         true);
     assertEquals(PohjakoulutusToinenAste.PERUSKOULU, getFirstHakemusArvo(hakemus, "POHJAKOULUTUS"));
     assertEquals("2015", getFirstHakemusArvo(hakemus, "PK_PAATTOTODISTUSVUOSI"));
-    assertEquals("not 17:" + hakemus.getAvaimet(), 17, hakemus.getAvaimet().size());
+    assertEquals(17, hakemus.getAvaimet().size(), "not 17:" + hakemus.getAvaimet());
   }
 
   @Test
@@ -3074,13 +3081,10 @@ public class HakemuksetConverterUtilTest {
         oikeinKoskaEiSuorituksia,
         hakemus,
         true);
-    Assert.assertEquals(
-        "LK_TILA on false",
+    Assertions.assertEquals(
         new AvainArvoDTO("LK_TILA", "false"),
-        hakemus.getAvaimet().stream()
-            .filter(a -> "LK_TILA".equals(a.getAvain()))
-            .findFirst()
-            .get());
+        hakemus.getAvaimet().stream().filter(a -> "LK_TILA".equals(a.getAvain())).findFirst().get(),
+        "LK_TILA on false");
   }
 
   @Test
@@ -3112,12 +3116,12 @@ public class HakemuksetConverterUtilTest {
         virheellinenKoskaUseampiSuoritus,
         hakemus,
         true);
-    Assert.assertTrue(
-        "LK_TILA löytyy ja sen arvo on true",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "LK_TILA".equals(a.getAvain()) && "true".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "LK_TILA löytyy ja sen arvo on true");
   }
 
   @Test
@@ -3163,12 +3167,12 @@ public class HakemuksetConverterUtilTest {
         toisellaHakemuksellaKorkeampiArvosana,
         hakemus,
         true);
-    Assert.assertTrue(
-        "LK_AI löytyy ja sen arvo on 6",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "LK_AI".equals(a.getAvain()) && "6".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "LK_AI löytyy ja sen arvo on 6");
   }
 
   @Test
@@ -3200,12 +3204,12 @@ public class HakemuksetConverterUtilTest {
         toisellaHakemuksellaKorkeampiArvosana,
         hakemus,
         true);
-    Assert.assertTrue(
-        "LK_TILA löytyy ja sen arvo on false",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "LK_TILA".equals(a.getAvain()) && "false".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "LK_TILA löytyy ja sen arvo on false");
   }
 
   @Test
@@ -3239,12 +3243,12 @@ public class HakemuksetConverterUtilTest {
         tuntematonAsteikkoMuttaTunnistetaanNumeroksi,
         hakemus,
         true);
-    Assert.assertTrue(
-        "LK_AI löytyy ja sen arvo on 8",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "LK_AI".equals(a.getAvain()) && "8".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "LK_AI löytyy ja sen arvo on 8");
   }
 
   @Test
@@ -3291,19 +3295,19 @@ public class HakemuksetConverterUtilTest {
 
     long count = hakemus.getAvaimet().stream().filter(a -> "LK_AI".equals(a.getAvain())).count();
     assertEquals(
-        "käsitellyssä datassa pitäisi olla vain yksi arvosana (paras arvosana) per aine ",
         1,
-        count);
+        count,
+        "käsitellyssä datassa pitäisi olla vain yksi arvosana (paras arvosana) per aine ");
 
     AvainArvoDTO avainArvoDTO =
         hakemus.getAvaimet().stream().filter(a -> "LK_AI".equals(a.getAvain())).findFirst().get();
     String arvo = "10";
     AvainArvoDTO expected = new AvainArvoDTO("LK_AI", arvo);
     assertEquals(
-        String.format(
-            "LK_AI arvo pitäisi olla toisesta suorituksesta löytyvä korotettu numero {}", arvo),
         expected,
-        avainArvoDTO);
+        avainArvoDTO,
+        String.format(
+            "LK_AI arvo pitäisi olla toisesta suorituksesta löytyvä korotettu numero {}", arvo));
   }
 
   // KYMPPILUOKKA:
@@ -3336,12 +3340,12 @@ public class HakemuksetConverterUtilTest {
         oikeinKoskaKeskenerainenSuoritus,
         hakemus,
         true);
-    Assert.assertTrue(
-        "PK_AI löytyy ja sen arvo on 7",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "PK_AI".equals(a.getAvain()) && "7".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "PK_AI löytyy ja sen arvo on 7");
   }
 
   @Test
@@ -3369,12 +3373,12 @@ public class HakemuksetConverterUtilTest {
         oikeinKoskaVainValmisSuoritus,
         hakemus,
         true);
-    Assert.assertTrue(
-        "PK_AI löytyy ja sen arvo on 8",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "PK_AI".equals(a.getAvain()) && "8".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "PK_AI löytyy ja sen arvo on 8");
   }
 
   @Test
@@ -3411,12 +3415,12 @@ public class HakemuksetConverterUtilTest {
         oikeinKoskaVainValmisSuoritus,
         hakemus,
         true);
-    Assert.assertTrue(
-        "PK_AI löytyy ja sen arvo on 9",
+    Assertions.assertTrue(
         hakemus.getAvaimet().stream()
                 .filter(a -> "PK_AI".equals(a.getAvain()) && "9".equals(a.getArvo()))
                 .count()
-            == 1L);
+            == 1L,
+        "PK_AI löytyy ja sen arvo on 9");
   }
 
   public static boolean testEquality(List<Map<String, String>> a, List<Map<String, String>> b) {
@@ -3463,13 +3467,13 @@ public class HakemuksetConverterUtilTest {
       // AvainSuoritusTietoDTO
       hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
           false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
-      Assert.assertEquals(
-          "YO_TILA löytyy ja sen arvo on true",
+      Assertions.assertEquals(
           new AvainArvoDTO("YO_TILA", "true"),
           hakemus.getAvaimet().stream()
               .filter(a -> "YO_TILA".equals(a.getAvain()))
               .findFirst()
-              .get());
+              .get(),
+          "YO_TILA löytyy ja sen arvo on true");
     }
     {
       HakemusDTO hakemus = new HakemusDTO();
@@ -3501,12 +3505,12 @@ public class HakemuksetConverterUtilTest {
 
       hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
           false, haku, "", new ParametritDTO(), new HashMap<>(), suoritus, hakemus, true);
-      Assert.assertTrue(
-          "YO_TILA löytyy ja sen arvo on false",
+      Assertions.assertTrue(
           hakemus.getAvaimet().stream()
                   .filter(a -> "YO_TILA".equals(a.getAvain()) && "false".equals(a.getArvo()))
                   .count()
-              == 1L);
+              == 1L,
+          "YO_TILA löytyy ja sen arvo on false");
     }
   }
 
@@ -3530,14 +3534,14 @@ public class HakemuksetConverterUtilTest {
 
       hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
           false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
-      Assert.assertTrue(
-          "Ensikertalaisuus asetettu",
+      Assertions.assertTrue(
           Boolean.valueOf(
               hakemus.getAvaimet().stream()
                   .filter(a -> a.getAvain().equals("ensikertalainen"))
                   .findFirst()
                   .get()
-                  .getArvo()));
+                  .getArvo()),
+          "Ensikertalaisuus asetettu");
     }
 
     {
@@ -3558,14 +3562,14 @@ public class HakemuksetConverterUtilTest {
 
       hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
           false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, hakemus, true);
-      Assert.assertFalse(
-          "Ensikertalaisuus asetettu",
+      Assertions.assertFalse(
           Boolean.valueOf(
               hakemus.getAvaimet().stream()
                   .filter(a -> a.getAvain().equals("ensikertalainen"))
                   .findFirst()
                   .get()
-                  .getArvo()));
+                  .getArvo()),
+          "Ensikertalaisuus asetettu");
     }
   }
 
@@ -3729,13 +3733,13 @@ public class HakemuksetConverterUtilTest {
         oppijaBuilder.build(),
         hakemus,
         true);
-    Assert.assertEquals(
-        "Odotettiin paras arvosana ensimmäisestä suorituksesta ja parhaat valinnaiset jälkimmäisestä suorituksesta",
+    Assertions.assertEquals(
         kiinnostavatAvainParit,
         hakemus.getAvaimet().stream()
             .filter(a -> kiinnostavatAvainParit.containsKey(a.getAvain()))
-            .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)));
-    Assert.assertEquals(
+            .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)),
+        "Odotettiin paras arvosana ensimmäisestä suorituksesta ja parhaat valinnaiset jälkimmäisestä suorituksesta");
+    Assertions.assertEquals(
         kiinnostavatAvainParitFysiikka,
         hakemus.getAvaimet().stream()
             .filter(a -> kiinnostavatAvainParitFysiikka.containsKey(a.getAvain()))
@@ -3824,18 +3828,18 @@ public class HakemuksetConverterUtilTest {
         oppijaBuilder.build(),
         hakemus,
         true);
-    Assert.assertEquals(
-        "Odotettiin paras arvosana ensimmäisestä suorituksesta ja parhaat valinnaiset ensimmäisestä suorituksesta",
+    Assertions.assertEquals(
         hakemus.getAvaimet().stream()
             .filter(a -> kiinnostavatAvainParit.containsKey(a.getAvain()))
             .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)),
-        kiinnostavatAvainParit);
-    Assert.assertEquals(
-        "Merkintöjä VAL2:lle ja VAL3:lle ei saa löytyä suoritusmerkintöjä huolimatta",
+        kiinnostavatAvainParit,
+        "Odotettiin paras arvosana ensimmäisestä suorituksesta ja parhaat valinnaiset ensimmäisestä suorituksesta");
+    Assertions.assertEquals(
         hakemus.getAvaimet().stream()
             .filter(a -> eiSaaLoytya.contains(a.getAvain()))
             .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo)),
-        Collections.emptyMap());
+        Collections.emptyMap(),
+        "Merkintöjä VAL2:lle ja VAL3:lle ei saa löytyä suoritusmerkintöjä huolimatta");
   }
 
   private Set<Map.Entry<String, String>> avaimetToEntrySet(Stream<AvainArvoDTO> avaimet) {
@@ -3935,8 +3939,8 @@ public class HakemuksetConverterUtilTest {
 
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
-    Assert.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
-    Assert.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_sv"));
+    Assertions.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
+    Assertions.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_sv"));
   }
 
   @Test
@@ -3969,7 +3973,7 @@ public class HakemuksetConverterUtilTest {
 
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
-    Assert.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_fi"));
+    Assertions.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_fi"));
   }
 
   @Test
@@ -4003,11 +4007,12 @@ public class HakemuksetConverterUtilTest {
 
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
-    Assert.assertEquals(OSALLISTUI.name(), getFirstHakemusArvo(h, "kielikoe_fi-OSALLISTUMINEN"));
-    Assert.assertEquals(
+    Assertions.assertEquals(
+        OSALLISTUI.name(), getFirstHakemusArvo(h, "kielikoe_fi-OSALLISTUMINEN"));
+    Assertions.assertEquals(
         EI_OSALLISTUNUT.name(), getFirstHakemusArvo(h, "kielikoe_sv-OSALLISTUMINEN"));
-    Assert.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
-    Assert.assertEquals("", getFirstHakemusArvo(h, "kielikoe_sv"));
+    Assertions.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
+    Assertions.assertEquals("", getFirstHakemusArvo(h, "kielikoe_sv"));
   }
 
   @Test
@@ -4042,10 +4047,12 @@ public class HakemuksetConverterUtilTest {
 
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
-    Assert.assertEquals(MERKITSEMATTA.name(), getFirstHakemusArvo(h, "kielikoe_fi-OSALLISTUMINEN"));
-    Assert.assertEquals(MERKITSEMATTA.name(), getFirstHakemusArvo(h, "kielikoe_sv-OSALLISTUMINEN"));
-    Assert.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
-    Assert.assertEquals("", getFirstHakemusArvo(h, "kielikoe_sv"));
+    Assertions.assertEquals(
+        MERKITSEMATTA.name(), getFirstHakemusArvo(h, "kielikoe_fi-OSALLISTUMINEN"));
+    Assertions.assertEquals(
+        MERKITSEMATTA.name(), getFirstHakemusArvo(h, "kielikoe_sv-OSALLISTUMINEN"));
+    Assertions.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
+    Assertions.assertEquals("", getFirstHakemusArvo(h, "kielikoe_sv"));
   }
 
   @Test
@@ -4087,7 +4094,7 @@ public class HakemuksetConverterUtilTest {
         oppijaJollaOnSekaHyvaksyttyEttaHylattyArvosana,
         h,
         true);
-    Assert.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
+    Assertions.assertEquals("true", getFirstHakemusArvo(h, "kielikoe_fi"));
 
     h.setAvaimet(new ArrayList<>());
     Oppija oppijaJollaOnVainHylattyjaArvosanoja =
@@ -4123,10 +4130,10 @@ public class HakemuksetConverterUtilTest {
         oppijaJollaOnVainHylattyjaArvosanoja,
         h,
         true);
-    Assert.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_fi"));
+    Assertions.assertEquals("false", getFirstHakemusArvo(h, "kielikoe_fi"));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void ammatillisenKielikoeArvosanatiedonAsteikkoTuleeOllaHyvaksytty() {
     HakemusDTO h = new HakemusDTO();
     h.setHakemusoid(HAKEMUS1_OID);
@@ -4149,8 +4156,11 @@ public class HakemuksetConverterUtilTest {
             .build()
             .build();
 
-    hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
-        false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true);
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
+                false, haku, "", new ParametritDTO(), new HashMap<>(), oppija, h, true));
   }
 
   @Test
@@ -4188,7 +4198,7 @@ public class HakemuksetConverterUtilTest {
         oppija,
         h,
         true);
-    assertThat(firstHakemusArvo(h, "kielikoe_fi"), OptionalMatchers.isEmpty());
+    assertTrue(firstHakemusArvo(h, "kielikoe_fi").isEmpty());
   }
 
   private static String getFirstHakemusArvo(HakemusDTO hakemusDTO, String avain) {

@@ -54,14 +54,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -371,19 +368,10 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
             "Luotiin henkilot="
                 + henkilot.stream().map(h -> h.getOidHenkilo()).collect(Collectors.toList()));
       } catch (Exception e) {
-        if (e.getCause() != null && e.getCause() instanceof WebApplicationException) {
-          LOG.error(
-              POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE
-                  + ". lisattavatTaiKeskeneraiset: {}. Response {}",
-              henkiloCreateDTOS,
-              getResponseAsString(e),
-              e);
-        } else {
-          LOG.error(
-              POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE + ". lisattavatTaiKeskeneraiset: {}",
-              henkiloCreateDTOS,
-              e);
-        }
+        LOG.error(
+            POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE + ". lisattavatTaiKeskeneraiset: {}",
+            henkiloCreateDTOS,
+            e);
         prosessi.keskeyta(
             Poikkeus.oppijanumerorekisteripoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE));
         throw e;
@@ -393,16 +381,6 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
           haku, henkilot, lisattavatTaiKeskeneraiset, saveApplications, prosessi);
     }
     return lisattavatTaiKeskeneraiset;
-  }
-
-  private String getResponseAsString(Exception e) {
-    Response response = ((WebApplicationException) e.getCause()).getResponse();
-    if (response.getEntity() != null && response.getEntity() instanceof InputStream) {
-      return new Scanner((InputStream) response.getEntity()).useDelimiter("\\A").next();
-    } else if (response.getEntity() != null) {
-      return response.getEntity().toString();
-    }
-    return "null";
   }
 
   private Observable<List<Poikkeus>> vastaanotonJaValinnantuloksenTallennus(

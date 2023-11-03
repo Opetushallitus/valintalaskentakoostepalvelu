@@ -13,30 +13,33 @@ import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.reactivex.Observable;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller("HakemuksetResource")
-@Path("hakemukset")
+@RestController("HakemuksetResource")
+@RequestMapping("/resources/hakemukset")
 @PreAuthorize("isAuthenticated()")
-@Api(value = "/hakemukset", description = "Hakemusten hakeminen")
+@Tag(name = "/hakemukset", description = "Hakemusten hakeminen")
 public class HakemuksetResource {
   private static final Logger LOG = LoggerFactory.getLogger(HakemuksetResource.class);
 
@@ -46,18 +49,22 @@ public class HakemuksetResource {
 
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @GET
-  @Path("/valinnanvaihe")
-  @Produces("application/json")
-  @ApiOperation(value = "Valinnanvaiheen hakemusten listaus", response = HakemusDTO.class)
-  public void hakemuksetValinnanvaiheelle(
-      @QueryParam("hakuOid") String hakuOid,
-      @QueryParam("valinnanvaiheOid") String valinnanvaiheOid,
-      @Suspended AsyncResponse asyncResponse,
-      @Context HttpServletRequest request) {
+  @GetMapping(value = "/valinnanvaihe", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Valinnanvaiheen hakemusten listaus",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = HakemusDTO.class)))
+      })
+  public DeferredResult<Collection<HakemusDTO>> hakemuksetValinnanvaiheelle(
+      @RequestParam(value = "hakuOid", required = false) String hakuOid,
+      @RequestParam(value = "valinnanvaiheOid", required = false) String valinnanvaiheOid,
+      HttpServletRequest request) {
     Preconditions.checkNotNull(hakuOid);
     Preconditions.checkNotNull(valinnanvaiheOid);
-    asyncResponse.setTimeout(1, TimeUnit.HOURS);
+
+    DeferredResult<Collection<HakemusDTO>> deferredResult = new DeferredResult<>(3600000l);
 
     Map<String, String> additionalAuditInfo = new HashMap<>();
     additionalAuditInfo.put("hakuOid", hakuOid);
@@ -78,14 +85,14 @@ public class HakemuksetResource {
         hakuOid);
     Long started = System.currentTimeMillis();
 
-    authorityCheckService
-        .getAuthorityCheckForRoles(
-            asList(
-                "ROLE_APP_HAKEMUS_READ_UPDATE",
-                "ROLE_APP_HAKEMUS_READ",
-                "ROLE_APP_HAKEMUS_CRUD",
-                "ROLE_APP_HAKEMUS_LISATIETORU",
-                "ROLE_APP_HAKEMUS_LISATIETOCRUD"))
+    Observable.fromFuture(
+            authorityCheckService.getAuthorityCheckForRoles(
+                asList(
+                    "ROLE_APP_HAKEMUS_READ_UPDATE",
+                    "ROLE_APP_HAKEMUS_READ",
+                    "ROLE_APP_HAKEMUS_CRUD",
+                    "ROLE_APP_HAKEMUS_LISATIETORU",
+                    "ROLE_APP_HAKEMUS_LISATIETOCRUD")))
         .subscribe(
             authCheck -> {
               valinnanvaiheenValintakoekutsutService.hae(
@@ -99,7 +106,7 @@ public class HakemuksetResource {
                         valinnanvaiheOid,
                         hakuOid,
                         duration);
-                    asyncResponse.resume(Response.ok(hakemusDTOs).build());
+                    deferredResult.setResult(hakemusDTOs);
                   },
                   exception -> {
                     long duration = (System.currentTimeMillis() - started) / 1000;
@@ -110,28 +117,29 @@ public class HakemuksetResource {
                       LOG.error(
                           String.format(
                               "%s : kesto %d sekuntia", exception.getMessage(), duration));
-                      Map<String, String> responseContent = new HashMap<>();
-                      responseContent.put("message", exception.getMessage());
-                      asyncResponse.resume(
-                          Response.status(Response.Status.BAD_REQUEST)
-                              .entity(responseContent)
-                              .build());
+                      deferredResult.setErrorResult(
+                          ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                              .body(exception.getMessage()));
                     } else {
                       LOG.error(
                           String.format(
                               "hakemusten listaaminen epäonnistui (valinnanvaihe %s, haku %s, kesto %d sekuntia",
                               valinnanvaiheOid, hakuOid, duration),
                           exception);
-                      asyncResponse.cancel();
+                      deferredResult.setErrorResult(
+                          ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                              .body(exception.getMessage()));
                     }
                   });
             },
             exception -> {
+              String errorMessage = "hakemusten listaaminen epäonnistui, authCheck failed";
               LOG.error(
-                  HttpExceptionWithResponse.appendWrappedResponse(
-                      "hakemusten listaaminen epäonnistui, authCheck failed", exception),
+                  HttpExceptionWithResponse.appendWrappedResponse(errorMessage, exception),
                   exception);
-              asyncResponse.resume(Response.serverError().entity(exception).build());
+              deferredResult.setErrorResult(errorMessage);
             });
+
+    return deferredResult;
   }
 }

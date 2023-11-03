@@ -2,8 +2,6 @@ package fi.vm.sade.valinta.kooste.laskentakerralla;
 
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
 import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockToReturnJson;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.resourcesAddress;
-import static fi.vm.sade.valinta.kooste.ValintalaskentakoostepalveluJetty.startShared;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.HAKUKOHDE1;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.HAKUKOHDE2;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeviite;
@@ -14,6 +12,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
+import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,18 +20,18 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.client.Entity;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
+@Disabled
 public class LaskentaKerrallaE2ETest {
   private final SeurantaServerMock seurantaServerMock = new SeurantaServerMock();
 
-  @Before
+  @BeforeEach
   public void startServer() {
-    startShared();
+    MockServicesApp.start();
   }
 
   @Test
@@ -41,7 +40,7 @@ public class LaskentaKerrallaE2ETest {
     HttpResourceBuilder.WebClientExposingHttpResource http =
         new HttpResourceBuilder(getClass().getName())
             .address(
-                resourcesAddress
+                MockServicesApp.resourcesAddress
                     + "/valintalaskentakerralla/haku/HAKUOID1/tyyppi/HAKU/whitelist/true")
             .buildExposingWebClientDangerously();
     mockToReturnJson(
@@ -83,16 +82,16 @@ public class LaskentaKerrallaE2ETest {
                 throw new RuntimeException(t);
               }
             }));
-    Assert.assertEquals(
+    Assertions.assertEquals(
         200,
         http.getWebClient()
             .query("valintakoelaskenta", "true")
             .post(Entity.json(Arrays.asList(HAKUKOHDE1, HAKUKOHDE2)))
             .getStatus());
     try {
-      Assert.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
+      Assertions.assertTrue(counter.tryAcquire(1, 10, TimeUnit.SECONDS));
     } catch (InterruptedException e) {
-      Assert.fail();
+      Assertions.fail();
     }
   }
 

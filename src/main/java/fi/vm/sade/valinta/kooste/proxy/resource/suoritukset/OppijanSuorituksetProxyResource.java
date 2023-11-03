@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.suoritukset;
 
 import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
-import static fi.vm.sade.valinta.kooste.util.ResponseUtil.respondWithError;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -24,35 +23,35 @@ import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import io.reactivex.Observable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
-@Controller("SuorituksenArvosanatProxyResource")
-@Path("/proxy/suoritukset")
+@RestController("SuorituksenArvosanatProxyResource")
+@RequestMapping("/resources/proxy/suoritukset")
 @PreAuthorize("isAuthenticated()")
-@Api(
-    value = "/proxy/suoritukset",
+@Tag(
+    name = "/proxy/suoritukset",
     description = "Käyttöliittymäkutsujen välityspalvelin suoritusrekisteriin")
 public class OppijanSuorituksetProxyResource {
   private static final Logger LOG = LoggerFactory.getLogger(OppijanSuorituksetProxyResource.class);
 
-  @Context private HttpServletRequest httpServletRequestJaxRS;
   @Autowired private SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
 
   @Autowired private OhjausparametritAsyncResource ohjausparametritAsyncResource;
@@ -69,40 +68,47 @@ public class OppijanSuorituksetProxyResource {
 
   /**
    * @deprecated Use the one with the fixed path (opiskelijaOid instead of opiskeljaOid) {@link
-   *     #getSuoritukset(String, String, String, AsyncResponse)} ()}
+   *     #getSuoritukset(String, String, String, HttpServletRequest)} ()}
    */
+  @GetMapping(
+      value =
+          "/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskeljaOid/{opiskeljaOid}/hakemusOid/{hakemusOid}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @GET
-  @Path(
-      "/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskeljaOid/{opiskeljaOid}/hakemusOid/{hakemusOid}")
-  public void getSuorituksetOld(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("opiskeljaOid") String opiskeljaOid,
-      @PathParam("hakemusOid") String hakemusOid,
-      @Suspended final AsyncResponse asyncResponse) {
-    getSuoritukset(hakuOid, opiskeljaOid, hakemusOid, asyncResponse);
+  public DeferredResult<ResponseEntity<Map<String, String>>> getSuorituksetOld(
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("opiskeljaOid") String opiskeljaOid,
+      @PathVariable("hakemusOid") String hakemusOid,
+      HttpServletRequest request) {
+    return getSuoritukset(hakuOid, opiskeljaOid, hakemusOid, request);
   }
 
+  @GetMapping(
+      value =
+          "/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskelijaOid/{opiskelijaOid}/hakemusOid/{hakemusOid}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @GET
-  @Path(
-      "/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskelijaOid/{opiskelijaOid}/hakemusOid/{hakemusOid}")
-  public void getSuoritukset(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("opiskelijaOid") String opiskelijaOid,
-      @PathParam("hakemusOid") String hakemusOid,
-      @Suspended final AsyncResponse asyncResponse) {
-    asyncResponse.setTimeout(2L, MINUTES);
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    asyncResponse.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity<Map<String, String>>> getSuoritukset(
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("opiskelijaOid") String opiskelijaOid,
+      @PathVariable("hakemusOid") String hakemusOid,
+      HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+
+    DeferredResult<ResponseEntity<Map<String, String>>> result =
+        new DeferredResult<>(2 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
           LOG.error(
               "suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{oid}",
               opiskelijaOid);
-          respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Suoritus proxy -palvelukutsu on aikakatkaistu"));
         });
+
     resolveHakemusDTO(
             auditSession,
             hakuOid,
@@ -112,41 +118,53 @@ public class OppijanSuorituksetProxyResource {
             true)
         .subscribe(
             hakemusDTO -> {
-              asyncResponse.resume(
-                  Response.ok()
-                      .header("Content-Type", "application/json")
-                      .entity(getAvainArvoMap(hakemusDTO))
-                      .build());
+              result.setResult(
+                  ResponseEntity.status(HttpStatus.OK).body(getAvainArvoMap(hakemusDTO)));
             },
             poikkeus -> {
               LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-              respondWithError(asyncResponse, poikkeus.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(poikkeus.getMessage()));
             });
+
+    return result;
   }
 
+  @PostMapping(
+      value = "/suorituksetByHakemusOids/hakuOid/{hakuOid}",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @POST
-  @Path("/suorituksetByHakemusOids/hakuOid/{hakuOid}")
-  @Consumes("application/json")
-  @ApiOperation(
-      consumes = "application/json",
-      value = "Hakemukset suoritustietoineen tietylle haulle",
-      response = Response.class)
-  public void getSuoritukset(
-      @PathParam("hakuOid") String hakuOid,
-      @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
-      List<String> hakemusOids,
-      @Suspended final AsyncResponse asyncResponse) {
+  @Operation(
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+      summary = "Hakemukset suoritustietoineen tietylle haulle",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = List.class)))
+      })
+  public DeferredResult<ResponseEntity<List<Map<String, String>>>> getSuoritukset(
+      @PathVariable("hakuOid") String hakuOid,
+      @RequestParam(value = "fetchEnsikertalaisuus", defaultValue = "false")
+          Boolean fetchEnsikertalaisuus,
+      @RequestBody List<String> hakemusOids,
+      HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
 
-    asyncResponse.setTimeout(2L, MINUTES);
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    asyncResponse.setTimeoutHandler(
-        handler -> {
+    DeferredResult<ResponseEntity<List<Map<String, String>>>> result =
+        new DeferredResult<>(2 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
           LOG.error(
               "suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskeljaOid/{hakuOid}",
               hakuOid);
-          respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Suoritus proxy -palvelukutsu on aikakatkaistu"));
         });
 
     resolveHakemusDTOs(auditSession, hakuOid, hakemusOids, fetchEnsikertalaisuus)
@@ -155,60 +173,69 @@ public class OppijanSuorituksetProxyResource {
               List<Map<String, String>> listOfMaps =
                   hakemusDTOs.stream().map(this::getAvainArvoMap).collect(Collectors.toList());
 
-              Response resp =
-                  Response.ok()
-                      .header("Content-Type", "application/json")
-                      .entity(listOfMaps)
-                      .build();
-
-              asyncResponse.resume(resp);
+              result.setResult(ResponseEntity.status(HttpStatus.OK).body(listOfMaps));
             }),
             (exception -> {
               LOG.error("OppijanSuorituksetProxyResource exception", exception);
-              respondWithError(asyncResponse, exception.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(exception.getMessage()));
             }));
+
+    return result;
   }
 
   /**
    * @deprecated Use the one with the fixed path (opiskelijaOid instead of opiskeljaOid) {@link
-   *     #getSuoritukset(String, String, Boolean, Hakemus, AsyncResponse)} ()}
+   *     #getSuoritukset(String, String, Boolean, Hakemus, HttpServletRequest)} ()}
    */
+  @PostMapping(
+      value = "/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskeljaOid/{opiskeljaOid}",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @POST
-  @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskeljaOid/{opiskeljaOid}")
   @Deprecated
-  public void getSuorituksetOld(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("opiskeljaOid") String opiskeljaOid,
-      @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
-      Hakemus hakemus,
-      @Suspended final AsyncResponse asyncResponse) {
-    getSuoritukset(hakuOid, opiskeljaOid, fetchEnsikertalaisuus, hakemus, asyncResponse);
+  public DeferredResult<ResponseEntity<Map<String, String>>> getSuorituksetOld(
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("opiskeljaOid") String opiskeljaOid,
+      @RequestParam(value = "fetchEnsikertalaisuus", defaultValue = "false")
+          Boolean fetchEnsikertalaisuus,
+      @RequestBody Hakemus hakemus,
+      HttpServletRequest request) {
+    return getSuoritukset(hakuOid, opiskeljaOid, fetchEnsikertalaisuus, hakemus, request);
   }
 
   /*
   Same as above except with the typo on path fixed (opiskeljaOid -> opiskelijaOid)
    */
+  @PostMapping(
+      value = "/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskelijaOid/{opiskelijaOid}",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @POST
-  @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}/opiskelijaOid/{opiskelijaOid}")
-  public void getSuoritukset(
-      @PathParam("hakuOid") String hakuOid,
-      @PathParam("opiskelijaOid") String opiskelijaOid,
-      @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
-      Hakemus hakemus,
-      @Suspended final AsyncResponse asyncResponse) {
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    asyncResponse.setTimeout(2L, MINUTES);
-    asyncResponse.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity<Map<String, String>>> getSuoritukset(
+      @PathVariable("hakuOid") String hakuOid,
+      @PathVariable("opiskelijaOid") String opiskelijaOid,
+      @RequestParam(value = "fetchEnsikertalaisuus", defaultValue = "false")
+          Boolean fetchEnsikertalaisuus,
+      @RequestBody Hakemus hakemus,
+      HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+
+    DeferredResult<ResponseEntity<Map<String, String>>> result =
+        new DeferredResult<>(2 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
           LOG.error(
               "suorituksetByOpiskelijaOid proxy -palvelukutsu on aikakatkaistu: /suorituksetByOpiskelijaOid/{oid}",
               opiskelijaOid);
-          respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Suoritus proxy -palvelukutsu on aikakatkaistu"));
         });
+
     resolveHakemusDTO(
             auditSession,
             hakuOid,
@@ -219,36 +246,46 @@ public class OppijanSuorituksetProxyResource {
         .subscribe(
             hakemusDTO -> {
               Map<String, String> avainArvoMap = getAvainArvoMap(hakemusDTO);
-              asyncResponse.resume(
-                  Response.ok().type(MediaType.APPLICATION_JSON_TYPE).entity(avainArvoMap).build());
+              result.setResult(ResponseEntity.status(HttpStatus.OK).body(avainArvoMap));
             },
             poikkeus -> {
               LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-              respondWithError(asyncResponse, poikkeus.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(poikkeus.getMessage()));
             });
+
+    return result;
   }
 
+  @PostMapping(
+      value = "/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = {MediaType.APPLICATION_JSON_VALUE})
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("/suorituksetByOpiskelijaOid/hakuOid/{hakuOid}")
-  public void getSuorituksetForOpiskelijas(
-      @PathParam("hakuOid") String hakuOid,
-      final List<HakemusHakija> allHakemus,
-      @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
-      @Suspended final AsyncResponse asyncResponse) {
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    asyncResponse.setTimeout(2L, MINUTES);
-    asyncResponse.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity<Map<String, Map<String, String>>>>
+      getSuorituksetForOpiskelijas(
+          @PathVariable("hakuOid") String hakuOid,
+          @RequestBody final List<HakemusHakija> allHakemus,
+          @RequestParam(value = "fetchEnsikertalaisuus", defaultValue = "false")
+              Boolean fetchEnsikertalaisuus,
+          HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+
+    DeferredResult<ResponseEntity<Map<String, Map<String, String>>>> result =
+        new DeferredResult<>(2 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
           LOG.error("suorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu");
-          respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Suoritus proxy -palvelukutsu on aikakatkaistu"));
         });
 
     if (allHakemus == null || allHakemus.isEmpty()) {
-      asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
-      return;
+      result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+      return result;
     }
 
     // final Map<String, Map<String, String>> allData = new HashMap<>();
@@ -300,33 +337,42 @@ public class OppijanSuorituksetProxyResource {
                               }));
               LOG.info(
                   "Haettiin {} hakemukselle {} suoritustietoa", allHakemus.size(), allData.size());
-              asyncResponse.resume(
-                  Response.ok().type(MediaType.APPLICATION_JSON_TYPE).entity(allData).build());
+              result.setResult(ResponseEntity.status(HttpStatus.OK).body(allData));
             },
             poikkeus -> {
               LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-              respondWithError(asyncResponse, poikkeus.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(poikkeus.getMessage()));
             });
+
+    return result;
   }
 
+  @PostMapping(
+      value = "/ataruSuorituksetByOpiskelijaOid/hakuOid/{hakuOid}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("/ataruSuorituksetByOpiskelijaOid/hakuOid/{hakuOid}")
-  public void getSuorituksetForAtaruOpiskelijas(
-      @PathParam("hakuOid") String hakuOid,
-      final List<String> hakemusOids,
-      @DefaultValue("false") @QueryParam("fetchEnsikertalaisuus") Boolean fetchEnsikertalaisuus,
-      @DefaultValue("false") @QueryParam("shouldUseApplicationPersonOid")
-          Boolean shouldUseApplicationPersonOid,
-      @Suspended final AsyncResponse asyncResponse) {
-    final AuditSession auditSession = createAuditSession(httpServletRequestJaxRS);
-    asyncResponse.setTimeout(2L, MINUTES);
-    asyncResponse.setTimeoutHandler(
-        handler -> {
+  public DeferredResult<ResponseEntity<Map<String, Map<String, String>>>>
+      getSuorituksetForAtaruOpiskelijas(
+          @PathVariable("hakuOid") String hakuOid,
+          @RequestBody final List<String> hakemusOids,
+          @RequestParam(value = "fetchEnsikertalaisuus", defaultValue = "false")
+              Boolean fetchEnsikertalaisuus,
+          @RequestParam(value = "shouldUseApplicationPersonOid", defaultValue = "false")
+              Boolean shouldUseApplicationPersonOid,
+          HttpServletRequest request) {
+    final AuditSession auditSession = createAuditSession(request);
+
+    DeferredResult<ResponseEntity<Map<String, Map<String, String>>>> result =
+        new DeferredResult<>(2 * 60 * 1000l);
+    result.onTimeout(
+        () -> {
           LOG.error("ataruSuorituksetByOpiskeljaOid proxy -palvelukutsu on aikakatkaistu");
-          respondWithError(handler, "Suoritus proxy -palvelukutsu on aikakatkaistu");
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Suoritus proxy -palvelukutsu on aikakatkaistu"));
         });
 
     LOG.info(
@@ -337,8 +383,8 @@ public class OppijanSuorituksetProxyResource {
         hakemusOids);
 
     if (hakemusOids == null || hakemusOids.isEmpty()) {
-      asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
-      return;
+      result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+      return result;
     }
 
     Observable<PisteetWithLastModified> valintapisteet =
@@ -356,7 +402,9 @@ public class OppijanSuorituksetProxyResource {
             ataruHakemukset,
             (haku, pisteet, hakemukset) -> {
               if (hakemukset == null || hakemukset.isEmpty()) {
-                asyncResponse.resume(Response.status(Response.Status.NO_CONTENT).build());
+                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
+                Observable<List<HakemusDTO>> never = Observable.never();
+                return never;
               }
               if (haku == null) {
                 throw new RuntimeException(String.format("Hakua %s ei löytynyt", hakuOid));
@@ -399,13 +447,16 @@ public class OppijanSuorituksetProxyResource {
                               }));
               LOG.info(
                   "Haettiin {} hakemukselle {} suoritustietoa", hakemusOids.size(), allData.size());
-              asyncResponse.resume(
-                  Response.ok().type(MediaType.APPLICATION_JSON_TYPE).entity(allData).build());
+              result.setResult(ResponseEntity.status(HttpStatus.OK).body(allData));
             },
             poikkeus -> {
               LOG.error("OppijanSuorituksetProxyResource exception", poikkeus);
-              respondWithError(asyncResponse, poikkeus.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(poikkeus.getMessage()));
             });
+
+    return result;
   }
 
   private Map<String, String> getAvainArvoMap(HakemusDTO hakemusDTO) {

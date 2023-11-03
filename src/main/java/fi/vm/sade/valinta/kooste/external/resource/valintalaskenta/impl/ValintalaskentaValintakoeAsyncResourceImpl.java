@@ -1,68 +1,74 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl;
 
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
-import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.core.GenericType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ValintalaskentaValintakoeAsyncResourceImpl extends UrlConfiguredResource
+public class ValintalaskentaValintakoeAsyncResourceImpl
     implements ValintalaskentaValintakoeAsyncResource {
-  private final HttpClient httpClient;
+  private final RestCasClient httpClient;
+
+  private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public ValintalaskentaValintakoeAsyncResourceImpl(
-      @Qualifier("ValintalaskentaHttpClient") HttpClient httpClient) {
-    super(TimeUnit.HOURS.toMillis(1));
+      @Qualifier("ValintalaskentaCasClient") RestCasClient httpClient) {
     this.httpClient = httpClient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
   @Override
   public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveelle(
       String hakukohdeOid) {
-    return httpClient.getJson(
-        getUrl("valintalaskenta-laskenta-service.valintakoe.hakutoive.hakukohdeoid", hakukohdeOid),
-        Duration.ofMinutes(1),
-        new GenericType<List<ValintakoeOsallistuminenDTO>>() {}.getType());
+    return httpClient.get(
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.valintakoe.hakutoive.hakukohdeoid", hakukohdeOid),
+        new TypeToken<List<ValintakoeOsallistuminenDTO>>() {},
+        Collections.emptyMap(),
+        60 * 1000);
   }
 
   @Override
   public CompletableFuture<List<ValintakoeOsallistuminenDTO>> haeHakutoiveille(
       Collection<String> hakukohdeOids) {
-    return httpClient.postJson(
-        getUrl("valintalaskenta-laskenta-service.valintakoe.hakutoive"),
-        Duration.ofMinutes(5),
+    return httpClient.post(
+        this.urlConfiguration.url("valintalaskenta-laskenta-service.valintakoe.hakutoive"),
+        new TypeToken<List<ValintakoeOsallistuminenDTO>>() {},
         hakukohdeOids,
-        new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
-        new com.google.gson.reflect.TypeToken<List<ValintakoeOsallistuminenDTO>>() {}.getType());
+        Collections.emptyMap(),
+        5 * 60 * 1000);
   }
 
   @Override
   public CompletableFuture<ValintakoeOsallistuminenDTO> haeHakemukselle(String hakemusOid) {
-    return httpClient.getJson(
-        getUrl("valintalaskenta-laskenta-service.valintakoe.hakemus", hakemusOid),
-        Duration.ofMinutes(1),
-        new GenericType<ValintakoeOsallistuminenDTO>() {}.getType());
+    return httpClient.get(
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.valintakoe.hakemus", hakemusOid),
+        new TypeToken<ValintakoeOsallistuminenDTO>() {},
+        Collections.emptyMap(),
+        60 * 1000);
   }
 
   @Override
   public CompletableFuture<List<HakemusOsallistuminenDTO>> haeValintatiedotHakukohteelle(
       String hakukohdeOid, List<String> valintakoeTunnisteet) {
-    return httpClient.postJson(
-        getUrl("valintalaskenta-laskenta-service.valintatieto.hakukohde", hakukohdeOid),
-        Duration.ofMinutes(5),
+    return httpClient.post(
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.valintatieto.hakukohde", hakukohdeOid),
+        new TypeToken<List<HakemusOsallistuminenDTO>>() {},
         valintakoeTunnisteet,
-        new com.google.gson.reflect.TypeToken<List<String>>() {}.getType(),
-        new com.google.gson.reflect.TypeToken<List<HakemusOsallistuminenDTO>>() {}.getType());
+        Collections.emptyMap(),
+        5 * 60 * 1000);
   }
 }

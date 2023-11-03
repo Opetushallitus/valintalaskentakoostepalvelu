@@ -18,8 +18,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
@@ -28,7 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 public class EligibilitiesKonvertointiTest {
   private final Logger LOG = LoggerFactory.getLogger(EligibilitiesKonvertointiTest.class);
 
-  @Ignore
+  @Disabled
   @Test
   public void t() throws JsonSyntaxException, IOException {
     // List<String> sq = Arrays.asList("s", "s");
@@ -47,7 +47,7 @@ public class EligibilitiesKonvertointiTest {
     }
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void te() throws JsonSyntaxException, IOException {
     String hakukohdeOid = "";
@@ -94,7 +94,7 @@ public class EligibilitiesKonvertointiTest {
     }
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testaaEligibilities() throws JsonSyntaxException, IOException {
 

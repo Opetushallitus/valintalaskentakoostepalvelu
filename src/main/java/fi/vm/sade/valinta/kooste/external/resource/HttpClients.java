@@ -1,16 +1,16 @@
 package fi.vm.sade.valinta.kooste.external.resource;
 
-import fi.vm.sade.javautils.cas.ApplicationSession;
-import fi.vm.sade.javautils.cas.CasSession;
+import static fi.vm.sade.valinta.sharedutils.http.HttpResource.CSRF_VALUE;
+
+import fi.vm.sade.javautils.nio.cas.CasConfig;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import java.net.CookieManager;
-import java.net.URI;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,39 +37,19 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "AtaruApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "AtaruCasClient")
   @Autowired
-  public ApplicationSession getAtaruApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("AtaruInternalHttpClient") java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getAtaruCasClient(
       @Value("${cas.service.ataru}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.ataru}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.ataru}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "ring-session");
-  }
-
-  @Bean(name = "AtaruHttpClient")
-  @Autowired
-  public HttpClient getAtaruHttpClient(
-      @Qualifier("AtaruInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("AtaruApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("ring-session")
+            .build());
   }
 
   @Bean(name = "HakuAppInternalHttpClient")
@@ -85,73 +65,41 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "HakuAppApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "HakuAppCasClient")
   @Autowired
-  public ApplicationSession getHakuAppApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("HakuAppInternalHttpClient") java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getHakuAppCasClient(
       @Value("${cas.service.haku-service}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "JSESSIONID");
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
-  @Bean(name = "SijoitteluServiceApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "SijoitteluServiceCasClient")
   @Autowired
-  public ApplicationSession getSijoitteluServiceApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("SijoitteluServiceInternalHttpClient")
-          java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getSijoitteluServiceCasClient(
       @Value("${cas.service.sijoittelu-service}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.sijoittelu}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.sijoittelu}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "JSESSIONID");
-  }
-
-  @Bean(name = "HakuAppHttpClient")
-  @Autowired
-  public HttpClient getHakuAppHttpClient(
-      @Qualifier("HakuAppInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("HakuAppApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Bean(name = "TarjontaHttpClient")
   @Autowired
   public HttpClient getTarjontaHttpClient(CookieManager cookieManager) {
     return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(), null, TarjontaAsyncResourceImpl.getGson());
+        defaultHttpClientBuilder(cookieManager).build(), TarjontaAsyncResourceImpl.getGson());
   }
 
   @Bean(name = "HakukohderyhmapalveluInternalHttpClient")
@@ -161,42 +109,21 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "HakukohderyhmapalveluApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "HakukohderyhmapalveluCasClient")
   @Autowired
-  public ApplicationSession getHakukohderyhmapalveluApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("HakukohderyhmapalveluInternalHttpClient")
-          java.net.http.HttpClient applicatioHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getHakukohderyhmapalveluCasClient(
       @Value("${valintalaskentakoostepalvelu.app.username.to.hakukohderyhmapalvelu}")
           String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.hakukohderyhmapalvelu}")
           String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     String service = UrlConfiguration.getInstance().url("hakukohderyhmapalvelu.auth.login");
-    return new ApplicationSession(
-        applicatioHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "ring-session");
-  }
-
-  @Bean(name = "HakukohderyhmapalveluHttpClient")
-  @Autowired
-  public HttpClient getHakukohderyhmapalveluHttpClient(
-      @Qualifier("HakukohderyhmapalveluInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("HakukohderyhmapalveluApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("ring-session")
+            .build());
   }
 
   @Bean(name = "KoutaInternalHttpClient")
@@ -205,39 +132,19 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "KoutaApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "KoutaCasClient")
   @Autowired
-  public ApplicationSession getKoutaApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("KoutaInternalHttpClient") java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getKoutaCasClient(
       @Value("${valintalaskentakoostepalvelu.app.username.to.kouta-internal}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.kouta-internal}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
     String service = UrlConfiguration.getInstance().url("kouta-internal.auth.login");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "session");
-  }
-
-  @Bean(name = "KoutaHttpClient")
-  @Autowired
-  public HttpClient getKoutaHttpClient(
-      @Qualifier("KoutaInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("KoutaApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("session")
+            .build());
   }
 
   @Bean(name = "ValintaTulosServiceHttpClient")
@@ -245,7 +152,6 @@ public class HttpClients {
   public HttpClient getValintaTulosServiceHttpClient(CookieManager cookieManager) {
     return new HttpClient(
         defaultHttpClientBuilder(cookieManager).build(),
-        null,
         ValintaTulosServiceAsyncResourceImpl.getGson());
   }
 
@@ -253,27 +159,21 @@ public class HttpClients {
   @Autowired
   public HttpClient getOhjausparametritHttpClient(CookieManager cookieManager) {
     return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(),
-        null,
-        DateDeserializer.gsonBuilder().create());
+        defaultHttpClientBuilder(cookieManager).build(), DateDeserializer.gsonBuilder().create());
   }
 
   @Bean(name = "OrganisaatioHttpClient")
   @Autowired
   public HttpClient getOrganisaatioHttpClient(CookieManager cookieManager) {
     return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(),
-        null,
-        DateDeserializer.gsonBuilder().create());
+        defaultHttpClientBuilder(cookieManager).build(), DateDeserializer.gsonBuilder().create());
   }
 
   @Bean(name = "DokumenttiHttpClient")
   @Autowired
   public HttpClient getDokumenttiHttpClient(CookieManager cookieManager) {
     return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(),
-        null,
-        DateDeserializer.gsonBuilder().create());
+        defaultHttpClientBuilder(cookieManager).build(), DateDeserializer.gsonBuilder().create());
   }
 
   @Bean(name = "ViestintapalveluInternalHttpClient")
@@ -283,49 +183,26 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "ViestintapalveluApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "ViestintapalveluCasClient")
   @Autowired
-  public ApplicationSession getViestintapalveluApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("ViestintapalveluInternalHttpClient")
-          java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getViestintapalveluCasClient(
       @Value("${cas.service.viestintapalvelu}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "JSESSIONID");
-  }
-
-  @Bean(name = "ViestintapalveluHttpClient")
-  @Autowired
-  public HttpClient getViestintapalveluHttpClient(
-      @Qualifier("ViestintapalveluInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("ViestintapalveluApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Bean(name = "KoodistoHttpClient")
   @Autowired
   public HttpClient getKoodistoHttpClient(CookieManager cookieManager) {
     return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(),
-        null,
-        DateDeserializer.gsonBuilder().create());
+        defaultHttpClientBuilder(cookieManager).build(), DateDeserializer.gsonBuilder().create());
   }
 
   @Bean(name = "OppijanumerorekisteriInternalHttpClient")
@@ -335,40 +212,19 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "OppijanumerorekisteriApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "OppijanumerorekisteriCasClient")
   @Autowired
-  public ApplicationSession getOppijanumerorekisteriApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("OppijanumerorekisteriInternalHttpClient")
-          java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getOppijanumerorekisteriCasClient(
       @Value("${cas.service.oppijanumerorekisteri-service}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.haku}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.haku}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "JSESSIONID");
-  }
-
-  @Bean(name = "OppijanumerorekisteriHttpClient")
-  @Autowired
-  public HttpClient getOppijanumerorekisteriHttpClient(
-      @Qualifier("OppijanumerorekisteriInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("OppijanumerorekisteriApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Bean(name = "ValintapisteServiceInternalHttpClient")
@@ -378,49 +234,26 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "ValintapisteServiceApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "ValintapisteServiceCasClient")
   @Autowired
-  public ApplicationSession getValintapisteServiceApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("ValintapisteServiceInternalHttpClient")
-          java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getValintapisteServiceCasClient(
       @Value("${cas.service.valintapiste-service}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "ring-session");
-  }
-
-  @Bean(name = "ValintapisteServiceHttpClient")
-  @Autowired
-  public HttpClient getValintapisteServiceHttpClient(
-      @Qualifier("ValintapisteServiceInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("ValintapisteServiceApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("ring-session")
+            .build());
   }
 
   @Bean(name = "ValintalaskentaValintakoeHttpClient")
   @Autowired
   public HttpClient getValintalaskentaValintakoeHttpClient(CookieManager cookieManager) {
     return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(),
-        null,
-        DateDeserializer.gsonBuilder().create());
+        defaultHttpClientBuilder(cookieManager).build(), DateDeserializer.gsonBuilder().create());
   }
 
   @Bean(name = "SuoritusrekisteriInternalHttpClient")
@@ -430,40 +263,19 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "SuoritusrekisteriApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "SuoritusrekisteriCasClient")
   @Autowired
-  public ApplicationSession getSuoritusrekisteriApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("SuoritusrekisteriInternalHttpClient")
-          java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getSuoritusrekisteriCasClient(
       @Value("${cas.service.suoritusrekisteri}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "JSESSIONID");
-  }
-
-  @Bean(name = "SuoritusrekisteriHttpClient")
-  @Autowired
-  public HttpClient getSuoritusrekisteriHttpClient(
-      @Qualifier("SuoritusrekisteriInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("SuoritusrekisteriApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   @Bean(name = "ValintalaskentaInternalHttpClient")
@@ -473,42 +285,19 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "ValintalaskentaApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "ValintalaskentaCasClient")
   @Autowired
-  public ApplicationSession getValintalaskentaApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("ValintalaskentaInternalHttpClient")
-          java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getValintalaskentaCasClient(
       @Value("${cas.service.valintalaskenta-service}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "JSESSIONID");
-  }
-
-  @Bean(name = "ValintalaskentaHttpClient")
-  @Autowired
-  public HttpClient getValintalaskentaHttpClient(
-      @Qualifier("ValintalaskentaInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("ValintalaskentaApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(
-        client,
-        applicationSession,
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build(),
         DateDeserializer.gsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create());
   }
 
@@ -519,40 +308,64 @@ public class HttpClients {
     return defaultHttpClientBuilder(cookieManager).build();
   }
 
-  @Profile("default")
-  @Bean(name = "ValintaperusteetApplicationSession")
+  @Profile({"default", "dev"})
+  @Bean(name = "ValintaperusteetCasClient")
   @Autowired
-  public ApplicationSession getValintaperusteetApplicationSession(
-      @Qualifier("CasHttpClient") java.net.http.HttpClient casHttpClient,
-      @Qualifier("ValintaperusteetInternalHttpClient")
-          java.net.http.HttpClient applicationHttpClient,
-      CookieManager cookieManager,
+  public RestCasClient getValintaperusteetCasClient(
       @Value("${cas.service.valintaperusteet-service}") String service,
       @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
       @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
     String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new ApplicationSession(
-        applicationHttpClient,
-        cookieManager,
-        CALLER_ID,
-        Duration.ofSeconds(10),
-        new CasSession(
-            casHttpClient,
-            Duration.ofSeconds(10),
-            CALLER_ID,
-            URI.create(ticketsUrl),
-            username,
-            password),
-        service,
-        "JSESSIONID");
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
-  @Bean(name = "ValintaperusteetHttpClient")
+  @Profile({"default", "dev"})
+  @Bean(name = "ryhmasahkopostiCasClient")
   @Autowired
-  public HttpClient getValintaperusteetHttpClient(
-      @Qualifier("ValintaperusteetInternalHttpClient") java.net.http.HttpClient client,
-      @Qualifier("ValintaperusteetApplicationSession") ApplicationSession applicationSession) {
-    return new HttpClient(client, applicationSession, DateDeserializer.gsonBuilder().create());
+  public RestCasClient getRyhmasahkopostiCasClient(
+      @Value("${cas.service.ryhmasahkoposti-service}") String service,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
+  }
+
+  @Profile({"default", "dev"})
+  @Bean(name = "OppijantunnistusCasClient")
+  @Autowired
+  public RestCasClient getOppijantunnistusCasClient(
+      @Value("${cas.service.oppijan-tunnistus}") String service,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("ring-session")
+            .build());
+  }
+
+  @Profile({"default", "dev"})
+  @Bean(name = "SeurantaCasClient")
+  @Autowired
+  public RestCasClient getSeurantaCasClient(
+      @Value("${cas.service.seuranta}") String service,
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("JSESSIONID")
+            .build());
   }
 
   public static java.net.http.HttpClient.Builder defaultHttpClientBuilder(
@@ -567,8 +380,6 @@ public class HttpClients {
   @Autowired
   public HttpClient getKoskiHttpClient(CookieManager cookieManager) {
     return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(),
-        null,
-        DateDeserializer.gsonBuilder().create());
+        defaultHttpClientBuilder(cookieManager).build(), DateDeserializer.gsonBuilder().create());
   }
 }

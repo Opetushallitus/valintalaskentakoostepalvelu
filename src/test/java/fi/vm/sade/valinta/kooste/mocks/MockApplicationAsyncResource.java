@@ -20,9 +20,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import javax.ws.rs.core.Response;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
+@Profile("mockresources")
 @Service
 public class MockApplicationAsyncResource implements ApplicationAsyncResource {
   public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
@@ -193,9 +194,9 @@ public class MockApplicationAsyncResource implements ApplicationAsyncResource {
   }
 
   @Override
-  public Observable<Response> changeStateOfApplicationsToPassive(
+  public Observable<String> changeStateOfApplicationsToPassive(
       List<String> hakemusOid, String reason) {
-    return Observable.just(Response.ok().build());
+    return Observable.just("OK");
   }
 
   @Override

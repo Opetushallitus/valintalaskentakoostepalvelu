@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.hakemukset;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -15,12 +15,12 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
@@ -35,20 +35,20 @@ import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class HakemuksetResourceTest {
 
   final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
   final HttpResourceBuilder.WebClientExposingHttpResource hakemuksetValinnanvaiheResource =
       new HttpResourceBuilder(getClass().getName())
           .address(root + "/hakemukset/valinnanvaihe")
           .buildExposingWebClientDangerously();
 
-  @Before
+  @BeforeEach
   public void startServer() {
     ValintakoeDTO v1 = new ValintakoeDTO();
     v1.setOid("1.2.3.4");
@@ -82,7 +82,8 @@ public class HakemuksetResourceTest {
     HakukohdeJaValintaperusteDTO v4 =
         new HakukohdeJaValintaperusteDTO("1.2.246.562.5.28143628072", Lists.newArrayList(v3));
     MockValintaperusteetAsyncResource.setHakukohdeValintaperusteResult(Lists.newArrayList(v4));
-    ValintaKoosteJetty.startShared();
+
+    MockResourcesApp.start();
   }
 
   @Test

@@ -13,13 +13,15 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.async.DeferredResult;
 
 @Service
 public class EPostiServiceImpl implements EPostiService {
@@ -92,7 +94,7 @@ public class EPostiServiceImpl implements EPostiService {
 
   @Override
   public void esikatseleSecurelinkki(
-      EPostiRequest ePostiRequest, Consumer<Response> success, Consumer<String> failure) {
+      EPostiRequest ePostiRequest, DeferredResult<ResponseEntity<byte[]>> result) {
     String hakuMessage =
         "Haku="
             + ePostiRequest.getHakuOid()
@@ -108,12 +110,12 @@ public class EPostiServiceImpl implements EPostiService {
     teeTokensRequest(ePostiRequest, Collections.emptyMap())
         .flatMap(tokensRequest -> oppijantunnistusAsyncResource.previewSecureLink(tokensRequest))
         .subscribe(
-            response -> {
-              success.accept(response);
-            },
+            response -> result.setResult(ResponseEntity.status(HttpStatus.OK).body(response)),
             throwable -> {
               LOG.error("Securelinkin esikatselu epäonnistui. " + hakuMessage, throwable);
-              failure.accept(throwable.getMessage());
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                      .body(throwable.getMessage()));
             });
   }
 

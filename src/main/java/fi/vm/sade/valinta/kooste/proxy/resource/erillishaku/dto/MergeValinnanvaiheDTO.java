@@ -1,28 +1,27 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.ArrayList;
 import java.util.List;
 
-@ApiModel(value = "ValinnanvaiheDTO", description = "Valinnan vaihe")
+@Schema(name = "ValinnanvaiheDTO", description = "Valinnan vaihe")
 public class MergeValinnanvaiheDTO {
-  @ApiModelProperty(value = "Järjestysnumero", required = true)
+  @Schema(name = "Järjestysnumero", required = true)
   private int jarjestysnumero;
 
-  @ApiModelProperty(value = "Valinnan vaiheen OID", required = true)
+  @Schema(name = "Valinnan vaiheen OID", required = true)
   private String valinnanvaiheoid;
 
-  @ApiModelProperty(value = "Haun OID", required = true)
+  @Schema(name = "Haun OID", required = true)
   private String hakuOid;
 
-  @ApiModelProperty(value = "Valinnan vaiheen nimi")
+  @Schema(name = "Valinnan vaiheen nimi")
   private String nimi;
 
-  @ApiModelProperty(value = "Onko viimeinen valinnanvaihe")
+  @Schema(name = "Onko viimeinen valinnanvaihe")
   private boolean viimeinenVaihe = false;
 
-  @ApiModelProperty(value = "Valinnan vaiheen hakukohteen OID")
+  @Schema(name = "Valinnan vaiheen hakukohteen OID")
   private String hakukohdeOid;
 
   public String getHakukohdeOid() {

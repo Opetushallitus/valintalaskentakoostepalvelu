@@ -4,7 +4,6 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
 
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
@@ -12,12 +11,14 @@ import fi.vm.sade.valinta.kooste.mocks.MockTarjontaAsyncService;
 import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoitteet;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import io.reactivex.Observable;
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,16 +27,17 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 /** @author Jussi Jartamo */
 public class OsoitetarratServiceTest {
   final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
+
   final HttpResourceBuilder.WebClientExposingHttpResource osoitetarratResource =
       new HttpResourceBuilder(getClass().getName())
           .address(root + "/viestintapalvelu/osoitetarrat/aktivoi")
@@ -51,12 +53,12 @@ public class OsoitetarratServiceTest {
   final String HAKEMUS1 = "HAKEMUS1";
   final String ATARUHAKEMUS1 = "1.2.246.562.11.00000000000000000063";
   final String SELVITETTY_TUNNISTE1 = "SELVITETTY_TUNNISTE1";
-  private final Observable<Response> byteArrayResponse =
-      Observable.just(Response.ok(new ByteArrayInputStream("lol".getBytes())).build());
+  private final Observable<InputStream> byteArrayResponse =
+      Observable.just(new ByteArrayInputStream("lol".getBytes()));
 
-  @Before
+  @BeforeEach
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
   }
 
   @Test
@@ -71,7 +73,7 @@ public class OsoitetarratServiceTest {
               .query("hakuOid", HAKU2)
               .query("hakukohdeOid", HAKUKOHDE2)
               .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
     } finally {
       Mocks.reset();
     }
@@ -120,15 +122,15 @@ public class OsoitetarratServiceTest {
               .query("hakukohdeOid", HAKUKOHDE1)
               .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
               .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
       // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))
           .haeOsoitetarrat(Mockito.any());
       List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
-      Assert.assertEquals(1, osoitteet.size());
-      Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
+      Assertions.assertEquals(1, osoitteet.size());
+      Assertions.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
     } finally {
       Mocks.reset();
       MockApplicationAsyncResource.clear();
@@ -191,15 +193,15 @@ public class OsoitetarratServiceTest {
               .query("hakukohdeOid", HAKUKOHDE1)
               .query("valintakoeTunnisteet", SELVITETTY_TUNNISTE1)
               .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
       // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))
           .haeOsoitetarrat(Mockito.any());
       List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
-      Assert.assertEquals(1, osoitteet.size());
-      Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
+      Assertions.assertEquals(1, osoitteet.size());
+      Assertions.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
     } finally {
       Mocks.reset();
       MockTarjontaAsyncService.clear();
@@ -248,15 +250,15 @@ public class OsoitetarratServiceTest {
               .query("hakukohdeOid", HAKUKOHDE1)
               .query("valintakoeTunnisteet", VALINTAKOE1)
               .post(Entity.entity(new DokumentinLisatiedot(), "application/json"));
-      Assert.assertEquals(200, r.getStatus());
+      Assertions.assertEquals(200, r.getStatus());
       // Ei välttämättä tarpeen koska asyncit testeissä palautuu lähtökohtaisesti heti mutta
       // muutosten varalta
       // annetaan pieni odotus aika ellei kutsut ole jo perillä.
       Mockito.verify(Mocks.getViestintapalveluAsyncResource(), Mockito.timeout(500).times(1))
           .haeOsoitetarrat(Mockito.any());
       List<Osoitteet> osoitteet = osoitteetArgumentCaptor.getAllValues();
-      Assert.assertEquals(1, osoitteet.size());
-      Assert.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
+      Assertions.assertEquals(1, osoitteet.size());
+      Assertions.assertEquals(1, osoitteet.iterator().next().getAddressLabels().size());
     } finally {
       Mocks.reset();
       MockApplicationAsyncResource.clear();

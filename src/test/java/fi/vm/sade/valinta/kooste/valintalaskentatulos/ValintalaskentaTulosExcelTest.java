@@ -4,24 +4,23 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.hakemus;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.hakemusOsallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintakoe;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.valinta.kooste.ValintaKoosteJetty;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.impl.ApplicationAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumentinLisatiedot;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
-import fi.vm.sade.valinta.sharedutils.http.HttpResource;
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.OsallistuminenDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
@@ -41,16 +40,16 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /** @author Jussi Jartamo */
 public class ValintalaskentaTulosExcelTest {
   final String root =
-      "http://localhost:" + ValintaKoosteJetty.port + "/valintalaskentakoostepalvelu/resources";
-  final HttpResource hakemusResource = new ApplicationAsyncResourceImpl(null, null);
+      "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
+
   final HttpResourceBuilder.WebClientExposingHttpResource valintakoekutsutResource =
       new HttpResourceBuilder(getClass().getName())
           .address(root + "/valintalaskentaexcel/valintakoekutsut/aktivoi")
@@ -71,19 +70,21 @@ public class ValintalaskentaTulosExcelTest {
   final Haku haku =
       new Haku(HAKU1, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null);
 
-  @Before
+  @BeforeEach
   public void startServer() {
-    ValintaKoosteJetty.startShared();
+    MockResourcesApp.start();
   }
 
-  @Ignore("This can be used for testing creation of production jsons")
+  @Disabled("This can be used for testing creation of production jsons")
   @Test
   public void testaaExcelinLuontiJsonLahteesta() throws Throwable {
     String listFull = IOUtils.toString(new FileInputStream("listfull.json"));
     String osallistumiset = IOUtils.toString(new FileInputStream("osallistumiset.json"));
     String valintakoe = IOUtils.toString(new FileInputStream("valintakoe.json"));
     List<Hakemus> hakemuses =
-        hakemusResource.gson().fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
+        DateDeserializer.gsonBuilder()
+            .create()
+            .fromJson(listFull, new TypeToken<List<Hakemus>>() {}.getType());
     List<HakemusWrapper> hakemusWrappers =
         hakemuses.stream().map(HakuappHakemusWrapper::new).collect(Collectors.toList());
 

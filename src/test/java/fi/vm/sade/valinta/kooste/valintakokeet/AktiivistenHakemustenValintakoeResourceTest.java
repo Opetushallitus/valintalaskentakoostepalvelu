@@ -1,12 +1,8 @@
 package fi.vm.sade.valinta.kooste.valintakokeet;
 
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -29,12 +25,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.core.Response;
 import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.DeferredResult;
 
 public class AktiivistenHakemustenValintakoeResourceTest {
   private final String hakukohdeOid = "hakukohdeOid";
@@ -107,11 +103,9 @@ public class AktiivistenHakemustenValintakoeResourceTest {
           applicationAsyncResource,
           ataruAsyncResource,
           tarjontaAsyncResource);
-  private Response responseReceivedInAsyncResponse;
 
   @Test
   public void vainApplicationAsyncResourcenPalauttamienHakemustenOsallistumisetPalautetaan() {
-    AsyncResponse asyncResponse = mock(AsyncResponse.class);
     when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
         .thenReturn(
             CompletableFuture.completedFuture(
@@ -123,28 +117,18 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     when(tarjontaAsyncResource.haeHaku(hakuOid))
         .thenReturn(CompletableFuture.completedFuture(hakuDTOHakuApp));
 
-    when(asyncResponse.resume(any(Response.class)))
-        .thenAnswer(
-            (Answer<Boolean>)
-                invocation -> {
-                  responseReceivedInAsyncResponse = invocation.getArgument(0);
-                  return true;
-                });
-
-    resource.osallistumisetByHakutoive(hakukohdeOid, asyncResponse);
+    DeferredResult<ResponseEntity<List<ValintakoeOsallistuminenDTO>>> result =
+        resource.osallistumisetByHakutoive(hakukohdeOid);
 
     verify(valintakoeAsyncResource).haeHakutoiveelle(hakukohdeOid);
     verify(applicationAsyncResource).getApplicationsByHakemusOids(hakemusOids);
-    verify(asyncResponse).setTimeout(anyLong(), any(TimeUnit.class));
-    verify(asyncResponse).resume(any(Response.class));
 
     verifyNoMoreInteractions(valintakoeAsyncResource);
     verifyNoMoreInteractions(applicationAsyncResource);
-    verifyNoMoreInteractions(asyncResponse);
 
-    assertEquals(OK.getStatusCode(), responseReceivedInAsyncResponse.getStatus());
+    Assertions.assertEquals(HttpStatus.OK, ((ResponseEntity) result.getResult()).getStatusCode());
     List<ValintakoeOsallistuminenDTO> osallistumisetVastauksessa =
-        (List<ValintakoeOsallistuminenDTO>) responseReceivedInAsyncResponse.getEntity();
+        ((ResponseEntity<List<ValintakoeOsallistuminenDTO>>) result.getResult()).getBody();
     assertThat(osallistumisetVastauksessa, Matchers.hasSize(2));
     assertEquals(hakemus1.getOid(), osallistumisetVastauksessa.get(0).getHakemusOid());
     assertEquals(hakemus3.getOid(), osallistumisetVastauksessa.get(1).getHakemusOid());
@@ -152,7 +136,6 @@ public class AktiivistenHakemustenValintakoeResourceTest {
 
   @Test
   public void ataruVainApplicationAsyncResourcenPalauttamienHakemustenOsallistumisetPalautetaan() {
-    AsyncResponse asyncResponse = mock(AsyncResponse.class);
     when(valintakoeAsyncResource.haeHakutoiveelle(hakukohdeOid))
         .thenReturn(
             CompletableFuture.completedFuture(
@@ -164,28 +147,18 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     when(tarjontaAsyncResource.haeHaku(hakuOid))
         .thenReturn(CompletableFuture.completedFuture(hakuDTOEditori));
 
-    when(asyncResponse.resume(any(Response.class)))
-        .thenAnswer(
-            (Answer<Boolean>)
-                invocation -> {
-                  responseReceivedInAsyncResponse = invocation.getArgument(0);
-                  return true;
-                });
-
-    resource.osallistumisetByHakutoive(hakukohdeOid, asyncResponse);
+    DeferredResult<ResponseEntity<List<ValintakoeOsallistuminenDTO>>> result =
+        resource.osallistumisetByHakutoive(hakukohdeOid);
 
     verify(valintakoeAsyncResource).haeHakutoiveelle(hakukohdeOid);
     verify(ataruAsyncResource).getApplicationsByOids(ataruHakemusOids);
-    verify(asyncResponse).setTimeout(anyLong(), any(TimeUnit.class));
-    verify(asyncResponse).resume(any(Response.class));
 
     verifyNoMoreInteractions(valintakoeAsyncResource);
     verifyNoMoreInteractions(applicationAsyncResource);
-    verifyNoMoreInteractions(asyncResponse);
 
-    assertEquals(OK.getStatusCode(), responseReceivedInAsyncResponse.getStatus());
+    assertEquals(HttpStatus.OK, ((ResponseEntity) result.getResult()).getStatusCode());
     List<ValintakoeOsallistuminenDTO> osallistumisetVastauksessa =
-        (List<ValintakoeOsallistuminenDTO>) responseReceivedInAsyncResponse.getEntity();
+        ((ResponseEntity<List<ValintakoeOsallistuminenDTO>>) result.getResult()).getBody();
     assertThat(osallistumisetVastauksessa, Matchers.hasSize(2));
     assertEquals(ataruHakemus1.getOid(), osallistumisetVastauksessa.get(0).getHakemusOid());
     assertEquals(ataruHakemus3.getOid(), osallistumisetVastauksessa.get(1).getHakemusOid());
@@ -193,7 +166,6 @@ public class AktiivistenHakemustenValintakoeResourceTest {
 
   @Test
   public void kutsuttavanPalvelunVirhePalautetaanVastaukseen() {
-    AsyncResponse asyncResponse = mock(AsyncResponse.class);
     when(tarjontaAsyncResource.haeHakukohde(hakukohdeOid))
         .thenReturn(CompletableFuture.completedFuture(hakukohdeDTO));
     when(tarjontaAsyncResource.haeHaku(hakuOid))
@@ -206,28 +178,19 @@ public class AktiivistenHakemustenValintakoeResourceTest {
     when(applicationAsyncResource.getApplicationsByHakemusOids(hakemusOids))
         .thenThrow(applicationFetchException);
 
-    when(asyncResponse.resume(any(Response.class)))
-        .thenAnswer(
-            (Answer<Boolean>)
-                invocation -> {
-                  responseReceivedInAsyncResponse = invocation.getArgument(0);
-                  return true;
-                });
-
-    resource.osallistumisetByHakutoive(hakukohdeOid, asyncResponse);
+    DeferredResult<ResponseEntity<List<ValintakoeOsallistuminenDTO>>> result =
+        resource.osallistumisetByHakutoive(hakukohdeOid);
 
     verify(valintakoeAsyncResource).haeHakutoiveelle(hakukohdeOid);
     verify(applicationAsyncResource).getApplicationsByHakemusOids(hakemusOids);
-    verify(asyncResponse).setTimeout(anyLong(), any(TimeUnit.class));
-    verify(asyncResponse).resume(any(Response.class));
 
     verifyNoMoreInteractions(valintakoeAsyncResource);
     verifyNoMoreInteractions(applicationAsyncResource);
-    verifyNoMoreInteractions(asyncResponse);
 
     assertEquals(
-        INTERNAL_SERVER_ERROR.getStatusCode(), responseReceivedInAsyncResponse.getStatus());
-    String responseContent = responseReceivedInAsyncResponse.getEntity().toString();
+        HttpStatus.INTERNAL_SERVER_ERROR, ((ResponseEntity) result.getResult()).getStatusCode());
+    String responseContent =
+        ((ResponseEntity<List<ValintakoeOsallistuminenDTO>>) result.getResult()).toString();
     assertThat(responseContent, containsString(applicationFetchException.getMessage()));
   }
 }

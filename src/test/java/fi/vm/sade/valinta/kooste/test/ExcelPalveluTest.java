@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /** @author Jussi Jartamo */
 public class ExcelPalveluTest {
@@ -20,6 +20,6 @@ public class ExcelPalveluTest {
     rivit.add(new Object[] {RANDOM_DATAA, RANDOM_DATAA});
 
     InputStream xlsData = ExcelExportUtil.exportGridAsXls(rivit.toArray(new Object[][] {}));
-    Assert.assertTrue(IOUtils.toByteArray(xlsData).length >= 0);
+    Assertions.assertTrue(IOUtils.toByteArray(xlsData).length >= 0);
   }
 }

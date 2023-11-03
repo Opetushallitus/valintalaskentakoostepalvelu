@@ -7,9 +7,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 /** @author Jussi Jartamo */
+@Profile("mockresources")
 @Service
 public class MockValintalaskentaValintakoeAsyncResource
     implements ValintalaskentaValintakoeAsyncResource {

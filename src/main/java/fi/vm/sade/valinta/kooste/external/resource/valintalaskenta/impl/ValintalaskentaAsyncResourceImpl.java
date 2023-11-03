@@ -4,11 +4,13 @@ import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.UUSI;
 import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VALMIS;
 import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VIRHE;
 
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
-import fi.vm.sade.valinta.kooste.external.resource.UrlConfiguredResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
+import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.Laskentakutsu;
@@ -16,58 +18,59 @@ import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
 import io.reactivex.Observable;
-import java.net.http.HttpRequest;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.MediaType;
-import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
-    implements ValintalaskentaAsyncResource {
+public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncResource {
   private static final Logger LOG = LoggerFactory.getLogger(ValintalaskentaAsyncResourceImpl.class);
   private final int MAX_POLL_INTERVAL_IN_SECONDS = 30;
-  private final HttpClient httpclient;
+  private final RestCasClient httpclient;
   private final ExecutorService lahetaLaskeDTOExecutor = Executors.newFixedThreadPool(1);
 
+  private final UrlConfiguration urlConfiguration;
+
+  private final Gson gson;
+
   public ValintalaskentaAsyncResourceImpl(
-      @Qualifier("ValintalaskentaCasInterceptor") AbstractPhaseInterceptor casInterceptor,
-      @Qualifier("ValintalaskentaHttpClient") HttpClient httpclient) {
-    super(TimeUnit.HOURS.toMillis(8), casInterceptor);
+      @Qualifier("ValintalaskentaCasClient") RestCasClient httpclient) {
     this.httpclient = httpclient;
+    this.urlConfiguration = UrlConfiguration.getInstance();
+    this.gson = DateDeserializer.gsonBuilder().create();
   }
 
   @Override
   public Observable<List<JonoDto>> jonotSijoitteluun(String hakuOid) {
-    return getAsObservableLazily(
-        "/valintatapajono/jonotsijoittelussa/" + hakuOid,
-        new GenericType<List<JonoDto>>() {}.getType());
+    return Observable.fromFuture(
+        this.httpclient.get(
+            "https://"
+                + this.urlConfiguration.url("host.virkailija")
+                + "/valintalaskenta-laskenta-service/resources/valintatapajono/jonotsijoittelussa/"
+                + hakuOid,
+            new TypeToken<List<JonoDto>>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 
   @Override
   public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
       String hakukohdeOid) {
-    return this.laskennantulokset(hakukohdeOid, null);
-  }
 
-  @Override
-  public CompletableFuture<List<ValintatietoValinnanvaiheDTO>> laskennantulokset(
-      String hakukohdeOid, Executor executor) {
-    return this.httpclient.getJson(
-        getUrl("valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid),
-        Duration.ofMinutes(10),
-        new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {}.getType(),
-        executor);
+    return this.httpclient.get(
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid),
+        new TypeToken<>() {},
+        Collections.emptyMap(),
+        10 * 60 * 1000);
   }
 
   public Observable<String> laske(LaskeDTO laskeDTO, SuoritustiedotDTO suoritustiedot) {
@@ -169,17 +172,16 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   private CompletableFuture<String> aloitaLaskentakutsunLahettaminenPaloissa(
       Laskentakutsu laskentakutsu) {
     final String url =
-        getUrl(
+        this.urlConfiguration.url(
             "valintalaskenta-laskenta-service.valintalaskenta.aloita.laskentakutsu.paloissa",
             laskentakutsu.getPollKey());
     return httpclient
         .post(
             url,
-            Duration.ofMinutes(1),
-            httpclient.createJsonBodyPublisher(laskentakutsu, Laskentakutsu.class),
-            builder ->
-                builder.header("Content-Type", "application/json").header("Accept", "text/plain"),
-            httpclient::parseTxt)
+            new TypeToken<String>() {},
+            laskentakutsu,
+            Map.of("Content-Type", "application/json", "Accept", "text/plain"),
+            60 * 1000)
         .whenComplete(
             (tulos, poikkeus) -> {
               if (poikkeus != null) {
@@ -202,19 +204,17 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
     return CompletableFuture.supplyAsync(
         () -> {
           final String url =
-              getUrl(
+              this.urlConfiguration.url(
                   "valintalaskenta-laskenta-service.valintalaskenta.lisaa.hakukohde.laskentakutsuun",
                   laskentakutsu.getPollKey());
+
           return httpclient
               .post(
                   url,
-                  Duration.ofMinutes(10),
-                  httpclient.createJsonBodyPublisher(dto, LaskeDTO.class),
-                  builder ->
-                      builder
-                          .header("Content-Type", "application/json")
-                          .header("Accept", "text/plain"),
-                  httpclient::parseTxt)
+                  new TypeToken<String>() {},
+                  dto,
+                  Map.of("Content-Type", "application/json", "Accept", "text/plain"),
+                  10 * 60 * 1000)
               .whenComplete(
                   (tulos, poikkeus) -> {
                     if (poikkeus != null) {
@@ -238,17 +238,16 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   private CompletableFuture<String> lahetaSuoritustiedot(
       SuoritustiedotDTO suoritustiedot, Laskentakutsu laskentakutsu) {
     final String url =
-        getUrl(
+        this.urlConfiguration.url(
             "valintalaskenta-laskenta-service.valintalaskenta.lisaa.suoritustiedot.laskentakutsuun",
             laskentakutsu.getPollKey());
     return httpclient
         .post(
             url,
-            Duration.ofMinutes(10),
-            HttpRequest.BodyPublishers.ofString(
-                Laskentakutsu.toBase64Gzip(suoritustiedot), StandardCharsets.UTF_8),
-            builder -> builder.header("Content-Type", "text/plain").header("Accept", "text/plain"),
-            httpclient::parseTxt)
+            new TypeToken<String>() {},
+            Laskentakutsu.toBase64Gzip(suoritustiedot),
+            Map.of("Content-Type", "text/plain", "Accept", "text/plain"),
+            10 * 60 * 1000)
         .whenComplete(
             (tulos, poikkeus) -> {
               if (poikkeus != null) {
@@ -269,17 +268,16 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   private CompletableFuture<String> kaynnistaPaloissaSiirrettyLaskenta(
       Laskentakutsu laskentakutsu) {
     final String url =
-        getUrl(
+        this.urlConfiguration.url(
             "valintalaskenta-laskenta-service.valintalaskenta.kaynnista.paloissa.aloitettu.laskenta",
             laskentakutsu.getPollKey());
     return httpclient
         .post(
             url,
-            Duration.ofMinutes(10),
-            httpclient.createJsonBodyPublisher(laskentakutsu, Laskentakutsu.class),
-            builder ->
-                builder.header("Content-Type", "application/json").header("Accept", "text/plain"),
-            httpclient::parseTxt)
+            new TypeToken<String>() {},
+            laskentakutsu,
+            Map.of("Content-Type", "application/json", "Accept", "text/plain"),
+            10 * 60 * 1000)
         .whenComplete(
             (tulos, poikkeus) -> {
               if (poikkeus != null) {
@@ -302,12 +300,13 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
       String hakuOid, String hakukohdeOid, String tarjoajaOid, ValinnanvaiheDTO vaihe) {
     HashMap<String, String> query = new HashMap<>();
     query.put("tarjoajaOid", tarjoajaOid);
-    return this.httpclient.postJson(
-        getUrl("valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid, query),
-        Duration.ofMinutes(5),
+    return this.httpclient.post(
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeOid, query),
+        new TypeToken<ValinnanvaiheDTO>() {},
         vaihe,
-        new TypeToken<ValinnanvaiheDTO>() {}.getType(),
-        new TypeToken<ValinnanvaiheDTO>() {}.getType());
+        Collections.emptyMap(),
+        5 * 60 * 1000);
   }
 
   public Observable<String> pollaa(int pollInterval, Object result, String uuid, String pollKey) {
@@ -326,14 +325,14 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
           .switchMap(
               d -> {
                 String url =
-                    getUrl("valintalaskenta-laskenta-service.valintalaskenta.status", pollKey);
-                return getAsObservableLazily(
-                        url,
-                        String.class,
-                        client -> {
-                          client.accept(MediaType.TEXT_PLAIN_TYPE);
-                          return client;
-                        })
+                    this.urlConfiguration.url(
+                        "valintalaskenta-laskenta-service.valintalaskenta.status", pollKey);
+                return Observable.fromFuture(
+                        this.httpclient.get(
+                            url,
+                            new TypeToken<String>() {},
+                            Map.of("Accept", "text/plain"),
+                            10 * 60 * 1000))
                     .switchMap(
                         rval ->
                             pollaa(
@@ -352,13 +351,12 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
         laskentakutsu.getPollKey());
 
     CompletableFuture<String> requestFuture =
-        httpclient.post(
-            getUrl(api),
-            Duration.ofMinutes(10),
-            httpclient.createJsonBodyPublisher(laskentakutsu, Laskentakutsu.class),
-            builder ->
-                builder.header("Content-Type", "application/json").header("Accept", "text/plain"),
-            httpclient::parseTxt);
+        this.httpclient.post(
+            this.urlConfiguration.url(api),
+            new TypeToken<String>() {},
+            laskentakutsu,
+            Map.of("Content-Type", "application/json", "Accept", "text/plain"),
+            10 * 60 * 1000);
 
     return kutsuRajapintaaPollaten(laskentakutsu, requestFuture);
   }
@@ -386,7 +384,7 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   }
 
   private void logitaKokotiedot(LaskeDTO laskeDTO) {
-    Function<Object, Integer> koonLaskenta = o -> gson().toJson(o).length();
+    Function<Object, Integer> koonLaskenta = o -> this.gson.toJson(o).length();
     try {
       LOG.debug(
           String.format(
@@ -406,9 +404,21 @@ public class ValintalaskentaAsyncResourceImpl extends UrlConfiguredResource
   private void logitaSuoritustietojenKoko(SuoritustiedotDTO suoritustiedotDTO) {
     try {
       LOG.debug(
-          String.format("Suoritustietojen koko: %s", gson().toJson(suoritustiedotDTO).length()));
+          String.format("Suoritustietojen koko: %s", this.gson.toJson(suoritustiedotDTO).length()));
     } catch (Exception e) {
       LOG.error("Virhe, kun yritettiin logittaa suoritustietojen kokoa", e);
     }
+  }
+
+  @Override
+  public Observable<List<ValintatietoValinnanvaiheDTO>> hakukohde(String hakukohdeoid) {
+    return Observable.fromFuture(
+        this.httpclient.get(
+            this.urlConfiguration.url(
+                "https://${host.virkailija}/valintalaskenta-laskenta-service/resources/hakukohde/$1/valinnanvaihe",
+                hakukohdeoid),
+            new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {},
+            Collections.emptyMap(),
+            10 * 60 * 1000));
   }
 }

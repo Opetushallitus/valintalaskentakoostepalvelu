@@ -7,9 +7,7 @@ import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdate
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Muutoshistoria;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValintaTulosServiceDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import io.reactivex.Observable;
@@ -22,10 +20,6 @@ import org.joda.time.format.DateTimeFormatter;
 public interface ValintaTulosServiceAsyncResource {
   DateTimeFormatter valintaTulosServiceCompatibleFormatter =
       DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZoneUTC();
-
-  Observable<List<ValintaTulosServiceDto>> getHaunValintatulokset(String hakuOid);
-
-  Observable<List<Muutoshistoria>> getMuutoshistoria(String hakemusOid, String valintatapajonoOid);
 
   Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid);
 

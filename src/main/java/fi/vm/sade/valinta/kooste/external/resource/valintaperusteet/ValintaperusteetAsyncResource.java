@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.Response;
+import org.springframework.http.ResponseEntity;
 
 public interface ValintaperusteetAsyncResource {
 
@@ -35,7 +35,7 @@ public interface ValintaperusteetAsyncResource {
   Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid);
 
   // @POST /valintaperusteet-service/resources/valintaperusteet/tuoHakukohde/
-  Observable<Response> tuoHakukohde(HakukohdeImportDTO hakukohde);
+  Observable<ResponseEntity> tuoHakukohde(HakukohdeImportDTO hakukohde);
 
   CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid);
 

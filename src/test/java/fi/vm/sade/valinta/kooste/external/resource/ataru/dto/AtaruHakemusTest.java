@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.ataru.dto;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
@@ -8,7 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 public class AtaruHakemusTest {
