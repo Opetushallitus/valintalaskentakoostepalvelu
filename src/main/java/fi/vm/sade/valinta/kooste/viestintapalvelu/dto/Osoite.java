@@ -19,7 +19,8 @@ public class Osoite implements Serializable {
   private String numero;
   private String www;
 
-  @JsonIgnore private Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
+  @JsonIgnore
+  private transient Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
 
   public Osoite(
       String firstName,
