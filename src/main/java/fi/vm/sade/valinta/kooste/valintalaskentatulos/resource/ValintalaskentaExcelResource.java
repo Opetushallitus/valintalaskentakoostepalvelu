@@ -229,7 +229,7 @@ public class ValintalaskentaExcelResource {
                                 id,
                                 "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
                                 DateTime.now().plusHours(24).toDate().getTime(),
-                                Arrays.asList("taulukkolaskennat", hakukohdeOid, id),
+                                Arrays.asList("taulukkolaskennat", hakukohdeOid),
                                 "application/vnd.ms-excel",
                                 xls);
                           } catch (Throwable e) {

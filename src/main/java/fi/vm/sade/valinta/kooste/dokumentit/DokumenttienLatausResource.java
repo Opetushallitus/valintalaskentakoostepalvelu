@@ -4,6 +4,7 @@ import static fi.vm.sade.valinta.kooste.AuthorizationUtil.getCurrentUser;
 
 import fi.vm.sade.valinta.dokumenttipalvelu.Dokumenttipalvelu;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.ObjectEntity;
+import fi.vm.sade.valinta.dokumenttipalvelu.dto.ObjectHead;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.ObjectMetadata;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -71,9 +72,10 @@ public class DokumenttienLatausResource {
       return dokumenttipalvelu.find(Set.of("viestintapalvelu", hakukohdeOid)).stream()
           .filter(
               object -> {
-                // FIXME: Tämä saattaa olla raskas operaatio, riippuen tallessa olevien
-                // hyväksymiskirjeiden määrästä
-                final ObjectEntity entity = dokumenttipalvelu.get(object.key);
+                // Tämä saattaa olla hidas operaatio, riippuen "voimassa olevien"
+                // hyväksymiskirjeiden määrästä per
+                // hakukohde
+                final ObjectHead entity = dokumenttipalvelu.head(object.key);
                 return entity.fileName.equals("hyvaksymiskirje_" + hakukohdeOid + ".pdf");
               })
           .sorted(
@@ -115,8 +117,7 @@ public class DokumenttienLatausResource {
             content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)),
         @ApiResponse(description = "Dokumenttia ei löytynyt", responseCode = "404"),
         @ApiResponse(
-            description =
-                "DocumentId:llä löytyi useampia dokumentteja",
+            description = "DocumentId:llä löytyi useampia dokumentteja",
             responseCode = "409",
             content =
                 @Content(

@@ -29,13 +29,7 @@ import io.reactivex.Observable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -373,10 +367,8 @@ public class OsoitetarratService {
                           id,
                           "osoitetarrat.pdf",
                           defaultExpirationDate().getTime(),
-                          Stream.concat(
-                                  prosessi.getTags().stream(),
-                                  Stream.concat(hakukohdeOid.stream(), Stream.of(id)))
-                              .collect(Collectors.toList()),
+                          Stream.concat(prosessi.getTags().stream(), hakukohdeOid.stream())
+                              .toList(),
                           "application/pdf",
                           inputStream)
                       .subscribe(

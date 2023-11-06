@@ -238,8 +238,7 @@ public class SijoittelunTulosRouteImpl
                     id,
                     "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
                     getTimeToLive(),
-                    Stream.concat(prosessi.getTags().stream(), Stream.of(hakukohdeOid, id))
-                        .toList(),
+                    Stream.concat(prosessi.getTags().stream(), Stream.of(hakukohdeOid)).toList(),
                     "application/vnd.ms-excel",
                     input)
                 .subscribe(
