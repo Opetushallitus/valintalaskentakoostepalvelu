@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 
 public class Osoite implements Serializable {
@@ -21,8 +20,7 @@ public class Osoite implements Serializable {
   private String www;
 
   @JsonIgnore
-  @Expose(serialize = false, deserialize = false)
-  private Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
+  private transient Boolean ulkomaillaSuoritettuKoulutusTaiOppivelvollisuudenKeskeyttanyt;
 
   public Osoite(
       String firstName,
