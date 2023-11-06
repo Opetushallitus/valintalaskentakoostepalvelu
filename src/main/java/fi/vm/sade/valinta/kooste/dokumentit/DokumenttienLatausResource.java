@@ -6,16 +6,18 @@ import fi.vm.sade.valinta.dokumenttipalvelu.Dokumenttipalvelu;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.ObjectEntity;
 import fi.vm.sade.valinta.dokumenttipalvelu.dto.ObjectMetadata;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -104,28 +106,57 @@ public class DokumenttienLatausResource {
   }
 
   @GetMapping(value = "/lataa/{documentId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @Operation(summary = "Lataa dokumentin")
-  public ResponseEntity<byte[]> lataa(
+  @Operation(
+      summary = "Lataa dokumentin",
+      responses = {
+        @ApiResponse(
+            description = "Dokumentin sisältö",
+            responseCode = "200",
+            content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)),
+        @ApiResponse(description = "Dokumenttia ei löytynyt", responseCode = "404"),
+        @ApiResponse(
+            description =
+                "DocumentId:llä löytyi useampia dokumentteja",
+            responseCode = "409",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ApiVirhe.class))),
+        @ApiResponse(
+            description = "Odottamaton virhetilanne dokumenttia ladattaessa",
+            responseCode = "500")
+      })
+  public ResponseEntity<Object> lataa(
       @PathVariable("documentId") final String documentId, final HttpServletResponse response) {
     try {
       final Collection<ObjectMetadata> objectMetadata =
           dokumenttipalvelu.find(Collections.singleton(documentId));
-      if (objectMetadata.size() == 1) {
-        final ObjectMetadata metadata = objectMetadata.stream().findFirst().get();
-        final ObjectEntity objectEntity = dokumenttipalvelu.get(metadata.key);
-        response.setHeader("Content-Type", objectEntity.contentType);
-        response.setHeader(
-            "Content-Disposition", "attachment; filename=\"" + objectEntity.fileName + "\"");
-        response.setHeader("Content-Length", String.valueOf(objectEntity.contentLength));
-        response.setHeader("Cache-Control", "private");
-        LOG.info("{} haki dokumentin {}", getCurrentUser(), documentId);
-        return ResponseEntity.ok(IOUtils.toByteArray(objectEntity.entity));
-      } else {
-        LOG.info("DocumentId:llä {} löytyi {} osumaa", documentId, objectMetadata.size());
+      if (objectMetadata.isEmpty()) {
+        LOG.info("DocumentId:llä {} ei löytynyt dokumentteja", documentId);
         return ResponseEntity.notFound().build();
+      } else if (objectMetadata.size() > 1) {
+        final List<String> keys =
+            objectMetadata.stream().map(o -> o.key).collect(Collectors.toList());
+        LOG.info(
+            "DocumentId:llä {} löytyi {} dokumenttia: avaimet {}",
+            documentId,
+            objectMetadata.size(),
+            keys);
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(
+                new ApiVirhe(String.format("löytyi %d dokumenttia", objectMetadata.size()), keys));
       }
+      final ObjectMetadata metadata = objectMetadata.stream().findFirst().get();
+      final ObjectEntity objectEntity = dokumenttipalvelu.get(metadata.key);
+      response.setHeader("Content-Type", objectEntity.contentType);
+      response.setHeader(
+          "Content-Disposition", "attachment; filename=\"" + objectEntity.fileName + "\"");
+      response.setHeader("Content-Length", String.valueOf(objectEntity.contentLength));
+      response.setHeader("Cache-Control", "private");
+      LOG.info("{} haki dokumentin {}", getCurrentUser(), documentId);
+      return ResponseEntity.ok(IOUtils.toByteArray(objectEntity.entity));
     } catch (final Exception e) {
-      LOG.warn("Virhe ladattaessa tiedostoa {}", documentId, e);
+      LOG.warn("Virhe ladattaessa dokumenttia {}", documentId, e);
       if (e.getCause() != null && e.getCause() instanceof NoSuchKeyException) {
         return ResponseEntity.notFound().build();
       } else {
