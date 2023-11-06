@@ -124,7 +124,7 @@ public class ErillishaunVientiService {
                       uuid,
                       "erillishaku.xlsx",
                       DateTime.now().plusHours(1).toDate().getTime(),
-                      List.of("erillishaku", uuid),
+                      List.of("erillishaku"),
                       "application/octet-stream",
                       excel.getExcel().vieXlsx())
                   .subscribe(
