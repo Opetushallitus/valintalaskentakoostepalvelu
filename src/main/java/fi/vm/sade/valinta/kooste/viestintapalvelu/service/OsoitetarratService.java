@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
 import fi.vm.sade.sijoittelu.tulos.dto.HakemusDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.IsAtaruHakemusOid;
@@ -354,7 +355,7 @@ public class OsoitetarratService {
                   return i;
                 }
               });
-      // LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(osoitteet));
+      LOG.info("osoitteet: {}", new GsonBuilder().setPrettyPrinting().create().toJson(osoitteet));
       viestintapalveluAsyncResource
           .haeOsoitetarrat(osoitteet)
           .subscribe(
