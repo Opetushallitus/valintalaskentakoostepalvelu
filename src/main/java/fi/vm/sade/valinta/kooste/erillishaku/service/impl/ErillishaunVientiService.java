@@ -344,7 +344,11 @@ public class ErillishaunVientiService {
                     : null)
             .valinnantilanKuvauksenTekstiFI(valinnantilanKuvauksenTekstiFI)
             .valinnantilanKuvauksenTekstiSV(valinnantilanKuvauksenTekstiSV)
-            .valinnantilanKuvauksenTekstiEN(valinnantilanKuvauksenTekstiEN);
+            .valinnantilanKuvauksenTekstiEN(valinnantilanKuvauksenTekstiEN)
+            .idTunnus(wrapper.getKansallinenId())
+            .syntymapaikka(wrapper.getSyntymapaikka())
+            .kaupunkiJaMaa(wrapper.getKaupunkiUlkomaa())
+            .passinNumero(wrapper.getPassinnumero());
 
     if (valintatulos != null) {
       builder
