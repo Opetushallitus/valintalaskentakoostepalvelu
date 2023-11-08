@@ -322,6 +322,10 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
     return null;
   }
 
+  public String getSyntymapaikka() {
+    return StringUtils.trimToEmpty(keyvalues.get("birthplace"));
+  }
+
   @Override
   public int hashCode() {
     return Optional.ofNullable(getOid()).orElse("").hashCode();

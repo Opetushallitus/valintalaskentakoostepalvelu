@@ -106,6 +106,7 @@ public class ErillishakuExcel {
     builder.add(new TekstiArvo("Passin numero"));
     builder.add(new TekstiArvo("Kansallinen ID-tunnus"));
     builder.add(new TekstiArvo("Kaupunki ja maa"));
+    builder.add(new TekstiArvo("Hakemus-oid"));
     esittelyt.add(builder.build());
 
     Collections.sort(
@@ -174,6 +175,7 @@ public class ErillishakuExcel {
               .passinNumero("4321")
               .idTunnus("1234")
               .kaupunkiJaMaa("Helsinki, Suomi")
+              .hakemusOid("")
               .build())
           .stream();
     } else {
@@ -264,6 +266,7 @@ public class ErillishakuExcel {
       a.add(new TekstiArvo(rivi.getPassinNumero(), true, true));
       a.add(new TekstiArvo(rivi.getIdTunnus(), true, true));
       a.add(new TekstiArvo(rivi.getKaupunkiJaMaa(), true, true));
+      a.add(new TekstiArvo(rivi.getHakemusOid(), true, true));
       return a;
     };
   }

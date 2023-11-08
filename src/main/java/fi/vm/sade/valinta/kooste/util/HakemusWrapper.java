@@ -107,4 +107,6 @@ public abstract class HakemusWrapper {
   public abstract List<AtaruHakutoive> ataruHakutoiveet();
 
   public abstract List<String> getHuoltajienSahkopostiosoitteet();
+
+  public abstract String getSyntymapaikka();
 }

@@ -439,6 +439,11 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
+  public String getSyntymapaikka() {
+    return null;
+  }
+
+  @Override
   public int hashCode() {
     return Optional.ofNullable(getOid()).orElse("").hashCode();
   }
