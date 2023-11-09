@@ -178,10 +178,10 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
     return httpclient
         .post(
             url,
-            new TypeToken<String>() {},
             laskentakutsu,
             Map.of("Content-Type", "application/json", "Accept", "text/plain"),
             60 * 1000)
+        .thenApply(response -> response.getResponseBody())
         .whenComplete(
             (tulos, poikkeus) -> {
               if (poikkeus != null) {
@@ -211,10 +211,10 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
           return httpclient
               .post(
                   url,
-                  new TypeToken<String>() {},
                   dto,
                   Map.of("Content-Type", "application/json", "Accept", "text/plain"),
                   10 * 60 * 1000)
+              .thenApply(response -> response.getResponseBody())
               .whenComplete(
                   (tulos, poikkeus) -> {
                     if (poikkeus != null) {
@@ -244,10 +244,10 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
     return httpclient
         .post(
             url,
-            new TypeToken<String>() {},
             Laskentakutsu.toBase64Gzip(suoritustiedot),
             Map.of("Content-Type", "text/plain", "Accept", "text/plain"),
             10 * 60 * 1000)
+        .thenApply(response -> response.getResponseBody())
         .whenComplete(
             (tulos, poikkeus) -> {
               if (poikkeus != null) {
@@ -274,10 +274,10 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
     return httpclient
         .post(
             url,
-            new TypeToken<String>() {},
             laskentakutsu,
             Map.of("Content-Type", "application/json", "Accept", "text/plain"),
             10 * 60 * 1000)
+        .thenApply(response -> response.getResponseBody())
         .whenComplete(
             (tulos, poikkeus) -> {
               if (poikkeus != null) {
@@ -328,11 +328,9 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
                     this.urlConfiguration.url(
                         "valintalaskenta-laskenta-service.valintalaskenta.status", pollKey);
                 return Observable.fromFuture(
-                        this.httpclient.get(
-                            url,
-                            new TypeToken<String>() {},
-                            Map.of("Accept", "text/plain"),
-                            10 * 60 * 1000))
+                        this.httpclient
+                            .get(url, Map.of("Accept", "text/plain"), 10 * 60 * 1000)
+                            .thenApply(response -> response.getResponseBody()))
                     .switchMap(
                         rval ->
                             pollaa(
@@ -351,12 +349,13 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
         laskentakutsu.getPollKey());
 
     CompletableFuture<String> requestFuture =
-        this.httpclient.post(
-            this.urlConfiguration.url(api),
-            new TypeToken<String>() {},
-            laskentakutsu,
-            Map.of("Content-Type", "application/json", "Accept", "text/plain"),
-            10 * 60 * 1000);
+        this.httpclient
+            .post(
+                this.urlConfiguration.url(api),
+                laskentakutsu,
+                Map.of("Content-Type", "application/json", "Accept", "text/plain"),
+                10 * 60 * 1000)
+            .thenApply(response -> response.getResponseBody());
 
     return kutsuRajapintaaPollaten(laskentakutsu, requestFuture);
   }
