@@ -242,7 +242,7 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
             "valintalaskenta-laskenta-service.valintalaskenta.lisaa.suoritustiedot.laskentakutsuun",
             laskentakutsu.getPollKey());
     return httpclient
-        .post(
+        .postPlaintext(
             url,
             Laskentakutsu.toBase64Gzip(suoritustiedot),
             Map.of("Content-Type", "text/plain", "Accept", "text/plain"),
