@@ -135,8 +135,6 @@ public class RestCasClient {
             .setUrl(url)
             .setMethod(method)
             .setRequestTimeout(timeout)
-            .addHeader("Content-Type", "application/json")
-            .addHeader("Accept", "application/json")
             .addHeader("Caller-Id", CALLER_ID)
             .addHeader("CSRF", CSRF_VALUE)
             .addHeader("Cookie", String.format("CSRF=%s;", CSRF_VALUE));
@@ -148,6 +146,8 @@ public class RestCasClient {
     for (Map.Entry<String, String> header : headers.entrySet()) {
       builder.addHeader(header.getKey(), header.getValue());
     }
+    if (!headers.containsKey("Content-Type")) builder.addHeader("Content-Type", "application/json");
+    if (!headers.containsKey("Accept")) builder.addHeader("Accept", "application/json");
     return builder;
   }
 }
