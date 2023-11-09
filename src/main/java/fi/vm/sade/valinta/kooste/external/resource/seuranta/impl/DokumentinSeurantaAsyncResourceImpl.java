@@ -30,7 +30,7 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
 
   public Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId) {
     return Observable.fromFuture(
-        this.restCasClient.post(
+        this.restCasClient.postPlaintext(
             this.urlConfiguration.url(
                 "seuranta-service.dokumentinseuranta.paivitadokumenttiid", uuid),
             new TypeToken<DokumenttiDto>() {},
@@ -41,7 +41,7 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
 
   public Observable<String> luoDokumentti(String kuvaus) {
     return Observable.fromFuture(
-        this.restCasClient.post(
+        this.restCasClient.postPlaintext(
             this.urlConfiguration.url("seuranta-service.dokumentinseuranta"),
             new TypeToken<String>() {},
             kuvaus,
@@ -51,7 +51,7 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
 
   public Observable<DokumenttiDto> paivitaKuvaus(String uuid, String kuvaus) {
     return Observable.fromFuture(
-        this.restCasClient.post(
+        this.restCasClient.postPlaintext(
             this.urlConfiguration.url("seuranta-service.dokumentinseuranta.paivitakuvaus", uuid),
             new TypeToken<DokumenttiDto>() {},
             kuvaus,

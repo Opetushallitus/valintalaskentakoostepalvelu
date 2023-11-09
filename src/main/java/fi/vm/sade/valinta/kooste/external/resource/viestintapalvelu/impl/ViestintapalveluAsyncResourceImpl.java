@@ -90,8 +90,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
                 this.urlConfiguration.url("viestintapalvelu.addresslabel.sync.pdf"),
                 osoitteet,
                 Map.of("Accept", "application/octet-stream"),
-                10 * 60 * 1000 // TODO: mikä on oikea timeout?
-                )
+                10 * 60 * 1000)
             .thenApply(r -> r.getResponseBodyAsStream()));
   }
 
@@ -127,10 +126,9 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
                     + kirjeenTyyppi
                     + "&language="
                     + asiointikieli,
-                new TypeToken<String>() {},
                 Map.of("Accept", "text/plain"),
-                10 * 60 * 1000 // TODO: mikä on oikea timeout?
-                )
+                10 * 60 * 1000)
+            .thenApply(response -> response.getResponseBody())
             .thenApply(
                 batchIdAsString ->
                     StringUtils.isNumeric(batchIdAsString)
@@ -145,10 +143,9 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
             .get(
                 this.urlConfiguration.url(
                     "viestintapalvelu.luotettu.letter.publishletterbatch", batchId),
-                new TypeToken<String>() {},
                 Map.of("Accept", "text/plain"),
-                10 * 60 * 1000 // TODO: mikä on oikea timeout?
-                )
+                10 * 60 * 1000)
+            .thenApply(response -> response.getResponseBody())
             .thenApply(
                 batchIdAsString ->
                     StringUtils.isNumeric(batchIdAsString)
@@ -164,7 +161,6 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
                 "viestintapalvelu.luotettu.letter.getepostiadressesforletterbatch", batchId),
             new TypeToken<Map<String, String>>() {},
             Collections.emptyMap(),
-            10 * 60 * 1000 // TODO: mikä on oikea timeout
-            ));
+            10 * 60 * 1000));
   }
 }

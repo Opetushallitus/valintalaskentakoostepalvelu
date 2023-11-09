@@ -51,9 +51,9 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
             .get(
                 this.urlConfiguration.url(
                     "seuranta-service.seuranta.laskenta.otaseuraavalaskentatyonalle"),
-                new TypeToken<String>() {},
                 Map.of("Accept", "text/plain"),
                 10 * 60 * 1000)
+            .thenApply(response -> response.getResponseBody())
             .thenApply(extractor));
   }
 

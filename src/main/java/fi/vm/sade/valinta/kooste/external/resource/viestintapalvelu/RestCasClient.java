@@ -54,11 +54,27 @@ public class RestCasClient {
         .thenApply(response -> this.gson.fromJson(response.getResponseBody(), typeToken.getType()));
   }
 
+  public <T> CompletableFuture<T> postPlaintext(
+      final String url,
+      final TypeToken<T> typeToken,
+      final Object body,
+      final Map<String, String> headers,
+      final int requestTimeout) {
+    return this.postPlaintext(url, body, headers, requestTimeout)
+        .thenApply(response -> this.gson.fromJson(response.getResponseBody(), typeToken.getType()));
+  }
+
   public CompletableFuture<Response> post(
       final String url, final Object body, final Map<String, String> headers, final int timeout) {
     return this.executeAndThrowOnError(
         withHeaders(request(url, "POST", timeout).setBody(this.gson.toJson(body)), headers)
             .build());
+  }
+
+  public CompletableFuture<Response> postPlaintext(
+      final String url, final Object body, final Map<String, String> headers, final int timeout) {
+    return this.executeAndThrowOnError(
+        withHeaders(request(url, "POST", timeout).setBody(body.toString()), headers).build());
   }
 
   public <T> CompletableFuture<T> get(
@@ -135,8 +151,6 @@ public class RestCasClient {
             .setUrl(url)
             .setMethod(method)
             .setRequestTimeout(timeout)
-            .addHeader("Content-Type", "application/json")
-            .addHeader("Accept", "application/json")
             .addHeader("Caller-Id", CALLER_ID)
             .addHeader("CSRF", CSRF_VALUE)
             .addHeader("Cookie", String.format("CSRF=%s;", CSRF_VALUE));
@@ -148,6 +162,8 @@ public class RestCasClient {
     for (Map.Entry<String, String> header : headers.entrySet()) {
       builder.addHeader(header.getKey(), header.getValue());
     }
+    if (!headers.containsKey("Content-Type")) builder.addHeader("Content-Type", "application/json");
+    if (!headers.containsKey("Accept")) builder.addHeader("Accept", "application/json");
     return builder;
   }
 }

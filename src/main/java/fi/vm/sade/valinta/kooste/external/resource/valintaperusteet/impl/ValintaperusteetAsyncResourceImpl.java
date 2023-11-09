@@ -214,7 +214,8 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
             valintaryhmaOid);
     LOG.info("Calling url {}", url);
     return Observable.fromFuture(
-        this.httpClient.get(
-            url, new TypeToken<String>() {}, Map.of("Accept", "text/plain"), 10 * 60 * 1000));
+        this.httpClient
+            .get(url, Map.of("Accept", "text/plain"), 10 * 60 * 1000)
+            .thenApply(response -> response.getResponseBody()));
   }
 }
