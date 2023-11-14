@@ -414,8 +414,7 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
     return Observable.fromFuture(
         this.httpclient.get(
             this.urlConfiguration.url(
-                "https://${host.virkailija}/valintalaskenta-laskenta-service/resources/hakukohde/$1/valinnanvaihe",
-                hakukohdeoid),
+                "valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeoid),
             new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
