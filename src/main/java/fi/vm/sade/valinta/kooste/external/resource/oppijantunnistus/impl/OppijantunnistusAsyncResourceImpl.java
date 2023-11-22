@@ -51,7 +51,8 @@ public class OppijantunnistusAsyncResourceImpl implements OppijantunnistusAsyncR
                 "oppijan-tunnistus.preview.haku.template.lang",
                 tokensRequest.getHakuOid(),
                 tokensRequest.getTemplatename(),
-                tokensRequest.getLang()),
+                tokensRequest.getLang(),
+                tokensRequest.getUrl()),
             new TypeToken<byte[]>() {},
             Map.of("Accept", "message/rfc822"),
             10 * 60 * 1000));
