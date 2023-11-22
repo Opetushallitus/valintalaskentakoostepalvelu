@@ -46,14 +46,15 @@ public class OppijantunnistusAsyncResourceImpl implements OppijantunnistusAsyncR
   @Override
   public Observable<byte[]> previewSecureLink(TokensRequest tokensRequest) {
     return Observable.fromFuture(
-        this.restCasClient.get(
-            this.urlConfiguration.url(
-                "oppijan-tunnistus.preview.haku.template.lang",
-                tokensRequest.getHakuOid(),
-                tokensRequest.getTemplatename(),
-                tokensRequest.getLang()),
-            new TypeToken<byte[]>() {},
-            Map.of("Accept", "message/rfc822"),
-            10 * 60 * 1000));
+            this.restCasClient.get(
+                this.urlConfiguration.url(
+                    "oppijan-tunnistus.preview.haku.template.lang",
+                    tokensRequest.getHakuOid(),
+                    tokensRequest.getTemplatename(),
+                    tokensRequest.getLang(),
+                    tokensRequest.getUrl()),
+                Map.of("Accept", "message/rfc822"),
+                10 * 60 * 1000))
+        .map(response -> response.getResponseBodyAsBytes());
   }
 }
