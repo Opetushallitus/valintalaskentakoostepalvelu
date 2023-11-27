@@ -81,7 +81,8 @@ public class ErillishakuDataRivi extends DataRivi {
     String syntymapaikka = rivi.getArvoAt(index++);
     String passinNumero = rivi.getArvoAt(index++);
     String idTunnus = rivi.getArvoAt(index++);
-    String kaupunkiJaMaa = rivi.getArvoAt(index);
+    String kaupunkiJaMaa = rivi.getArvoAt(index++);
+    String hakemusOid = rivi.getArvoAt(index);
 
     if (isDataRow(rivi, sukunimi, etunimi, oid)) {
       kuuntelija.erillishakuRiviTapahtuma(
@@ -122,6 +123,7 @@ public class ErillishakuDataRivi extends DataRivi {
               .passinNumero(passinNumero)
               .idTunnus(idTunnus)
               .kaupunkiJaMaa(kaupunkiJaMaa)
+              .hakemusOid(hakemusOid)
               .build());
     }
     return true;
