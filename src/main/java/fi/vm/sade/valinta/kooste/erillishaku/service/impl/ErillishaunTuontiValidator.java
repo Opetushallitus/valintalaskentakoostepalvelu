@@ -101,6 +101,8 @@ public class ErillishaunTuontiValidator {
   protected List<String> validoi(
       Hakutyyppi tyyppi, ErillishakuRivi rivi, boolean saveApplications) {
     List<String> errors = new ArrayList<>();
+
+    validateUniqueId(rivi, errors);
     validateTunniste(rivi, errors);
     validateSyntymaAika(rivi, errors);
     validateNimet(rivi, errors);
@@ -140,6 +142,12 @@ public class ErillishaunTuontiValidator {
     validateEhdollisenHyvaksynnanKoodi(rivi, errors);
 
     return errors;
+  }
+
+  private void validateUniqueId(ErillishakuRivi rivi, List<String> errors) {
+    if (!isBlank(rivi.getPersonOid()) && isBlank(rivi.getHakemusOid())) {
+      errors.add("Henkilön OIDia ei saa syöttää ilman hakemuksen OIDia.");
+    }
   }
 
   private void validateSyntymaAika(ErillishakuRivi rivi, List<String> errors) {
