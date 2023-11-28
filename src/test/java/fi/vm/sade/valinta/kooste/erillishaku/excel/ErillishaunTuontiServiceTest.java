@@ -124,7 +124,6 @@ public class ErillishaunTuontiServiceTest {
       final AtaruHakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
       assertEquals("haku1", hakemusProto.getHakuOid());
       assertEquals("kohde1", hakemusProto.getHakukohdeOid());
-      // assertEquals("hakija1", hakemusProto.getHakijaOid());
       assertEquals(MockData.hetu, hakemusProto.getHenkilotunnus());
       assertEquals("Tuomas", hakemusProto.getEtunimi());
       assertEquals("Hakkarainen", hakemusProto.getSukunimi());
@@ -140,7 +139,6 @@ public class ErillishaunTuontiServiceTest {
                 assertEquals(ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI, v.getVastaanottotila());
                 assertEquals(MockData.valintatapajonoOid, v.getValintatapajonoOid());
                 assertEquals("hakemus1", v.getHakemusOid());
-                // assertEquals("hakija1", v.getHenkiloOid());
                 assertEquals(true, v.getJulkaistavissa());
                 assertEquals(true, v.getEhdollisestiHyvaksyttavissa());
                 assertEquals(MockData.kohdeOid, v.getHakukohdeOid());
@@ -161,7 +159,6 @@ public class ErillishaunTuontiServiceTest {
       final AtaruHakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
       assertEquals("haku1", hakemusProto.getHakuOid());
       assertEquals("kohde1", hakemusProto.getHakukohdeOid());
-      // assertEquals("hakija1", hakemusProto.getHakijaOid());
       assertEquals("Tuomas", hakemusProto.getEtunimi());
       assertEquals("Hakkarainen", hakemusProto.getSukunimi());
       assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
