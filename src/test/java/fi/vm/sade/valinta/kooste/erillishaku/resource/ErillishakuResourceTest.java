@@ -202,7 +202,6 @@ public class ErillishakuResourceTest {
             .toisenAsteenSuoritusmaa(hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "")
             .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
             .maksuntila(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Maksuntila.MAKSAMATTA : null)
-            // TODO: these don't get added to wrapper so they'll always be blank
             .kutsumanimi("")
             .syntymapaikka("")
             .passinNumero("")
