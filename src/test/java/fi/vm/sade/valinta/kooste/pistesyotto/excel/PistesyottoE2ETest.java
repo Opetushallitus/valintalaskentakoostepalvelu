@@ -152,11 +152,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     mockToReturnJson(
         PUT,
-        "/dokumenttipalvelu-service/resources/dokumentit/tallenna",
-        "Success of dokumenttipalvelu-service PUT in " + getClass().getSimpleName());
-
-    mockToReturnJson(
-        PUT,
         "/valintapiste-service/api/haku/testioidi1/hakukohde/1.2.246.562.5.85532589612",
         Collections.emptySet());
 

@@ -160,7 +160,7 @@ public class RestCasClient {
   private static RequestBuilder withHeaders(RequestBuilder builder, Map<String, String> headers) {
     builder = builder.build().toBuilder();
     for (Map.Entry<String, String> header : headers.entrySet()) {
-      builder.addHeader(header.getKey(), header.getValue());
+      builder.setHeader(header.getKey(), header.getValue());
     }
     if (!headers.containsKey("Content-Type")) builder.addHeader("Content-Type", "application/json");
     if (!headers.containsKey("Accept")) builder.addHeader("Accept", "application/json");
