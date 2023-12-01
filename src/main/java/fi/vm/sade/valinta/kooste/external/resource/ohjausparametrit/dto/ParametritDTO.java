@@ -40,6 +40,8 @@ public class ParametritDTO {
 
   private ParametriDTO PH_HKP;
 
+  private Boolean synteettisetHakemukset;
+
   public void setPH_EVR(ParametriDTO PH_EVR) {
     this.PH_EVR = PH_EVR;
   }
@@ -114,6 +116,10 @@ public class ParametritDTO {
 
   public void setTarget(String target) {
     this.target = target;
+  }
+
+  public void setSynteettisetHakemukset(Boolean synteettisetHakemukset) {
+    this.synteettisetHakemukset = synteettisetHakemukset;
   }
 
   public ParametriDTO getPH_EVR() {
@@ -191,4 +197,6 @@ public class ParametritDTO {
   public String getTarget() {
     return target;
   }
+
+  public Boolean getSynteettisetHakemukset() { return synteettisetHakemukset; }
 }

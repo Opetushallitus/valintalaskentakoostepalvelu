@@ -17,6 +17,7 @@ public class Haku {
   public final String koulutuksenAlkamiskausiUri;
   public final Integer koulutuksenAlkamisvuosi;
   public final String ataruLomakeAvain;
+  public Boolean synteettisetHakemukset = false;
 
   public Haku(
       String oid,
@@ -87,6 +88,11 @@ public class Haku {
     this.ataruLomakeAvain = dto.hakulomakeAtaruId;
   }
 
+  public Haku withSynteettisetHakemukset(Boolean synteettisetHakemukset) {
+    this.synteettisetHakemukset = synteettisetHakemukset;
+    return this;
+  }
+
   public boolean isKorkeakouluhaku() {
     if (this.kohdejoukkoUri == null) {
       return false;
@@ -102,15 +108,12 @@ public class Haku {
   }
 
   public boolean isHakemuspalvelu() {
-    return this.ataruLomakeAvain != null;
+    return (this.ataruLomakeAvain != null ||
+            (this.synteettisetHakemukset != null && this.synteettisetHakemukset));
   }
 
   public boolean isKoutaHaku() {
     if (this.oid.startsWith("1.2.246.562.29.") && this.oid.length() >= 35) return true;
     else return false;
-  }
-
-  public String getAtaruLomakeAvain() {
-    return ataruLomakeAvain;
   }
 }
