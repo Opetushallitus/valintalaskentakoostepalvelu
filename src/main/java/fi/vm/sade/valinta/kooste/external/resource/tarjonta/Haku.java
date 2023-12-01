@@ -108,8 +108,8 @@ public class Haku {
   }
 
   public boolean isHakemuspalvelu() {
-    return (this.ataruLomakeAvain != null ||
-            (this.synteettisetHakemukset != null && this.synteettisetHakemukset));
+    return (this.ataruLomakeAvain != null
+        || (this.synteettisetHakemukset != null && this.synteettisetHakemukset));
   }
 
   public boolean isKoutaHaku() {

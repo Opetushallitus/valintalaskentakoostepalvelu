@@ -18,8 +18,8 @@ import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.HakukohderyhmaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.KoutaHakukohdeDTO;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
@@ -69,7 +69,8 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
       @Qualifier("TarjontaHttpClient") HttpClient client,
       @Qualifier("KoutaCasClient") RestCasClient koutaClient,
       @Qualifier("HakukohderyhmapalveluCasClient") RestCasClient hakukohderyhmapalveluClient,
-      @Qualifier("OhjausparametritAsyncResourceImpl") OhjausparametritAsyncResource ohjausparametritAsyncResource) {
+      @Qualifier("OhjausparametritAsyncResourceImpl")
+          OhjausparametritAsyncResource ohjausparametritAsyncResource) {
     this.client = client;
     this.koutaClient = koutaClient;
     this.hakukohderyhmapalveluClient = hakukohderyhmapalveluClient;
@@ -196,16 +197,20 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   @Override
   public CompletableFuture<Haku> haeHaku(String hakuOid) {
     if (KOUTA_OID_LENGTH.equals(hakuOid.length())) {
-      CompletableFuture<ParametritDTO> parametritF = ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+      CompletableFuture<ParametritDTO> parametritF =
+          ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
       CompletableFuture<KoutaHaku> koutaF =
           this.koutaClient.get(
               urlConfiguration.url("kouta-internal.haku.hakuoid", hakuOid),
               new TypeToken<KoutaHaku>() {},
               Collections.emptyMap(),
               10 * 1000);
-      return koutaF.thenApplyAsync(Haku::new)
-              .thenCombineAsync(parametritF, (haku, parametrit) ->
-                      haku.withSynteettisetHakemukset(parametrit.getSynteettisetHakemukset()));
+      return koutaF
+          .thenApplyAsync(Haku::new)
+          .thenCombineAsync(
+              parametritF,
+              (haku, parametrit) ->
+                  haku.withSynteettisetHakemukset(parametrit.getSynteettisetHakemukset()));
     } else {
       return this.getTarjontaHaku(hakuOid).thenApplyAsync(Haku::new);
     }
