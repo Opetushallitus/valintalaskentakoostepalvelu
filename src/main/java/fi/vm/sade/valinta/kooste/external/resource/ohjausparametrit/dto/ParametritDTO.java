@@ -198,5 +198,7 @@ public class ParametritDTO {
     return target;
   }
 
-  public Boolean getSynteettisetHakemukset() { return synteettisetHakemukset; }
+  public Boolean getSynteettisetHakemukset() {
+    return synteettisetHakemukset;
+  }
 }
