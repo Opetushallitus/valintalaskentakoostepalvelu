@@ -37,10 +37,12 @@ public class TarjontaAsyncResourceImplTest {
   private final HttpClient tarjontaClient = mock(HttpClient.class);
   private final RestCasClient koutaClient = mock(RestCasClient.class);
   private final RestCasClient hakukohderyhmapalveluClient = mock(RestCasClient.class);
-  private final OhjausparametritAsyncResource ohjausparametritAsyncResource = mock(OhjausparametritAsyncResource.class);
+  private final OhjausparametritAsyncResource ohjausparametritAsyncResource =
+      mock(OhjausparametritAsyncResource.class);
 
   private final TarjontaAsyncResourceImpl tarjontaAsyncResource =
-      new TarjontaAsyncResourceImpl(tarjontaClient, koutaClient, hakukohderyhmapalveluClient, ohjausparametritAsyncResource);
+      new TarjontaAsyncResourceImpl(
+          tarjontaClient, koutaClient, hakukohderyhmapalveluClient, ohjausparametritAsyncResource);
 
   private final UrlConfiguration urlConfiguration =
       new UrlConfiguration() {
