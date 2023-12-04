@@ -405,7 +405,8 @@ public class ViestintapalveluAktivointiResource {
       @RequestParam(OPH.HAKUKOHDEOID) String hakukohdeOid,
       @RequestParam(OPH.TARJOAJAOID) String tarjoajaOid,
       @RequestParam("templateName") String templateName,
-      @RequestParam("valintakoeTunnisteet") List<String> valintakoeTunnisteet,
+      @RequestParam(value = "valintakoeTunnisteet", required = false)
+          List<String> valintakoeTunnisteet,
       @RequestBody DokumentinLisatiedot hakemuksillaRajaus) {
     if ((hakemuksillaRajaus == null
             || hakemuksillaRajaus.getHakemusOids() == null

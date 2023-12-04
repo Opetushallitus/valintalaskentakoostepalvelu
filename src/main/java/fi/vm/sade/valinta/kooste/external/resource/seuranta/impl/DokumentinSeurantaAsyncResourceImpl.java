@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAsyncResource {
-
   private final RestCasClient restCasClient;
 
   private final UrlConfiguration urlConfiguration;
@@ -28,11 +27,11 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
     this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
-  public Observable<DokumenttiDto> paivitaDokumenttiId(String uuid, String dokumenttiId) {
+  public Observable<DokumenttiDto> paivitaDokumenttiId(String key, String dokumenttiId) {
     return Observable.fromFuture(
         this.restCasClient.postPlaintext(
             this.urlConfiguration.url(
-                "seuranta-service.dokumentinseuranta.paivitadokumenttiid", uuid),
+                "seuranta-service.dokumentinseuranta.paivitadokumenttiid", key),
             new TypeToken<DokumenttiDto>() {},
             dokumenttiId,
             Map.of("Content-Type", "text/plain"),
@@ -49,10 +48,10 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
             10 * 60 * 1000));
   }
 
-  public Observable<DokumenttiDto> paivitaKuvaus(String uuid, String kuvaus) {
+  public Observable<DokumenttiDto> paivitaKuvaus(String key, String kuvaus) {
     return Observable.fromFuture(
         this.restCasClient.postPlaintext(
-            this.urlConfiguration.url("seuranta-service.dokumentinseuranta.paivitakuvaus", uuid),
+            this.urlConfiguration.url("seuranta-service.dokumentinseuranta.paivitakuvaus", key),
             new TypeToken<DokumenttiDto>() {},
             kuvaus,
             Map.of("Content-Type", "text/plain"),
@@ -60,10 +59,10 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
   }
 
   public Observable<DokumenttiDto> lisaaVirheilmoituksia(
-      String uuid, List<VirheilmoitusDto> virheilmoitukset) {
+      String key, List<VirheilmoitusDto> virheilmoitukset) {
     return Observable.fromFuture(
         this.restCasClient.post(
-            this.urlConfiguration.url("seuranta-service.dokumentinseuranta.lisaavirheita", uuid),
+            this.urlConfiguration.url("seuranta-service.dokumentinseuranta.lisaavirheita", key),
             new TypeToken<DokumenttiDto>() {},
             virheilmoitukset,
             Collections.emptyMap(),

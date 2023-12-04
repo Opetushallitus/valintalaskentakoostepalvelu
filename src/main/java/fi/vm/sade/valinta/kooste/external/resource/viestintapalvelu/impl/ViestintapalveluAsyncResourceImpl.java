@@ -89,7 +89,7 @@ public class ViestintapalveluAsyncResourceImpl implements ViestintapalveluAsyncR
             .post(
                 this.urlConfiguration.url("viestintapalvelu.addresslabel.sync.pdf"),
                 osoitteet,
-                Map.of("Accept", "application/octet-stream"),
+                Map.of("Accept", "*/*"),
                 10 * 60 * 1000)
             .thenApply(r -> r.getResponseBodyAsStream()));
   }

@@ -273,15 +273,20 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                       null,
                                       hyvaksymiskirjeDTO.getVainTulosEmailinKieltaneet())));
           return muodostaHyvaksymiskirjeet(
-              prosessi,
-              hakuParametritService.getParametritForHakuAsync(hakuOid),
-              hakijatF,
-              hakemuksetF,
-              hyvaksymiskirjeDTO,
-              null,
-              false,
-              Collections.singletonList(ContentStructureType.letter),
-              KirjeenVastaanottaja.HAKIJA);
+                  prosessi,
+                  hakuParametritService.getParametritForHakuAsync(hakuOid),
+                  hakijatF,
+                  hakemuksetF,
+                  hyvaksymiskirjeDTO,
+                  null,
+                  false,
+                  Collections.singletonList(ContentStructureType.letter),
+                  KirjeenVastaanottaja.HAKIJA)
+              .thenComposeAsync(
+                  batchId ->
+                      dokumenttiAsyncResource
+                          .uudelleenNimea(batchId, "hyvaksymiskirje_" + hakukohdeOid + ".pdf")
+                          .thenApplyAsync(v -> batchId));
         },
         String.format("Aloitetaan hakukohteen %s hyväksymiskirjeiden muodostaminen", hakukohdeOid),
         String.format("Hakukohteen %s hyväksymiskirjeiden muodostaminen valmistui", hakukohdeOid),
