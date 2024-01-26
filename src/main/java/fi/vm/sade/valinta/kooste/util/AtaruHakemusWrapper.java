@@ -159,6 +159,11 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
+  public String getSyntymaaikaForErillishaku() {
+    return henkilo.getSyntymaaika().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+  }
+
+  @Override
   public String getHenkilotunnus() {
     return StringUtils.trimToEmpty(henkilo.getHetu());
   }

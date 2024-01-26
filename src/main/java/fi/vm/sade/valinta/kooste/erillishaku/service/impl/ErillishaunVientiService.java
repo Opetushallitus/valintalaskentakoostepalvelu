@@ -320,7 +320,7 @@ public class ErillishaunVientiService {
             .etunimi(wrapper.getEtunimi())
             .henkilotunnus(wrapper.getHenkilotunnus())
             .sahkoposti(wrapper.getSahkopostiOsoite())
-            .syntymaAika(wrapper.getSyntymaaika())
+            .syntymaAika(wrapper.getSyntymaaikaForErillishaku())
             .sukupuoli(Sukupuoli.fromString(wrapper.getSukupuoliAsIs()))
             .personOid(wrapper.getPersonOid())
             .aidinkieli(wrapper.getAidinkieli())
