@@ -762,27 +762,6 @@ public class HakemuksetConverterUtil {
     }
   }
 
-  public List<SuoritusJaArvosanat> pohjakoulutuksenSuoritukset(
-      String pohjakoulutus, List<SuoritusJaArvosanat> suoritukset) {
-    if (pohjakoulutus.equals(PohjakoulutusToinenAste.YLIOPPILAS)) {
-      return suoritukset.stream()
-          .filter(s -> wrap(s).isLukio() || wrap(s).isYoTutkinto())
-          .collect(toList());
-    }
-    if (pohjakoulutus.equals(PohjakoulutusToinenAste.PERUSKOULU)
-        || pohjakoulutus.equals(PohjakoulutusToinenAste.YKSILOLLISTETTY)
-        || pohjakoulutus.equals(PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY)
-        || pohjakoulutus.equals(PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY)) {
-      return suoritukset.stream()
-          .filter(s -> wrap(s).isSuoritusMistaSyntyyPeruskoulunArvosanoja())
-          .collect(toList());
-    }
-    if (pohjakoulutus.equals(PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO)) {
-      return suoritukset.stream().filter(s -> wrap(s).isUlkomainenKorvaava()).collect(toList());
-    }
-    throw new RuntimeException(String.format("Tuntematon pohjakoulutus %s", pohjakoulutus));
-  }
-
   public Map<String, String> suoritustenTiedot(
       Haku haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> sureSuoritukset) {
     final Map<String, Predicate<SuoritusJaArvosanat>> predicates =

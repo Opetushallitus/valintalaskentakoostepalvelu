@@ -947,111 +947,6 @@ public class HakemuksetConverterUtilTest {
   }
 
   @Test
-  public void lukioJaYoSuorituksetJosPohjakoulutusLukio() {
-    List<SuoritusJaArvosanat> suoritukset =
-        new ArrayList<>() {
-          {
-            add(vahvistettuPerusopetusValmisHakukaudella);
-            add(vahvistettuKymppiValmisHakukaudella);
-            add(vahvistettuAmmattistarttiValmisHakukaudella);
-            add(vahvistettuAmmatilliseenValmistavaValmisHakukaudella);
-            add(vahvistettuLukioonValmistavaValmisHakukaudella);
-            add(vahvistettuLisaopetusTalousValmisHakukaudella);
-            add(vahvistettuValmentavaValmisHakukaudella);
-            add(vahvistamatonLukioValmisHakukaudella);
-            add(vahvistettuYOValmisHakukaudella);
-          }
-        };
-    List<SuoritusJaArvosanat> oletetut =
-        new ArrayList<>() {
-          {
-            add(vahvistamatonLukioValmisHakukaudella);
-            add(vahvistettuYOValmisHakukaudella);
-          }
-        };
-    assertEquals(
-        oletetut,
-        hakemuksetConverterUtil.pohjakoulutuksenSuoritukset(
-            PohjakoulutusToinenAste.YLIOPPILAS, suoritukset));
-  }
-
-  @Test
-  public void peruskouluJaLisapistekoulutuksetJosPohjakoulutusJokinPeruskoulu() {
-    List<SuoritusJaArvosanat> suoritukset =
-        new ArrayList<>() {
-          {
-            add(vahvistettuPerusopetusValmisHakukaudella);
-            add(vahvistettuKymppiValmisHakukaudella);
-            add(vahvistettuAmmattistarttiValmisHakukaudella);
-            add(vahvistettuAmmatilliseenValmistavaValmisHakukaudella);
-            add(vahvistettuLukioonValmistavaValmisHakukaudella);
-            add(vahvistettuLisaopetusTalousValmisHakukaudella);
-            add(vahvistettuValmentavaValmisHakukaudella);
-            add(vahvistamatonLukioValmisHakukaudella);
-            add(vahvistettuYOValmisHakukaudella);
-            add(vahvistettuValmaValmisHakukaudella);
-            add(vahvistettuTelmaValmisHakukaudella);
-            add(vahvistettuTuvaValmisHakukaudella);
-          }
-        };
-    List<SuoritusJaArvosanat> oletetut =
-        new ArrayList<>() {
-          {
-            add(vahvistettuPerusopetusValmisHakukaudella);
-            add(vahvistettuKymppiValmisHakukaudella);
-            add(vahvistettuAmmattistarttiValmisHakukaudella);
-            add(vahvistettuAmmatilliseenValmistavaValmisHakukaudella);
-            add(vahvistettuLukioonValmistavaValmisHakukaudella);
-            add(vahvistettuLisaopetusTalousValmisHakukaudella);
-            add(vahvistettuValmentavaValmisHakukaudella);
-            add(vahvistettuValmaValmisHakukaudella);
-            add(vahvistettuTelmaValmisHakukaudella);
-            add(vahvistettuTuvaValmisHakukaudella);
-          }
-        };
-    assertEquals(
-        oletetut,
-        hakemuksetConverterUtil.pohjakoulutuksenSuoritukset(
-            PohjakoulutusToinenAste.PERUSKOULU, suoritukset));
-    assertEquals(
-        oletetut,
-        hakemuksetConverterUtil.pohjakoulutuksenSuoritukset(
-            PohjakoulutusToinenAste.YKSILOLLISTETTY, suoritukset));
-    assertEquals(
-        oletetut,
-        hakemuksetConverterUtil.pohjakoulutuksenSuoritukset(
-            PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY, suoritukset));
-    assertEquals(
-        oletetut,
-        hakemuksetConverterUtil.pohjakoulutuksenSuoritukset(
-            PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY, suoritukset));
-  }
-
-  @Test
-  public void ulkomaisetSuorituksetJosPohjakoulutusUlkomainen() {
-    List<SuoritusJaArvosanat> suoritukset =
-        new ArrayList<>() {
-          {
-            add(vahvistettuPerusopetusValmisHakukaudella);
-            add(vahvistettuKymppiValmisHakukaudella);
-            add(vahvistamatonLukioValmisHakukaudella);
-            add(vahvistettuYOValmisHakukaudella);
-            add(vahvistettuUlkomainenValmisHakukaudella);
-          }
-        };
-    List<SuoritusJaArvosanat> oletetut =
-        new ArrayList<>() {
-          {
-            add(vahvistettuUlkomainenValmisHakukaudella);
-          }
-        };
-    assertEquals(
-        oletetut,
-        hakemuksetConverterUtil.pohjakoulutuksenSuoritukset(
-            PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO, suoritukset));
-  }
-
-  @Test
   public void valmaTelmaLisapistekoulutuksetJosValmisPerusopetus() {
     HakemusDTO h = new HakemusDTO();
     h.setAvaimet(
@@ -1267,6 +1162,33 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("YO_TILA", "false");
     Assertions.assertEquals(
         oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+  }
+
+  @Test
+  public void eiKaytaLisapistekoulutustaHakemukselta() {
+    HakemusDTO h = new HakemusDTO();
+    h.setAvaimet(
+      new ArrayList<>() {
+        {
+          add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+          add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true"));
+        }
+      });
+    List<SuoritusJaArvosanat> suoritukset =
+      new ArrayList<>() {
+        {
+          add(vahvistettuPerusopetusValmisAiemmin);
+        }
+      };
+    Map<String, String> oletettu = new HashMap<>();
+    oletettu.put("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU);
+    oletettu.put("PK_TILA", "false");
+    oletettu.put("AM_TILA", "false");
+    oletettu.put("LK_TILA", "false");
+    oletettu.put("YO_TILA", "false");
+    Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
+    Assertions.assertEquals(
+      oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
