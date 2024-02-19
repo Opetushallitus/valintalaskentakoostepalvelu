@@ -55,11 +55,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.apache.commons.lang3.StringUtils;
 
 @Service
 public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
@@ -437,21 +437,21 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     try {
       LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
       if (saveApplications) {
-          List<ErillishakuRivi> unsaved =
-                lisattavatTaiKeskeneraiset.stream()
+        List<ErillishakuRivi> unsaved =
+            lisattavatTaiKeskeneraiset.stream()
                 .filter(rivi -> StringUtils.isBlank(rivi.getHakemusOid()))
                 .collect(Collectors.toList());
-          List<ErillishakuRivi> saved =
-                lisattavatTaiKeskeneraiset.stream()
+        List<ErillishakuRivi> saved =
+            lisattavatTaiKeskeneraiset.stream()
                 .filter(rivi -> !StringUtils.isBlank(rivi.getHakemusOid()))
                 .collect(Collectors.toList());
 
-          if (unsaved.isEmpty()) {
-              LOG.info("Ei löydetty tallentamattomia hakemuksia hakemuspalveluun tallennettavaksi");
-              return lisattavatTaiKeskeneraiset;
-          }
+        if (unsaved.isEmpty()) {
+          LOG.info("Ei löydetty tallentamattomia hakemuksia hakemuspalveluun tallennettavaksi");
+          return lisattavatTaiKeskeneraiset;
+        }
 
-          List<AtaruHakemusPrototyyppi> hakemusPrototyypit =
+        List<AtaruHakemusPrototyyppi> hakemusPrototyypit =
             unsaved.stream()
                 .map(
                     rivi ->
@@ -463,8 +463,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                             koodistoCachedAsyncResource))
                 .collect(Collectors.toList());
 
-        LOG.info(
-            "Tallennetaan hakemukset ({}kpl) hakemuspalveluun", unsaved.size());
+        LOG.info("Tallennetaan hakemukset ({}kpl) hakemuspalveluun", unsaved.size());
         final List<AtaruSyntheticApplicationResponse> hakemukset;
         try {
           hakemukset =
@@ -493,7 +492,8 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                     hakemukset.stream(),
                     unsaved.stream(),
                     (hakemus, rivi) ->
-                        rivi.withHakemusAndPersonOid(hakemus.getHakemusOid(), hakemus.getPersonOid())))
+                        rivi.withHakemusAndPersonOid(
+                            hakemus.getHakemusOid(), hakemus.getPersonOid())))
             .collect(Collectors.toList());
       } else {
         return lisattavatTaiKeskeneraiset;
