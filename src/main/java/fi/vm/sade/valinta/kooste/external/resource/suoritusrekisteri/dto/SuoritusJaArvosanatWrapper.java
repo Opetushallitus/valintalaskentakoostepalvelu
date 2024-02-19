@@ -113,12 +113,6 @@ public class SuoritusJaArvosanatWrapper {
     return "KESKEYTYNYT".equals(suoritusJaArvosanat.getSuoritus().getTila());
   }
 
-  public String komoToString() {
-    return Optional.ofNullable(
-            KOMO_TO_STRING_MAPPER.get(suoritusJaArvosanat.getSuoritus().getKomo()))
-        .orElse("Tuntematon suoritus " + suoritusJaArvosanat.getSuoritus().getKomo());
-  }
-
   public SuoritusJaArvosanatWrapper(SuoritusJaArvosanat suoritusJaArvosanat) {
     this.suoritusJaArvosanat = suoritusJaArvosanat;
   }

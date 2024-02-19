@@ -71,6 +71,19 @@ public class HakemuksetConverterUtil {
   public static final String DISCRETIONARY_POSTFIX = "discretionary";
   public static final String KOHDEJOUKKO_AMMATILLINEN_JA_LUKIO = "haunkohdejoukko_11";
 
+  public static final String TUVA_SUORITUSVUOSI_KEY = "LISAPISTEKOULUTUS_TUVA_SUORITUSVUOSI";
+
+  public static final String VALMA_SUORITUSVUOSI_KEY = "LISAPISTEKOULUTUS_VALMA_SUORITUSVUOSI";
+
+  public static final String LUVA_SUORITUSVUOSI_KEY = "LISAPISTEKOULUTUS_LUVA_SUORITUSVUOSI"; // TODO: Not in lisapistekoulutus?
+
+  public static final String KYMPPI_SUORITUSVUOSI_KEY = "LISAPISTEKOULUTUS_KYMPPI_SUORITUSVUOSI";
+
+  private static final Map<String, String> LISAPISTEKOULUTUS_SUORITUSVUOSI_MAP = Map.of(
+    Lisapistekoulutus.LISAKOULUTUS_KYMPPI.komoOid, KYMPPI_SUORITUSVUOSI_KEY,
+    Lisapistekoulutus.LISAKOULUTUS_TUVA.komoOid, TUVA_SUORITUSVUOSI_KEY,
+    Lisapistekoulutus.LISAKOULUTUS_VALMA.komoOid, VALMA_SUORITUSVUOSI_KEY);
+
   private static final Logger LOG = LoggerFactory.getLogger(HakemuksetConverterUtil.class);
 
   private final LocalDateTime abienPohjaKoulutusPaattelyLeikkuriPvm;
@@ -814,7 +827,7 @@ public class HakemuksetConverterUtil {
     pohjakoulutus.ifPresent(
         pk ->
             lisapistekoulutukset(pk, haku, hakemus, suoritukset).entrySet().stream()
-                .forEach(e -> tiedot.put(e.getKey().name(), String.valueOf(e.getValue()))));
+                .forEach(e -> tiedot.put(e.getKey(), String.valueOf(e.getValue()))));
     return tiedot;
   }
 
@@ -884,18 +897,19 @@ public class HakemuksetConverterUtil {
                                     && (wrap(s).isVahvistettu() || wrap(s).isLukio()))));
   }
 
-  private Map<Lisapistekoulutus, Boolean> lisapistekoulutukset(
+  private Map<String, Object> lisapistekoulutukset(
       String pohjakoulutus, Haku haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
     if (PohjakoulutusToinenAste.KESKEYTYNYT.equals(pohjakoulutus)
         || PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutus)
         || PohjakoulutusToinenAste.ULKOMAINEN_TUTKINTO.equals(pohjakoulutus)) {
       return Arrays.stream(Lisapistekoulutus.values())
-          .collect(toMap(Function.identity(), lpk -> false));
+          .collect(toMap(Enum::name, lpk -> false));
     }
-    return Arrays.stream(Lisapistekoulutus.values())
+    Map<String, Object> suoritusvuosiMap = new HashMap<>();
+    Map<String, Object> koulutusMap = Arrays.stream(Lisapistekoulutus.values())
         .collect(
             toMap(
-                Function.identity(),
+                Enum::name,
                 lpk ->
                     suoritukset.stream()
                         .filter(s -> lpk.komoOid.equals(s.getSuoritus().getKomo()))
@@ -904,13 +918,24 @@ public class HakemuksetConverterUtil {
                                 !(wrap(s).isKeskeytynyt()
                                     && !lisapistekoulutusHuomioidaan(haku, wrap(s))))
                         .findFirst()
-                        .map(s -> !wrap(s).isKeskeytynyt())
+                        .map(s -> {
+                          SuoritusJaArvosanatWrapper wrapper = wrap(s);
+                          if (!wrapper.isKeskeytynyt()
+                            && LISAPISTEKOULUTUS_SUORITUSVUOSI_MAP.containsKey(s.getSuoritus().getKomo())
+                            && wrapper.getValmistuminenAsDateTime() != null) {
+                            suoritusvuosiMap.put(LISAPISTEKOULUTUS_SUORITUSVUOSI_MAP.get(s.getSuoritus().getKomo()),
+                              wrapper.getValmistuminenAsDateTime().getYear());
+                          }
+                          return !wrapper.isKeskeytynyt();
+                        })
                         .orElse(
                             hakemus.getAvaimet().stream()
                                 .filter(a -> lpk.name().equals(a.getAvain()))
                                 .map(a -> Boolean.valueOf(a.getArvo()))
                                 .findFirst()
                                 .orElse(false))));
+    suoritusvuosiMap.putAll(koulutusMap);
+    return suoritusvuosiMap;
   }
 
   private Optional<Integer> pkPaattotodistusvuosi(

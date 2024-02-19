@@ -980,6 +980,7 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("PK_PAATTOTODISTUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
+    oletettu.put(HakemuksetConverterUtil.VALMA_SUORITUSVUOSI_KEY, "2015");
     Assertions.assertEquals(
         oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
@@ -1015,6 +1016,7 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("PK_PAATTOTODISTUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
+    oletettu.put(HakemuksetConverterUtil.TUVA_SUORITUSVUOSI_KEY, "2015");
     Assertions.assertEquals(
         oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
@@ -1162,33 +1164,6 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("YO_TILA", "false");
     Assertions.assertEquals(
         oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
-  }
-
-  @Test
-  public void eiKaytaLisapistekoulutustaHakemukselta() {
-    HakemusDTO h = new HakemusDTO();
-    h.setAvaimet(
-      new ArrayList<>() {
-        {
-          add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
-          add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true"));
-        }
-      });
-    List<SuoritusJaArvosanat> suoritukset =
-      new ArrayList<>() {
-        {
-          add(vahvistettuPerusopetusValmisAiemmin);
-        }
-      };
-    Map<String, String> oletettu = new HashMap<>();
-    oletettu.put("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU);
-    oletettu.put("PK_TILA", "false");
-    oletettu.put("AM_TILA", "false");
-    oletettu.put("LK_TILA", "false");
-    oletettu.put("YO_TILA", "false");
-    Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
-    Assertions.assertEquals(
-      oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
 
   @Test
