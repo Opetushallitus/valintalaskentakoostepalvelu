@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.apache.commons.lang3.StringUtils;
 
 @Service
 public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
@@ -436,8 +437,16 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
     try {
       LOG.info("Käsitellään hakemukset ({}kpl)", lisattavatTaiKeskeneraiset.size());
       if (saveApplications) {
-        List<AtaruHakemusPrototyyppi> hakemusPrototyypit =
-            lisattavatTaiKeskeneraiset.stream()
+          List<ErillishakuRivi> unsaved =
+                lisattavatTaiKeskeneraiset.stream()
+                .filter(rivi -> StringUtils.isBlank(rivi.getHakemusOid()))
+                .collect(Collectors.toList());
+          List<ErillishakuRivi> saved =
+                lisattavatTaiKeskeneraiset.stream()
+                .filter(rivi -> !StringUtils.isBlank(rivi.getHakemusOid()))
+                .collect(Collectors.toList());
+          List<AtaruHakemusPrototyyppi> hakemusPrototyypit =
+            unsaved.stream()
                 .map(
                     rivi ->
                         createHakemusprototyyppi(
@@ -448,7 +457,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                             koodistoCachedAsyncResource))
                 .collect(Collectors.toList());
         LOG.info(
-            "Tallennetaan hakemukset ({}kpl) hakemuspalveluun", lisattavatTaiKeskeneraiset.size());
+            "Tallennetaan hakemukset ({}kpl) hakemuspalveluun", unsaved.size());
         final List<AtaruSyntheticApplicationResponse> hakemukset;
         try {
           hakemukset =
@@ -462,20 +471,22 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                   "Error updating application prototypes %s",
                   Arrays.toString(hakemusPrototyypit.toArray())),
               e);
-          LOG.error("Rivit={}", Arrays.toString(lisattavatTaiKeskeneraiset.toArray()));
+          LOG.error("Rivit={}", Arrays.toString(unsaved.toArray()));
           throw e;
         }
-        if (hakemukset.size() != lisattavatTaiKeskeneraiset.size()) { // 1-1 relationship assumed
+        if (hakemukset.size() != unsaved.size()) { // 1-1 relationship assumed
           LOG.warn(
               "Hakemuspalveluun tallennettujen hakemusten lukumäärä {}kpl on väärä!! Odotettiin {}kpl.",
               hakemukset.size(),
-              lisattavatTaiKeskeneraiset.size());
+              unsaved.size());
         }
-        return zip(
-                hakemukset.stream(),
-                lisattavatTaiKeskeneraiset.stream(),
-                (hakemus, rivi) ->
-                    rivi.withHakemusAndPersonOid(hakemus.getHakemusOid(), hakemus.getPersonOid()))
+        return Stream.concat(
+                saved.stream(),
+                zip(
+                    hakemukset.stream(),
+                    unsaved.stream(),
+                    (hakemus, rivi) ->
+                        rivi.withHakemusAndPersonOid(hakemus.getHakemusOid(), hakemus.getPersonOid())))
             .collect(Collectors.toList());
       } else {
         return lisattavatTaiKeskeneraiset;
