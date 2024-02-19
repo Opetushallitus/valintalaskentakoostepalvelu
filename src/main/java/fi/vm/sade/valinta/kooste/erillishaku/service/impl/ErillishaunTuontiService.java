@@ -445,6 +445,12 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                 lisattavatTaiKeskeneraiset.stream()
                 .filter(rivi -> !StringUtils.isBlank(rivi.getHakemusOid()))
                 .collect(Collectors.toList());
+
+          if (unsaved.isEmpty()) {
+              LOG.info("Ei löydetty tallentamattomia hakemuksia hakemuspalveluun tallennettavaksi");
+              return lisattavatTaiKeskeneraiset;
+          }
+
           List<AtaruHakemusPrototyyppi> hakemusPrototyypit =
             unsaved.stream()
                 .map(
@@ -456,6 +462,7 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
                             haku.getHakukohdeOid(),
                             koodistoCachedAsyncResource))
                 .collect(Collectors.toList());
+
         LOG.info(
             "Tallennetaan hakemukset ({}kpl) hakemuspalveluun", unsaved.size());
         final List<AtaruSyntheticApplicationResponse> hakemukset;
