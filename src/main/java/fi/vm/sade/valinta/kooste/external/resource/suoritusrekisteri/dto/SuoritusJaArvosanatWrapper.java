@@ -6,7 +6,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
