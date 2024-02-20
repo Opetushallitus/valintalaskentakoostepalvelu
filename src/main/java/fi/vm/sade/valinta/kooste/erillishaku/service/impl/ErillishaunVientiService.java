@@ -318,6 +318,7 @@ public class ErillishaunVientiService {
             .hakemusOid(oid)
             .sukunimi(wrapper.getSukunimi())
             .etunimi(wrapper.getEtunimi())
+            .kutsumanimi(wrapper.getKutsumanimi())
             .henkilotunnus(wrapper.getHenkilotunnus())
             .sahkoposti(wrapper.getSahkopostiOsoite())
             .syntymaAika(wrapper.getSyntymaaikaForErillishaku())
