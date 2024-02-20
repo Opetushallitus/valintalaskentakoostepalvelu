@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,15 +170,28 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   private Function<AtaruHakemus, AtaruHakemusWrapper> hakemusToHakemusWrapper(
       Map<String, HenkiloPerustietoDto> henkilot, Map<String, Koodi> maakoodit) {
     return hakemus -> {
-      String ISOmaakoodi =
-          maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
       HenkiloPerustietoDto henkilo = henkilot.get(hakemus.getPersonOid());
       List<String> kansalaisuudet =
           henkilo.getKansalaisuus().stream()
               .map(k -> maakoodit.get(k.getKansalaisuusKoodi()).getKoodiArvo())
               .collect(Collectors.toList());
       Map<String, String> newKeyValues = new HashMap<>(hakemus.getKeyValues());
-      newKeyValues.replace("country-of-residence", ISOmaakoodi);
+
+      String asuinmaaISO =
+          maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
+      newKeyValues.replace("country-of-residence", asuinmaaISO);
+
+      String toisenasteensuoritusmaa =
+          hakemus.getKeyValues().get("secondary-completed-base-education–country");
+      if (StringUtils.isNotBlank(toisenasteensuoritusmaa)) {
+        String toisenasteensuoritusmaaISO =
+            maakoodit
+                .get(hakemus.getKeyValues().get("secondary-completed-base-education–country"))
+                .getKoodiArvo();
+        newKeyValues.replace(
+            "secondary-completed-base-education–country", toisenasteensuoritusmaaISO);
+      }
+
       AtaruHakemus h =
           new AtaruHakemus(
               hakemus.getHakemusOid(),
