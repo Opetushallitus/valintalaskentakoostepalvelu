@@ -36,14 +36,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
 import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -75,15 +68,21 @@ public class HakemuksetConverterUtil {
 
   private final LocalDateTime abienPohjaKoulutusPaattelyLeikkuriPvm;
 
+  private final LocalDateTime harkinnanvaraisuusPaattelyLeikkuriPvm;
+
   private final HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource;
 
   @Autowired
   public HakemuksetConverterUtil(
       @Value("${valintalaskentakoostepalvelu.abi.pohjakoulutus.paattely.leikkuripvm:2020-06-01}")
           String abienPohjaKoulutusPaattelyLeikkuriPvm,
+      @Value("${valintalaskentakoostepalvelu.harkinnanvaraisuus.paattely.leikkuripvm:2020-06-01}")
+          String harkinnanvaraisuusPaattelyLeikkuriPvm,
       HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource) {
     this.abienPohjaKoulutusPaattelyLeikkuriPvm =
         LocalDate.parse(abienPohjaKoulutusPaattelyLeikkuriPvm).atStartOfDay();
+    this.harkinnanvaraisuusPaattelyLeikkuriPvm =
+        LocalDate.parse(harkinnanvaraisuusPaattelyLeikkuriPvm).atStartOfDay();
     this.harkinnanvaraisuusAsyncResource = harkinnanvaraisuusAsyncResource;
   }
 
@@ -583,6 +582,25 @@ public class HakemuksetConverterUtil {
         .collect(toMap(a -> a.getAvain(), a -> a));
   }
 
+  public List<SuoritusJaArvosanat> filterKeskenDeadlinenJalkeenSuoritukset(
+      List<SuoritusJaArvosanat> suoritukset, LocalDate dateToCompare) {
+    try {
+      return suoritukset.stream()
+          .map(SuoritusJaArvosanatWrapper::wrap)
+          .filter(
+              s ->
+                  s.isValmis()
+                      || (s.isKesken()
+                          && !dateToCompare.isAfter(
+                              harkinnanvaraisuusPaattelyLeikkuriPvm.toLocalDate())))
+          .map(SuoritusJaArvosanatWrapper::getSuoritusJaArvosanat)
+          .collect(toList());
+    } catch (Exception e) {
+      LOG.error("Error when checking cut date: ", e);
+    }
+    return Collections.emptyList();
+  }
+
   public List<SuoritusJaArvosanat> filterUnrelevantSuoritukset(
       Haku haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> suoritukset) {
     return suoritukset.stream()
@@ -652,6 +670,7 @@ public class HakemuksetConverterUtil {
 
     final Predicate<SuoritusJaArvosanatWrapper> vahvistettuKeskeytynytPerusopetus =
         s -> s.isPerusopetus() && s.isVahvistettu() && s.isKeskeytynyt();
+
     if (suorituksetRekisterista.stream().anyMatch(vahvistettuKeskeytynytPerusopetus)
         && suorituksetRekisterista.stream()
             .filter(SuoritusJaArvosanatWrapper::isPerusopetus)
@@ -795,8 +814,11 @@ public class HakemuksetConverterUtil {
           }
         };
     final Map<String, String> tiedot = new HashMap<>();
+    List<SuoritusJaArvosanat> keskenSuorituksetPoistettu =
+        filterKeskenDeadlinenJalkeenSuoritukset(sureSuoritukset, LocalDate.now());
     final List<SuoritusJaArvosanat> suoritukset =
-        filterUnrelevantSuoritukset(haku, hakemus, sureSuoritukset);
+        filterUnrelevantSuoritukset(haku, hakemus, keskenSuorituksetPoistettu);
+
     sort(suoritukset);
 
     Optional<String> pohjakoulutus =

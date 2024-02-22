@@ -342,12 +342,43 @@ public class HakemuksetConverterUtilTest {
               .setValmis()
               .done();
 
+  private static final SuoritusJaArvosanat peruskouluSuoritusValmisDeadlinenJalkeen =
+      new SuoritusrekisteriSpec.SuoritusBuilder().setValmis().done();
+  private static final SuoritusJaArvosanat peruskouluSuoritusKeskenDeadlinenJalkeen =
+      new SuoritusrekisteriSpec.SuoritusBuilder().setKesken().done();
   private HakemuksetConverterUtil hakemuksetConverterUtil;
 
   @BeforeEach
   public void setup() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("9999-12-31", "2024-02-21", harkinnanvaraisuusAsyncResource);
+  }
+
+  @Test
+  public void kasitteleDeadlinenJalkeenKeskenTilaisetKuinKeskeytynyt() {
+    HakemusDTO h = new HakemusDTO();
+
+    Oppija o = new Oppija();
+    o.getSuoritukset().add(peruskouluSuoritusValmisDeadlinenJalkeen);
+    o.getSuoritukset().add(peruskouluSuoritusValmisDeadlinenJalkeen);
+    o.getSuoritukset().add(peruskouluSuoritusKeskenDeadlinenJalkeen);
+
+    List<SuoritusJaArvosanat> suoritukset =
+        hakemuksetConverterUtil.filterKeskenDeadlinenJalkeenSuoritukset(
+            o.getSuoritukset(), java.time.LocalDate.of(2024, 2, 21));
+    assertEquals(3, suoritukset.size());
+
+    suoritukset =
+        hakemuksetConverterUtil.filterKeskenDeadlinenJalkeenSuoritukset(
+            o.getSuoritukset(), java.time.LocalDate.of(2024, 2, 22));
+    assertEquals(2, suoritukset.size());
+
+    o = new Oppija();
+    o.getSuoritukset().add(peruskouluSuoritusKeskenDeadlinenJalkeen);
+    suoritukset =
+        hakemuksetConverterUtil.filterKeskenDeadlinenJalkeenSuoritukset(
+            o.getSuoritukset(), java.time.LocalDate.of(2024, 2, 22));
+    assertEquals(0, suoritukset.size());
   }
 
   @Test
@@ -462,7 +493,7 @@ public class HakemuksetConverterUtilTest {
   public void
       pohjakoulutusLukioJosHakemuksellaLukioJaLukioSuoritusKeskeytynytHakukaudellaJaLeikkuriPvmOnTulevaisuudessa() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("9999-12-31", "9999-12-31", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -487,7 +518,7 @@ public class HakemuksetConverterUtilTest {
   public void
       pohjakoulutusPeruskouluJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaAbiturientti() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("1970-01-01", "1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -512,7 +543,7 @@ public class HakemuksetConverterUtilTest {
   public void
       pohjakoulutusLukioJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaEIAbiturientti() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("1970-01-01", "1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -531,7 +562,7 @@ public class HakemuksetConverterUtilTest {
   public void
       pohjakoulutusHeittaaPoikkeuksenJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessa() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("1970-01-01", "1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
