@@ -368,7 +368,9 @@ public class HakemuksetConverterUtil {
     if (fetchEnsikertalaisuus)
       ensikertalaisuus(hakijallaOnHenkilotunnus, haku, hakukohdeOid, oppija, hakemusDTO, merge);
     Map<String, AvainArvoDTO> suoritustenTiedot =
-        suoritustenTiedot(haku, hakemusDTO, oppija.getSuoritukset()).entrySet().stream()
+        suoritustenTiedot(haku, hakemusDTO, oppija.getSuoritukset(), LocalDate.now())
+            .entrySet()
+            .stream()
             .collect(
                 Collectors.toMap(
                     Map.Entry::getKey, e -> new AvainArvoDTO(e.getKey(), e.getValue())));
@@ -589,7 +591,7 @@ public class HakemuksetConverterUtil {
           .map(SuoritusJaArvosanatWrapper::wrap)
           .filter(
               s ->
-                  s.isValmis()
+                  !s.isKesken()
                       || (s.isKesken()
                           && !dateToCompare.isAfter(
                               harkinnanvaraisuusPaattelyLeikkuriPvm.toLocalDate())))
@@ -803,7 +805,10 @@ public class HakemuksetConverterUtil {
   }
 
   public Map<String, String> suoritustenTiedot(
-      Haku haku, HakemusDTO hakemus, List<SuoritusJaArvosanat> sureSuoritukset) {
+      Haku haku,
+      HakemusDTO hakemus,
+      List<SuoritusJaArvosanat> sureSuoritukset,
+      LocalDate dateToCompare) {
     final Map<String, Predicate<SuoritusJaArvosanat>> predicates =
         new HashMap<String, Predicate<SuoritusJaArvosanat>>() {
           {
@@ -814,11 +819,10 @@ public class HakemuksetConverterUtil {
           }
         };
     final Map<String, String> tiedot = new HashMap<>();
-    List<SuoritusJaArvosanat> keskenSuorituksetPoistettu =
-        filterKeskenDeadlinenJalkeenSuoritukset(sureSuoritukset, LocalDate.now());
+    List<SuoritusJaArvosanat> sureSuorituksetKeskenOlevatPoistettu =
+        filterKeskenDeadlinenJalkeenSuoritukset(sureSuoritukset, dateToCompare);
     final List<SuoritusJaArvosanat> suoritukset =
-        filterUnrelevantSuoritukset(haku, hakemus, keskenSuorituksetPoistettu);
-
+        filterUnrelevantSuoritukset(haku, hakemus, sureSuorituksetKeskenOlevatPoistettu);
     sort(suoritukset);
 
     Optional<String> pohjakoulutus =
