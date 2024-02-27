@@ -199,9 +199,9 @@ public class HakemuksetConverterUtilTest {
           .setValmistuminen(HAKUKAUDELLA)
           .setKeskeytynyt()
           .done();
-  private static final SuoritusJaArvosanat vahvistettuKymppiKeskeytynytEiHakukaudella =
+  private static final SuoritusJaArvosanat vahvistettuOpistovuosiKeskeytynytEiHakukaudella =
       new SuoritusrekisteriSpec.SuoritusBuilder()
-          .setKymppiluokka()
+          .setOpistovuosi()
           .setVahvistettu(true)
           .setValmistuminen(HAKUKAUDEN_ULKOPUOLELLA)
           .setKeskeytynyt()
@@ -1050,39 +1050,6 @@ public class HakemuksetConverterUtilTest {
   }
 
   @Test
-  public void
-      negatiivinenValmaTulosSuoritusrekisteristaEdelliseltaVuodeltaEiAjaYliHakemuksenTietoja() {
-    HakemusDTO h = new HakemusDTO();
-    h.setAvaimet(
-        new ArrayList<>() {
-          {
-            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
-            this.add(new AvainArvoDTO("LISAKOULUTUS_VALMA", "true"));
-          }
-        });
-    String edellisenaVuonna = "1.1.2014";
-    Assertions.assertEquals(
-        "1.1.2015", HAKUKAUDELLA); // edellisenaVuonna needs to be fixed if HAKUKAUDELLA changes
-
-    List<SuoritusJaArvosanat> suoritukset =
-        new ArrayList<>() {
-          {
-            add(vahvistettuPerusopetusValmisAiemmin);
-            add(
-                new SuoritusrekisteriSpec.SuoritusBuilder()
-                    .setValma()
-                    .setVahvistettu(true)
-                    .setValmistuminen(edellisenaVuonna)
-                    .setKeskeytynyt()
-                    .done());
-          }
-        };
-    assertThat(
-        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset),
-        new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("true")));
-  }
-
-  @Test
   public void positiivinenValmaTulosSuoritusrekisteristaHuomioidaanHakukaudelta() {
     HakemusDTO h = new HakemusDTO();
     h.setAvaimet(
@@ -1201,7 +1168,7 @@ public class HakemuksetConverterUtilTest {
         new ArrayList<>() {
           {
             add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
-            add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true"));
+            add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_OPISTOVUOSI.name(), "true"));
           }
         });
     List<SuoritusJaArvosanat> suoritukset =
@@ -1217,7 +1184,7 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("LK_TILA", "false");
     oletettu.put("YO_TILA", "false");
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
-    oletettu.put(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true");
+    oletettu.put(Lisapistekoulutus.LISAKOULUTUS_OPISTOVUOSI.name(), "true");
     Assertions.assertEquals(
         oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }
@@ -1229,13 +1196,13 @@ public class HakemuksetConverterUtilTest {
         new ArrayList<>() {
           {
             add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
-            add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true"));
+            add(new AvainArvoDTO(Lisapistekoulutus.LISAKOULUTUS_OPISTOVUOSI.name(), "true"));
           }
         });
     List<SuoritusJaArvosanat> suoritukset =
         new ArrayList<>() {
           {
-            add(vahvistettuKymppiKeskeytynytEiHakukaudella);
+            add(vahvistettuOpistovuosiKeskeytynytEiHakukaudella);
             add(vahvistettuPerusopetusValmisAiemmin);
           }
         };
@@ -1246,7 +1213,7 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("LK_TILA", "false");
     oletettu.put("YO_TILA", "false");
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
-    oletettu.put(Lisapistekoulutus.LISAKOULUTUS_KYMPPI.name(), "true");
+    oletettu.put(Lisapistekoulutus.LISAKOULUTUS_OPISTOVUOSI.name(), "true");
     Assertions.assertEquals(
         oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
   }

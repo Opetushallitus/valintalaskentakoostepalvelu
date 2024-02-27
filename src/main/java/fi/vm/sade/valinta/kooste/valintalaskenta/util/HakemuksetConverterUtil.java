@@ -939,7 +939,11 @@ public class HakemuksetConverterUtil {
                                 })
                             .orElse(
                                 hakemus.getAvaimet().stream()
-                                    .filter(a -> lpk.name().equals(a.getAvain()))
+                                    .filter(
+                                        a ->
+                                            lpk.name().equals(a.getAvain())
+                                                && lpk.equals(
+                                                    Lisapistekoulutus.LISAKOULUTUS_OPISTOVUOSI))
                                     .map(a -> Boolean.valueOf(a.getArvo()))
                                     .findFirst()
                                     .orElse(false))));
