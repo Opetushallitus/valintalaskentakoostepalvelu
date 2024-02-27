@@ -71,7 +71,7 @@ public class ErillishakuExcel {
     builder.add(new TekstiArvo("Sähköposti"));
     builder.add(new TekstiArvo("Syntymäaika"));
     builder.add(new TekstiArvo("Sukupuoli"));
-    builder.add(new TekstiArvo("Hakija-oid"));
+    builder.add(new TekstiArvo("Oppijanumero"));
     builder.add(new TekstiArvo("Äidinkieli"));
     builder.add(new TekstiArvo("Hakemuksentila"));
     if (tyyppi == Hakutyyppi.KORKEAKOULU) {
