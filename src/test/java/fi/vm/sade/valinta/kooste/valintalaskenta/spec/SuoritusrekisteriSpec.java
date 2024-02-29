@@ -289,6 +289,11 @@ public class SuoritusrekisteriSpec {
       return SuoritusBuilder.this;
     }
 
+    public SuoritusBuilder setOpistovuosi() {
+      suoritus.setKomo(SuoritusJaArvosanatWrapper.OPISTOVUOSI_KOMO);
+      return SuoritusBuilder.this;
+    }
+
     public SuoritusBuilder setPerusopetuksenOppiaineenOppimaara() {
       suoritus.setKomo(SuoritusJaArvosanatWrapper.POO_KOMO);
       return SuoritusBuilder.this;

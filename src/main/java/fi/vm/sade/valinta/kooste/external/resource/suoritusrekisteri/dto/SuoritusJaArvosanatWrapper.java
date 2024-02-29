@@ -6,7 +6,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -111,12 +110,6 @@ public class SuoritusJaArvosanatWrapper {
 
   public boolean isKeskeytynyt() {
     return "KESKEYTYNYT".equals(suoritusJaArvosanat.getSuoritus().getTila());
-  }
-
-  public String komoToString() {
-    return Optional.ofNullable(
-            KOMO_TO_STRING_MAPPER.get(suoritusJaArvosanat.getSuoritus().getKomo()))
-        .orElse("Tuntematon suoritus " + suoritusJaArvosanat.getSuoritus().getKomo());
   }
 
   public SuoritusJaArvosanatWrapper(SuoritusJaArvosanat suoritusJaArvosanat) {
