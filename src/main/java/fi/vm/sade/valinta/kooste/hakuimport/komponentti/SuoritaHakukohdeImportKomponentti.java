@@ -40,6 +40,7 @@ public class SuoritaHakukohdeImportKomponentti {
   private static final String NOLLA = "0.0";
   private static final String PAASYKOE_TYYPPI_URI = "valintakokeentyyppi_1";
   private static final String LISANAYTTO_TYYPPI_URI = "valintakokeentyyppi_2";
+  private static final String OMA_PAASYKOE_TYYPPI_URI = "valintakokeentyyppi_10";
   private static final String PAINOKERROIN_POSTFIX = "_painokerroin";
   private static final String A11KIELI = "A1";
   private static final String A21KIELI = "A2";
@@ -317,7 +318,7 @@ public class SuoritaHakukohdeImportKomponentti {
     }
 
     List<HakukohteenValintakoeDTO> uniqueValintakokeet =
-        Set.of(PAASYKOE_TYYPPI_URI, LISANAYTTO_TYYPPI_URI).stream()
+        Set.of(PAASYKOE_TYYPPI_URI, LISANAYTTO_TYYPPI_URI, OMA_PAASYKOE_TYYPPI_URI).stream()
             .map(hakukohde::getValintakoeOfType)
             .filter(Optional::isPresent)
             .map(Optional::get)
