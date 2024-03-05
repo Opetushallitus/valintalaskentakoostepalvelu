@@ -613,9 +613,8 @@ public class HakemuksetConverterUtil {
           .map(SuoritusJaArvosanatWrapper::getSuoritusJaArvosanat)
           .collect(toList());
     } catch (Exception e) {
-      LOG.error("Error when checking cut date: ", e);
+      throw new RuntimeException("Error when checking cut date: ", e);
     }
-    return Collections.emptyList();
   }
 
   public List<SuoritusJaArvosanat> filterUnrelevantSuoritukset(
