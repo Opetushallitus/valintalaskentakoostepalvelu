@@ -17,7 +17,7 @@ public class ExcelTestData {
     return getInputStream("puutteellisiaTietojaAutotayttoaVarten.xlsx");
   }
 
-  public static InputStream erillisHakuHenkiloOidilla() {
+  public static InputStream erillisHakuHakemusOidilla() {
     return getInputStream("erillishaku_oidilla.xlsx");
   }
 

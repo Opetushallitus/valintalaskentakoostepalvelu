@@ -51,6 +51,8 @@ public abstract class HakemusWrapper {
 
   public abstract String getSyntymaaika();
 
+  public abstract String getSyntymaaikaForErillishaku();
+
   public abstract String getHenkilotunnus();
 
   public abstract boolean hasHenkilotunnus();
@@ -107,4 +109,6 @@ public abstract class HakemusWrapper {
   public abstract List<AtaruHakutoive> ataruHakutoiveet();
 
   public abstract List<String> getHuoltajienSahkopostiosoitteet();
+
+  public abstract String getSyntymapaikka();
 }

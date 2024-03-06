@@ -159,6 +159,11 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
+  public String getSyntymaaikaForErillishaku() {
+    return henkilo.getSyntymaaika().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+  }
+
+  @Override
   public String getHenkilotunnus() {
     return StringUtils.trimToEmpty(henkilo.getHetu());
   }
@@ -190,12 +195,15 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public Boolean getToisenAsteenSuoritus() {
-    return null;
+    String value = StringUtils.trimToEmpty(keyvalues.get("secondary-completed-base-education"));
+    if (value != null && value.equals("0"))
+      return true; // Yes, this is how it goes: 0 = true, 1 = false...
+    return false;
   }
 
   @Override
   public String getToisenAsteenSuoritusmaa() {
-    return null;
+    return StringUtils.trimToEmpty(keyvalues.get("secondary-completed-base-education–country"));
   }
 
   @Override
@@ -205,7 +213,7 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
 
   @Override
   public String getKutsumanimi() {
-    return StringUtils.trimToEmpty(henkilo.getKutsumanimi());
+    return StringUtils.trimToEmpty(keyvalues.get("preferred-name"));
   }
 
   @Override
@@ -320,6 +328,10 @@ public class AtaruHakemusWrapper extends HakemusWrapper {
   @Override
   public String getState() {
     return null;
+  }
+
+  public String getSyntymapaikka() {
+    return StringUtils.trimToEmpty(keyvalues.get("birthplace"));
   }
 
   @Override

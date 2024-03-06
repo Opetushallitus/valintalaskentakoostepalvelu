@@ -13,6 +13,7 @@ import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.kouta.dto.HakukohderyhmaHakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
@@ -36,9 +37,12 @@ public class TarjontaAsyncResourceImplTest {
   private final HttpClient tarjontaClient = mock(HttpClient.class);
   private final RestCasClient koutaClient = mock(RestCasClient.class);
   private final RestCasClient hakukohderyhmapalveluClient = mock(RestCasClient.class);
+  private final OhjausparametritAsyncResource ohjausparametritAsyncResource =
+      mock(OhjausparametritAsyncResource.class);
 
   private final TarjontaAsyncResourceImpl tarjontaAsyncResource =
-      new TarjontaAsyncResourceImpl(tarjontaClient, koutaClient, hakukohderyhmapalveluClient);
+      new TarjontaAsyncResourceImpl(
+          tarjontaClient, koutaClient, hakukohderyhmapalveluClient, ohjausparametritAsyncResource);
 
   private final UrlConfiguration urlConfiguration =
       new UrlConfiguration() {

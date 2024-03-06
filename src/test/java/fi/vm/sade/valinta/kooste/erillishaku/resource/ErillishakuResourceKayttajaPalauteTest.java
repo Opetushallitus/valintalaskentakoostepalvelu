@@ -2,10 +2,8 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource;
 
 import static fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi.KORKEAKOULU;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_HAKEMUSPALVELUN_VIRHE;
-import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_TYHJA_DATAJOUKKO;
 import static fi.vm.sade.valinta.kooste.erillishaku.resource.ErillishakuResource.POIKKEUS_VIALLINEN_DATAJOUKKO;
-import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.laillinenRivi;
 import static fi.vm.sade.valinta.kooste.erillishaku.util.ErillishakuRiviTestUtil.viallinenJsonRiviPuuttuvillaTunnisteilla;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -18,7 +16,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData;
 import fi.vm.sade.valinta.kooste.erillishaku.resource.dto.Prosessi;
 import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
+import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
@@ -99,7 +97,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
                     POIKKEUS_VIALLINEN_DATAJOUKKO,
                     asList(
                         new Tunniste(
-                            "Rivi 2: Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid olivat tyhjiä (vähintään yksi tunniste on syötettävä). Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat. : Etunimi, Sukunimi, , HYVAKSYTTY, Ei, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, false, null, VASTAANOTTANUT_SITOVASTI, null, null, true, null, null, null, null, null, null, null, null, , null",
+                            "Rivi 2: Henkilötunnus, syntymäaika + sukupuoli ja henkilö-oid olivat tyhjiä (vähintään yksi tunniste on syötettävä). Äidinkieli on pakollinen tieto, kun henkilötunnus ja henkilö OID puuttuvat. : Etunimi, Sukunimi, , HYVAKSYTTY, Ei, ***HENKILOTUNNUS***, , NAINEN, , EI_ILMOITTAUTUNUT, false, null, VASTAANOTTANUT_SITOVASTI, null, null, true, null, null, null, null, null, null, null, null, , null, null, null, null, null, null",
                             ErillishakuResource.RIVIN_TUNNISTE_KAYTTOLIITTYMAAN))))));
   }
 
@@ -122,7 +120,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
   @Test
   public void tuontiVirheHakemuspalveluKutsussaPalaute() {
     try {
-      MockApplicationAsyncResource.serviceIsAvailable.set(false);
+      MockAtaruAsyncResource.serviceIsAvailable.set(false);
       final ProsessiId prosessiId =
           excelClient()
               .post(
@@ -136,31 +134,7 @@ public class ErillishakuResourceKayttajaPalauteTest {
               .poikkeukset,
           equalTo(asList(Poikkeus.hakemuspalvelupoikkeus(POIKKEUS_HAKEMUSPALVELUN_VIRHE))));
     } finally {
-      MockApplicationAsyncResource.serviceIsAvailable.set(true);
-    }
-  }
-
-  @Test
-  public void tuontiVirheHenkilopalveluKutsussaPalaute() {
-    try {
-      MockOppijanumerorekisteriAsyncResource.serviceIsAvailable.set(false);
-      final ProsessiId prosessiId =
-          jsonClient()
-              .post(
-                  Entity.json(new ErillishakuJson(asList(laillinenRivi())))
-                  //
-                  ,
-                  ProsessiId.class);
-
-      assertThat(
-          odotaVirhettaTaiEpaonnistuTimeouttiin(prosessiId)
-              // Odotetaan hakemuspalvelun epäonnistumisesta johtuvaa palautetta!
-              .poikkeukset,
-          equalTo(
-              asList(
-                  Poikkeus.oppijanumerorekisteripoikkeus(POIKKEUS_OPPIJANUMEROREKISTERIN_VIRHE))));
-    } finally {
-      MockOppijanumerorekisteriAsyncResource.serviceIsAvailable.set(true);
+      MockAtaruAsyncResource.serviceIsAvailable.set(true);
     }
   }
 

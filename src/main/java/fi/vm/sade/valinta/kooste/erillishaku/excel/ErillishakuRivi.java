@@ -73,6 +73,12 @@ public class ErillishakuRivi {
   private final Boolean toisenAsteenSuoritus;
   private final String toisenAsteenSuoritusmaa;
 
+  private final String kutsumanimi;
+  private final String syntymapaikka;
+  private final String passinNumero;
+  private final String idTunnus;
+  private final String kaupunkiJaMaa;
+
   // Empty constructor for Jackson JSON library. Deserialization fails without this!
   public ErillishakuRivi() {
     this(
@@ -99,6 +105,11 @@ public class ErillishakuRivi {
         null,
         false,
         false,
+        null,
+        null,
+        null,
+        null,
+        null,
         null,
         null,
         null,
@@ -148,7 +159,12 @@ public class ErillishakuRivi {
       Boolean toisenAsteenSuoritus,
       String toisenAsteenSuoritusmaa,
       String maksuvelvollisuus,
-      Maksuntila maksuntila) {
+      Maksuntila maksuntila,
+      String kutsumanimi,
+      String syntymapaikka,
+      String passinNumero,
+      String idTunnus,
+      String kaupunkiJaMaa) {
     this.hakemusOid = hakemusOid;
     this.etunimi = etunimi;
     this.sukunimi = sukunimi;
@@ -184,6 +200,11 @@ public class ErillishakuRivi {
     this.toisenAsteenSuoritusmaa = toisenAsteenSuoritusmaa;
     this.maksuvelvollisuus = maksuvelvollisuus;
     this.maksuntila = maksuntila;
+    this.kutsumanimi = kutsumanimi;
+    this.syntymapaikka = syntymapaikka;
+    this.passinNumero = passinNumero;
+    this.idTunnus = idTunnus;
+    this.kaupunkiJaMaa = kaupunkiJaMaa;
   }
 
   public String getHakemusOid() {
@@ -382,7 +403,17 @@ public class ErillishakuRivi {
         + ", "
         + ErillishakuDataRivi.getTotuusarvoString(toisenAsteenSuoritus)
         + ", "
-        + toisenAsteenSuoritusmaa;
+        + toisenAsteenSuoritusmaa
+        + ", "
+        + kutsumanimi
+        + ", "
+        + syntymapaikka
+        + ", "
+        + passinNumero
+        + ", "
+        + idTunnus
+        + ", "
+        + kaupunkiJaMaa;
   }
 
   public ErillishakuRivi withAidinkieli(String aidinkieli) {
@@ -391,6 +422,13 @@ public class ErillishakuRivi {
 
   public ErillishakuRivi withHakemusOid(String hakemusOid) {
     return ErillishakuRiviBuilder.fromRivi(this).hakemusOid(hakemusOid).build();
+  }
+
+  public ErillishakuRivi withHakemusAndPersonOid(String hakemusOid, String personOid) {
+    return ErillishakuRiviBuilder.fromRivi(this)
+        .hakemusOid(hakemusOid)
+        .personOid(personOid)
+        .build();
   }
 
   public HenkiloCreateDTO toHenkiloCreateDTO(String kansalaisuus) {
@@ -453,5 +491,25 @@ public class ErillishakuRivi {
 
   public Maksuntila getMaksuntila() {
     return maksuntila;
+  }
+
+  public String getKutsumanimi() {
+    return kutsumanimi;
+  }
+
+  public String getSyntymapaikka() {
+    return syntymapaikka;
+  }
+
+  public String getPassinNumero() {
+    return passinNumero;
+  }
+
+  public String getIdTunnus() {
+    return idTunnus;
+  }
+
+  public String getKaupunkiJaMaa() {
+    return kaupunkiJaMaa;
   }
 }
