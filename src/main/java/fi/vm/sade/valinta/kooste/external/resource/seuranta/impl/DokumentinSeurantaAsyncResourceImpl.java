@@ -10,6 +10,7 @@ import io.reactivex.Observable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.asynchttpclient.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -40,12 +41,13 @@ public class DokumentinSeurantaAsyncResourceImpl implements DokumentinSeurantaAs
 
   public Observable<String> luoDokumentti(String kuvaus) {
     return Observable.fromFuture(
-        this.restCasClient.postPlaintext(
-            this.urlConfiguration.url("seuranta-service.dokumentinseuranta"),
-            new TypeToken<String>() {},
-            kuvaus,
-            Map.of("Content-Type", "text/plain"),
-            10 * 60 * 1000));
+        this.restCasClient
+            .postPlaintext(
+                this.urlConfiguration.url("seuranta-service.dokumentinseuranta"),
+                kuvaus,
+                Map.of("Content-Type", "text/plain"),
+                10 * 60 * 1000)
+            .thenApply(Response::getResponseBody));
   }
 
   public Observable<DokumenttiDto> paivitaKuvaus(String key, String kuvaus) {
