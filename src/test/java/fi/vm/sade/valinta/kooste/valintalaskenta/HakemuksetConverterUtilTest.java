@@ -342,12 +342,46 @@ public class HakemuksetConverterUtilTest {
               .setValmis()
               .done();
 
+  private static final SuoritusJaArvosanat peruskouluSuoritusValmisDeadlinenJalkeen =
+      new SuoritusrekisteriSpec.SuoritusBuilder().setValmis().done();
+  private static final SuoritusJaArvosanat peruskouluSuoritusKeskenDeadlinenJalkeen =
+      new SuoritusrekisteriSpec.SuoritusBuilder().setKesken().done();
+
+  private static final java.time.LocalDate currentDateFixedForTests =
+      java.time.LocalDate.of(2024, 2, 21);
   private HakemuksetConverterUtil hakemuksetConverterUtil;
 
   @BeforeEach
   public void setup() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("9999-12-31", "2024-02-21", harkinnanvaraisuusAsyncResource);
+  }
+
+  @Test
+  public void kasitteleDeadlinenJalkeenKeskenTilaisetKuinKeskeytynyt() {
+    HakemusDTO h = new HakemusDTO();
+
+    Oppija o = new Oppija();
+    o.getSuoritukset().add(peruskouluSuoritusValmisDeadlinenJalkeen);
+    o.getSuoritukset().add(peruskouluSuoritusValmisDeadlinenJalkeen);
+    o.getSuoritukset().add(peruskouluSuoritusKeskenDeadlinenJalkeen);
+
+    List<SuoritusJaArvosanat> suoritukset =
+        hakemuksetConverterUtil.filterKeskenDeadlinenJalkeenSuoritukset(
+            o.getSuoritukset(), java.time.LocalDate.of(2024, 2, 21));
+    assertEquals(3, suoritukset.size());
+
+    suoritukset =
+        hakemuksetConverterUtil.filterKeskenDeadlinenJalkeenSuoritukset(
+            o.getSuoritukset(), java.time.LocalDate.of(2024, 2, 22));
+    assertEquals(2, suoritukset.size());
+
+    o = new Oppija();
+    o.getSuoritukset().add(peruskouluSuoritusKeskenDeadlinenJalkeen);
+    suoritukset =
+        hakemuksetConverterUtil.filterKeskenDeadlinenJalkeenSuoritukset(
+            o.getSuoritukset(), java.time.LocalDate.of(2024, 2, 22));
+    assertEquals(0, suoritukset.size());
   }
 
   @Test
@@ -462,7 +496,7 @@ public class HakemuksetConverterUtilTest {
   public void
       pohjakoulutusLukioJosHakemuksellaLukioJaLukioSuoritusKeskeytynytHakukaudellaJaLeikkuriPvmOnTulevaisuudessa() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("9999-12-31", "9999-12-31", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -487,7 +521,7 @@ public class HakemuksetConverterUtilTest {
   public void
       pohjakoulutusPeruskouluJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaAbiturientti() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("1970-01-01", "1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -512,7 +546,7 @@ public class HakemuksetConverterUtilTest {
   public void
       pohjakoulutusLukioJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessaJaEIAbiturientti() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("1970-01-01", "1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -531,7 +565,7 @@ public class HakemuksetConverterUtilTest {
   public void
       pohjakoulutusHeittaaPoikkeuksenJosHakemuksellaLukioJaSuressaEiValmistaSuoritustaJaLeikkuriPvmOnMenneisyydessa() {
     hakemuksetConverterUtil =
-        new HakemuksetConverterUtil("1970-01-01", harkinnanvaraisuusAsyncResource);
+        new HakemuksetConverterUtil("1970-01-01", "1970-01-01", harkinnanvaraisuusAsyncResource);
     HakemusDTO h = new HakemusDTO();
     h.setHakijaOid("1.2.3.4.5.6");
     h.setAvaimet(
@@ -683,7 +717,8 @@ public class HakemuksetConverterUtilTest {
             add(vahvistettuPerusopetusKeskeytynytHakukaudella);
           }
         };
-    Map<String, String> answers = hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset);
+    Map<String, String> answers =
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests);
     Assertions.assertEquals("true", answers.get("preference1-discretionary"));
     Assertions.assertEquals(
         "todistustenpuuttuminen", answers.get("preference1-discretionary-follow-up"));
@@ -982,7 +1017,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
     oletettu.put(HakemuksetConverterUtil.VALMA_SUORITUSVUOSI_KEY, "2015");
     Assertions.assertEquals(
-        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+        oletettu,
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests));
   }
 
   @Test
@@ -1018,7 +1054,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
     oletettu.put(HakemuksetConverterUtil.TUVA_SUORITUSVUOSI_KEY, "2015");
     Assertions.assertEquals(
-        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+        oletettu,
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests));
   }
 
   @Test
@@ -1045,8 +1082,41 @@ public class HakemuksetConverterUtilTest {
           }
         };
     assertThat(
-        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset),
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests),
         new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("false")));
+  }
+
+  @Test
+  public void
+      negatiivinenValmaTulosSuoritusrekisteristaEdelliseltaVuodeltaEiAjaYliHakemuksenTietoja() {
+    HakemusDTO h = new HakemusDTO();
+    h.setAvaimet(
+        new ArrayList<>() {
+          {
+            this.add(new AvainArvoDTO("POHJAKOULUTUS", PohjakoulutusToinenAste.PERUSKOULU));
+            this.add(new AvainArvoDTO("LISAKOULUTUS_VALMA", "true"));
+          }
+        });
+    String edellisenaVuonna = "1.1.2014";
+    Assertions.assertEquals(
+        "1.1.2015", HAKUKAUDELLA); // edellisenaVuonna needs to be fixed if HAKUKAUDELLA changes
+
+    List<SuoritusJaArvosanat> suoritukset =
+        new ArrayList<>() {
+          {
+            add(vahvistettuPerusopetusValmisAiemmin);
+            add(
+                new SuoritusrekisteriSpec.SuoritusBuilder()
+                    .setValma()
+                    .setVahvistettu(true)
+                    .setValmistuminen(edellisenaVuonna)
+                    .setKeskeytynyt()
+                    .done());
+          }
+        };
+    assertThat(
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests),
+        new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("true")));
   }
 
   @Test
@@ -1072,7 +1142,7 @@ public class HakemuksetConverterUtilTest {
           }
         };
     assertThat(
-        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset),
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests),
         new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("true")));
   }
 
@@ -1102,7 +1172,7 @@ public class HakemuksetConverterUtilTest {
           }
         };
     assertThat(
-        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset),
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests),
         new IsMapContaining<>(equalTo("LISAKOULUTUS_VALMA"), equalTo("false")));
   }
 
@@ -1130,7 +1200,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("LK_TILA", "false");
     oletettu.put("YO_TILA", "false");
     Assertions.assertEquals(
-        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+        oletettu,
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests));
   }
 
   @Test
@@ -1158,7 +1229,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("YO_TILA", "false");
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
     Assertions.assertEquals(
-        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+        oletettu,
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, java.time.LocalDate.now()));
   }
 
   @Test
@@ -1186,7 +1258,8 @@ public class HakemuksetConverterUtilTest {
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
     oletettu.put(Lisapistekoulutus.LISAKOULUTUS_OPISTOVUOSI.name(), "true");
     Assertions.assertEquals(
-        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+        oletettu,
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests));
   }
 
   @Test
@@ -1215,7 +1288,8 @@ public class HakemuksetConverterUtilTest {
     Arrays.stream(Lisapistekoulutus.values()).forEach(lpk -> oletettu.put(lpk.name(), "false"));
     oletettu.put(Lisapistekoulutus.LISAKOULUTUS_OPISTOVUOSI.name(), "true");
     Assertions.assertEquals(
-        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+        oletettu,
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests));
   }
 
   @Test
@@ -1244,7 +1318,8 @@ public class HakemuksetConverterUtilTest {
     oletettu.put("PK_SUORITUSVUOSI", "2015");
     oletettu.put("PK_SUORITUSLUKUKAUSI", "2");
     Assertions.assertEquals(
-        oletettu, hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset));
+        oletettu,
+        hakemuksetConverterUtil.suoritustenTiedot(haku, h, suoritukset, currentDateFixedForTests));
   }
 
   @Test
@@ -1984,7 +2059,7 @@ public class HakemuksetConverterUtilTest {
             .setVahvistettu(false)
             .setMyontaja(HAKEMUS1_OID)
             .setValmistuminen("1.1.2014")
-            .setKesken()
+            .setValmis()
             .build()
             .build();
 
