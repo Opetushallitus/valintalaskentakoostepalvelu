@@ -133,7 +133,9 @@ public class RestCasClient {
         .apply(request)
         .thenApply(
             response -> {
-              if (response.getStatusCode() == 200 || response.getStatusCode() == 204) {
+              if (response.getStatusCode() == 200
+                  || response.getStatusCode() == 202
+                  || response.getStatusCode() == 204) {
                 return response;
               } else {
                 throw new RestCasClientException(
