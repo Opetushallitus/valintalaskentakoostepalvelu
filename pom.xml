@@ -19,7 +19,7 @@
     <properties>
         <auditlog.api.version>8.3.0-SNAPSHOT</auditlog.api.version>
         <cxf.version>3.3.5</cxf.version>
-        <fasterxml.jackson.version>2.13.5</fasterxml.jackson.version> <!-- newest version breaks tests -->
+        <fasterxml.jackson.version>2.16.0</fasterxml.jackson.version> <!-- newest version breaks tests -->
         <jetty.version>9.4.27.v20200227</jetty.version>
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
@@ -675,8 +675,7 @@ vcsRevision=${revision}
 buildTtime=${maven.build.timestamp}
 ]]>
                                 </echo>
-                                <loadfile property="buildversiontxt"
-                                          srcFile="${project.build.outputDirectory}/static/buildversion.txt"/>
+                                <loadfile property="buildversiontxt" srcFile="${project.build.outputDirectory}/static/buildversion.txt"/>
                                 <echo message="${buildversiontxt}"/>
                                 <echo file="target/mavenversion.txt">${project.version}</echo>
                             </target>
