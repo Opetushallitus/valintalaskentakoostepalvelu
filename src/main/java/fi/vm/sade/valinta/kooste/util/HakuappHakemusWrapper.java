@@ -221,6 +221,11 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   }
 
   @Override
+  public String getSyntymaaikaForErillishaku() {
+    return getSyntymaaika();
+  }
+
+  @Override
   public String getHenkilotunnus() {
     getHenkilotiedot();
     return Optional.ofNullable(henkilotiedot.get(HETU)).orElse(StringUtils.EMPTY);
@@ -436,6 +441,11 @@ public class HakuappHakemusWrapper extends HakemusWrapper {
   @Override
   public String getState() {
     return hakemus.getState();
+  }
+
+  @Override
+  public String getSyntymapaikka() {
+    return null;
   }
 
   @Override

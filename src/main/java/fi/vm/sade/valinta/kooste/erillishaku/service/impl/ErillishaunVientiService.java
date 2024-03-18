@@ -318,9 +318,10 @@ public class ErillishaunVientiService {
             .hakemusOid(oid)
             .sukunimi(wrapper.getSukunimi())
             .etunimi(wrapper.getEtunimi())
+            .kutsumanimi(wrapper.getKutsumanimi())
             .henkilotunnus(wrapper.getHenkilotunnus())
             .sahkoposti(wrapper.getSahkopostiOsoite())
-            .syntymaAika(wrapper.getSyntymaaika())
+            .syntymaAika(wrapper.getSyntymaaikaForErillishaku())
             .sukupuoli(Sukupuoli.fromString(wrapper.getSukupuoliAsIs()))
             .personOid(wrapper.getPersonOid())
             .aidinkieli(wrapper.getAidinkieli())
@@ -343,7 +344,11 @@ public class ErillishaunVientiService {
                     : null)
             .valinnantilanKuvauksenTekstiFI(valinnantilanKuvauksenTekstiFI)
             .valinnantilanKuvauksenTekstiSV(valinnantilanKuvauksenTekstiSV)
-            .valinnantilanKuvauksenTekstiEN(valinnantilanKuvauksenTekstiEN);
+            .valinnantilanKuvauksenTekstiEN(valinnantilanKuvauksenTekstiEN)
+            .idTunnus(wrapper.getKansallinenId())
+            .syntymapaikka(wrapper.getSyntymapaikka())
+            .kaupunkiJaMaa(wrapper.getKaupunkiUlkomaa())
+            .passinNumero(wrapper.getPassinnumero());
 
     if (valintatulos != null) {
       builder

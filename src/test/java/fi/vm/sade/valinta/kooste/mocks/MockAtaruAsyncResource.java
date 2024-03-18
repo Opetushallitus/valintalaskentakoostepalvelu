@@ -5,13 +5,20 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruSyntheticApplicationResponse;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import io.reactivex.Observable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.mockito.internal.util.collections.Sets;
@@ -23,8 +30,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
+  public static AtomicBoolean serviceIsAvailable = new AtomicBoolean(true);
+
+  private static <T> CompletableFuture<T> serviceAvailableCheck() {
+    if (!serviceIsAvailable.get()) {
+      return CompletableFuture.failedFuture(
+          new RuntimeException("MockAtaru on kytketty pois päältä!"));
+    }
+    return null;
+  }
+
   private static List<HakemusWrapper> byHakukohdeRes = Lists.newArrayList();
   private static List<HakemusWrapper> byOidsResult = Lists.newArrayList();
+
+  public static class Result {
+    public final Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit;
+
+    public Result(final Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
+      this.hakemusPrototyypit = hakemusPrototyypit;
+    }
+  }
+
+  public final List<MockAtaruAsyncResource.Result> results = new ArrayList<>();
 
   @Override
   public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
@@ -46,6 +73,23 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(
       List<String> oids) {
     return CompletableFuture.completedFuture(byOidsResult); // todo add harkinnanvaraisuustietos
+  }
+
+  @Override
+  public Observable<List<AtaruSyntheticApplicationResponse>> putApplicationPrototypes(
+      Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
+    return Observable.fromFuture(
+        Optional.ofNullable(
+                MockAtaruAsyncResource
+                    .<List<AtaruSyntheticApplicationResponse>>serviceAvailableCheck())
+            .orElseGet(
+                () -> {
+                  results.add(new Result(hakemusPrototyypit));
+                  return CompletableFuture.completedFuture(
+                      hakemusPrototyypit.stream()
+                          .map(prototyyppi -> toSyntheticApplicationResponse(prototyyppi))
+                          .collect(Collectors.toList()));
+                }));
   }
 
   public static void setByHakukohdeResult(List<HakemusWrapper> hakemukset) {
@@ -94,5 +138,15 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   public static HakemusWrapper getAtaruHakemusWrapper(String s) {
     AtaruHakemus hakemus = getAtaruHakemukset(Sets.newSet(s)).iterator().next();
     return new AtaruHakemusWrapper(hakemus, createHenkilo());
+  }
+
+  private AtaruSyntheticApplicationResponse toSyntheticApplicationResponse(
+      AtaruHakemusPrototyyppi prototyyppi) {
+    final AtaruSyntheticApplicationResponse response = new AtaruSyntheticApplicationResponse();
+
+    response.setHakemusOid(MockData.hakemusOid);
+    response.setPersonOid(MockData.hakijaOid);
+
+    return response;
   }
 }
