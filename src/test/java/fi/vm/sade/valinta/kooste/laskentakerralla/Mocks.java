@@ -52,7 +52,7 @@ public class Mocks {
       mock(ValintapisteAsyncResource.class);
   static KoskiService koskiService = mock(KoskiService.class);
   static HakemuksetConverterUtil hakemuksetConverterUtil =
-      new HakemuksetConverterUtil("9999-12-31", harkinnanvaraisuusAsyncResource);
+      new HakemuksetConverterUtil("9999-12-31", "9999-12-31", harkinnanvaraisuusAsyncResource);
   static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
       new MockOppijanumerorekisteriAsyncResource();
   static LaskentaActorSystem laskentaActorSystem =
