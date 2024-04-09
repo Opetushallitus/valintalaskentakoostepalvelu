@@ -8,8 +8,12 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeValinnanvaiheDTO;
 import java.util.Collection;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OsallistujatPredicate implements Predicate<ValintakoeOsallistuminenDTO> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OsallistujatPredicate.class);
   private final String hakukohdeOid;
   private final Set<String> valintakoeOids;
   private final Set<String> tunnisteet;
@@ -43,6 +47,7 @@ public class OsallistujatPredicate implements Predicate<ValintakoeOsallistuminen
         }
         for (ValintakoeValinnanvaiheDTO valinnanvaihe : hakutoive.getValinnanVaiheet()) {
           for (ValintakoeDTO valintakoe : valinnanvaihe.getValintakokeet()) {
+            LOG.info("Osallistujat: | {} | {}", tunnisteet, valintakoe.getValintakoeTunniste());
             if (!valintakoeTunnisteet.contains(valintakoe.getValintakoeTunniste())) {
               // vain tarkasteltavista valintakokeista ollaan kiinnostuneita
               continue;
@@ -72,6 +77,7 @@ public class OsallistujatPredicate implements Predicate<ValintakoeOsallistuminen
               continue;
             }
           } else {
+            LOG.info("Apply: | {} | {}", tunnisteet, valintakoe.getValintakoeTunniste());
             if (!tunnisteet.contains(valintakoe.getValintakoeTunniste())) {
               // vain tarkasteltavista valintakokeista ollaan kiinnostuneita
               continue;

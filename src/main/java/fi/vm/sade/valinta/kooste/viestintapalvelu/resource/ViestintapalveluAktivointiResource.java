@@ -419,6 +419,7 @@ public class ViestintapalveluAktivointiResource {
       throw new RuntimeException(
           "Valintakokeen tunniste tai tunnisteet ja hakukohde on pakollisia tietoja koekutsukirjeen luontiin!");
     }
+    LOG.info("Hakukohteen {} valintakoetunnisteet: {}", hakukohdeOid, valintakoeTunnisteet);
     KoekutsuProsessiImpl prosessi = new KoekutsuProsessiImpl(2);
     try {
       String template = templateName == null ? "koekutsukirje" : templateName;

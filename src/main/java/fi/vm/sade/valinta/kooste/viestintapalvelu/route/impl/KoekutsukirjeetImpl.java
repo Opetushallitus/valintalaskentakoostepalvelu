@@ -129,6 +129,7 @@ public class KoekutsukirjeetImpl implements KoekutsukirjeetService {
                                       valintakoeTunnisteet, koekutsu.getHakukohdeOid()))
                               .map(ValintakoeOsallistuminenDTO::getHakemusOid)
                               .collect(Collectors.toSet());
+                      LOG.info("Osallistujien hakemusoidit: {}", osallistujienHakemusOidit);
                       Stream<HakemusWrapper> hakukohteenUlkopuolisetHakemukset =
                           getHakukohteenUlkopuolisetHakemukset(
                               hakemukset, osallistujienHakemusOidit, koekutsu.getHaku());
