@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemus;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruSyntheticApplicationResponse;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
@@ -14,14 +16,13 @@ import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.AtaruHakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.reactivex.Observable;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -169,15 +170,28 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   private Function<AtaruHakemus, AtaruHakemusWrapper> hakemusToHakemusWrapper(
       Map<String, HenkiloPerustietoDto> henkilot, Map<String, Koodi> maakoodit) {
     return hakemus -> {
-      String ISOmaakoodi =
-          maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
       HenkiloPerustietoDto henkilo = henkilot.get(hakemus.getPersonOid());
       List<String> kansalaisuudet =
           henkilo.getKansalaisuus().stream()
               .map(k -> maakoodit.get(k.getKansalaisuusKoodi()).getKoodiArvo())
               .collect(Collectors.toList());
       Map<String, String> newKeyValues = new HashMap<>(hakemus.getKeyValues());
-      newKeyValues.replace("country-of-residence", ISOmaakoodi);
+
+      String asuinmaaISO =
+          maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
+      newKeyValues.replace("country-of-residence", asuinmaaISO);
+
+      String toisenasteensuoritusmaa =
+          hakemus.getKeyValues().get("secondary-completed-base-education–country");
+      if (StringUtils.isNotBlank(toisenasteensuoritusmaa)) {
+        String toisenasteensuoritusmaaISO =
+            maakoodit
+                .get(hakemus.getKeyValues().get("secondary-completed-base-education–country"))
+                .getKoodiArvo();
+        newKeyValues.replace(
+            "secondary-completed-base-education–country", toisenasteensuoritusmaaISO);
+      }
+
       AtaruHakemus h =
           new AtaruHakemus(
               hakemus.getHakemusOid(),
@@ -226,5 +240,15 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(
       List<String> oids) {
     return getApplications(null, oids, true);
+  }
+
+  @Override
+  public Observable<List<AtaruSyntheticApplicationResponse>> putApplicationPrototypes(
+      Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
+    String url = this.urlConfiguration.url("ataru.post-synthetic-applications");
+
+    return Observable.fromFuture(
+        this.casClient.post(
+            url, new TypeToken<>() {}, hakemusPrototyypit, Collections.emptyMap(), 60 * 60 * 1000));
   }
 }

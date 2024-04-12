@@ -12,16 +12,20 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRiviBuilder;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.KielisyysDto;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,8 +140,8 @@ public class ErillishaunTuontiHelper {
             .filter(r -> r.getSukunimi() != null && henkilo.getSukunimi() != null)
             .filter(
                 r ->
-                    HakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate())
-                            .equals(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
+                    AtaruHakemusPrototyyppi.parseDate(r.formatSyntymaAikaAsDate())
+                            .equals(AtaruHakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
                         && r.getSukupuoli()
                             .equals(Sukupuoli.toSukupuoliEnum(henkilo.getSukupuoli()))
                         && r.getEtunimi().equals(henkilo.getEtunimet())
@@ -173,7 +177,7 @@ public class ErillishaunTuontiHelper {
         .etunimi(henkilo.getEtunimet())
         .henkilotunnus(henkilo.getHetu())
         .sahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()))
-        .syntymaAika(HakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
+        .syntymaAika(AtaruHakemusPrototyyppi.parseDate(henkilo.getSyntymaaika()))
         .sukupuoli(
             isNotBlank(sukupuoli) ? Sukupuoli.toSukupuoliEnum(sukupuoli) : rivi.getSukupuoli())
         .personOid(henkilo.getOidHenkilo())
@@ -182,16 +186,53 @@ public class ErillishaunTuontiHelper {
         .build();
   }
 
-  public static HakemusPrototyyppi createHakemusprototyyppi(
-      ErillishakuRivi rivi, String kotikunta) {
-    HakemusPrototyyppi hakemus = new HakemusPrototyyppi();
+  private static String toAtaruAsiointikieli(String asiointikieli) {
+    if (asiointikieli.equalsIgnoreCase("fi")) {
+      return "1";
+    } else if (asiointikieli.equalsIgnoreCase("sv")) {
+      return "2";
+    } else if (asiointikieli.equalsIgnoreCase("en")) {
+      return "3";
+    }
+
+    return "1";
+  }
+
+  private static String convertMaakoodi(
+      String maakoodi, KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+    Map<String, Koodi> maaKoodit1 =
+        koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_1);
+    Map<String, Koodi> maaKoodit2 =
+        koodistoCachedAsyncResource.haeKoodisto(KoodistoCachedAsyncResource.MAAT_JA_VALTIOT_2);
+
+    String maaNimi =
+        koodistoCachedAsyncResource.haeKoodistaArvo(maaKoodit1.get(maakoodi), "FI", null);
+    return maaKoodit2.values().stream()
+        .flatMap(
+            koodi ->
+                koodi.getMetadata().stream()
+                    .map(metadata -> new ImmutablePair<>(metadata.getNimi(), koodi.getKoodiArvo())))
+        .filter(x -> x.getLeft().equalsIgnoreCase(maaNimi))
+        .map(ImmutablePair::getRight)
+        .findFirst()
+        .orElse(null);
+  }
+
+  public static AtaruHakemusPrototyyppi createHakemusprototyyppi(
+      ErillishakuRivi rivi,
+      String kotikunta,
+      String hakuOid,
+      String hakukohdeOid,
+      KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
+    AtaruHakemusPrototyyppi hakemus = new AtaruHakemusPrototyyppi();
+    hakemus.setHakuOid(hakuOid);
+    hakemus.setHakukohdeOid(hakukohdeOid);
     hakemus.setAidinkieli(rivi.getAidinkieli());
-    hakemus.setAsiointikieli(rivi.getAsiointikieli());
-    hakemus.setAsuinmaa(rivi.getAsuinmaa());
+    hakemus.setAsiointikieli(toAtaruAsiointikieli(rivi.getAsiointikieli()));
+    hakemus.setAsuinmaa(convertMaakoodi(rivi.getAsuinmaa(), koodistoCachedAsyncResource));
     hakemus.setEtunimi(rivi.getEtunimi());
-    hakemus.setHakijaOid(rivi.getPersonOid());
     hakemus.setHenkilotunnus(rivi.getHenkilotunnus());
-    hakemus.setKansalaisuus(rivi.getKansalaisuus());
+    hakemus.setKansalaisuus(convertMaakoodi(rivi.getKansalaisuus(), koodistoCachedAsyncResource));
     hakemus.setKotikunta(kotikunta);
     hakemus.setOsoite(rivi.getOsoite());
     hakemus.setPostinumero(rivi.getPostinumero());
@@ -202,8 +243,14 @@ public class ErillishaunTuontiHelper {
     hakemus.setSahkoposti(StringUtils.trimToEmpty(rivi.getSahkoposti()));
     hakemus.setSyntymaAika(rivi.getSyntymaAika());
     hakemus.setToisenAsteenSuoritus(rivi.getToisenAsteenSuoritus());
-    hakemus.setToisenAsteenSuoritusmaa(rivi.getToisenAsteenSuoritusmaa());
-    hakemus.setMaksuvelvollisuus(rivi.getMaksuvelvollisuus());
+    hakemus.setToisenAsteenSuoritusmaa(
+        convertMaakoodi(rivi.getToisenAsteenSuoritusmaa(), koodistoCachedAsyncResource));
+    hakemus.setKutsumanimi(rivi.getKutsumanimi());
+    hakemus.setSyntymapaikka(rivi.getSyntymapaikka());
+    hakemus.setPassinNumero(rivi.getPassinNumero());
+    hakemus.setIdTunnus(rivi.getIdTunnus());
+    hakemus.setKaupunkiJaMaa(rivi.getKaupunkiJaMaa());
+
     return hakemus;
   }
 
