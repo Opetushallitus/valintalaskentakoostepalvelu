@@ -34,6 +34,9 @@ public class DevApp {
         "kayttooikeus-service.userDetails.byUsername",
         "https://virkailija.hahtuvaopintopolku.fi/kayttooikeus-service/userDetails/$1");
 
+    System.setProperty("aws.region", "eu-west-1");
+    System.setProperty("aws.bucket.name", "opintopolku-local-dokumenttipalvelu");
+    
     App.start();
   }
 }
