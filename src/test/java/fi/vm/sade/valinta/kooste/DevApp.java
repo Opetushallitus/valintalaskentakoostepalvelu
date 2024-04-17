@@ -36,7 +36,9 @@ public class DevApp {
 
     System.setProperty("aws.region", "eu-west-1");
     System.setProperty("aws.bucket.name", "opintopolku-local-dokumenttipalvelu");
-    
+
+    System.setProperty("server.servlet.session.timeout", "60m");
+
     App.start();
   }
 }
