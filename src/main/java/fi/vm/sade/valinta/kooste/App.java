@@ -19,6 +19,7 @@ public class App {
     System.setProperty("server.servlet.context-path", CONTEXT_PATH);
     System.setProperty("spring.task.scheduling.pool.size", "10");
     System.setProperty("spring.jmx.enabled", "true");
+    System.setProperty("server.servlet.session.timeout", "60m");
 
     SpringApplication app = new SpringApplication(App.class);
     app.setAllowBeanDefinitionOverriding(true);
