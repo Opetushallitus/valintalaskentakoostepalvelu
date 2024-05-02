@@ -104,7 +104,8 @@ public class Suoritus {
   }
 
   public boolean isYksilollistettyMaAi() {
-    return this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false").equals("true");
+    return this.tila != "KESKEYTYNYT"
+        && this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false").equals("true");
   }
 
   @Override
