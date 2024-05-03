@@ -109,16 +109,8 @@ public class Suoritus {
   }
 
   public boolean isYksilollistettyMaAi() {
-    boolean hasYksilollistettyMaAi =
-        !"KESKEYTYNYT".equals(this.tila)
-            && this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false").equals("true");
-    LOG.info(
-        "isYksilollistettyMaAi | id: {} | tila: {} | hasYksilollistettyMaAi: {} | lahdeArvot.getOrDefault(\"yksilollistetty_ma_ai\", \"false\"): {}",
-        this.id,
-        this.tila,
-        hasYksilollistettyMaAi,
-        this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false"));
-    return hasYksilollistettyMaAi;
+    return !"KESKEYTYNYT".equals(this.tila)
+        && this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false").equals("true");
   }
 
   @Override
