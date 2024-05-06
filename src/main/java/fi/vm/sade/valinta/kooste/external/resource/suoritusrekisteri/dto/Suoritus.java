@@ -1,8 +1,13 @@
 package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Suoritus {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Suoritus.class);
+
   private String id;
   private String komo;
   private String myontaja;
@@ -104,7 +109,8 @@ public class Suoritus {
   }
 
   public boolean isYksilollistettyMaAi() {
-    return this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false").equals("true");
+    return !"KESKEYTYNYT".equals(this.tila)
+        && this.lahdeArvot.getOrDefault("yksilollistetty_ma_ai", "false").equals("true");
   }
 
   @Override
