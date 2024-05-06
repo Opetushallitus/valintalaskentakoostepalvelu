@@ -37,7 +37,7 @@ public class LaskentaSeurantaAsyncResourceImpl implements LaskentaSeurantaAsyncR
 
   @Autowired
   public LaskentaSeurantaAsyncResourceImpl(
-      @Qualifier("SeurantaCasClient") RestCasClient restCasClient) {
+      @Qualifier("ValintalaskentaCasClient") RestCasClient restCasClient) {
     this.restCasClient = restCasClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
   }
