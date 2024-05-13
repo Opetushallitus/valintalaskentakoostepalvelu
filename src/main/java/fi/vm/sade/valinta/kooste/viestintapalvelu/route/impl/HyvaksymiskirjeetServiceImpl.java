@@ -434,8 +434,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             CompletableFuture<Map<String, MetaHakukohde>> hakukohteetF =
                 hakijatF.thenComposeAsync(this::kiinnostavatHakukohteet);
             CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF =
-                hakukohteetF.thenComposeAsync(
-                    hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, null));
+                CompletableFuture.completedFuture(Collections.emptyMap());
 
             CompletableFuture.allOf(
                     maatjavaltiot1F,
@@ -689,8 +688,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
     CompletableFuture<Map<String, Koodi>> postinumerotF =
         koodistoCachedAsyncResource.haeKoodistoAsync(KoodistoCachedAsyncResource.POSTI);
     CompletableFuture<Map<String, Optional<Osoite>>> osoitteetF =
-        hakukohteetF.thenComposeAsync(
-            hakukohteet -> this.hakukohteidenHakutoimistojenOsoitteet(hakukohteet, asiointikieli));
+        CompletableFuture.completedFuture(Collections.emptyMap());
     CompletableFuture<String> vakiosisaltoF =
         this.haeHakukohteenVakiosisalto(
             hyvaksymiskirjeDTO.getSisalto(), hyvaksymiskirjeDTO.getHakukohdeOid());
