@@ -878,7 +878,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
   }
 
   @Test
-  public void testEiHarkinnanVarainenJosYksilollistettyMatAiYliajettuKorotuksella()
+  public void testOnHarkinnanVarainenJosYksilollistettyMatAiJaKorotus()
       throws ExecutionException, InterruptedException, TimeoutException {
 
     String leikkuriPvm = "2032-06-06";
@@ -961,7 +961,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
         h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
     assertEquals(
-        1,
+        0,
         hhv.get().stream()
             .filter(
                 hakemuksenHarkinnanvaraisuus ->
@@ -971,10 +971,21 @@ public class HarkinnavaraisuusAsyncResourceTest {
                         .getHarkinnanvaraisuudenSyy()
                         .equals(HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN))
             .count());
+    assertEquals(
+        1,
+        hhv.get().stream()
+            .filter(
+                hakemuksenHarkinnanvaraisuus ->
+                    hakemuksenHarkinnanvaraisuus
+                        .getHakutoiveet()
+                        .get(0)
+                        .getHarkinnanvaraisuudenSyy()
+                        .equals(HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI))
+            .count());
   }
 
   @Test
-  public void testJosYksilollistettyMatAiKorotettuYliajetaanAtaruHarkinnanvaraisuus()
+  public void testJosYksilollistettyMatAiKorotettuOnEdelleenHarkinnanvarainen()
       throws ExecutionException, InterruptedException, TimeoutException {
 
     String leikkuriPvm = "2032-06-06";
@@ -1053,7 +1064,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
         h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
     assertEquals(
-        1,
+        0,
         hhv.get().stream()
             .filter(
                 hakemuksenHarkinnanvaraisuus ->
@@ -1066,7 +1077,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
   }
 
   @Test
-  public void testJosYksilollistettyMatAiKorotettuYliajetaanVanhaSureHarkinnanvaraisuus()
+  public void testJosYksilollistettyMatAiKorotettuEiYliajetaVanhaaSureHarkinnanvaraisuutta()
       throws ExecutionException, InterruptedException, TimeoutException {
     // ei varmuutta onko tämä realistinen tosielämän tilanne että vanha sure-tieto tulee hakemuksen
     // mukana, mutta huomioidaan nyt tämäkin
@@ -1146,7 +1157,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
         h.getHarkinnanvaraisuudetForHakemukses(hakemusOids);
 
     assertEquals(
-        1,
+        0,
         hhv.get().stream()
             .filter(
                 hakemuksenHarkinnanvaraisuus ->
@@ -1194,7 +1205,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
   }
 
   @Test
-  public void korotuksenPerusteellaEiYksMatAi() {
+  public void arvosanaaKorottanutYksMatAi() {
     String leikkuriPvm = "2022-06-06";
     HarkinnanvaraisuusAsyncResource h =
         new HarkinnanvaraisuusAsyncResourceImpl(leikkuriPvm, mockAtaru, mockSure, mockOnr);
@@ -1236,7 +1247,7 @@ public class HarkinnavaraisuusAsyncResourceTest {
                     hakukohdeOid, HarkinnanvaraisuudenSyy.EI_HARKINNANVARAINEN)));
 
     boolean isYksMatAi = h.hasYksilollistettyMatAi(eiHark, yksilollistetynAikanKorottaja);
-    assertFalse(isYksMatAi);
+    assertTrue(isYksMatAi);
   }
 
   @Test
