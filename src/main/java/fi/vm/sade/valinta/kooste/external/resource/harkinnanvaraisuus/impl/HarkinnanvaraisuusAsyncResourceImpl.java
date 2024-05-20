@@ -1,8 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl;
 
-import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.PK_10_KOMO;
-import static fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper.POO_KOMO;
-
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuudenSyy;
 import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
@@ -96,8 +93,8 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
 
   private Boolean hasYksilollistettyMatAi(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
-      return oppijas.stream().anyMatch(oppija -> loytyyYksilollistettyMaAi(oppija.getSuoritukset()))
-          && !oppijas.stream().anyMatch(oppija -> hasKorotettuMatAi(oppija.getSuoritukset()));
+      return oppijas.stream()
+          .anyMatch(oppija -> loytyyYksilollistettyMaAi(oppija.getSuoritukset()));
     } else {
       return false;
     }
@@ -112,36 +109,21 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                     && sa.getSuoritus().isVahvistettu());
   }
 
-  private Boolean hasKorotettuMatAi(List<SuoritusJaArvosanat> suoritukset) {
-    return suoritukset.stream()
-        .anyMatch(
-            sa ->
-                (PK_10_KOMO.equals(sa.getSuoritus().getKomo())
-                        || POO_KOMO.equals(sa.getSuoritus().getKomo()))
-                    && sa.getSuoritus().isVahvistettu()
-                    && sa.getArvosanat().stream()
-                        .anyMatch(
-                            arvosana ->
-                                "AI".equals(arvosana.getAine())
-                                    || "MA".equals(arvosana.getAine())));
-  }
-
   private Boolean hasPkSuoritusWithoutYksilollistettyMatAi2018Jalkeen(List<Oppija> oppijas) {
     if (!oppijas.isEmpty()) {
       return oppijas.stream()
           .anyMatch(
               oppija ->
-                  hasKorotettuMatAi(oppija.getSuoritukset())
-                      || oppija.getSuoritukset().stream()
-                          .anyMatch(
-                              sa ->
-                                  PK_KOMO.equals(sa.getSuoritus().getKomo())
-                                      && VALMISTUMINEN_DTF
-                                              .parseDateTime(sa.getSuoritus().getValmistuminen())
-                                              .getYear()
-                                          >= 2018
-                                      && !sa.getSuoritus().isYksilollistettyMaAi()
-                                      && sa.getSuoritus().isVahvistettu()));
+                  oppija.getSuoritukset().stream()
+                      .anyMatch(
+                          sa ->
+                              PK_KOMO.equals(sa.getSuoritus().getKomo())
+                                  && VALMISTUMINEN_DTF
+                                          .parseDateTime(sa.getSuoritus().getValmistuminen())
+                                          .getYear()
+                                      >= 2018
+                                  && !sa.getSuoritus().isYksilollistettyMaAi()
+                                  && sa.getSuoritus().isVahvistettu()));
     } else {
       return false;
     }
