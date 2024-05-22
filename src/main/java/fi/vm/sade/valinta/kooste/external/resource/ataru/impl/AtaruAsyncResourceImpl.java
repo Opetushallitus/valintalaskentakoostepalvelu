@@ -232,6 +232,7 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
         Stream.concat(
                 Stream.concat(toisenasteensuoritusmaaKooditOrEmpty, asuinmaaKoodit),
                 kansalaisuusKoodit)
+            .filter(Objects::nonNull)
             .distinct()
             .collect(
                 Collectors.toMap(
