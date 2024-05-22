@@ -94,13 +94,20 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
                           Stream<String> asuinmaaKoodit =
                               hakemukset.stream()
                                   .map(h -> h.getKeyValues().get("country-of-residence"));
+                          Stream<String> toisenasteensuoritusmaaKoodit =
+                              hakemukset.stream()
+                                  .map(
+                                      h ->
+                                          h.getKeyValues()
+                                              .get("secondary-completed-base-education–country"));
                           Stream<String> kansalaisuusKoodit =
                               henkilot.values().stream()
                                   .flatMap(
                                       h ->
                                           h.getKansalaisuus().stream()
                                               .map(KansalaisuusDto::getKansalaisuusKoodi));
-                          return getMaakoodit(asuinmaaKoodit, kansalaisuusKoodit)
+                          return getMaakoodit(
+                                  asuinmaaKoodit, kansalaisuusKoodit, toisenasteensuoritusmaaKoodit)
                               .thenApplyAsync(
                                   maakoodit ->
                                       hakemukset.stream()
@@ -216,9 +223,12 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   private CompletableFuture<Map<String, Koodi>> getMaakoodit(
-      Stream<String> asuinmaaKoodit, Stream<String> kansalaisuusKoodit) {
+      Stream<String> asuinmaaKoodit,
+      Stream<String> kansalaisuusKoodit,
+      Stream<String> toisenasteensuoritusmaaKoodit) {
     return CompletableFutureUtil.sequence(
-        Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
+        Stream.concat(
+                Stream.concat(toisenasteensuoritusmaaKoodit, asuinmaaKoodit), kansalaisuusKoodit)
             .distinct()
             .collect(
                 Collectors.toMap(
