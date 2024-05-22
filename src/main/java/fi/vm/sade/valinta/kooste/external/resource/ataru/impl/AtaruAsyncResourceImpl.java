@@ -94,13 +94,20 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
                           Stream<String> asuinmaaKoodit =
                               hakemukset.stream()
                                   .map(h -> h.getKeyValues().get("country-of-residence"));
+                          Stream<String> toisenasteensuoritusmaaKoodit =
+                              hakemukset.stream()
+                                  .map(
+                                      h ->
+                                          h.getKeyValues()
+                                              .get("secondary-completed-base-education–country"));
                           Stream<String> kansalaisuusKoodit =
                               henkilot.values().stream()
                                   .flatMap(
                                       h ->
                                           h.getKansalaisuus().stream()
                                               .map(KansalaisuusDto::getKansalaisuusKoodi));
-                          return getMaakoodit(asuinmaaKoodit, kansalaisuusKoodit)
+                          return getMaakoodit(
+                                  asuinmaaKoodit, kansalaisuusKoodit, toisenasteensuoritusmaaKoodit)
                               .thenApplyAsync(
                                   maakoodit ->
                                       hakemukset.stream()
@@ -183,13 +190,21 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
 
       String toisenasteensuoritusmaa =
           hakemus.getKeyValues().get("secondary-completed-base-education–country");
-      if (StringUtils.isNotBlank(toisenasteensuoritusmaa)) {
-        String toisenasteensuoritusmaaISO =
-            maakoodit
-                .get(hakemus.getKeyValues().get("secondary-completed-base-education–country"))
-                .getKoodiArvo();
-        newKeyValues.replace(
-            "secondary-completed-base-education–country", toisenasteensuoritusmaaISO);
+
+      try {
+        if (StringUtils.isNotBlank(toisenasteensuoritusmaa)) {
+          String toisenasteensuoritusmaaISO =
+              maakoodit
+                  .get(hakemus.getKeyValues().get("secondary-completed-base-education–country"))
+                  .getKoodiArvo();
+          newKeyValues.replace(
+              "secondary-completed-base-education–country", toisenasteensuoritusmaaISO);
+        }
+      } catch (Exception e) {
+        LOG.error(
+            "Toisen asteen suoritusmaata {} ei löytynyt koodistosta, hakemus {}",
+            toisenasteensuoritusmaa,
+            hakemus);
       }
 
       AtaruHakemus h =
@@ -208,9 +223,16 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   private CompletableFuture<Map<String, Koodi>> getMaakoodit(
-      Stream<String> asuinmaaKoodit, Stream<String> kansalaisuusKoodit) {
+      Stream<String> asuinmaaKoodit,
+      Stream<String> kansalaisuusKoodit,
+      Stream<String> toisenasteensuoritusmaaKoodit) {
+    Stream<String> toisenasteensuoritusmaaKooditOrEmpty =
+        toisenasteensuoritusmaaKoodit == null ? Stream.empty() : toisenasteensuoritusmaaKoodit;
     return CompletableFutureUtil.sequence(
-        Stream.concat(asuinmaaKoodit, kansalaisuusKoodit)
+        Stream.concat(
+                Stream.concat(toisenasteensuoritusmaaKooditOrEmpty, asuinmaaKoodit),
+                kansalaisuusKoodit)
+            .filter(Objects::nonNull)
             .distinct()
             .collect(
                 Collectors.toMap(
