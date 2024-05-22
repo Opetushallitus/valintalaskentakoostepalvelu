@@ -177,6 +177,7 @@ public class ErillishakuResourceTest {
             .hakemusOid(MockData.hakemusOid)
             .sukunimi(MockData.sukunimi)
             .etunimi(MockData.etunimi)
+            .kutsumanimi(MockData.etunimi)
             .henkilotunnus(MockData.hetu)
             .sahkoposti("testi@testi.fi")
             .syntymaAika(MockData.syntymaAika)
@@ -202,6 +203,10 @@ public class ErillishakuResourceTest {
             .toisenAsteenSuoritusmaa(hakutyyppi == Hakutyyppi.KORKEAKOULU ? "FIN" : "")
             .maksuvelvollisuus(Maksuvelvollisuus.NOT_CHECKED)
             .maksuntila(hakutyyppi == Hakutyyppi.KORKEAKOULU ? Maksuntila.MAKSAMATTA : null)
+            .syntymapaikka("")
+            .passinNumero("")
+            .idTunnus("")
+            .kaupunkiJaMaa("")
             .build();
     assertEquals(expectedRivi.toString(), tulos.rivit.get(0).toString());
   }

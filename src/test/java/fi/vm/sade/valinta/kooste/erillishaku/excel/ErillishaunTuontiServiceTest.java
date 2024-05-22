@@ -1,14 +1,8 @@
 package fi.vm.sade.valinta.kooste.erillishaku.excel;
 
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuRivi.SYNTYMAAIKAFORMAT_JSON;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishaunTuontiServiceTest.PERSON_1_OID;
 import static fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishaunTuontiServiceTest.getDummyHaku;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuHenkiloOidilla;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuSyntymaAjalla;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.erillisHakuTuntemattomallaKielella;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.kkHakuToisenAsteenValintatuloksella;
-import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.puutteellisiaTietojaAutotayttoaVarten;
+import static fi.vm.sade.valinta.kooste.erillishaku.excel.ExcelTestData.*;
 import static io.reactivex.Observable.just;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -28,15 +22,13 @@ import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusPrototyyppi;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloTyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -49,7 +41,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -107,7 +98,6 @@ public class ErillishaunTuontiServiceTest {
     public void tuodaanToisenAsteenValintatilojaKorkeaKoulunHakuun() {
       importData(kkHakuToisenAsteenValintatuloksella());
 
-      assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
       assertEquals(1, applicationAsyncResource.results.size());
       assertEquals(1, erillishaunValinnantulokset.size());
       assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
@@ -127,29 +117,17 @@ public class ErillishaunTuontiServiceTest {
     public void tuontiSuoritetaan() {
       importData(kkHakuToisenAsteenValintatuloksella());
 
-      assertEquals(1, henkiloAsyncResource.henkiloPrototyypit.size());
-      final HenkiloCreateDTO henkilo = henkiloAsyncResource.henkiloPrototyypit.get(0);
-      assertEquals("Tuomas", henkilo.etunimet);
-      assertEquals("Tuomas", henkilo.kutsumanimi);
-      assertEquals("Hakkarainen", henkilo.sukunimi);
-      assertEquals(MockData.hetu, henkilo.hetu);
-      assertNotNull(henkilo.syntymaaika);
-      assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
-
       assertEquals(1, applicationAsyncResource.results.size());
       applicationAsyncResource.results.get(0);
-      final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
-      assertEquals("haku1", appResult.hakuOid);
-      assertEquals("kohde1", appResult.hakukohdeOid);
-      assertEquals("tarjoaja1", appResult.tarjoajaOid);
+      final MockAtaruAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
       assertEquals(1, appResult.hakemusPrototyypit.size());
-      final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
-      assertEquals("hakija1", hakemusProto.getHakijaOid());
+      final AtaruHakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
+      assertEquals("haku1", hakemusProto.getHakuOid());
+      assertEquals("kohde1", hakemusProto.getHakukohdeOid());
       assertEquals(MockData.hetu, hakemusProto.getHenkilotunnus());
       assertEquals("Tuomas", hakemusProto.getEtunimi());
       assertEquals("Hakkarainen", hakemusProto.getSukunimi());
       assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
-      assertEquals(Maksuvelvollisuus.REQUIRED, hakemusProto.getMaksuvelvollisuus());
 
       assertEquals(1, erillishaunValinnantulokset.size());
       assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
@@ -161,7 +139,6 @@ public class ErillishaunTuontiServiceTest {
                 assertEquals(ValintatuloksenTila.VASTAANOTTANUT_SITOVASTI, v.getVastaanottotila());
                 assertEquals(MockData.valintatapajonoOid, v.getValintatapajonoOid());
                 assertEquals("hakemus1", v.getHakemusOid());
-                assertEquals("hakija1", v.getHenkiloOid());
                 assertEquals(true, v.getJulkaistavissa());
                 assertEquals(true, v.getEhdollisestiHyvaksyttavissa());
                 assertEquals(MockData.kohdeOid, v.getHakukohdeOid());
@@ -177,17 +154,14 @@ public class ErillishaunTuontiServiceTest {
 
       assertEquals(1, applicationAsyncResource.results.size());
       applicationAsyncResource.results.get(0);
-      final MockApplicationAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
-      assertEquals("haku1", appResult.hakuOid);
-      assertEquals("kohde1", appResult.hakukohdeOid);
-      assertEquals("tarjoaja1", appResult.tarjoajaOid);
+      final MockAtaruAsyncResource.Result appResult = applicationAsyncResource.results.get(0);
       assertEquals(1, appResult.hakemusPrototyypit.size());
-      final HakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
-      assertEquals("hakija1", hakemusProto.getHakijaOid());
+      final AtaruHakemusPrototyyppi hakemusProto = appResult.hakemusPrototyypit.iterator().next();
+      assertEquals("haku1", hakemusProto.getHakuOid());
+      assertEquals("kohde1", hakemusProto.getHakukohdeOid());
       assertEquals("Tuomas", hakemusProto.getEtunimi());
       assertEquals("Hakkarainen", hakemusProto.getSukunimi());
       assertEquals("01.01.1901", hakemusProto.getSyntymaAika());
-      assertEquals(Maksuvelvollisuus.NOT_REQUIRED, hakemusProto.getMaksuvelvollisuus());
     }
   }
 
@@ -212,18 +186,7 @@ public class ErillishaunTuontiServiceTest {
               });
       importRows(singletonList(erillishakuRivi), mockHenkiloAsyncResource);
 
-      assertEquals(1, henkiloPrototyypit.size());
-      final HenkiloCreateDTO henkilo = henkiloPrototyypit.get(0);
-      assertEquals(erillishakuRivi.getEtunimi(), henkilo.etunimet);
-      assertEquals(erillishakuRivi.getEtunimi(), henkilo.kutsumanimi);
-      assertEquals(erillishakuRivi.getSukunimi(), henkilo.sukunimi);
-      assertEquals(erillishakuRivi.getHenkilotunnus(), henkilo.hetu);
-      LocalDate erillishakuSyntymaAika =
-          LocalDate.parse(erillishakuRivi.getSyntymaAika(), SYNTYMAAIKAFORMAT);
-      LocalDate henkiloSyntymaAika = LocalDate.parse(henkilo.syntymaaika, SYNTYMAAIKAFORMAT_JSON);
-      assertEquals(erillishakuSyntymaAika, henkiloSyntymaAika);
-      assertEquals(HenkiloTyyppi.OPPIJA, henkilo.henkiloTyyppi);
-
+      assertEquals(MockData.hakijaOid, erillishakuRivi.getPersonOid());
       assertEquals(1, erillishaunValinnantulokset.size());
       assertEquals(1, erillishaunValinnantulokset.get("jono1").size());
       erillishaunValinnantulokset
@@ -234,7 +197,6 @@ public class ErillishaunTuontiServiceTest {
                 assertEquals(ValintatuloksenTila.KESKEN, v.getVastaanottotila());
                 assertEquals(MockData.valintatapajonoOid, v.getValintatapajonoOid());
                 assertEquals("hakemus1", v.getHakemusOid());
-                assertEquals(personOidHenkiloPalvelusta, v.getHenkiloOid());
                 assertEquals(erillishakuRivi.isJulkaistaankoTiedot(), v.getJulkaistavissa());
                 assertEquals(
                     erillishakuRivi.getEhdollisestiHyvaksyttavissa(),
@@ -288,39 +250,15 @@ public class ErillishaunTuontiServiceTest {
   }
 
   @Nested
-  public final class HakijaOidilla extends ErillisHakuTuontiTestCase {
+  public final class HakemusOidilla extends ErillisHakuTuontiTestCase {
     @Test
     public void tuodaan() {
-      importData(erillisHakuHenkiloOidilla());
+      importData(erillisHakuHakemusOidilla());
     }
   }
 
   @Nested
   public final class Errors extends ErillisHakuTuontiTestCase {
-
-    @Test
-    public void henkilonLuontiEpaonnistuu() {
-      final OppijanumerorekisteriAsyncResource failingOppijanumerorekisteriResource =
-          mock(OppijanumerorekisteriAsyncResource.class);
-      when(failingOppijanumerorekisteriResource.haeTaiLuoHenkilot(Mockito.any()))
-          .thenReturn(Observable.error(new RuntimeException("simulated HTTP fail")));
-      final TarjontaAsyncResource tarjontaAsyncResource = mockTarjonta();
-      final ErillishaunTuontiService tuontiService =
-          new ErillishaunTuontiService(
-              applicationAsyncResource,
-              failingOppijanumerorekisteriResource,
-              valintaTulosServiceAsyncResource,
-              koodistoCachedAsyncResource,
-              tarjontaAsyncResource,
-              Schedulers.trampoline());
-      assertEquals(0, applicationAsyncResource.results.size());
-      tuontiService.tuoExcelistä(
-          new AuditSession(PERSON_2_OID, emptyList(), "", ""),
-          prosessi,
-          erillisHaku,
-          kkHakuToisenAsteenValintatuloksella());
-      Mockito.verify(prosessi).keskeyta();
-    }
 
     @Test
     public void tilojenTuontiEpaonnistuu() {
@@ -365,9 +303,8 @@ public class ErillishaunTuontiServiceTest {
 
     @Test
     public void hakemustenLuontiEpaonnistuu() {
-      final ApplicationAsyncResource failingResource = mock(ApplicationAsyncResource.class);
-      when(failingResource.putApplicationPrototypes(
-              Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+      final AtaruAsyncResource failingResource = mock(AtaruAsyncResource.class);
+      when(failingResource.putApplicationPrototypes(Mockito.any()))
           .thenReturn(Observable.error(new RuntimeException("simulated HTTP fail")));
       final TarjontaAsyncResource tarjontaAsyncResource = mockTarjonta();
       final ErillishaunTuontiService tuontiService =
@@ -403,7 +340,7 @@ class ErillisHakuTuontiTestCase {
 
   final MockOppijanumerorekisteriAsyncResource henkiloAsyncResource =
       new MockOppijanumerorekisteriAsyncResource();
-  final MockApplicationAsyncResource applicationAsyncResource = new MockApplicationAsyncResource();
+  final MockAtaruAsyncResource applicationAsyncResource = new MockAtaruAsyncResource();
   final KirjeProsessi prosessi = mock(KirjeProsessi.class);
   final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource =
       new MockValintaTulosServiceAsyncResource();
