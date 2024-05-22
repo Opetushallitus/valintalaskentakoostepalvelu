@@ -226,9 +226,12 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
       Stream<String> asuinmaaKoodit,
       Stream<String> kansalaisuusKoodit,
       Stream<String> toisenasteensuoritusmaaKoodit) {
+    Stream<String> toisenasteensuoritusmaaKooditOrEmpty =
+        toisenasteensuoritusmaaKoodit == null ? Stream.empty() : toisenasteensuoritusmaaKoodit;
     return CompletableFutureUtil.sequence(
         Stream.concat(
-                Stream.concat(toisenasteensuoritusmaaKoodit, asuinmaaKoodit), kansalaisuusKoodit)
+                Stream.concat(toisenasteensuoritusmaaKooditOrEmpty, asuinmaaKoodit),
+                kansalaisuusKoodit)
             .distinct()
             .collect(
                 Collectors.toMap(
