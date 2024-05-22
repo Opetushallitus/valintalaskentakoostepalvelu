@@ -195,9 +195,9 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
         }
       } catch (Exception e) {
         LOG.error(
-                "Toisen asteen suoritusmaata {} ei löytynyt koodistosta, hakemus OID {}",
+                "Toisen asteen suoritusmaata {} ei löytynyt koodistosta, hakemus {}",
                 toisenasteensuoritusmaa,
-                hakemus.getHakemusOid());
+                hakemus);
       }
 
         AtaruHakemus h =

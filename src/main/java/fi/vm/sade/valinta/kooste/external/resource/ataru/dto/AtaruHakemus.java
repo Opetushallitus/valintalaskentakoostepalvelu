@@ -94,4 +94,17 @@ public class AtaruHakemus {
   public boolean hasHetu() {
     return StringUtils.isNotEmpty(keyValues.get("ssn"));
   }
+
+  @Override
+  public String toString() {
+    return "AtaruHakemus{" +
+            "hakemusOid='" + hakemusOid + '\'' +
+            ", personOid='" + personOid + '\'' +
+            ", hakuOid='" + hakuOid + '\'' +
+            ", asiointikieli='" + asiointikieli + '\'' +
+            ", hakutoiveet=" + hakutoiveet +
+            ", maksuvelvollisuus=" + maksuvelvollisuus +
+            ", keyValues=" + keyValues +
+            '}';
+  }
 }
