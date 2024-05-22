@@ -177,12 +177,12 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
               .collect(Collectors.toList());
       Map<String, String> newKeyValues = new HashMap<>(hakemus.getKeyValues());
 
-        String asuinmaaISO =
-                maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
-        newKeyValues.replace("country-of-residence", asuinmaaISO);
+      String asuinmaaISO =
+              maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
+      newKeyValues.replace("country-of-residence", asuinmaaISO);
 
-        String toisenasteensuoritusmaa =
-                hakemus.getKeyValues().get("secondary-completed-base-education–country");
+      String toisenasteensuoritusmaa =
+              hakemus.getKeyValues().get("secondary-completed-base-education–country");
 
       try {
         if (StringUtils.isNotBlank(toisenasteensuoritusmaa)) {
