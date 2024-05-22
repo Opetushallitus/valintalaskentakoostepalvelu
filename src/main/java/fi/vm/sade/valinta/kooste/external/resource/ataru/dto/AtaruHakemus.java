@@ -97,14 +97,25 @@ public class AtaruHakemus {
 
   @Override
   public String toString() {
-    return "AtaruHakemus{" +
-            "hakemusOid='" + hakemusOid + '\'' +
-            ", personOid='" + personOid + '\'' +
-            ", hakuOid='" + hakuOid + '\'' +
-            ", asiointikieli='" + asiointikieli + '\'' +
-            ", hakutoiveet=" + hakutoiveet +
-            ", maksuvelvollisuus=" + maksuvelvollisuus +
-            ", keyValues=" + keyValues +
-            '}';
+    return "AtaruHakemus{"
+        + "hakemusOid='"
+        + hakemusOid
+        + '\''
+        + ", personOid='"
+        + personOid
+        + '\''
+        + ", hakuOid='"
+        + hakuOid
+        + '\''
+        + ", asiointikieli='"
+        + asiointikieli
+        + '\''
+        + ", hakutoiveet="
+        + hakutoiveet
+        + ", maksuvelvollisuus="
+        + maksuvelvollisuus
+        + ", keyValues="
+        + keyValues
+        + '}';
   }
 }

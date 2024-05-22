@@ -178,29 +178,29 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
       Map<String, String> newKeyValues = new HashMap<>(hakemus.getKeyValues());
 
       String asuinmaaISO =
-              maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
+          maakoodit.get(hakemus.getKeyValues().get("country-of-residence")).getKoodiArvo();
       newKeyValues.replace("country-of-residence", asuinmaaISO);
 
       String toisenasteensuoritusmaa =
-              hakemus.getKeyValues().get("secondary-completed-base-education–country");
+          hakemus.getKeyValues().get("secondary-completed-base-education–country");
 
       try {
         if (StringUtils.isNotBlank(toisenasteensuoritusmaa)) {
           String toisenasteensuoritusmaaISO =
-                  maakoodit
-                          .get(hakemus.getKeyValues().get("secondary-completed-base-education–country"))
-                          .getKoodiArvo();
+              maakoodit
+                  .get(hakemus.getKeyValues().get("secondary-completed-base-education–country"))
+                  .getKoodiArvo();
           newKeyValues.replace(
-                  "secondary-completed-base-education–country", toisenasteensuoritusmaaISO);
+              "secondary-completed-base-education–country", toisenasteensuoritusmaaISO);
         }
       } catch (Exception e) {
         LOG.error(
-                "Toisen asteen suoritusmaata {} ei löytynyt koodistosta, hakemus {}",
-                toisenasteensuoritusmaa,
-                hakemus);
+            "Toisen asteen suoritusmaata {} ei löytynyt koodistosta, hakemus {}",
+            toisenasteensuoritusmaa,
+            hakemus);
       }
 
-        AtaruHakemus h =
+      AtaruHakemus h =
           new AtaruHakemus(
               hakemus.getHakemusOid(),
               hakemus.getPersonOid(),
