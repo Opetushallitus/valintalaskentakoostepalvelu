@@ -1,10 +1,12 @@
 package fi.vm.sade.valinta.kooste.hakuapphakemukset;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -34,6 +36,14 @@ public class HakuAppHakemuksetResource {
   private final RestCasClient hakuAppClient;
   private final UrlConfiguration urlConfiguration;
 
+  private final List<String> roles =
+      List.of(
+          "ROLE_APP_HAKEMUS_READ_UPDATE",
+          "ROLE_APP_HAKEMUS_READ",
+          "ROLE_APP_HAKEMUS_CRUD",
+          "ROLE_APP_HAKEMUS_LISATIETORU",
+          "ROLE_APP_HAKEMUS_LISATIETOCRUD");
+
   @Autowired
   public HakuAppHakemuksetResource(@Qualifier("HakuAppCasClient") RestCasClient hakuAppClient) {
     this.hakuAppClient = hakuAppClient;
@@ -42,22 +52,136 @@ public class HakuAppHakemuksetResource {
 
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+  @GetMapping(
+      value = "eligibilities/{hakuOid}/{hakukohdeOid}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Hakee yhden hakemuksen tiedot oidilla.")
+  public CompletableFuture<List<String>> findApplicationEligibilities(
+      @PathVariable final String hakuOid, @PathVariable final String hakukohdeOid) {
+
+    Preconditions.checkNotNull(hakuOid);
+    Preconditions.checkNotNull(hakukohdeOid);
+
+    AuthorityCheckService.Context context = authorityCheckService.getContext();
+
+    LOG.info(
+        "Haetaan haun {} hakemuksien maksuvelvollisuudet hakukohteelle {}", hakuOid, hakukohdeOid);
+
+    authorityCheckService.checkAuthorizationForHakukohteet(List.of(hakukohdeOid), roles);
+
+    CompletableFuture<List<String>> response =
+        this.hakuAppClient.get(
+            this.urlConfiguration.url("haku-app.applications.eligibilities", hakuOid, hakukohdeOid),
+            new TypeToken<List<String>>() {},
+            Collections.emptyMap(),
+            60 * 60 * 1000);
+
+    return response;
+  }
+
+  @PreAuthorize(
+      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+  @GetMapping(value = "/{hakemusOid}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Hakee yhden hakemuksen tiedot oidilla.")
+  public CompletableFuture<Map<String, Object>> findApplicationByOid(
+      @PathVariable final String hakemusOid) {
+
+    Preconditions.checkNotNull(hakemusOid);
+
+    AuthorityCheckService.Context context = authorityCheckService.getContext();
+
+    LOG.info("Haetaan yksi hakemus haku-appista. Hakemuksen oid on {}", hakemusOid);
+
+    CompletableFuture<Map<String, Object>> response =
+        this.hakuAppClient
+            .get(
+                this.urlConfiguration.url("haku-app.applications", hakemusOid),
+                new TypeToken<Map<String, Object>>() {},
+                Collections.emptyMap(),
+                60 * 60 * 1000)
+            .thenApply(
+                hakemus -> {
+                  List<String> hakukohdeOids = getHekutoiveet(hakemus);
+                  authorityCheckService.withContext(
+                      context,
+                      () ->
+                          authorityCheckService.checkAuthorizationForHakukohteet(
+                              hakukohdeOids, roles));
+                  return hakemus;
+                });
+
+    return response;
+  }
+
+  @PreAuthorize(
+      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+  @PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Palauttaa hakuehtoihin sopivien hakemusten tiedot.",
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)))
+  public CompletableFuture<List<Map<String, Object>>> findListApplicationsPost(
+      @RequestParam(name = "keys", required = false) List<String> keys,
+      @RequestParam(name = "state", required = false) List<String> state,
+      @RequestParam(name = "asIds", required = false) List<String> asIds,
+      @RequestBody final String applicationSearchData) {
+
+    AuthorityCheckService.Context context = authorityCheckService.getContext();
+
+    String queryString =
+        UriComponentsBuilder.newInstance()
+            .queryParamIfPresent("keys", Optional.ofNullable(keys))
+            .queryParamIfPresent("appState", Optional.ofNullable(state))
+            .queryParamIfPresent("asIds", Optional.ofNullable(asIds))
+            .build()
+            .toUri()
+            .getQuery();
+
+    LOG.info(
+        "Haetaan hakemuksia haku-appista (listfull POST). Query on {} ja body on {}",
+        queryString,
+        applicationSearchData.toString());
+
+    CompletableFuture<List<Map<String, Object>>> response =
+        this.hakuAppClient
+            .postPlaintext(
+                this.urlConfiguration.url("haku-app.applications.list") + "?" + queryString,
+                new TypeToken<List<Map<String, Object>>>() {},
+                applicationSearchData,
+                Collections.emptyMap(),
+                60 * 60 * 1000)
+            .thenApply(hakemukset -> filterAuthorizedHakemukset(context, hakemukset));
+
+    return response;
+  }
+
+  @PreAuthorize(
+      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   @PostMapping(value = "/listfull", produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(summary = "Palauttaa hakuehtoihin sopivien hakemusten tiedot.")
+  @Operation(
+      summary = "Palauttaa hakuehtoihin sopivien hakemusten tiedot.",
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)))
   public CompletableFuture<List<Map<String, Object>>> findFullApplicationsPost(
-      final List<Map<String, Object>> applicationSearchData) {
+      @RequestBody final String applicationSearchData) {
+
+    AuthorityCheckService.Context context = authorityCheckService.getContext();
 
     LOG.info(
         "Haetaan hakemuksia haku-appista (listfull POST). Body on {}",
         applicationSearchData.toString());
 
     CompletableFuture<List<Map<String, Object>>> response =
-        this.hakuAppClient.post(
-            this.urlConfiguration.url("haku-app.applications.listfull"),
-            new TypeToken<List<Map<String, Object>>>() {},
-            applicationSearchData,
-            Collections.emptyMap(),
-            60 * 60 * 1000);
+        this.hakuAppClient
+            .postPlaintext(
+                this.urlConfiguration.url("haku-app.applications.listfull"),
+                new TypeToken<List<Map<String, Object>>>() {},
+                applicationSearchData,
+                Collections.emptyMap(),
+                60 * 60 * 1000)
+            .thenApply(hakemukset -> filterAuthorizedHakemukset(context, hakemukset));
 
     return response;
   }
@@ -90,6 +214,8 @@ public class HakuAppHakemuksetResource {
       @RequestParam(name = "rows", required = false) String rows,
       @RequestParam(name = "sortResults", required = false) String sortResults) {
 
+    AuthorityCheckService.Context context = authorityCheckService.getContext();
+
     String queryString =
         UriComponentsBuilder.newInstance()
             .queryParamIfPresent("q", Optional.ofNullable(searchTerms))
@@ -102,6 +228,7 @@ public class HakuAppHakemuksetResource {
             .queryParamIfPresent("baseEducation", Optional.ofNullable(baseEducation))
             .queryParamIfPresent("lopoid", Optional.ofNullable(lopoid))
             .queryParamIfPresent("asId", Optional.ofNullable(asId))
+            .queryParamIfPresent("organizationFilter", Optional.ofNullable(organizationFilter))
             .queryParamIfPresent("asSemester", Optional.ofNullable(asSemester))
             .queryParamIfPresent("asYear", Optional.ofNullable(asYear))
             .queryParamIfPresent("aoOid", Optional.ofNullable(aoOid))
@@ -127,37 +254,40 @@ public class HakuAppHakemuksetResource {
                 new TypeToken<List<Map<String, Object>>>() {},
                 Collections.emptyMap(),
                 60 * 60 * 1000)
-            .thenApply(
-                hakemukset -> {
-                  return hakemukset.stream()
-                      .filter(
-                          hakemus -> {
-                            String hakemusOid = (String) hakemus.get("oid");
-                            Map<String, Object> answers =
-                                (Map<String, Object>) hakemus.get("answers");
-                            Map<String, String> hakutoiveet =
-                                (Map<String, String>) answers.get("hakutoiveet");
-                            List<String> hakukohdeOids =
-                                hakutoiveet.entrySet().stream()
-                                    .filter(
-                                        entry ->
-                                            entry.getKey().endsWith("-Koulutus-id")
-                                                && StringUtils.isNotBlank(entry.getValue()))
-                                    .map(entry -> entry.getValue())
-                                    .collect(Collectors.toList());
-                            LOG.info("Hakemuksen {} hakutoiveet: {}", hakemusOid, hakukohdeOids);
-                            return authorityCheckService.checkAuthorizationForAnyHakukohde(
-                                hakukohdeOids,
-                                List.of(
-                                    "ROLE_APP_HAKEMUS_READ_UPDATE",
-                                    "ROLE_APP_HAKEMUS_READ",
-                                    "ROLE_APP_HAKEMUS_CRUD",
-                                    "ROLE_APP_HAKEMUS_LISATIETORU",
-                                    "ROLE_APP_HAKEMUS_LISATIETOCRUD"));
-                          })
-                      .collect(Collectors.toList());
-                });
+            .thenApply(hakemukset -> filterAuthorizedHakemukset(context, hakemukset));
 
     return response;
+  }
+
+  private List<Map<String, Object>> filterAuthorizedHakemukset(
+      AuthorityCheckService.Context context, List<Map<String, Object>> hakemukset) {
+    return hakemukset.stream()
+        .filter(
+            hakemus -> {
+              String hakemusOid = (String) hakemus.get("oid");
+              List<String> hakukohdeOids = getHekutoiveet(hakemus);
+              LOG.info("Hakemuksen {} hakutoiveet: {}", hakemusOid, hakukohdeOids);
+              boolean hakemusAuthorized =
+                  authorityCheckService.checkAuthorizationForAnyHakukohdeWithContext(
+                      context, hakukohdeOids, roles);
+              return hakemusAuthorized;
+            })
+        .collect(Collectors.toList());
+  }
+
+  private List<String> getHekutoiveet(Map<String, Object> hakemus) {
+    @SuppressWarnings("unchecked")
+    Map<String, Object> answers = (Map<String, Object>) hakemus.get("answers");
+    @SuppressWarnings("unchecked")
+    Map<String, String> hakutoiveet = (Map<String, String>) answers.get("hakutoiveet");
+    List<String> hakukohdeOids =
+        hakutoiveet.entrySet().stream()
+            .filter(
+                entry ->
+                    entry.getKey().endsWith("-Koulutus-id")
+                        && StringUtils.isNotBlank(entry.getValue()))
+            .map(entry -> entry.getValue())
+            .collect(Collectors.toList());
+    return hakukohdeOids;
   }
 }

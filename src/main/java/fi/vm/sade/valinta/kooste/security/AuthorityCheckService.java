@@ -115,8 +115,10 @@ public class AuthorityCheckService {
     }
   }
 
-  public boolean checkAuthorizationForAnyHakukohde(
-      Collection<String> hakukohdeOids, Collection<String> requiredRoles) {
+  public boolean checkAuthorizationForAnyHakukohdeWithContext(
+      Context context, Collection<String> hakukohdeOids, Collection<String> requiredRoles) {
+    setContext(context);
+
     Collection<? extends GrantedAuthority> userRoles = getRoles();
 
     if (containsOphRole(userRoles)) {
@@ -129,6 +131,8 @@ public class AuthorityCheckService {
             .map(authorityCheck -> hakukohdeOids.stream().anyMatch(authorityCheck))
             .timeout(2, MINUTES)
             .blockingFirst();
+
+    clearContext();
 
     return isAuthorized;
   }
