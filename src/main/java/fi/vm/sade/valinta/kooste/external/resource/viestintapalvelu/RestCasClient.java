@@ -153,6 +153,7 @@ public class RestCasClient {
             .setUrl(url)
             .setMethod(method)
             .setRequestTimeout(timeout)
+            .setReadTimeout(timeout)
             .addHeader("Caller-Id", CALLER_ID)
             .addHeader("CSRF", CSRF_VALUE)
             .addHeader("Cookie", String.format("CSRF=%s;", CSRF_VALUE));
