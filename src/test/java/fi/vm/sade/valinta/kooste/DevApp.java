@@ -2,6 +2,8 @@ package fi.vm.sade.valinta.kooste;
 
 public class DevApp {
 
+  private static final String ENVIRONMENT = "hahtuva";
+
   public static void main(String[] args) {
     // ssl-konfiguraatio
     System.setProperty("server.ssl.key-store-type", "PKCS12");
@@ -13,32 +15,44 @@ public class DevApp {
 
     System.setProperty(
         "cas.service.valintalaskentakoostepalvelu",
-        "https://localhost:8443/valintalaskentakoostepalvelu");
+        String.format(
+            "https://virkailija.%sopintopolku.fi/valintalaskentakoostepalvelu", ENVIRONMENT));
     System.setProperty("cas-service.sendRenew", "false");
     System.setProperty("cas-service.key", "valintalaskentakoostepalvelu");
 
     System.setProperty("spring.profiles.active", "dev");
 
-    System.setProperty("host.virkailija", "virkailija.hahtuvaopintopolku.fi");
+    System.setProperty(
+        "host.virkailija", String.format("virkailija.%sopintopolku.fi", ENVIRONMENT));
     System.setProperty(
         "valintalaskentakoostepalvelu.valintaperusteet-service.baseurl",
-        "https://virkailija.hahtuvaopintopolku.fi");
+        String.format("https://virkailija.%sopintopolku.fi", ENVIRONMENT));
     System.setProperty(
         "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl",
-        "https://virkailija.hahtuvaopintopolku.fi");
+        String.format("https://virkailija.%sopintopolku.fi", ENVIRONMENT));
 
-    System.setProperty("url-ilb", "http://alb.hahtuvaopintopolku.fi:8888");
-    System.setProperty("baseurl-sijoittelu-service", "http://alb.hahtuvaopintopolku.fi:8888");
-    System.setProperty("baseurl-viestintapalvelu", "http://alb.hahtuvaopintopolku.fi:8888");
+    System.setProperty("url-ilb", String.format("http://alb.%sopintopolku.fi:8888", ENVIRONMENT));
+    System.setProperty(
+        "baseurl-sijoittelu-service",
+        String.format("http://alb.%sopintopolku.fi:8888", ENVIRONMENT));
+    System.setProperty(
+        "baseurl-viestintapalvelu", String.format("http://alb.%sopintopolku.fi:8888", ENVIRONMENT));
     System.setProperty(
         "kayttooikeus-service.userDetails.byUsername",
-        "https://virkailija.hahtuvaopintopolku.fi/kayttooikeus-service/userDetails/$1");
+        String.format(
+            "http://alb.%sopintopolku.fi:8888/kayttooikeus-service/userDetails/$1", ENVIRONMENT));
 
     System.setProperty("aws.region", "eu-west-1");
     System.setProperty("aws.bucket.name", "opintopolku-local-dokumenttipalvelu");
 
     System.setProperty("server.servlet.session.timeout", "60m");
 
+    System.setProperty(
+        "valintalaskentakoostepalvelu.postgresql.url",
+        "jdbc:postgresql://localhost:5433/valintalaskentakoostepalvelu");
+    System.setProperty("valintalaskentakoostepalvelu.postgresql.driver", "");
+
+    TempDockerDB.start();
     App.start();
   }
 }
