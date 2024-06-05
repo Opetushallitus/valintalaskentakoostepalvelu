@@ -62,12 +62,18 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
 
   public void start() {
     LOG.info(
-        "(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {} ",
+        "(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {}, splittaus {} ",
         uuid(),
         getHakuOid(),
-        totalKohteet());
+        totalKohteet(),
+        splittaus);
     final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
-    IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> laskeSeuraavaHakukohde());
+    IntStream.range(0, onkoTarveSplitata ? splittaus : 1)
+        .forEach(
+            i -> {
+              LOG.info("Käynnistetään laskenta " + i);
+              laskeSeuraavaHakukohde();
+            });
   }
 
   private void laskeSeuraavaHakukohde() {
