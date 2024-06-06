@@ -370,7 +370,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
         urlConfiguration.url("kouta-internal.hakukohde.search", koutaParameters),
         new TypeToken<Set<KoutaHakukohde>>() {},
         Collections.emptyMap(),
-        10 * 1000);
+        60 * 1000);
   }
 
   private CompletableFuture<Map<String, List<String>>> findHakukohderyhmasForHakukohteet(
