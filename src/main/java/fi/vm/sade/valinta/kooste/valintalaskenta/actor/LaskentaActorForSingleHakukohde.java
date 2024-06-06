@@ -13,6 +13,7 @@ import fi.vm.sade.valinta.seuranta.dto.IlmoitusDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -62,12 +63,18 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
 
   public void start() {
     LOG.info(
-        "(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {} ",
+        "(Uuid={}) Laskenta-actor käynnistetty haulle {}, hakukohteita yhteensä {}, splittaus {} ",
         uuid(),
         getHakuOid(),
-        totalKohteet());
+        totalKohteet(),
+        splittaus);
     final boolean onkoTarveSplitata = actorParams.getHakukohdeOids().size() > 20;
-    IntStream.range(0, onkoTarveSplitata ? splittaus : 1).forEach(i -> laskeSeuraavaHakukohde());
+    IntStream.range(0, onkoTarveSplitata ? splittaus : 1)
+        .forEach(
+            i -> {
+              LOG.info("Käynnistetään laskenta " + i);
+              laskeSeuraavaHakukohde();
+            });
   }
 
   private void laskeSeuraavaHakukohde() {
@@ -97,6 +104,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                                 "Laskentaa odotettiin 90 minuuttia ja ohitettiin")));
         Observable.amb(
                 Arrays.asList(hakukohteenLaskenta.apply(hakukohdeJaOrganisaatio), laskentaTimer))
+            .subscribeOn(Schedulers.newThread())
             .subscribe(
                 s -> handleSuccessfulLaskentaResult(fromRetryQueue, hakukohdeOid),
                 e -> handleFailedLaskentaResult(fromRetryQueue, hakukohdeJaOrganisaatio, e));
@@ -128,6 +136,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
       HakukohdeTila tila = HakukohdeTila.VALMIS;
       laskentaSeurantaAsyncResource
           .merkkaaHakukohteenTila(uuid(), hakukohdeOid, tila, Optional.empty())
+          .subscribeOn(Schedulers.newThread())
           .subscribe(
               ok ->
                   LOG.info(
@@ -178,6 +187,7 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
                   Optional.of(
                       virheilmoitus(
                           failure.getMessage(), Arrays.toString(failure.getStackTrace()))))
+              .subscribeOn(Schedulers.newThread())
               .subscribe(
                   ok ->
                       LOG.error(
@@ -262,9 +272,11 @@ class LaskentaActorForSingleHakukohde implements LaskentaActor {
           laskentaSeurantaAsyncResource.merkkaaLaskennanTila(
               uuid(), LaskentaTila.VALMIS, Optional.empty());
     }
-    tilanmerkkausObservable.subscribe(
-        response -> laskentaSupervisor.ready(uuid()),
-        e -> LOG.error("Ongelma laskennan merkkaamisessa loppuneeksi", e));
+    tilanmerkkausObservable
+        .subscribeOn(Schedulers.newThread())
+        .subscribe(
+            response -> laskentaSupervisor.ready(uuid()),
+            e -> LOG.error("Ongelma laskennan merkkaamisessa loppuneeksi", e));
   }
 
   public void postStop() {
