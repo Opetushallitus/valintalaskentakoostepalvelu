@@ -823,7 +823,7 @@ public class HakemuksetConverterUtil {
         pohjakoulutus(
             haku,
             hakemus,
-            sureSuoritukset.stream()
+            sureSuorituksetKeskenOlevatPoistettu.stream()
                 .map(SuoritusJaArvosanatWrapper::wrap)
                 // TODO: Onko tämä enää tarpeellista kun hakemuksilta ei tule vahvistamattomia
                 // suorituksia?
