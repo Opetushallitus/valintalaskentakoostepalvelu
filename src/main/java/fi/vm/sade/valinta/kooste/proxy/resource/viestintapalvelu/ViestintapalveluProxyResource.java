@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.ViestintapalveluAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.dto.LetterBatchCountDto;
+import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.letter.TemplateHistory;
 import io.reactivex.Observable;
 import java.util.Arrays;
 import java.util.List;
@@ -65,6 +66,30 @@ public class ViestintapalveluProxyResource {
                     ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(throwable.getMessage())));
 
+    return result;
+  }
+
+  @GetMapping(value = "/template/getHistory")
+  @PreAuthorize(
+      "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
+  public DeferredResult<ResponseEntity<List<TemplateHistory>>> getTemplateHistory(
+      @RequestParam(value = "templateName") String templateName,
+      @RequestParam(value = "languageCode") String languageCode,
+      @RequestParam(value = "oid") String oid,
+      @RequestParam(value = "tag", required = false) String tag,
+      @RequestParam(value = "applicationPeriod") String applicationPeriod) {
+    DeferredResult<ResponseEntity<List<TemplateHistory>>> result =
+        new DeferredResult<>(5 * 10 * 1000l);
+    Observable.fromFuture(
+            viestintapalveluAsyncResource.haeKirjepohja(
+                applicationPeriod, oid, templateName, languageCode, tag))
+        .subscribe(
+            templateHistories ->
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(templateHistories)),
+            error ->
+                result.setErrorResult(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(error.getMessage())));
     return result;
   }
 
