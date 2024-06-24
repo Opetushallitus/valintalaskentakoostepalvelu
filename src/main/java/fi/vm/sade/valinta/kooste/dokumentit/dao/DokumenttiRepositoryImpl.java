@@ -28,8 +28,7 @@ public class DokumenttiRepositoryImpl implements DokumenttiRepository {
   public DokumenttiDto hae(UUID uuid) {
     // haetaan ilmoitukset mappiin, avain laskennan uuid + hakuoid
     RowMapper<VirheilmoitusDto> ilmoitusRowmapper =
-        (rs, rownum) ->
-            new VirheilmoitusDto(rs.getString("ilmoitustyyppi"), rs.getString("ilmoitus"));
+        (rs, rownum) -> new VirheilmoitusDto("", rs.getString("ilmoitus"));
     List<VirheilmoitusDto> ilmoitukset =
         this.jdbcTemplate.query(
             "SELECT * FROM dokumentinseuranta_virheet WHERE dokumentti_uuid=?::uuid",
