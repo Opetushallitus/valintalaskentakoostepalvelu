@@ -17,7 +17,6 @@ kela.ftp.host={{kela_ftp_host}}
 kela.ftp.port={{kela_ftp_port}}
 kela.ftp.protocol={{kela_ftp_protocol}}
 kela.ftp.path={{kela_ftp_path}}
-server.name={{ansible_hostname}}
 valintalaskentakoostepalvelu.app.username.to.haku={{valintalaskentakoostepalvelu_app_username_to_haku}}
 valintalaskentakoostepalvelu.app.password.to.haku={{valintalaskentakoostepalvelu_app_password_to_haku}}
 valintalaskentakoostepalvelu.app.username.to.hakukohderyhmapalvelu={{valintalaskentakoostepalvelu_app_username_to_hakukohderyhmapalvelu}}
@@ -44,7 +43,7 @@ valintalaskentakoostepalvelu.app.username.to.suoritusrekisteri={{valintalaskenta
 valintalaskentakoostepalvelu.app.password.to.suoritusrekisteri={{valintalaskentakoostepalvelu_app_password_to_haku}}
 
 # Oletusarvoja
-cas.callback.valintalaskentakoostepalvelu=http://{{ cluster_valinta_host | default("${server.name}") }}:{{ cluster_valinta_port | default("8309") }}/valintalaskentakoostepalvelu
+cas.callback.valintalaskentakoostepalvelu=http://{{ cluster_valinta_host }}:{{ cluster_valinta_port }}/valintalaskentakoostepalvelu
 cas.sendRenew=false
 cas.service.seuranta=https://${host.virkailija}/seuranta-service/j_spring_cas_security_check
 cas.service.haku-service=https://${host.virkailija}/haku-app/j_spring_cas_security_check
