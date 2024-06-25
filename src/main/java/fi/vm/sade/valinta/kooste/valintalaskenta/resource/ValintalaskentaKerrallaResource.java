@@ -287,7 +287,7 @@ public class ValintalaskentaKerrallaResource {
       responses = {
         @ApiResponse(
             responseCode = "OK",
-            content = @Content(schema = @Schema(implementation = byte[].class)))
+            content = @Content(schema = @Schema(implementation = LaskentaDto.class)))
       })
   public DeferredResult<ResponseEntity<LaskentaDto>> statusYhteenveto(
       @PathVariable("uuid") final String uuid) {
