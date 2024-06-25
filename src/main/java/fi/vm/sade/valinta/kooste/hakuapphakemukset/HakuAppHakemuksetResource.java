@@ -126,13 +126,20 @@ public class HakuAppHakemuksetResource {
                       authorizedHakemukset.stream()
                           .map(
                               origHakemus -> {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> answers =
+                                    (Map<String, Object>) origHakemus.get("answers");
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> henkilotiedot =
+                                    (Map<String, Object>) answers.get("henkilotiedot");
+
                                 Map<String, Object> hakemus = new HashMap<>();
                                 hakemus.put("oid", origHakemus.get("oid"));
                                 hakemus.put("state", origHakemus.get("state"));
                                 hakemus.put("received", origHakemus.get("received"));
-                                hakemus.put("firstNames", origHakemus.get("firstNames"));
-                                hakemus.put("lastName", origHakemus.get("lastName"));
-                                hakemus.put("ssn", origHakemus.get("ssn"));
+                                hakemus.put("firstNames", henkilotiedot.get("Etunimet"));
+                                hakemus.put("lastName", henkilotiedot.get("Sukunimi"));
+                                hakemus.put("ssn", henkilotiedot.get("Henkilotunnus"));
                                 hakemus.put("personOid", origHakemus.get("personOid"));
                                 return hakemus;
                               })
