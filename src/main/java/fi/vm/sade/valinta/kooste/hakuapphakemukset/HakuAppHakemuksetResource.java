@@ -128,25 +128,28 @@ public class HakuAppHakemuksetResource {
                               origHakemus -> {
                                 @SuppressWarnings("unchecked")
                                 Map<String, Object> answers =
-                                    (Map<String, Object>) origHakemus.get("answers");
+                                    (Map<String, Object>)
+                                        origHakemus.getOrDefault("answers", Map.of());
                                 @SuppressWarnings("unchecked")
                                 Map<String, Object> henkilotiedot =
-                                    (Map<String, Object>) answers.get("henkilotiedot");
+                                    (Map<String, Object>)
+                                        answers.getOrDefault("henkilotiedot", Map.of());
 
                                 Map<String, Object> hakemus = new HashMap<>();
-                                hakemus.put("oid", origHakemus.get("oid"));
-                                hakemus.put("state", origHakemus.get("state"));
-                                hakemus.put("received", origHakemus.get("received"));
-                                hakemus.put("firstNames", henkilotiedot.get("Etunimet"));
-                                hakemus.put("lastName", henkilotiedot.get("Sukunimi"));
-                                hakemus.put("ssn", henkilotiedot.get("Henkilotunnus"));
-                                hakemus.put("personOid", origHakemus.get("personOid"));
+                                hakemus.put("oid", origHakemus.getOrDefault("oid", ""));
+                                hakemus.put("state", origHakemus.getOrDefault("state", ""));
+                                hakemus.put("received", origHakemus.getOrDefault("received", ""));
+                                hakemus.put(
+                                    "firstNames", henkilotiedot.getOrDefault("Etunimet", ""));
+                                hakemus.put("lastName", henkilotiedot.getOrDefault("Sukunimi", ""));
+                                hakemus.put("ssn", henkilotiedot.getOrDefault("Henkilotunnus", ""));
+                                hakemus.put("personOid", origHakemus.getOrDefault("personOid", ""));
                                 return hakemus;
                               })
-                          .collect(Collectors.toUnmodifiableList());
+                          .toList();
 
                   Map<String, Object> result = new HashMap<>();
-                  result.put("", hakemusList.size());
+                  result.put("", Integer.valueOf(hakemusList.size()));
                   result.put("results", hakemukset);
 
                   return result;
@@ -372,27 +375,23 @@ public class HakuAppHakemuksetResource {
               String hakemusOid = (String) hakemus.get("oid");
               List<String> hakukohdeOids = getHekutoiveet(hakemus);
               LOG.info("Hakemuksen {} hakutoiveet: {}", hakemusOid, hakukohdeOids);
-              boolean hakemusAuthorized =
-                  authorityCheckService.checkAuthorizationForAnyHakukohdeWithContext(
-                      context, hakukohdeOids, roles);
-              return hakemusAuthorized;
+              return authorityCheckService.checkAuthorizationForAnyHakukohdeWithContext(
+                  context, hakukohdeOids, roles);
             })
         .collect(Collectors.toList());
   }
 
   private List<String> getHekutoiveet(Map<String, Object> hakemus) {
     @SuppressWarnings("unchecked")
-    Map<String, Object> answers = (Map<String, Object>) hakemus.get("answers");
+    Map<String, Object> answers = (Map<String, Object>) hakemus.getOrDefault("answers", Map.of());
     @SuppressWarnings("unchecked")
-    Map<String, String> hakutoiveet = (Map<String, String>) answers.get("hakutoiveet");
-    List<String> hakukohdeOids =
-        hakutoiveet.entrySet().stream()
-            .filter(
-                entry ->
-                    entry.getKey().endsWith("-Koulutus-id")
-                        && StringUtils.isNotBlank(entry.getValue()))
-            .map(entry -> entry.getValue())
-            .collect(Collectors.toList());
-    return hakukohdeOids;
+    Map<String, String> hakutoiveet =
+        (Map<String, String>) answers.getOrDefault("hakutoiveet", Map.of());
+    return hakutoiveet.entrySet().stream()
+        .filter(
+            entry ->
+                entry.getKey().endsWith("-Koulutus-id") && StringUtils.isNotBlank(entry.getValue()))
+        .map(Map.Entry::getValue)
+        .collect(Collectors.toList());
   }
 }
