@@ -52,6 +52,104 @@ public class HakuAppHakemuksetResource {
 
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
+  @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Palauttaa hakuehtoihin sopivien hakemusten perustiedot.")
+  public CompletableFuture<Map<String, Object>> findApplicationsGet(
+      @RequestParam(name = "q", required = false) String searchTerms,
+      @RequestParam(name = "appState", required = false) List<String> state,
+      @RequestParam(name = "paymentState", required = false) String paymentState,
+      @RequestParam(name = "preferenceChecked", required = false) Boolean preferenceChecked,
+      @RequestParam(name = "aoid", required = false) String aoid,
+      @RequestParam(name = "aoOids", required = false) List<String> aoOids,
+      @RequestParam(name = "groupOid", required = false) String groupOid,
+      @RequestParam(name = "baseEducation", required = false) Set<String> baseEducation,
+      @RequestParam(name = "lopoid", required = false) String lopoid,
+      @RequestParam(name = "asId", required = false) String asId,
+      @RequestParam(name = "organizationFilter", required = false) String organizationFilter,
+      @RequestParam(name = "asSemester", required = false) String asSemester,
+      @RequestParam(name = "asYear", required = false) String asYear,
+      @RequestParam(name = "aoOid", required = false) String aoOid,
+      @RequestParam(name = "discretionaryOnly", required = false) Boolean discretionaryOnly,
+      @RequestParam(name = "primaryPreferenceOnly", required = false) Boolean primaryPreferenceOnly,
+      @RequestParam(name = "sendingSchoolOid", required = false) String sendingSchoolOid,
+      @RequestParam(name = "sendingClass", required = false) String sendingClass,
+      @RequestParam(name = "updatedAfter", required = false) String updatedAfter,
+      @RequestParam(name = "start", required = false) String start,
+      @RequestParam(name = "rows", required = false) String rows,
+      @RequestParam(name = "sortResults", required = false) String sortResults) {
+
+    AuthorityCheckService.Context context = authorityCheckService.getContext();
+
+    String queryString =
+        UriComponentsBuilder.newInstance()
+            .queryParamIfPresent("q", Optional.ofNullable(searchTerms))
+            .queryParamIfPresent("appState", Optional.ofNullable(state))
+            .queryParamIfPresent("paymentState", Optional.ofNullable(paymentState))
+            .queryParamIfPresent("preferenceChecked", Optional.ofNullable(preferenceChecked))
+            .queryParamIfPresent("aoid", Optional.ofNullable(aoid))
+            .queryParamIfPresent("aoOids", Optional.ofNullable(aoOids))
+            .queryParamIfPresent("groupOid", Optional.ofNullable(groupOid))
+            .queryParamIfPresent("baseEducation", Optional.ofNullable(baseEducation))
+            .queryParamIfPresent("lopoid", Optional.ofNullable(lopoid))
+            .queryParamIfPresent("asId", Optional.ofNullable(asId))
+            .queryParamIfPresent("organizationFilter", Optional.ofNullable(organizationFilter))
+            .queryParamIfPresent("asSemester", Optional.ofNullable(asSemester))
+            .queryParamIfPresent("asYear", Optional.ofNullable(asYear))
+            .queryParamIfPresent("aoOid", Optional.ofNullable(aoOid))
+            .queryParamIfPresent("discretionaryOnly", Optional.ofNullable(discretionaryOnly))
+            .queryParamIfPresent(
+                "primaryPreferenceOnly", Optional.ofNullable(primaryPreferenceOnly))
+            .queryParamIfPresent("sendingSchoolOid", Optional.ofNullable(sendingSchoolOid))
+            .queryParamIfPresent("sendingClass", Optional.ofNullable(sendingClass))
+            .queryParamIfPresent("updatedAfter", Optional.ofNullable(updatedAfter))
+            .queryParamIfPresent("start", Optional.ofNullable(start))
+            .queryParamIfPresent("rows", Optional.ofNullable(rows))
+            .queryParamIfPresent("sortResults", Optional.ofNullable(sortResults))
+            .build()
+            .toUri()
+            .getQuery();
+
+    LOG.info("Haetaan hakemuksia haku-appista (GET). Query on {}", queryString);
+
+    CompletableFuture<Map<String, Object>> response =
+        this.hakuAppClient
+            .get(
+                this.urlConfiguration.url("haku-app.applications.listfull") + "?" + queryString,
+                new TypeToken<List<Map<String, Object>>>() {},
+                Collections.emptyMap(),
+                60 * 60 * 1000)
+            .thenApply(
+                hakemusList -> {
+                  List<Map<String, Object>> authorizedHakemukset =
+                      filterAuthorizedHakemukset(context, hakemusList);
+                  List<Map<String, Object>> hakemukset =
+                      authorizedHakemukset.stream()
+                          .map(
+                              origHakemus -> {
+                                Map<String, Object> hakemus = new HashMap<>();
+                                hakemus.put("oid", origHakemus.get("oid"));
+                                hakemus.put("state", origHakemus.get("state"));
+                                hakemus.put("received", origHakemus.get("received"));
+                                hakemus.put("firstNames", origHakemus.get("firstNames"));
+                                hakemus.put("lastName", origHakemus.get("lastName"));
+                                hakemus.put("ssn", origHakemus.get("ssn"));
+                                hakemus.put("personOid", origHakemus.get("personOid"));
+                                return hakemus;
+                              })
+                          .collect(Collectors.toUnmodifiableList());
+
+                  Map<String, Object> result = new HashMap<>();
+                  result.put("", hakemusList.size());
+                  result.put("results", hakemukset);
+
+                  return result;
+                });
+
+    return response;
+  }
+
+  @PreAuthorize(
+      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   @GetMapping(
       value = "eligibilities/{hakuOid}/{hakukohdeOid}",
       produces = MediaType.APPLICATION_JSON_VALUE)
