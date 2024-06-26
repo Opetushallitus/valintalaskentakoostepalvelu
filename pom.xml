@@ -85,8 +85,8 @@
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
-                <artifactId>java-cas</artifactId>
-                <version>1.1.1-SNAPSHOT</version>
+                <artifactId>java-cas-refactored</artifactId>
+                <version>1.2.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
@@ -240,7 +240,7 @@
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
-            <artifactId>java-cas</artifactId>
+            <artifactId>java-cas-refactored</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
