@@ -281,6 +281,52 @@ public class ValintalaskentaKerrallaResource {
     return result;
   }
 
+  @GetMapping(value = "/status/{uuid}/yhteenveto", produces = "application/json")
+  @Operation(
+      summary = "Valintalaskennan tilan yhteenveto",
+      responses = {
+        @ApiResponse(
+            responseCode = "OK",
+            content = @Content(schema = @Schema(implementation = LaskentaDto.class)))
+      })
+  public DeferredResult<ResponseEntity<LaskentaDto>> statusYhteenveto(
+      @PathVariable("uuid") final String uuid) {
+
+    DeferredResult<ResponseEntity<LaskentaDto>> result = new DeferredResult<>(60 * 1000L);
+    result.onTimeout(
+        () -> {
+          LOG.error("Valintalaskennan tilan {} hakeminen timeouttasi!", uuid);
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Valintalaskennan tilan hakeminen timeouttasi!"));
+        });
+
+    checkAuthorizationForLaskentaFromSeuranta(uuid)
+        .subscribe(
+            allowed -> {
+              seurantaAsyncResource
+                  .laskenta(uuid)
+                  .subscribe(
+                      laskenta -> result.setResult(ResponseEntity.of(Optional.of(laskenta))),
+                      poikkeus -> {
+                        LOG.error(
+                            "Tietojen haussa seurantapalvelusta(/laskenta/"
+                                + uuid
+                                + ") tapahtui virhe",
+                            poikkeus);
+                        result.setErrorResult(poikkeus);
+                      });
+            },
+            error -> {
+              LOG.error(
+                  "Valintalaskennan tilan haku epäonnistui, koska käyttöoikeudet eivät riittäneet!");
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.FORBIDDEN).body(error.getMessage()));
+            });
+
+    return result;
+  }
+
   @DeleteMapping(value = "/haku/{uuid:.+}")
   public ResponseEntity<String> lopetaLaskenta(
       @PathVariable("uuid") String uuid,
