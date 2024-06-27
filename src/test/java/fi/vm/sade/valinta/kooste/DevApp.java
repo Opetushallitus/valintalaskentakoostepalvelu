@@ -27,9 +27,9 @@ public class DevApp {
         "valintalaskentakoostepalvelu.valintalaskenta-laskenta-service.baseurl",
         "https://virkailija.hahtuvaopintopolku.fi");
 
-    System.setProperty("url-ilb", "http://alb.hahtuvaopintopolku.fi:8888");
-    System.setProperty("baseurl-sijoittelu-service", "http://alb.hahtuvaopintopolku.fi:8888");
-    System.setProperty("baseurl-viestintapalvelu", "http://alb.hahtuvaopintopolku.fi:8888");
+    System.setProperty("url-ilb", "https://virkailija.hahtuvaopintopolku.fi");
+    System.setProperty("baseurl-sijoittelu-service", "https://virkailija.hahtuvaopintopolku.fi");
+    System.setProperty("baseurl-viestintapalvelu", "https://virkailija.hahtuvaopintopolku.fi");
     System.setProperty(
         "kayttooikeus-service.userDetails.byUsername",
         "https://virkailija.hahtuvaopintopolku.fi/kayttooikeus-service/userDetails/$1");
