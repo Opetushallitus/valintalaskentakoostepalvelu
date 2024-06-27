@@ -1,16 +1,25 @@
 package fi.vm.sade.valinta.kooste.hakuapphakemukset;
 
+import static fi.vm.sade.valinta.kooste.AuthorizationUtil.createAuditSession;
+
 import com.google.common.base.Preconditions;
 import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.auditlog.Changes;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import fi.vm.sade.valinta.sharedutils.AuditLog;
+import fi.vm.sade.valinta.sharedutils.ValintaResource;
+import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +85,8 @@ public class HakuAppHakemuksetResource {
       @RequestParam(name = "updatedAfter", required = false) String updatedAfter,
       @RequestParam(name = "start", required = false) String start,
       @RequestParam(name = "rows", required = false) String rows,
-      @RequestParam(name = "sortResults", required = false) String sortResults) {
+      @RequestParam(name = "sortResults", required = false) String sortResults,
+      HttpServletRequest request) {
 
     AuthorityCheckService.Context context = authorityCheckService.getContext();
 
@@ -110,6 +120,21 @@ public class HakuAppHakemuksetResource {
             .getQuery();
 
     LOG.info("Haetaan hakemuksia haku-appista (GET). Query on {}", queryString);
+
+    final AuditSession auditSession = createAuditSession(request);
+
+    Map<String, String> additionalInfo = new HashMap<>();
+    additionalInfo.put("Username from call params", auditSession.getPersonOid());
+    additionalInfo.put("queryString", queryString);
+
+    AuditLog.log(
+        KoosteAudit.AUDIT,
+        auditSession.asAuditUser(),
+        ValintaperusteetOperation.HAKEMUS,
+        ValintaResource.HAKEMUS,
+        auditSession.getPersonOid(),
+        Changes.EMPTY,
+        additionalInfo);
 
     CompletableFuture<Map<String, Object>> response =
         this.hakuAppClient
@@ -165,17 +190,33 @@ public class HakuAppHakemuksetResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Hakee yhden hakemuksen tiedot oidilla.")
   public CompletableFuture<List<String>> findApplicationEligibilities(
-      @PathVariable final String hakuOid, @PathVariable final String hakukohdeOid) {
+      @PathVariable final String hakuOid,
+      @PathVariable final String hakukohdeOid,
+      HttpServletRequest request) {
 
     Preconditions.checkNotNull(hakuOid);
     Preconditions.checkNotNull(hakukohdeOid);
-
-    AuthorityCheckService.Context context = authorityCheckService.getContext();
 
     LOG.info(
         "Haetaan haun {} hakemuksien maksuvelvollisuudet hakukohteelle {}", hakuOid, hakukohdeOid);
 
     authorityCheckService.checkAuthorizationForHakukohteet(List.of(hakukohdeOid), roles);
+
+    final AuditSession auditSession = createAuditSession(request);
+
+    Map<String, String> additionalInfo = new HashMap<>();
+    additionalInfo.put("Username from call params", auditSession.getPersonOid());
+    additionalInfo.put("hakuOid", hakuOid);
+    additionalInfo.put("hakukohdeOid", hakukohdeOid);
+
+    AuditLog.log(
+        KoosteAudit.AUDIT,
+        auditSession.asAuditUser(),
+        ValintaperusteetOperation.HAKEMUS,
+        ValintaResource.HAKEMUS,
+        hakukohdeOid,
+        Changes.EMPTY,
+        additionalInfo);
 
     CompletableFuture<List<String>> response =
         this.hakuAppClient.get(
@@ -192,11 +233,26 @@ public class HakuAppHakemuksetResource {
   @GetMapping(value = "/{hakemusOid}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Hakee yhden hakemuksen tiedot oidilla.")
   public CompletableFuture<Map<String, Object>> findApplicationByOid(
-      @PathVariable final String hakemusOid) {
+      @PathVariable final String hakemusOid, HttpServletRequest request) {
 
     Preconditions.checkNotNull(hakemusOid);
 
     AuthorityCheckService.Context context = authorityCheckService.getContext();
+
+    final AuditSession auditSession = createAuditSession(request);
+
+    Map<String, String> additionalInfo = new HashMap<>();
+    additionalInfo.put("Username from call params", auditSession.getPersonOid());
+    additionalInfo.put("hakemusOid", hakemusOid);
+
+    AuditLog.log(
+        KoosteAudit.AUDIT,
+        auditSession.asAuditUser(),
+        ValintaperusteetOperation.HAKEMUS,
+        ValintaResource.HAKEMUS,
+        hakemusOid,
+        Changes.EMPTY,
+        additionalInfo);
 
     LOG.info("Haetaan yksi hakemus haku-appista. Hakemuksen oid on {}", hakemusOid);
 
@@ -233,7 +289,8 @@ public class HakuAppHakemuksetResource {
       @RequestParam(name = "keys", required = false) List<String> keys,
       @RequestParam(name = "state", required = false) List<String> state,
       @RequestParam(name = "asIds", required = false) List<String> asIds,
-      @RequestBody final String applicationSearchData) {
+      @RequestBody final String applicationSearchData,
+      HttpServletRequest request) {
 
     AuthorityCheckService.Context context = authorityCheckService.getContext();
 
@@ -250,6 +307,22 @@ public class HakuAppHakemuksetResource {
         "Haetaan hakemuksia haku-appista (listfull POST). Query on {} ja body on {}",
         queryString,
         applicationSearchData.toString());
+
+    final AuditSession auditSession = createAuditSession(request);
+
+    Map<String, String> additionalInfo = new HashMap<>();
+    additionalInfo.put("Username from call params", auditSession.getPersonOid());
+    additionalInfo.put("queryString", queryString);
+    additionalInfo.put("applicationSearchData", applicationSearchData);
+
+    AuditLog.log(
+        KoosteAudit.AUDIT,
+        auditSession.asAuditUser(),
+        ValintaperusteetOperation.HAKEMUS,
+        ValintaResource.HAKEMUS,
+        auditSession.getPersonOid(),
+        Changes.EMPTY,
+        additionalInfo);
 
     CompletableFuture<List<Map<String, Object>>> response =
         this.hakuAppClient
@@ -273,13 +346,28 @@ public class HakuAppHakemuksetResource {
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)))
   public CompletableFuture<List<Map<String, Object>>> findFullApplicationsPost(
-      @RequestBody final String applicationSearchData) {
+      @RequestBody final String applicationSearchData, HttpServletRequest request) {
 
     AuthorityCheckService.Context context = authorityCheckService.getContext();
 
     LOG.info(
         "Haetaan hakemuksia haku-appista (listfull POST). Body on {}",
         applicationSearchData.toString());
+
+    final AuditSession auditSession = createAuditSession(request);
+
+    Map<String, String> additionalInfo = new HashMap<>();
+    additionalInfo.put("Username from call params", auditSession.getPersonOid());
+    additionalInfo.put("applicationSearchData", applicationSearchData);
+
+    AuditLog.log(
+        KoosteAudit.AUDIT,
+        auditSession.asAuditUser(),
+        ValintaperusteetOperation.HAKEMUS,
+        ValintaResource.HAKEMUS,
+        auditSession.getPersonOid(),
+        Changes.EMPTY,
+        additionalInfo);
 
     CompletableFuture<List<Map<String, Object>>> response =
         this.hakuAppClient
@@ -320,7 +408,8 @@ public class HakuAppHakemuksetResource {
       @RequestParam(name = "updatedAfter", required = false) String updatedAfter,
       @RequestParam(name = "start", required = false) String start,
       @RequestParam(name = "rows", required = false) String rows,
-      @RequestParam(name = "sortResults", required = false) String sortResults) {
+      @RequestParam(name = "sortResults", required = false) String sortResults,
+      HttpServletRequest request) {
 
     AuthorityCheckService.Context context = authorityCheckService.getContext();
 
@@ -354,6 +443,21 @@ public class HakuAppHakemuksetResource {
             .getQuery();
 
     LOG.info("Haetaan hakemuksia haku-appista (listfull GET). Query on {}", queryString);
+
+    final AuditSession auditSession = createAuditSession(request);
+
+    Map<String, String> additionalInfo = new HashMap<>();
+    additionalInfo.put("Username from call params", auditSession.getPersonOid());
+    additionalInfo.put("queryString", queryString);
+
+    AuditLog.log(
+        KoosteAudit.AUDIT,
+        auditSession.asAuditUser(),
+        ValintaperusteetOperation.HAKEMUS,
+        ValintaResource.HAKEMUS,
+        auditSession.getPersonOid(),
+        Changes.EMPTY,
+        additionalInfo);
 
     CompletableFuture<List<Map<String, Object>>> response =
         this.hakuAppClient
