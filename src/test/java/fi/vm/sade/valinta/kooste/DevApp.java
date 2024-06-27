@@ -37,6 +37,7 @@ public class DevApp {
         String.format("http://alb.%sopintopolku.fi:8888", ENVIRONMENT));
     System.setProperty(
         "baseurl-viestintapalvelu", String.format("http://alb.%sopintopolku.fi:8888", ENVIRONMENT));
+
     System.setProperty(
         "kayttooikeus-service.userDetails.byUsername",
         String.format(
