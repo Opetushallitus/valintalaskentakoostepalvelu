@@ -115,28 +115,6 @@ public class AuthorityCheckService {
     }
   }
 
-  public boolean checkAuthorizationForAnyHakukohdeWithContext(
-      Context context, Collection<String> hakukohdeOids, Collection<String> requiredRoles) {
-    setContext(context);
-
-    Collection<? extends GrantedAuthority> userRoles = getRoles();
-
-    if (containsOphRole(userRoles)) {
-      // on OPH-käyttäjä, ei tarvitse käydä läpi organisaatioita
-      return true;
-    }
-
-    boolean isAuthorized =
-        Observable.fromFuture(getAuthorityCheckForRoles(requiredRoles))
-            .map(authorityCheck -> hakukohdeOids.stream().anyMatch(authorityCheck))
-            .timeout(2, MINUTES)
-            .blockingFirst();
-
-    clearContext();
-
-    return isAuthorized;
-  }
-
   public HakukohdeOIDAuthorityCheck getHakukohdeOidBasedAuthCheck(Context context, Collection<String> requiredRoles) {
     setContext(context);
 
