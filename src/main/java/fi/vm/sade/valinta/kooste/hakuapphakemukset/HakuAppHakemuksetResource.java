@@ -8,6 +8,7 @@ import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.pistesyotto.service.HakukohdeOIDAuthorityCheck;
 import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
@@ -265,7 +266,7 @@ public class HakuAppHakemuksetResource {
                 60 * 60 * 1000)
             .thenApply(
                 hakemus -> {
-                  List<String> hakukohdeOids = getHekutoiveet(hakemus);
+                  List<String> hakukohdeOids = getHakutoiveet(hakemus);
                   authorityCheckService.withContext(
                       context,
                       () ->
@@ -473,19 +474,19 @@ public class HakuAppHakemuksetResource {
 
   private List<Map<String, Object>> filterAuthorizedHakemukset(
       AuthorityCheckService.Context context, List<Map<String, Object>> hakemukset) {
+      HakukohdeOIDAuthorityCheck authorityCheck = authorityCheckService.getHakukohdeOidBasedAuthCheck(context, roles);
     return hakemukset.stream()
         .filter(
             hakemus -> {
               String hakemusOid = (String) hakemus.get("oid");
-              List<String> hakukohdeOids = getHekutoiveet(hakemus);
+              List<String> hakukohdeOids = getHakutoiveet(hakemus);
               LOG.info("Hakemuksen {} hakutoiveet: {}", hakemusOid, hakukohdeOids);
-              return authorityCheckService.checkAuthorizationForAnyHakukohdeWithContext(
-                  context, hakukohdeOids, roles);
+              return hakukohdeOids.stream().anyMatch(authorityCheck);
             })
         .collect(Collectors.toList());
   }
 
-  private List<String> getHekutoiveet(Map<String, Object> hakemus) {
+  private List<String> getHakutoiveet(Map<String, Object> hakemus) {
     @SuppressWarnings("unchecked")
     Map<String, Object> answers = (Map<String, Object>) hakemus.getOrDefault("answers", Map.of());
     @SuppressWarnings("unchecked")
