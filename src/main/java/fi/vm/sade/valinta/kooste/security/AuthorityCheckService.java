@@ -115,14 +115,19 @@ public class AuthorityCheckService {
     }
   }
 
-  public HakukohdeOIDAuthorityCheck getHakukohdeOidBasedAuthCheck(Context context, Collection<String> requiredRoles) {
+  public HakukohdeOIDAuthorityCheck getHakukohdeOidBasedAuthCheck(
+      Context context, Collection<String> requiredRoles) {
     setContext(context);
-
     Collection<? extends GrantedAuthority> userRoles = getRoles();
     if (containsOphRole(userRoles)) {
       return (oid) -> true;
     } else {
-      return Observable.fromFuture(getAuthorityCheckForRoles(requiredRoles)).timeout(2, MINUTES).blockingFirst();
+      HakukohdeOIDAuthorityCheck authCheck =
+          Observable.fromFuture(getAuthorityCheckForRoles(requiredRoles))
+              .timeout(2, MINUTES)
+              .blockingFirst();
+      clearContext();
+      return authCheck;
     }
   }
 

@@ -474,7 +474,8 @@ public class HakuAppHakemuksetResource {
 
   private List<Map<String, Object>> filterAuthorizedHakemukset(
       AuthorityCheckService.Context context, List<Map<String, Object>> hakemukset) {
-      HakukohdeOIDAuthorityCheck authorityCheck = authorityCheckService.getHakukohdeOidBasedAuthCheck(context, roles);
+    HakukohdeOIDAuthorityCheck authorityCheck =
+        authorityCheckService.getHakukohdeOidBasedAuthCheck(context, roles);
     return hakemukset.stream()
         .filter(
             hakemus -> {
