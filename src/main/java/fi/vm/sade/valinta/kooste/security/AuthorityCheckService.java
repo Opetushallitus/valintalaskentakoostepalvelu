@@ -137,6 +137,17 @@ public class AuthorityCheckService {
     return isAuthorized;
   }
 
+  public HakukohdeOIDAuthorityCheck getHakukohdeOidBasedAuthCheck(Context context, Collection<String> requiredRoles) {
+    setContext(context);
+
+    Collection<? extends GrantedAuthority> userRoles = getRoles();
+    if (containsOphRole(userRoles)) {
+      return (oid) -> true;
+    } else {
+      return Observable.fromFuture(getAuthorityCheckForRoles(requiredRoles)).timeout(2, MINUTES).blockingFirst();
+    }
+  }
+
   public boolean isAuthorizedForAnyParentOid(
       Set<String> organisaatioOids,
       Collection<? extends GrantedAuthority> userRoles,
