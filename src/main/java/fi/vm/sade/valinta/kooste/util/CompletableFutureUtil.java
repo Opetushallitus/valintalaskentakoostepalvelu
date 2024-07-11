@@ -2,6 +2,7 @@ package fi.vm.sade.valinta.kooste.util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,11 @@ public class CompletableFutureUtil {
   public static <T> CompletableFuture<List<T>> sequence(List<CompletableFuture<T>> fs) {
     return CompletableFuture.allOf(fs.toArray(CompletableFuture[]::new))
         .thenApplyAsync(v -> fs.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+  }
+
+  public static <T> CompletableFuture<Set<T>> sequenceToSet(List<CompletableFuture<T>> fs) {
+    return CompletableFuture.allOf(fs.toArray(CompletableFuture[]::new))
+        .thenApplyAsync(v -> fs.stream().map(CompletableFuture::join).collect(Collectors.toSet()));
   }
 
   public static CompletableFuture<List<?>> sequenceWildcard(List<CompletableFuture<?>> fs) {
