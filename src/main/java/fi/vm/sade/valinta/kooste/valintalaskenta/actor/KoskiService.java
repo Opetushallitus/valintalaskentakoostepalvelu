@@ -51,17 +51,14 @@ public class KoskiService {
       @Value(
               "${valintalaskentakoostepalvelu.laskenta.opiskeluoikeustyypit.joille.haetaan.tiedot.koskesta}")
           String koskenOpiskeluoikeusTyypitString,
-      @Value("${valintalaskentakoostepalvelu.laskenta.kosken.historiapyyntojen.rinnakkaisuus}")
-          Integer koskenHistoriapyyntojenRinnakkaisuus,
-      KoskiAsyncResource koskiAsyncResource) {
+      KoskiAsyncResource koskiAsyncResource,
+      KoskiOpiskeluoikeusHistoryService koskiOpiskeluoikeusHistoryService) {
     this.koskiAsyncResource = koskiAsyncResource;
     this.koskiHakukohdeOidFilter = resolveKoskiHakukohdeOidFilter(koskiHakukohdeOiditString);
     this.koskenFunktionimet = resolveKoskenFunktionimet(koskenFunktionimetString);
     this.koskenOpiskeluoikeusTyypit =
         resolveKoskenOpiskeluoikeudet(koskenOpiskeluoikeusTyypitString);
-    this.koskiOpiskeluoikeusHistoryService =
-        new KoskiOpiskeluoikeusHistoryService(
-            koskenHistoriapyyntojenRinnakkaisuus, koskiAsyncResource);
+    this.koskiOpiskeluoikeusHistoryService = koskiOpiskeluoikeusHistoryService;
   }
 
   /** Populoi tiedot löytyneet tiedot <code>suoritustiedotDTO</code> :hon. */
@@ -120,7 +117,9 @@ public class KoskiService {
     int maaraJoilleTiedotJoLoytyvat =
         hakemusWrappers.size() - oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat.size();
     return koskiAsyncResource
-        .findKoskiOppijat(oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat)
+        .findKoskiOppijat(
+            oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat,
+            paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan)
         .thenApplyAsync(
             koskioppijat -> {
               LOG.info(
@@ -131,13 +130,11 @@ public class KoskiService {
                       hakemusWrappers.size(),
                       maaraJoilleTiedotJoLoytyvat,
                       hakukohdeOid));
-              koskioppijat.forEach(
-                  o -> o.poistaMuuntyyppisetOpiskeluoikeudetKuin(koskenOpiskeluoikeusTyypit));
-              koskiOpiskeluoikeusHistoryService.haeVanhemmatOpiskeluoikeudetTarvittaessa(
-                  koskioppijat, paivaJonkaMukaisiaTietojaKoskiDatastaKaytetaan);
+              // koskioppijat.forEach(
+              //    o -> o.poistaMuuntyyppisetOpiskeluoikeudetKuin(koskenOpiskeluoikeusTyypit));
               Map<String, KoskiOppija> koskiOppijatOppijanumeroittain =
                   koskioppijat.stream()
-                      .collect(Collectors.toMap(KoskiOppija::getOppijanumero, Function.identity()));
+                      .collect(Collectors.toMap(KoskiOppija::getOppijaOid, Function.identity()));
               oppijanumerotJoiltaKoskiOpiskeluoikeudetPuuttuvat.forEach(
                   oppijanumero -> {
                     KoskiOppija loytynytOppija = koskiOppijatOppijanumeroittain.get(oppijanumero);
