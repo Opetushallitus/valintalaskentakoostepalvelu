@@ -12,11 +12,15 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class KoskiOppija {
 
-  private KoskiHenkilö henkilö;
+  private String oppijaOid;
   private JsonArray opiskeluoikeudet;
 
-  public String getOppijanumero() {
-    return henkilö.oid;
+  public String getOppijaOid() {
+    return oppijaOid;
+  }
+
+  public void setOppijaOid(String oppijaOid) {
+    this.oppijaOid = oppijaOid;
   }
 
   public JsonArray getOpiskeluoikeudet() {
@@ -25,10 +29,6 @@ public class KoskiOppija {
 
   public void setOpiskeluoikeudet(JsonArray opiskeluoikeudet) {
     this.opiskeluoikeudet = opiskeluoikeudet;
-  }
-
-  public void setHenkilö(KoskiHenkilö henkilö) {
-    this.henkilö = henkilö;
   }
 
   public void poistaMuuntyyppisetOpiskeluoikeudetKuin(
@@ -49,15 +49,6 @@ public class KoskiOppija {
           }
         });
     return tulos;
-  }
-
-  public static class KoskiHenkilö {
-    public String oid;
-
-    @Override
-    public String toString() {
-      return ToStringBuilder.reflectionToString(this);
-    }
   }
 
   @Override
