@@ -3,6 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource;
 import static fi.vm.sade.valinta.sharedutils.http.HttpResource.CSRF_VALUE;
 
 import fi.vm.sade.javautils.nio.cas.CasConfig;
+import fi.vm.sade.valinta.kooste.external.resource.koski.impl.KoskiAsyncHttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.impl.TarjontaAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
@@ -359,8 +360,8 @@ public class HttpClients {
   }
 
   @Bean(name = "KoskiHttpClient")
-  public HttpClient getKoskiHttpClient(CookieManager cookieManager) {
-    return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(), DateDeserializer.gsonBuilder().create());
+  public KoskiAsyncHttpClient getKoskiHttpClient(
+      @Value("${valintalaskentakoostepalvelu.koski.max.query.workers}") int maxThreads) {
+    return new KoskiAsyncHttpClient(maxThreads, DateDeserializer.gsonBuilder().create());
   }
 }
