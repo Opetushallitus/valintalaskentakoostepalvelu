@@ -5,16 +5,15 @@ import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.User;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
+import fi.vm.sade.valinta.kooste.dokumentit.dao.DokumenttiRepository;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.seuranta.DokumentinSeurantaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoRivi;
-import fi.vm.sade.valinta.seuranta.dto.VirheilmoitusDto;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
@@ -43,7 +42,7 @@ public class ValintatapajonoTuontiService {
   @Autowired private ApplicationAsyncResource applicationAsyncResource;
   @Autowired private AtaruAsyncResource ataruAsyncResource;
   @Autowired private ValintalaskentaAsyncResource valintalaskentaAsyncResource;
-  @Autowired private DokumentinSeurantaAsyncResource dokumentinSeurantaAsyncResource;
+  @Autowired private DokumenttiRepository dokumenttiRepository;
 
   public void tuo(
       BiFunction<
@@ -131,11 +130,7 @@ public class ValintatapajonoTuontiService {
                         } catch (Throwable t) {
                           LOG.error("Audit logitus epäonnistui", t);
                         }
-                        dokumentinSeurantaAsyncResource
-                            .paivitaDokumenttiId(keyRef.get(), VALMIS)
-                            .subscribe(
-                                dontcare -> LOG.error("Saatiin paivitettya dokId"),
-                                dontcare -> LOG.error("Ei saatu paivitettya!", dontcare));
+                        dokumenttiRepository.merkkaaValmiiksi(UUID.fromString(keyRef.get()));
                       },
                       poikkeusKasittelija(
                           "Tallennus valintapalveluun epäonnistui", result, keyRef));
@@ -143,15 +138,9 @@ public class ValintatapajonoTuontiService {
                   "Saatiin vastaus muodostettua hakukohteelle {} haussa {}. Palautetaan se asynkronisena paluuarvona.",
                   hakukohdeOid,
                   hakuOid);
-              dokumentinSeurantaAsyncResource
-                  .paivitaKuvaus(
-                      keyRef.get(),
-                      "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...")
-                  .subscribe(
-                      dontcare -> {},
-                      dontcare -> {
-                        LOG.error("Onnistumisen ilmoittamisessa virhe!", dontcare);
-                      });
+              dokumenttiRepository.paivitaKuvaus(
+                  UUID.fromString(keyRef.get()),
+                  "Tuonnin esitiedot haettu onnistuneesti. Tallennetaan kantaan...");
             } catch (Throwable t) {
               poikkeusKasittelija("Tallennus valintapalveluun epäonnistui", result, keyRef)
                   .accept(t);
@@ -203,23 +192,13 @@ public class ValintatapajonoTuontiService {
             },
             poikkeusKasittelija("Hakemusten hakeminen epäonnistui", result, keyRef));
 
-    dokumentinSeurantaAsyncResource
-        .luoDokumentti("Valintatapajonon tuonti")
-        .subscribe(
-            key -> {
-              try {
-                result.setResult(
-                    ResponseEntity.status(HttpStatus.OK)
-                        .header("Content-Type", "text/plain")
-                        .body(key));
-                keyRef.set(key);
-                mergeSuplier.get();
-              } catch (Throwable t) {
-                LOG.error(
-                    "Aikakatkaisu ehti ensin. Palvelu on todennäköisesti kovan kuorman alla.", t);
-              }
-            },
-            poikkeusKasittelija("Seurantapalveluun ei saatu yhteyttä", result, keyRef));
+    UUID key = dokumenttiRepository.luoDokumentti("Valintatapajonon tuonti");
+    result.setResult(
+        ResponseEntity.status(HttpStatus.OK)
+            .header("Content-Type", "text/plain")
+            .body(key.toString()));
+    keyRef.set(key.toString());
+    mergeSuplier.get();
   }
 
   private PoikkeusKasittelijaSovitin poikkeusKasittelija(
@@ -244,12 +223,7 @@ public class ValintatapajonoTuontiService {
           try {
             String dokumenttiId = dokumenttiIdRef.get();
             if (dokumenttiId != null) {
-              dokumentinSeurantaAsyncResource
-                  .lisaaVirheilmoituksia(
-                      dokumenttiId, Arrays.asList(new VirheilmoitusDto("", viesti)))
-                  .subscribe(
-                      dontcare -> {},
-                      dontcare -> LOG.error("Virheen ilmoittamisessa virhe!", dontcare));
+              dokumenttiRepository.lisaaVirheilmoitus(UUID.fromString(dokumenttiId), viesti);
             }
           } catch (Throwable t) {
             LOG.error("Odottamaton virhe", t);

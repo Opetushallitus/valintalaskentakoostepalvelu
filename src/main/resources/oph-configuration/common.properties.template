@@ -128,3 +128,10 @@ omatsivut.email.application.modify.link.sv=${url-haku-sv}/omatsivut/tuloskirjeet
 
 aws.region={{aws_region}}
 aws.bucket.name={{dokumenttipalvelu_aws_bucket_name}}
+
+valintalaskentakoostepalvelu.postgresql.url=jdbc:postgresql://{{host_postgresql_valintalaskentakoostepalvelu}}:{{port_postgresql}}/valintalaskentakoostepalvelu
+valintalaskentakoostepalvelu.postgresql.username={{postgres_app_user}}
+valintalaskentakoostepalvelu.postgresql.password={{host_postgresql_valintalaskentakoostepalvelu_app_password}}
+valintalaskentakoostepalvelu.postgresql.maxactive={{host_postgresql_valintalaskentakoostepalvelu_max_active}}
+valintalaskentakoostepalvelu.postgresql.maxwait={{host_postgresql_valintalaskentakoostepalvelu_max_wait}}
+valintalaskentakoostepalvelu.postgresql.driver=org.postgresql.Driver
