@@ -460,13 +460,23 @@ public class OppijanSuorituksetProxyResource {
   }
 
   private Map<String, String> getAvainArvoMap(HakemusDTO hakemusDTO) {
-    return hakemusDTO.getAvaimet().stream()
-        .map(
-            a ->
-                a.getAvain().endsWith("_SUORITETTU")
-                    ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S")
-                    : a)
-        .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
+    try {
+      LOG.debug("Hakemuksen {} avaimet: {}", hakemusDTO.getHakemusoid(), hakemusDTO.getAvaimet());
+      return hakemusDTO.getAvaimet().stream()
+          .map(
+              a ->
+                  a.getAvain().endsWith("_SUORITETTU")
+                      ? new AvainArvoDTO(a.getAvain().replaceFirst("_SUORITETTU", ""), "S")
+                      : a)
+          .collect(Collectors.toMap(AvainArvoDTO::getAvain, AvainArvoDTO::getArvo));
+    } catch (Exception e) {
+      LOG.error(
+          "Hakemuksen {} avaimien muuttaminen (AvainArvoDTO -> Map) epäonnistui. Avaimet: {}",
+          hakemusDTO.getHakemusoid(),
+          hakemusDTO.getAvaimet(),
+          e);
+      throw e;
+    }
   }
 
   private Observable<HakemusDTO> resolveHakemusDTO(
