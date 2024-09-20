@@ -82,9 +82,7 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
   public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(
       List<String> opiskelijaOids, String hakuOid, boolean fetchEnsikertalaisuus) {
     Map<String, String> parameters = new HashMap<>();
-    if (fetchEnsikertalaisuus) {
-      parameters.put("ensikertalaisuudet", "true");
-    }
+    parameters.put("ensikertalaisuudet", fetchEnsikertalaisuus ? "true" : "false");
     parameters.put("haku", hakuOid);
     String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
     return batchedPostOppijasFuture(opiskelijaOids, url);
