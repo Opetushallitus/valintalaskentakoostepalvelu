@@ -109,38 +109,6 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
     return batchedPostOppijasFuture(opiskelijaOids, url);
   }
 
-  private Observable<List<Oppija>> batchedPostOppijas(List<String> opiskelijaOids, String url) {
-    if (opiskelijaOids.isEmpty()) {
-      LOG.info(
-          "Batched POST: empty list of oids provided. Returning an empty set without api call.");
-      return Observable.just(Collections.emptyList());
-    }
-    List<List<String>> oidBatches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
-    LOG.info(
-        "Batched POST: {} oids partitioned into {} batches",
-        opiskelijaOids.size(),
-        oidBatches.size());
-
-    Observable<Observable<List<Oppija>>> obses =
-        Observable.fromIterable(oidBatches)
-            .map(
-                oidBatch -> {
-                  LOG.info("Calling POST url {} with {} opiskelijaOids", url, oidBatch.size());
-
-                  return Observable.fromFuture(
-                      this.httpClient.post(
-                          url,
-                          new TypeToken<List<Oppija>>() {},
-                          oidBatch,
-                          Collections.emptyMap(),
-                          10 * 60 * 1000));
-                });
-
-    // Add the elements returned by each response to one master list
-    Observable<List<Oppija>> allOppijas = Observable.concat(obses);
-    return allOppijas;
-  }
-
   private CompletableFuture<List<Oppija>> batchedPostOppijasFuture(
       List<String> opiskelijaOids, String url) {
     if (opiskelijaOids.isEmpty()) {
