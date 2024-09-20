@@ -638,7 +638,7 @@ public class LaskentaActorFactory {
                       "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
                       () ->
                           suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-                              oppijaOids, hakuOid),
+                              oppijaOids, hakuOid, true),
                       retryHakemuksetAndOppijat)
                   .thenApply(
                       oppijat -> {

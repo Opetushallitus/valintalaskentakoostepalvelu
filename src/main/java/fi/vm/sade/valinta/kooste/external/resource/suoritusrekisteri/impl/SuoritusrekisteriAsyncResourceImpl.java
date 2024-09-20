@@ -80,9 +80,11 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
 
   @Override
   public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(
-      List<String> opiskelijaOids, String hakuOid) {
+      List<String> opiskelijaOids, String hakuOid, boolean fetchEnsikertalaisuus) {
     Map<String, String> parameters = new HashMap<>();
-    parameters.put("ensikertalaisuudet", "true");
+    if (fetchEnsikertalaisuus) {
+      parameters.put("ensikertalaisuudet", "true");
+    }
     parameters.put("haku", hakuOid);
     String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
     return batchedPostOppijasFuture(opiskelijaOids, url);
@@ -105,14 +107,6 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
     parameters.put("ensikertalaisuudet", "false");
     String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
     return batchedPostOppijasFuture(opiskelijaOids, url);
-  }
-
-  @Override
-  public Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(
-      List<String> opiskelijaOids) {
-    String url =
-        this.urlConfiguration.url("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=false";
-    return batchedPostOppijas(opiskelijaOids, url);
   }
 
   private Observable<List<Oppija>> batchedPostOppijas(List<String> opiskelijaOids, String url) {
