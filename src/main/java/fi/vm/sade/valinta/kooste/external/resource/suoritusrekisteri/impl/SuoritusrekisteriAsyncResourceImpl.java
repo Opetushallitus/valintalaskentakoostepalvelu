@@ -30,7 +30,7 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
 
   private final UrlConfiguration urlConfiguration;
 
-  private int maxOppijatPostSize = 5000;
+  private int maxOppijatPostSize = 1000;
 
   @Autowired
   public SuoritusrekisteriAsyncResourceImpl(
