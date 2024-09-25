@@ -239,20 +239,24 @@ public class ValintalaskentaTest {
         .thenReturn(Observable.just(Collections.singletonList(new Oppija())));
     when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid2, ataruHakuOid))
         .thenReturn(Observable.just(Collections.singletonList(new Oppija())));
-    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), ataruHakuOid))
+    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+            List.of(personOid1), ataruHakuOid, true))
         .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
-    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid))
+    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid, true))
         .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
-    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), ataruHakuOid))
-        .thenReturn(
-            CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
-    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of("personOid"), hakuOid))
+    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+            List.of("personOid"), ataruHakuOid, true))
         .thenReturn(
             CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            Collections.emptyList(), ataruHakuOid))
+            List.of("personOid"), hakuOid, true))
+        .thenReturn(
+            CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
+    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+            Collections.emptyList(), ataruHakuOid, true))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
-    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(Collections.emptyList(), hakuOid))
+    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+            Collections.emptyList(), hakuOid, true))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
     when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid))

@@ -74,8 +74,8 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
   }
 
   @Override
-  public synchronized CompletableFuture<List<Oppija>> getSuorituksetByOppijas(
-      List<String> opiskelijaOids, String hakuOid) {
+  public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(
+      List<String> opiskelijaOids, String hakuOid, boolean fetchEnsikertalaisuus) {
     return CompletableFuture.completedFuture(oppijatRef.get());
   }
 
@@ -83,12 +83,6 @@ public class MockSuoritusrekisteriAsyncResource implements SuoritusrekisteriAsyn
   public synchronized Observable<Oppija> getSuorituksetByOppija(
       String opiskelijaOid, String hakuOid) {
     return Observable.just(oppijaRef.get());
-  }
-
-  @Override
-  public synchronized Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(
-      List<String> opiskelijaOids) {
-    return Observable.just(oppijatRef.get());
   }
 
   @Override

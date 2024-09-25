@@ -80,9 +80,9 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
 
   @Override
   public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(
-      List<String> opiskelijaOids, String hakuOid) {
+      List<String> opiskelijaOids, String hakuOid, boolean fetchEnsikertalaisuus) {
     Map<String, String> parameters = new HashMap<>();
-    parameters.put("ensikertalaisuudet", "true");
+    parameters.put("ensikertalaisuudet", fetchEnsikertalaisuus ? "true" : "false");
     parameters.put("haku", hakuOid);
     String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
     return batchedPostOppijasFuture(opiskelijaOids, url);
@@ -105,46 +105,6 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
     parameters.put("ensikertalaisuudet", "false");
     String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
     return batchedPostOppijasFuture(opiskelijaOids, url);
-  }
-
-  @Override
-  public Observable<List<Oppija>> getSuorituksetWithoutEnsikertalaisuus(
-      List<String> opiskelijaOids) {
-    String url =
-        this.urlConfiguration.url("suoritusrekisteri.oppijat") + "/?ensikertalaisuudet=false";
-    return batchedPostOppijas(opiskelijaOids, url);
-  }
-
-  private Observable<List<Oppija>> batchedPostOppijas(List<String> opiskelijaOids, String url) {
-    if (opiskelijaOids.isEmpty()) {
-      LOG.info(
-          "Batched POST: empty list of oids provided. Returning an empty set without api call.");
-      return Observable.just(Collections.emptyList());
-    }
-    List<List<String>> oidBatches = Lists.partition(opiskelijaOids, maxOppijatPostSize);
-    LOG.info(
-        "Batched POST: {} oids partitioned into {} batches",
-        opiskelijaOids.size(),
-        oidBatches.size());
-
-    Observable<Observable<List<Oppija>>> obses =
-        Observable.fromIterable(oidBatches)
-            .map(
-                oidBatch -> {
-                  LOG.info("Calling POST url {} with {} opiskelijaOids", url, oidBatch.size());
-
-                  return Observable.fromFuture(
-                      this.httpClient.post(
-                          url,
-                          new TypeToken<List<Oppija>>() {},
-                          oidBatch,
-                          Collections.emptyMap(),
-                          10 * 60 * 1000));
-                });
-
-    // Add the elements returned by each response to one master list
-    Observable<List<Oppija>> allOppijas = Observable.concat(obses);
-    return allOppijas;
   }
 
   private CompletableFuture<List<Oppija>> batchedPostOppijasFuture(

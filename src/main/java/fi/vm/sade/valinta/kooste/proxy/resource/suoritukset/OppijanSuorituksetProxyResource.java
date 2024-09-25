@@ -588,10 +588,9 @@ public class OppijanSuorituksetProxyResource {
         Observable.fromFuture(ohjausparametritAsyncResource.haeHaunOhjausparametrit(haku.oid));
 
     Observable<List<Oppija>> suorituksetObservable =
-        fetchEnsikertalaisuus
-            ? Observable.fromFuture(
-                suoritusrekisteriAsyncResource.getSuorituksetByOppijas(opiskelijaOids, haku.oid))
-            : suoritusrekisteriAsyncResource.getSuorituksetWithoutEnsikertalaisuus(opiskelijaOids);
+        Observable.fromFuture(
+            suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+                opiskelijaOids, haku.oid, fetchEnsikertalaisuus));
 
     return Observable.zip(
         suorituksetObservable,
