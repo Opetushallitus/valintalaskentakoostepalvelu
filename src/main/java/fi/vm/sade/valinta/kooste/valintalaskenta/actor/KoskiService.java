@@ -141,11 +141,14 @@ public class KoskiService {
                     if (loytynytOppija != null) {
                       suoritustiedotDTO.asetaKoskiopiskeluoikeudet(
                           oppijanumero, GSON.toJson(loytynytOppija.getOpiskeluoikeudet()));
-                      LOG.info(String.format("Koskesta palautui oppijalle %s tiedot: %s", oppijanumero,
-                          GSON.toJson(loytynytOppija.getOpiskeluoikeudet())));
+                      LOG.info(
+                          String.format(
+                              "Koskesta palautui oppijalle %s tiedot: %s",
+                              oppijanumero, GSON.toJson(loytynytOppija.getOpiskeluoikeudet())));
                     } else {
                       suoritustiedotDTO.asetaKoskiopiskeluoikeudet(oppijanumero, "[]");
-                      LOG.info(String.format("Koskesta ei löytynyt tietoja oppijalle %s", oppijanumero));
+                      LOG.info(
+                          String.format("Koskesta ei löytynyt tietoja oppijalle %s", oppijanumero));
                     }
                   });
               return koskiOppijatOppijanumeroittain;
