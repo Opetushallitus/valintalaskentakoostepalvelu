@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste;
 
 public class DevApp {
 
-  private static final String ENVIRONMENT = "hahtuva";
+  private static final String ENVIRONMENT = "untuva";
 
   public static void main(String[] args) {
     // ssl-konfiguraatio
