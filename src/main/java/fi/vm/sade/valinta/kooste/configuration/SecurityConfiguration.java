@@ -24,12 +24,16 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.util.matcher.RegexRequestMatcher;
+import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 
 @Profile({"default", "dev"})
 @Configuration
 @Order(2)
 @EnableMethodSecurity(securedEnabled = true)
 @EnableWebSecurity
+@EnableJdbcHttpSession
 public class SecurityConfiguration {
   private Environment environment;
 
@@ -153,5 +157,15 @@ public class SecurityConfiguration {
         .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class);
 
     return http.build();
+  }
+
+  @Bean
+  public CookieSerializer cookieSerializer() {
+    DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+    serializer.setUseSecureCookie(true);
+    serializer.setCookieName("JSESSIONID");
+    serializer.setCookiePath("/valintalaskentakoostepalvelu");
+    serializer.setUseBase64Encoding(false);
+    return serializer;
   }
 }
