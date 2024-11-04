@@ -66,7 +66,7 @@ public class ValintalaskentaKerrallaResource {
       @RequestParam(value = "withHakijaRyhmat", required = false, defaultValue = "false")
           Boolean withHakijaRyhmat) {
     authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
-    DeferredResult<ResponseEntity<LaskeDTO>> result = new DeferredResult<>(1 * 60 * 1000l);
+    DeferredResult<ResponseEntity<LaskeDTO>> result = new DeferredResult<>(5 * 60 * 1000l);
 
     Date nyt = new Date();
 
@@ -74,32 +74,29 @@ public class ValintalaskentaKerrallaResource {
       result.onTimeout(
           () -> {
             LOG.error(
-                "Laskennan kaynnistys timeuottasi kutsulle /haku/{}/tyyppi/HAKU?valinnanvaihe={}&valintakoelaskenta={}\r\n{}",
+                "Lähtötietojen haku timeuottasi kutsulle /haku/{}/hakukohde/{}/lahtotiedot",
                 hakuOid,
-                valinnanvaihe,
-                valintakoelaskenta);
+                hakukohdeOid);
             result.setErrorResult(
                 ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
-                    .body("Ajo laskennalle aikakatkaistu!"));
+                    .body("Lähtötietojen haku hakukohteelle aikakatkaistu!"));
           });
 
-      result.setResult(
-          new ResponseEntity<>(
-              this.laskentaResurssiProvider
-                  .fetchResourcesForOneLaskenta(
-                      uuid,
-                      hakuOid,
-                      hakukohdeOid,
-                      valinnanvaihe == -1 ? null : valinnanvaihe,
-                      koosteAuditSession(),
-                      erillishaku,
-                      retryHakemuksetAndOppijat,
-                      withHakijaRyhmat,
-                      nyt)
-                  .get(),
-              HttpStatus.OK));
+      this.laskentaResurssiProvider
+          .fetchResourcesForOneLaskenta(
+              uuid,
+              hakuOid,
+              hakukohdeOid,
+              valinnanvaihe == -1 ? null : valinnanvaihe,
+              koosteAuditSession(),
+              erillishaku,
+              retryHakemuksetAndOppijat,
+              withHakijaRyhmat,
+              nyt)
+          .thenApply(laskeDTO -> result.setResult(new ResponseEntity<>(laskeDTO, HttpStatus.OK)));
     } catch (Throwable e) {
-      LOG.error("Laskennan tietojen hakemisessa tapahtui odottamaton virhe!", e);
+      LOG.error(
+          "Hakukohteen " + hakukohdeOid + " tietojen hakemisessa tapahtui odottamaton virhe!", e);
       result.setErrorResult(
           ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
               .body("Odottamaton virhe laskennan tietojen hakemisessa! " + e.getMessage()));
