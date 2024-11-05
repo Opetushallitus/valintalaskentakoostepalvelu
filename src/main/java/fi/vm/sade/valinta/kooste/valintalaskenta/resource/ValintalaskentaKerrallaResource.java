@@ -93,7 +93,20 @@ public class ValintalaskentaKerrallaResource {
               retryHakemuksetAndOppijat,
               withHakijaRyhmat,
               nyt)
-          .thenApply(laskeDTO -> result.setResult(new ResponseEntity<>(laskeDTO, HttpStatus.OK)));
+          .thenApply(laskeDTO -> result.setResult(new ResponseEntity<>(laskeDTO, HttpStatus.OK)))
+          .exceptionally(
+              e -> {
+                LOG.error(
+                    "Hakukohteen "
+                        + hakukohdeOid
+                        + " tietojen hakemisessa tapahtui odottamaton virhe!",
+                    e);
+                result.setErrorResult(
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(
+                            "Odottamaton virhe laskennan tietojen hakemisessa! " + e.getMessage()));
+                throw new RuntimeException(e);
+              });
     } catch (Throwable e) {
       LOG.error(
           "Hakukohteen " + hakukohdeOid + " tietojen hakemisessa tapahtui odottamaton virhe!", e);
