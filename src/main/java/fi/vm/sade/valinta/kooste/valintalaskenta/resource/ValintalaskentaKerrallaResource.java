@@ -66,7 +66,7 @@ public class ValintalaskentaKerrallaResource {
       @RequestParam(value = "withHakijaRyhmat", required = false, defaultValue = "false")
           Boolean withHakijaRyhmat) {
     authorityCheckService.checkAuthorizationForHaku(hakuOid, valintalaskentaAllowedRoles);
-    DeferredResult<ResponseEntity<LaskeDTO>> result = new DeferredResult<>(5 * 60 * 1000l);
+    DeferredResult<ResponseEntity<LaskeDTO>> result = new DeferredResult<>(10 * 60 * 1000l);
 
     Date nyt = new Date();
 
@@ -74,7 +74,7 @@ public class ValintalaskentaKerrallaResource {
       result.onTimeout(
           () -> {
             LOG.error(
-                "Lähtötietojen haku timeuottasi kutsulle /haku/{}/hakukohde/{}/lahtotiedot",
+                "Lähtötietojen haku timeouttasi kutsulle /haku/{}/hakukohde/{}/lahtotiedot",
                 hakuOid,
                 hakukohdeOid);
             result.setErrorResult(
