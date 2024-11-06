@@ -273,17 +273,23 @@ public class LaskentaResurssiProvider {
         new LaskentaResurssinhakuWrapper.PyynnonTunniste(
             "Please put individual resource source identifier here!", uuid, hakukohdeOid);
 
-    CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet =
-        storeDuration(
-            createResurssiFuture(
-                tunniste,
-                "valintaperusteetAsyncResource.haeValintaperusteet",
-                () ->
-                    valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, valinnanVaihe)),
-            "valintaperusteet",
-            durations);
-    if (!isValintalaskentaKaytossa(valintaperusteet.join())) {
-      throw new RuntimeException("Valintalaskenta ei ole käytössä hakukohteelle " + hakukohdeOid);
+    CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet;
+
+    synchronized (this) {
+      valintaperusteet =
+          storeDuration(
+              createResurssiFuture(
+                  tunniste,
+                  "valintaperusteetAsyncResource.haeValintaperusteet",
+                  () ->
+                      valintaperusteetAsyncResource.haeValintaperusteet(
+                          hakukohdeOid, valinnanVaihe)),
+              "valintaperusteet",
+              durations);
+
+      if (!isValintalaskentaKaytossa(valintaperusteet.join())) {
+        throw new RuntimeException("Valintalaskenta ei ole käytössä hakukohteelle " + hakukohdeOid);
+      }
     }
 
     CompletableFuture<List<HakemusWrapper>> hakemukset =
