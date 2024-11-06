@@ -126,7 +126,6 @@ public class LaskentaResurssiProvider {
                           .collect(Collectors.joining(", ")));
 
               List<ValintaperusteetDTO> valintaperusteet = valintaperusteetF.join();
-              verifyValintalaskentaKaytossaOrThrowError(uuid, hakukohdeOid, valintaperusteet);
               verifyJonokriteeritOrThrowError(uuid, hakukohdeOid, valintaperusteet);
               LOG.info(
                   "(Uuid: {}) Kaikki resurssit hakukohteelle {} saatu. Kootaan ja palautetaan LaskeDTO.",
@@ -199,22 +198,14 @@ public class LaskentaResurssiProvider {
             });
   }
 
-  private void verifyValintalaskentaKaytossaOrThrowError(
-      String uuid, String hakukohdeOid, List<ValintaperusteetDTO> valintaperusteetList) {
+  private boolean isValintalaskentaKaytossa(List<ValintaperusteetDTO> valintaperusteetList) {
     boolean jokinValintatapajonoKayttaaValintalaskentaa =
         valintaperusteetList.stream()
             .map(ValintaperusteetDTO::getValinnanVaihe)
             .flatMap(v -> v.getValintatapajono().stream())
             .anyMatch(ValintatapajonoJarjestyskriteereillaDTO::getKaytetaanValintalaskentaa);
 
-    if (!jokinValintatapajonoKayttaaValintalaskentaa) {
-      String errorMessage =
-          String.format(
-              "(Uuid: %s) Hakukohteen %s valittujen valinnanvaiheiden valintatapajonoissa ei käytetä valintalaskentaa, joten valintalaskentaa ei voida jatkaa ja se keskeytetään",
-              uuid, hakukohdeOid);
-      LOG.error(errorMessage);
-      throw new RuntimeException(errorMessage);
-    }
+    return jokinValintatapajonoKayttaaValintalaskentaa;
   }
 
   private void verifyJonokriteeritOrThrowError(
@@ -281,6 +272,19 @@ public class LaskentaResurssiProvider {
     LaskentaResurssinhakuWrapper.PyynnonTunniste tunniste =
         new LaskentaResurssinhakuWrapper.PyynnonTunniste(
             "Please put individual resource source identifier here!", uuid, hakukohdeOid);
+
+    CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet =
+        storeDuration(
+            createResurssiFuture(
+                tunniste,
+                "valintaperusteetAsyncResource.haeValintaperusteet",
+                () ->
+                    valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, valinnanVaihe)),
+            "valintaperusteet",
+            durations);
+    if (!isValintalaskentaKaytossa(valintaperusteet.join())) {
+      throw new RuntimeException("Valintalaskenta ei ole käytössä hakukohteelle " + hakukohdeOid);
+    }
 
     CompletableFuture<List<HakemusWrapper>> hakemukset =
         hakuFuture.thenCompose(
@@ -358,15 +362,6 @@ public class LaskentaResurssiProvider {
                   durations);
             });
 
-    CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet =
-        storeDuration(
-            createResurssiFuture(
-                tunniste,
-                "valintaperusteetAsyncResource.haeValintaperusteet",
-                () ->
-                    valintaperusteetAsyncResource.haeValintaperusteet(hakukohdeOid, valinnanVaihe)),
-            "valintaperusteet",
-            durations);
     CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes =
         storeDuration(
             createResurssiFuture(
