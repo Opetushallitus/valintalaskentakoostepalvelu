@@ -319,6 +319,13 @@ public class LaskentaResurssiProvider {
                 CompletableFuture<List<Oppija>> oppijatF =
                     henkiloViitteet.thenComposeAsync(
                         hws -> {
+                          LOG.info(
+                              "Haetaan suoritukset hakukohteen "
+                                  + hakukohdeOid
+                                  + " "
+                                  + hws.size()
+                                  + " oppijalle");
+
                           LOG.info("Got henkiloViittees: {}", hws);
                           Map<String, String> masterToOriginal =
                               hws.stream()
