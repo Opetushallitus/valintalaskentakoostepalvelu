@@ -103,8 +103,7 @@ public class LaskentaResurssiProvider {
       CompletableFuture<PisteetWithLastModified> valintapisteetForHakukohdesF,
       CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmatF,
       CompletableFuture<List<HakemusWrapper>> hakemuksetF,
-      CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOidF,
-      Map<String, String> durations) {
+      CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOidF) {
     return CompletableFuture.allOf(
             haku,
             parametritDTO,
@@ -117,14 +116,6 @@ public class LaskentaResurssiProvider {
             koskiOppijaByOppijaOidF)
         .thenApplyAsync(
             x -> {
-              LOG.info(
-                  "Kestot: Hakukohde: "
-                      + hakukohdeOid
-                      + ": "
-                      + durations.entrySet().stream()
-                          .map(e -> e.getKey() + ":" + e.getValue())
-                          .collect(Collectors.joining(", ")));
-
               List<ValintaperusteetDTO> valintaperusteet = valintaperusteetF.join();
               verifyJonokriteeritOrThrowError(uuid, hakukohdeOid, valintaperusteet);
               LOG.info(
@@ -181,20 +172,6 @@ public class LaskentaResurssiProvider {
                     valintaperusteet,
                     hakijaryhmatF.join());
               }
-            })
-        .orTimeout(9 * 60 * 1000l, TimeUnit.MILLISECONDS)
-        .exceptionally(
-            ex -> {
-              if (ex instanceof TimeoutException) {
-                LOG.error(
-                    "Kestot: (Timeout) Hakukohde: "
-                        + hakukohdeOid
-                        + ": "
-                        + durations.entrySet().stream()
-                            .map(e -> e.getKey() + ":" + e.getValue())
-                            .collect(Collectors.joining(", ")));
-              }
-              throw new RuntimeException(ex);
             });
   }
 
@@ -257,6 +234,7 @@ public class LaskentaResurssiProvider {
       boolean withHakijaRyhmat,
       Date nyt) {
 
+    Instant start = Instant.now();
     Map<String, String> durations = new HashMap<>();
 
     final CompletableFuture<ParametritDTO> parametritDTOFuture =
@@ -439,12 +417,35 @@ public class LaskentaResurssiProvider {
             valintapisteetHakemuksille,
             hakijaryhmat,
             hakemukset,
-            koskiOppijaByOppijaOid,
-            durations)
+            koskiOppijaByOppijaOid)
         .thenApply(
             laskeDTO -> {
+              durations.put("Total", Duration.between(start, Instant.now()).toMillis() + "");
+              LOG.info(
+                  "Kestot: Hakukohde: "
+                      + hakukohdeOid
+                      + ": "
+                      + durations.entrySet().stream()
+                          .map(e -> e.getKey() + ":" + e.getValue())
+                          .collect(Collectors.joining(", ")));
+
               laskeDTO.populoiSuoritustiedotHakemuksille(suoritustiedotDTO);
               return laskeDTO;
+            })
+        .orTimeout(9 * 60 * 1000l, TimeUnit.MILLISECONDS)
+        .exceptionally(
+            ex -> {
+              if (ex instanceof TimeoutException) {
+                durations.put("Total", Duration.between(start, Instant.now()).toMillis() + "");
+                LOG.error(
+                    "Kestot: (Timeout) Hakukohde: "
+                        + hakukohdeOid
+                        + ": "
+                        + durations.entrySet().stream()
+                            .map(e -> e.getKey() + ":" + e.getValue())
+                            .collect(Collectors.joining(", ")));
+              }
+              throw new RuntimeException(ex);
             });
   }
 
