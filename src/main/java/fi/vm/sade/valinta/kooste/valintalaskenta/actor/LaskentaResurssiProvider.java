@@ -54,6 +54,9 @@ public class LaskentaResurssiProvider {
   private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
   private final ExecutorService executor = Executors.newWorkStealingPool();
 
+  private final ConcurrencyLimiter oppijatLimiter = new ConcurrencyLimiter(1000);
+  private final ConcurrencyLimiter valintaperusteetLimiter = new ConcurrencyLimiter(16);
+
   @Autowired
   public LaskentaResurssiProvider(
       @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:1}") int splittaus,
@@ -77,6 +80,39 @@ public class LaskentaResurssiProvider {
     this.hakemuksetConverterUtil = hakemuksetConverterUtil;
     this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
     this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
+  }
+
+  static class ConcurrencyLimiter {
+
+    private final int maxPermits;
+    private final Semaphore semaphore;
+
+    public ConcurrencyLimiter(int permits) {
+      this.maxPermits = permits;
+      this.semaphore = new Semaphore(permits, true);
+    }
+
+    public <T> CompletableFuture<T> withConcurrencyLimit(
+        int permits, String tunniste, Supplier<T> action) {
+      Instant waitStart = Instant.now();
+      return CompletableFuture.supplyAsync(
+          () -> {
+            semaphore.acquireUninterruptibly(Math.min(this.maxPermits, permits));
+            Instant invokeStart = Instant.now();
+            try {
+              return action.get();
+            } finally {
+              semaphore.release(permits);
+              LOG.info(
+                  tunniste
+                      + ": odotettiin "
+                      + Duration.between(waitStart, invokeStart).toMillis()
+                      + "ms, suoritus "
+                      + Duration.between(invokeStart, Instant.now()).toMillis()
+                      + "ms");
+            }
+          });
+    }
   }
 
   private static <T> CompletableFuture<T> storeDuration(
@@ -251,24 +287,27 @@ public class LaskentaResurssiProvider {
         new LaskentaResurssinhakuWrapper.PyynnonTunniste(
             "Please put individual resource source identifier here!", uuid, hakukohdeOid);
 
-    CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet;
-
-    synchronized (this.valintaperusteetAsyncResource) {
-      valintaperusteet =
-          storeDuration(
-              createResurssiFuture(
-                  tunniste,
-                  "valintaperusteetAsyncResource.haeValintaperusteet",
-                  () ->
-                      valintaperusteetAsyncResource.haeValintaperusteet(
-                          hakukohdeOid, valinnanVaihe)),
-              "valintaperusteet",
-              durations);
-
-      if (!isValintalaskentaKaytossa(valintaperusteet.join())) {
-        throw new RuntimeException("Valintalaskenta ei ole käytössä hakukohteelle " + hakukohdeOid);
-      }
-    }
+    CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet =
+        this.valintaperusteetLimiter.withConcurrencyLimit(
+            1,
+            "valintaperusteet, hakukohde: " + hakukohdeOid,
+            () -> {
+              CompletableFuture<List<ValintaperusteetDTO>> vp =
+                  storeDuration(
+                      createResurssiFuture(
+                          tunniste,
+                          "valintaperusteetAsyncResource.haeValintaperusteet",
+                          () ->
+                              valintaperusteetAsyncResource.haeValintaperusteet(
+                                  hakukohdeOid, valinnanVaihe)),
+                      "valintaperusteet",
+                      durations);
+              if (!isValintalaskentaKaytossa(vp.join())) {
+                throw new RuntimeException(
+                    "Valintalaskenta ei ole käytössä hakukohteelle " + hakukohdeOid);
+              }
+              return vp.join();
+            });
 
     CompletableFuture<List<HakemusWrapper>> hakemukset =
         hakuFuture.thenCompose(
@@ -313,32 +352,32 @@ public class LaskentaResurssiProvider {
             });
 
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
-        CompletableFuture.supplyAsync(
-            () -> {
-              synchronized (this.suoritusrekisteriAsyncResource) {
-                CompletableFuture<List<Oppija>> oppijatF =
-                    henkiloViitteet.thenComposeAsync(
-                        hws -> {
-                          LOG.info(
-                              "Haetaan suoritukset hakukohteen "
-                                  + hakukohdeOid
-                                  + " "
-                                  + hws.size()
-                                  + " oppijalle");
+        henkiloViitteet.thenComposeAsync(
+            hws ->
+                this.oppijatLimiter.withConcurrencyLimit(
+                    hws.size() + 25,
+                    "suoritukset, hakukohde: " + hakukohdeOid,
+                    () -> {
+                      LOG.info(
+                          "Haetaan suoritukset hakukohteen "
+                              + hakukohdeOid
+                              + " "
+                              + hws.size()
+                              + " oppijalle");
 
-                          LOG.info("Got henkiloViittees: {}", hws);
-                          Map<String, String> masterToOriginal =
-                              hws.stream()
-                                  .collect(
-                                      Collectors.toMap(
-                                          HenkiloViiteDto::getMasterOid,
-                                          HenkiloViiteDto::getHenkiloOid));
-                          List<String> oppijaOids = new ArrayList<>(masterToOriginal.keySet());
-                          LOG.info(
-                              "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
-                              oppijaOids,
-                              hakukohdeOid);
-                          return storeDuration(
+                      LOG.info("Got henkiloViittees: {}", hws);
+                      Map<String, String> masterToOriginal =
+                          hws.stream()
+                              .collect(
+                                  Collectors.toMap(
+                                      HenkiloViiteDto::getMasterOid,
+                                      HenkiloViiteDto::getHenkiloOid));
+                      List<String> oppijaOids = new ArrayList<>(masterToOriginal.keySet());
+                      LOG.info(
+                          "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
+                          oppijaOids,
+                          hakukohdeOid);
+                      return storeDuration(
                               createResurssiFuture(
                                       tunniste,
                                       "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
@@ -356,11 +395,9 @@ public class LaskentaResurssiProvider {
                                         return oppijat;
                                       }),
                               "suoritukset",
-                              durations);
-                        });
-                return oppijatF.join();
-              }
-            });
+                              durations)
+                          .join();
+                    }));
 
     CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes =
         storeDuration(
