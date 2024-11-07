@@ -275,7 +275,7 @@ public class LaskentaResurssiProvider {
 
     CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet;
 
-    synchronized (this) {
+    synchronized (this.valintaperusteetAsyncResource) {
       valintaperusteet =
           storeDuration(
               createResurssiFuture(
@@ -335,37 +335,46 @@ public class LaskentaResurssiProvider {
             });
 
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
-        henkiloViitteet.thenComposeAsync(
-            hws -> {
-              LOG.info("Got henkiloViittees: {}", hws);
-              Map<String, String> masterToOriginal =
-                  hws.stream()
-                      .collect(
-                          Collectors.toMap(
-                              HenkiloViiteDto::getMasterOid, HenkiloViiteDto::getHenkiloOid));
-              List<String> oppijaOids = new ArrayList<>(masterToOriginal.keySet());
-              LOG.info(
-                  "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
-                  oppijaOids,
-                  hakukohdeOid);
-              return storeDuration(
-                  createResurssiFuture(
-                          tunniste,
-                          "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
-                          () ->
-                              suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-                                  oppijaOids, hakuOid, true),
-                          retryHakemuksetAndOppijat)
-                      .thenApply(
-                          oppijat -> {
-                            oppijat.forEach(
-                                oppija ->
-                                    oppija.setOppijanumero(
-                                        masterToOriginal.get(oppija.getOppijanumero())));
-                            return oppijat;
-                          }),
-                  "suoritukset",
-                  durations);
+        CompletableFuture.supplyAsync(
+            () -> {
+              synchronized (this.suoritusrekisteriAsyncResource) {
+                CompletableFuture<List<Oppija>> oppijatF =
+                    henkiloViitteet.thenComposeAsync(
+                        hws -> {
+                          LOG.info("Got henkiloViittees: {}", hws);
+                          Map<String, String> masterToOriginal =
+                              hws.stream()
+                                  .collect(
+                                      Collectors.toMap(
+                                          HenkiloViiteDto::getMasterOid,
+                                          HenkiloViiteDto::getHenkiloOid));
+                          List<String> oppijaOids = new ArrayList<>(masterToOriginal.keySet());
+                          LOG.info(
+                              "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
+                              oppijaOids,
+                              hakukohdeOid);
+                          return storeDuration(
+                              createResurssiFuture(
+                                      tunniste,
+                                      "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
+                                      () ->
+                                          suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+                                              oppijaOids, hakuOid, true),
+                                      retryHakemuksetAndOppijat)
+                                  .thenApply(
+                                      oppijat -> {
+                                        oppijat.forEach(
+                                            oppija ->
+                                                oppija.setOppijanumero(
+                                                    masterToOriginal.get(
+                                                        oppija.getOppijanumero())));
+                                        return oppijat;
+                                      }),
+                              "suoritukset",
+                              durations);
+                        });
+                return oppijatF.join();
+              }
             });
 
     CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes =
