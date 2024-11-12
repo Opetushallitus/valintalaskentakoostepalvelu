@@ -48,6 +48,13 @@ public class ValintalaskentaKerrallaResource {
     return auditSession;
   }
 
+  private static Throwable getUnderlyingCause(Throwable t) {
+    if (t.getCause() != null) {
+      return getUnderlyingCause(t.getCause());
+    }
+    return t;
+  }
+
   @GetMapping(
       value = "/haku/{hakuOid}/hakukohde/{hakukohdeOid}/lahtotiedot",
       produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,15 +103,17 @@ public class ValintalaskentaKerrallaResource {
           .thenApply(laskeDTO -> result.setResult(new ResponseEntity<>(laskeDTO, HttpStatus.OK)))
           .exceptionally(
               e -> {
+                Throwable cause = getUnderlyingCause(e);
                 LOG.error(
                     "Hakukohteen "
                         + hakukohdeOid
                         + " tietojen hakemisessa tapahtui odottamaton virhe!",
-                    e);
+                    cause);
                 result.setErrorResult(
                     ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(
-                            "Odottamaton virhe laskennan tietojen hakemisessa! " + e.getMessage()));
+                            "Odottamaton virhe laskennan tietojen hakemisessa! "
+                                + cause.getMessage()));
                 throw new RuntimeException(e);
               });
     } catch (Throwable e) {
