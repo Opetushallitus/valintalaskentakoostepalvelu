@@ -28,6 +28,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -35,7 +36,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient;
+import software.amazon.awssdk.services.cloudwatch.model.Dimension;
+import software.amazon.awssdk.services.cloudwatch.model.MetricDatum;
+import software.amazon.awssdk.services.cloudwatch.model.PutMetricDataRequest;
+import software.amazon.awssdk.services.cloudwatch.model.StandardUnit;
 
 @Service
 public class LaskentaResurssiProvider {
@@ -52,10 +59,45 @@ public class LaskentaResurssiProvider {
   private final KoskiService koskiService;
   private final HakemuksetConverterUtil hakemuksetConverterUtil;
   private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
-  private final ExecutorService executor = Executors.newWorkStealingPool();
+  private final ExecutorService executor = Executors.newWorkStealingPool(256);
 
-  private final ConcurrencyLimiter oppijatLimiter = new ConcurrencyLimiter(1000);
-  private final ConcurrencyLimiter valintaperusteetLimiter = new ConcurrencyLimiter(16);
+  private final int NO_LIMIT_PERMITS = Integer.MAX_VALUE;
+  private final ConcurrencyLimiter parametritLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "parametrit", this.executor);
+  private final ConcurrencyLimiter hakuLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "haku", this.executor);
+  private final ConcurrencyLimiter ataruhakemuksetLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "ataruhakemukset", this.executor);
+  private final ConcurrencyLimiter hakuapphakemuksetLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakuapphakemukset", this.executor);
+  private final ConcurrencyLimiter hakukohderyhmatLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakukohderyhmat", this.executor);
+  private final ConcurrencyLimiter valintapisteetLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "valintapisteet", this.executor);
+  private final ConcurrencyLimiter hakijaryhmatLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakijaryhmat", this.executor);
+  private final ConcurrencyLimiter koskioppijatLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "koskioppijat", this.executor);
+
+  private final Collection<ConcurrencyLimiter> limiters =
+      List.of(
+          parametritLimiter,
+          hakuLimiter,
+          ataruhakemuksetLimiter,
+          hakuapphakemuksetLimiter,
+          hakukohderyhmatLimiter,
+          valintapisteetLimiter,
+          hakijaryhmatLimiter,
+          koskioppijatLimiter);
+
+  private final ConcurrencyLimiter valintaperusteetLimiter =
+      new ConcurrencyLimiter(16, "valintaperusteet", this.executor);
+  private final ConcurrencyLimiter suorituksetLimiter =
+      new ConcurrencyLimiter(1000, "suoritukset", this.executor);
+
+  private final CloudWatchClient cloudWatchClient;
+
+  private final String environmentName;
 
   @Autowired
   public LaskentaResurssiProvider(
@@ -69,7 +111,9 @@ public class LaskentaResurssiProvider {
       KoskiService koskiService,
       HakemuksetConverterUtil hakemuksetConverterUtil,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
-      OhjausparametritAsyncResource ohjausparametritAsyncResource) {
+      OhjausparametritAsyncResource ohjausparametritAsyncResource,
+      CloudWatchClient cloudWatchClient,
+      @Value("${environment.name}") String environmentName) {
     this.applicationAsyncResource = applicationAsyncResource;
     this.ataruAsyncResource = ataruAsyncResource;
     this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
@@ -80,50 +124,176 @@ public class LaskentaResurssiProvider {
     this.hakemuksetConverterUtil = hakemuksetConverterUtil;
     this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
     this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
+    this.cloudWatchClient = cloudWatchClient;
+    this.environmentName = environmentName;
   }
 
   static class ConcurrencyLimiter {
 
     private final int maxPermits;
+    private final String vaihe;
     private final Semaphore semaphore;
+    private final ExecutorService executor;
+    private final AtomicInteger ongoing;
 
-    public ConcurrencyLimiter(int permits) {
+    public ConcurrencyLimiter(int permits, String vaihe, ExecutorService executor) {
+      this.vaihe = vaihe;
       this.maxPermits = permits;
       this.semaphore = new Semaphore(permits, true);
+      this.executor = executor;
+      this.ongoing = new AtomicInteger(0);
+    }
+
+    public int getOngoing() {
+      return this.ongoing.get();
+    }
+
+    public String getVaihe() {
+      return this.vaihe;
     }
 
     public <T> CompletableFuture<T> withConcurrencyLimit(
-        int permits, String tunniste, Supplier<T> action) {
+        int permits,
+        Map<String, Optional<Duration>> waitDurations,
+        Map<String, Optional<Duration>> invokeDurations,
+        Supplier<CompletableFuture<T>> supplier) {
+      invokeDurations.put(this.vaihe, Optional.empty()); // invoket voi timeoutata
+
       Instant waitStart = Instant.now();
+      this.ongoing.incrementAndGet();
       return CompletableFuture.supplyAsync(
           () -> {
-            semaphore.acquireUninterruptibly(Math.min(this.maxPermits, permits));
-            Instant invokeStart = Instant.now();
+            this.semaphore.acquireUninterruptibly(Math.min(this.maxPermits, permits));
             try {
-              return action.get();
+              Instant invokeStart = Instant.now();
+              waitDurations.put(this.vaihe, Optional.of(Duration.between(waitStart, invokeStart)));
+              T result = supplier.get().join();
+              invokeDurations.put(
+                  this.vaihe, Optional.of(Duration.between(invokeStart, Instant.now())));
+              return result;
             } finally {
               semaphore.release(permits);
-              LOG.info(
-                  tunniste
-                      + ": odotettiin "
-                      + Duration.between(waitStart, invokeStart).toMillis()
-                      + "ms, suoritus "
-                      + Duration.between(invokeStart, Instant.now()).toMillis()
-                      + "ms");
+              this.ongoing.decrementAndGet();
             }
-          });
+          },
+          this.executor);
     }
   }
 
-  private static <T> CompletableFuture<T> storeDuration(
-      CompletableFuture<T> future, String name, Map<String, String> durations) {
-    Instant start = Instant.now();
-    durations.put(name, "not finished");
-    return future.thenApply(
-        result -> {
-          durations.put(name, Duration.between(start, Instant.now()).toMillis() + "");
-          return result;
-        });
+  private void tallennaLokitJaMetriikat(
+      String hakukohdeOid,
+      Map<String, Optional<Duration>> waitDurations,
+      Map<String, Optional<Duration>> invokeDurations) {
+    Collection<MetricDatum> datums = new ArrayList<>();
+    datums.addAll(
+        waitDurations.entrySet().stream()
+            .map(
+                e ->
+                    MetricDatum.builder()
+                        .metricName("odotus")
+                        .value((double) e.getValue().get().toMillis())
+                        .storageResolution(60)
+                        .dimensions(
+                            List.of(Dimension.builder().name("vaihe").value(e.getKey()).build()))
+                        .timestamp(Instant.now())
+                        .unit(StandardUnit.MILLISECONDS)
+                        .build())
+            .collect(Collectors.toList()));
+
+    datums.addAll(
+        invokeDurations.entrySet().stream()
+            .map(
+                e -> {
+                  if (e.getValue().isPresent()) {
+                    return MetricDatum.builder()
+                        .metricName("kesto")
+                        .value((double) e.getValue().get().toMillis())
+                        .storageResolution(60)
+                        .dimensions(
+                            List.of(Dimension.builder().name("vaihe").value(e.getKey()).build()))
+                        .timestamp(Instant.now())
+                        .unit(StandardUnit.MILLISECONDS)
+                        .build();
+                  } else {
+                    return MetricDatum.builder()
+                        .metricName("timeouts")
+                        .value(1.0)
+                        .storageResolution(60)
+                        .dimensions(
+                            List.of(Dimension.builder().name("vaihe").value(e.getKey()).build()))
+                        .timestamp(Instant.now())
+                        .unit(StandardUnit.COUNT)
+                        .build();
+                  }
+                })
+            .collect(Collectors.toList()));
+
+    CompletableFuture.supplyAsync(
+        () ->
+            this.cloudWatchClient.putMetricData(
+                PutMetricDataRequest.builder()
+                    .namespace(this.environmentName + "-valintalaskenta")
+                    .metricData(datums)
+                    .build()),
+        this.executor);
+
+    LOG.info(
+        "Odotukset: Hakukohde: "
+            + hakukohdeOid
+            + ": "
+            + waitDurations.entrySet().stream()
+                .map(
+                    e ->
+                        e.getKey()
+                            + ":"
+                            + e.getValue().map(d -> d.toMillis() + "").orElse("timeout"))
+                .collect(Collectors.joining(", ")));
+
+    LOG.info(
+        "Kestot: Hakukohde: "
+            + hakukohdeOid
+            + ": "
+            + invokeDurations.entrySet().stream()
+                .map(
+                    e ->
+                        e.getKey()
+                            + ":"
+                            + e.getValue().map(d -> d.toMillis() + "").orElse("timeout"))
+                .collect(Collectors.joining(", ")));
+  }
+
+  @Scheduled(initialDelay = 15, fixedDelay = 15, timeUnit = TimeUnit.SECONDS)
+  public void tallennaMaarat() {
+    Collection<MetricDatum> datums =
+        this.limiters.stream()
+            .filter(limiter -> limiter.getOngoing() > 0)
+            .map(
+                limiter ->
+                    MetricDatum.builder()
+                        .metricName("ongoing")
+                        .value((double) limiter.getOngoing())
+                        .storageResolution(1)
+                        .dimensions(
+                            List.of(
+                                Dimension.builder()
+                                    .name("vaihe")
+                                    .value(limiter.getVaihe())
+                                    .build()))
+                        .timestamp(Instant.now())
+                        .unit(StandardUnit.COUNT)
+                        .build())
+            .toList();
+
+    if (!datums.isEmpty()) {
+      CompletableFuture.supplyAsync(
+          () ->
+              this.cloudWatchClient.putMetricData(
+                  PutMetricDataRequest.builder()
+                      .namespace(this.environmentName + "-valintalaskenta")
+                      .metricData(datums)
+                      .build()),
+          this.executor);
+    }
   }
 
   private CompletableFuture<LaskeDTO> getLaskeDtoFuture(
@@ -208,7 +378,8 @@ public class LaskentaResurssiProvider {
                     valintaperusteet,
                     hakijaryhmatF.join());
               }
-            });
+            },
+            this.executor);
   }
 
   private boolean isValintalaskentaKaytossa(List<ValintaperusteetDTO> valintaperusteetList) {
@@ -255,10 +426,6 @@ public class LaskentaResurssiProvider {
     }
   }
 
-  public LaskentaResurssiProvider() {
-    super();
-  }
-
   public CompletableFuture<LaskeDTO> fetchResourcesForOneLaskenta(
       final String uuid,
       final String hakuOid,
@@ -271,15 +438,18 @@ public class LaskentaResurssiProvider {
       Date nyt) {
 
     Instant start = Instant.now();
-    Map<String, String> durations = new HashMap<>();
+    Map<String, Optional<Duration>> waitDurations = new ConcurrentHashMap<>();
+    Map<String, Optional<Duration>> invokeDurations = new ConcurrentHashMap<>();
 
     final CompletableFuture<ParametritDTO> parametritDTOFuture =
-        storeDuration(
-            ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid),
-            "parametrit",
-            durations);
+        this.parametritLimiter.withConcurrencyLimit(
+            1,
+            waitDurations,
+            invokeDurations,
+            () -> ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid));
     final CompletableFuture<Haku> hakuFuture =
-        storeDuration(tarjontaAsyncResource.haeHaku(hakuOid), "haku", durations);
+        this.hakuLimiter.withConcurrencyLimit(
+            1, waitDurations, invokeDurations, () -> tarjontaAsyncResource.haeHaku(hakuOid));
 
     SuoritustiedotDTO suoritustiedotDTO = new SuoritustiedotDTO();
 
@@ -290,54 +460,59 @@ public class LaskentaResurssiProvider {
     CompletableFuture<List<ValintaperusteetDTO>> valintaperusteet =
         this.valintaperusteetLimiter.withConcurrencyLimit(
             1,
-            "valintaperusteet, hakukohde: " + hakukohdeOid,
-            () -> {
-              CompletableFuture<List<ValintaperusteetDTO>> vp =
-                  storeDuration(
-                      createResurssiFuture(
-                          tunniste,
-                          "valintaperusteetAsyncResource.haeValintaperusteet",
-                          () ->
-                              valintaperusteetAsyncResource.haeValintaperusteet(
-                                  hakukohdeOid, valinnanVaihe)),
-                      "valintaperusteet",
-                      durations);
-              if (!isValintalaskentaKaytossa(vp.join())) {
-                throw new RuntimeException(
-                    "Valintalaskenta ei ole käytössä hakukohteelle " + hakukohdeOid);
-              }
-              return vp.join();
-            });
+            waitDurations,
+            invokeDurations,
+            () ->
+                createResurssiFuture(
+                        tunniste,
+                        "valintaperusteetAsyncResource.haeValintaperusteet",
+                        () ->
+                            valintaperusteetAsyncResource.haeValintaperusteet(
+                                hakukohdeOid, valinnanVaihe))
+                    .thenApplyAsync(
+                        vp -> {
+                          if (!isValintalaskentaKaytossa(vp)) {
+                            throw new RuntimeException(
+                                "Valintalaskenta ei ole käytössä hakukohteelle " + hakukohdeOid);
+                          }
+                          return vp;
+                        },
+                        this.executor));
 
     CompletableFuture<List<HakemusWrapper>> hakemukset =
-        hakuFuture.thenCompose(
+        hakuFuture.thenComposeAsync(
             haku -> {
               if (haku.isHakemuspalvelu()) {
                 boolean haetaanHarkinnanvaraisuudet =
                     haku.isAmmatillinenJaLukio() && haku.isKoutaHaku();
-                return storeDuration(
-                    createResurssiFuture(
-                        tunniste,
-                        "applicationAsyncResource.getApplications",
-                        () ->
-                            ataruAsyncResource.getApplicationsByHakukohde(
-                                hakukohdeOid, haetaanHarkinnanvaraisuudet),
-                        retryHakemuksetAndOppijat),
-                    "ataruhakemukset",
-                    durations);
+                return this.ataruhakemuksetLimiter.withConcurrencyLimit(
+                    1,
+                    waitDurations,
+                    invokeDurations,
+                    () ->
+                        createResurssiFuture(
+                            tunniste,
+                            "applicationAsyncResource.getApplications",
+                            () ->
+                                ataruAsyncResource.getApplicationsByHakukohde(
+                                    hakukohdeOid, haetaanHarkinnanvaraisuudet),
+                            retryHakemuksetAndOppijat));
               } else {
-                return storeDuration(
-                    createResurssiFuture(
-                        tunniste,
-                        "applicationAsyncResource.getApplicationsByOid",
-                        () ->
-                            applicationAsyncResource.getApplicationsByOids(
-                                hakuOid, Collections.singletonList(hakukohdeOid)),
-                        retryHakemuksetAndOppijat),
-                    "hakuapphakemukset",
-                    durations);
+                return this.hakuapphakemuksetLimiter.withConcurrencyLimit(
+                    1,
+                    waitDurations,
+                    invokeDurations,
+                    () ->
+                        createResurssiFuture(
+                            tunniste,
+                            "applicationAsyncResource.getApplicationsByOid",
+                            () ->
+                                applicationAsyncResource.getApplicationsByOids(
+                                    hakuOid, Collections.singletonList(hakukohdeOid)),
+                            retryHakemuksetAndOppijat));
               }
-            });
+            },
+            this.executor);
 
     CompletableFuture<List<HenkiloViiteDto>> henkiloViitteet =
         hakemukset.thenComposeAsync(
@@ -349,14 +524,16 @@ public class LaskentaResurssiProvider {
                               new HenkiloViiteDto(hw.getApplicationPersonOid(), hw.getPersonOid()))
                       .collect(Collectors.toList());
               return CompletableFuture.completedFuture(viitteet);
-            });
+            },
+            this.executor);
 
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
         henkiloViitteet.thenComposeAsync(
             hws ->
-                this.oppijatLimiter.withConcurrencyLimit(
+                this.suorituksetLimiter.withConcurrencyLimit(
                     hws.size() + 25,
-                    "suoritukset, hakukohde: " + hakukohdeOid,
+                    waitDurations,
+                    invokeDurations,
                     () -> {
                       LOG.info(
                           "Haetaan suoritukset hakukohteen "
@@ -377,72 +554,86 @@ public class LaskentaResurssiProvider {
                           "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
                           oppijaOids,
                           hakukohdeOid);
-                      return storeDuration(
-                              createResurssiFuture(
-                                      tunniste,
-                                      "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
-                                      () ->
-                                          suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-                                              oppijaOids, hakuOid, true),
-                                      retryHakemuksetAndOppijat)
-                                  .thenApply(
-                                      oppijat -> {
-                                        oppijat.forEach(
-                                            oppija ->
-                                                oppija.setOppijanumero(
-                                                    masterToOriginal.get(
-                                                        oppija.getOppijanumero())));
-                                        return oppijat;
-                                      }),
-                              "suoritukset",
-                              durations)
-                          .join();
-                    }));
+                      return createResurssiFuture(
+                              tunniste,
+                              "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
+                              () ->
+                                  suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+                                      oppijaOids, hakuOid, true),
+                              retryHakemuksetAndOppijat)
+                          .thenApply(
+                              oppijat -> {
+                                oppijat.forEach(
+                                    oppija ->
+                                        oppija.setOppijanumero(
+                                            masterToOriginal.get(oppija.getOppijanumero())));
+                                return oppijat;
+                              });
+                    }),
+            this.executor);
 
     CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes =
-        storeDuration(
-            createResurssiFuture(
-                tunniste,
-                "tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",
-                () -> tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid)),
-            "hakukohderyhmat",
-            durations);
+        this.hakukohderyhmatLimiter.withConcurrencyLimit(
+            1,
+            waitDurations,
+            invokeDurations,
+            () ->
+                createResurssiFuture(
+                    tunniste,
+                    "tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes",
+                    () -> tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid)));
+
     CompletableFuture<PisteetWithLastModified> valintapisteetHakemuksille =
         hakemukset.thenComposeAsync(
             hakemusWrappers -> {
               List<String> hakemusOids =
                   hakemusWrappers.stream().map(HakemusWrapper::getOid).collect(Collectors.toList());
-              return storeDuration(
-                  createResurssiFuture(
-                      tunniste,
-                      "valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture",
-                      () ->
-                          valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
-                              hakemusOids, auditSession),
-                      retryHakemuksetAndOppijat),
-                  "valintapisteet",
-                  durations);
-            });
+              return this.valintapisteetLimiter.withConcurrencyLimit(
+                  1,
+                  waitDurations,
+                  invokeDurations,
+                  () ->
+                      createResurssiFuture(
+                          tunniste,
+                          "valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture",
+                          () ->
+                              valintapisteAsyncResource.getValintapisteetWithHakemusOidsAsFuture(
+                                  hakemusOids, auditSession),
+                          retryHakemuksetAndOppijat));
+            },
+            this.executor);
+
     CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmat =
         withHakijaRyhmat
-            ? storeDuration(
-                createResurssiFuture(
-                    tunniste,
-                    "valintaperusteetAsyncResource.haeHakijaryhmat",
-                    () -> valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)),
-                "valintaperusteet",
-                durations)
+            ? this.hakijaryhmatLimiter.withConcurrencyLimit(
+                1,
+                waitDurations,
+                invokeDurations,
+                () ->
+                    createResurssiFuture(
+                        tunniste,
+                        "valintaperusteetAsyncResource.haeHakijaryhmat",
+                        () -> valintaperusteetAsyncResource.haeHakijaryhmat(hakukohdeOid)))
             : CompletableFuture.completedFuture(emptyList());
     CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOid =
-        createResurssiFuture(
-            tunniste,
-            "koskiService.haeKoskiOppijat",
-            () ->
-                storeDuration(
-                    koskiService.haeKoskiOppijat(
-                        hakukohdeOid, valintaperusteet, hakemukset, suoritustiedotDTO, nyt),
-                    "koskioppijat",
-                    durations));
+        CompletableFuture.allOf(valintaperusteet, hakemukset)
+            .thenComposeAsync(
+                unused ->
+                    this.koskioppijatLimiter.withConcurrencyLimit(
+                        1,
+                        waitDurations,
+                        invokeDurations,
+                        () ->
+                            createResurssiFuture(
+                                tunniste,
+                                "koskiService.haeKoskiOppijat",
+                                () ->
+                                    koskiService.haeKoskiOppijat(
+                                        hakukohdeOid,
+                                        valintaperusteet,
+                                        hakemukset,
+                                        suoritustiedotDTO,
+                                        nyt))));
 
     LOG.info(
         "(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.",
@@ -462,32 +653,22 @@ public class LaskentaResurssiProvider {
             hakijaryhmat,
             hakemukset,
             koskiOppijaByOppijaOid)
-        .thenApply(
+        .thenApplyAsync(
             laskeDTO -> {
-              durations.put("Total", Duration.between(start, Instant.now()).toMillis() + "");
-              LOG.info(
-                  "Kestot: Hakukohde: "
-                      + hakukohdeOid
-                      + ": "
-                      + durations.entrySet().stream()
-                          .map(e -> e.getKey() + ":" + e.getValue())
-                          .collect(Collectors.joining(", ")));
+              invokeDurations.put("Total", Optional.of(Duration.between(start, Instant.now())));
+              this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
 
               laskeDTO.populoiSuoritustiedotHakemuksille(suoritustiedotDTO);
               return laskeDTO;
-            })
+            },
+            this.executor)
         .orTimeout(9 * 60 * 1000l, TimeUnit.MILLISECONDS)
         .exceptionally(
             ex -> {
               if (ex instanceof TimeoutException) {
-                durations.put("Total", Duration.between(start, Instant.now()).toMillis() + "");
-                LOG.error(
-                    "Kestot: (Timeout) Hakukohde: "
-                        + hakukohdeOid
-                        + ": "
-                        + durations.entrySet().stream()
-                            .map(e -> e.getKey() + ":" + e.getValue())
-                            .collect(Collectors.joining(", ")));
+                invokeDurations.put(
+                    "Total (timeout)", Optional.of(Duration.between(start, Instant.now())));
+                this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
               }
               throw new RuntimeException(ex);
             });
