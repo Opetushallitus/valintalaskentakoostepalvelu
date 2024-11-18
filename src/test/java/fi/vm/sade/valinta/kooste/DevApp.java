@@ -1,10 +1,43 @@
 package fi.vm.sade.valinta.kooste;
 
+import static org.testcontainers.containers.localstack.LocalStackContainer.Service.CLOUDWATCH;
+
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Ports;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.test.util.TestSocketUtils;
+import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.utility.DockerImageName;
+
 public class DevApp {
+
+  private static final Logger LOG = LoggerFactory.getLogger(DevApp.class);
 
   private static final String ENVIRONMENT = "untuva";
 
+  private static final int localstackPort = TestSocketUtils.findAvailableTcpPort();
+
+  private static final LocalStackContainer localStackContainer =
+      new LocalStackContainer(new DockerImageName("localstack/localstack:2.2.0"))
+          .withServices(CLOUDWATCH)
+          .withLogConsumer(frame -> LOG.info(frame.getUtf8StringWithoutLineEnding()))
+          .withExposedPorts(4566)
+          .withCreateContainerCmdModifier(
+              m ->
+                  m.withHostConfig(
+                      new HostConfig()
+                          .withPortBindings(
+                              new PortBinding(
+                                  Ports.Binding.bindPort(localstackPort), new ExposedPort(4566)))));
+
   public static void main(String[] args) {
+    System.setProperty("localstackPort", localstackPort + "");
+    System.setProperty("aws.accessKeyId", "localstack");
+    System.setProperty("aws.secretAccessKey", "localstack");
+
     // ssl-konfiguraatio
     System.setProperty("server.ssl.key-store-type", "PKCS12");
     System.setProperty("server.ssl.key-store", "classpath:keystore.p12");
@@ -53,6 +86,7 @@ public class DevApp {
     System.setProperty("valintalaskentakoostepalvelu.postgresql.driver", "");
 
     TempDockerDB.start();
+    localStackContainer.start();
     App.start();
   }
 }
