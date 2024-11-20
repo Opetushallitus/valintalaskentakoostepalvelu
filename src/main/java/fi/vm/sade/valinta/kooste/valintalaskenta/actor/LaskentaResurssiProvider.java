@@ -6,7 +6,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -50,7 +49,6 @@ public class LaskentaResurssiProvider {
   private static final Logger LOG = LoggerFactory.getLogger(LaskentaResurssiProvider.class);
 
   private final ValintapisteAsyncResource valintapisteAsyncResource;
-  private final ApplicationAsyncResource applicationAsyncResource;
   private final AtaruAsyncResource ataruAsyncResource;
   private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
   private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
@@ -74,8 +72,6 @@ public class LaskentaResurssiProvider {
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakijaryhmat", this.executor);
   private final ConcurrencyLimiter koskioppijatLimiter =
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "koskioppijat", this.executor);
-  private final ConcurrencyLimiter hakuapphakemuksetLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakuapp", this.executor);
 
   private final ConcurrencyLimiter ataruhakemuksetLimiter =
       new ConcurrencyLimiter(16, "ataruhakemukset", this.executor);
@@ -89,7 +85,6 @@ public class LaskentaResurssiProvider {
           parametritLimiter,
           hakuLimiter,
           ataruhakemuksetLimiter,
-          hakuapphakemuksetLimiter,
           hakukohderyhmatLimiter,
           valintapisteetLimiter,
           hakijaryhmatLimiter,
@@ -103,8 +98,6 @@ public class LaskentaResurssiProvider {
 
   @Autowired
   public LaskentaResurssiProvider(
-      @Value("${valintalaskentakoostepalvelu.laskennan.splittaus:1}") int splittaus,
-      ApplicationAsyncResource applicationAsyncResource,
       AtaruAsyncResource ataruAsyncResource,
       ValintaperusteetAsyncResource valintaperusteetAsyncResource,
       SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
@@ -116,7 +109,6 @@ public class LaskentaResurssiProvider {
       OhjausparametritAsyncResource ohjausparametritAsyncResource,
       CloudWatchClient cloudWatchClient,
       @Value("${environment.name}") String environmentName) {
-    this.applicationAsyncResource = applicationAsyncResource;
     this.ataruAsyncResource = ataruAsyncResource;
     this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
     this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
@@ -500,18 +492,8 @@ public class LaskentaResurssiProvider {
                                     hakukohdeOid, haetaanHarkinnanvaraisuudet),
                             retryHakemuksetAndOppijat));
               } else {
-                return this.hakuapphakemuksetLimiter.withConcurrencyLimit(
-                    1,
-                    waitDurations,
-                    invokeDurations,
-                    () ->
-                        createResurssiFuture(
-                            tunniste,
-                            "applicationAsyncResource.getApplicationsByOid",
-                            () ->
-                                applicationAsyncResource.getApplicationsByOids(
-                                    hakuOid, Collections.singletonList(hakukohdeOid)),
-                            retryHakemuksetAndOppijat));
+                throw new RuntimeException(
+                    "HakuApp lähtötietoja ei tueta enää: hakukohde " + hakukohdeOid);
               }
             },
             this.executor);
