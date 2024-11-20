@@ -79,6 +79,11 @@ public class LaskentaResurssiProvider {
   private final ConcurrencyLimiter koskioppijatLimiter =
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "koskioppijat", this.executor);
 
+  private final ConcurrencyLimiter valintaperusteetLimiter =
+      new ConcurrencyLimiter(16, "valintaperusteet", this.executor);
+  private final ConcurrencyLimiter suorituksetLimiter =
+      new ConcurrencyLimiter(1000, "suoritukset", this.executor);
+
   private final Collection<ConcurrencyLimiter> limiters =
       List.of(
           parametritLimiter,
@@ -88,12 +93,9 @@ public class LaskentaResurssiProvider {
           hakukohderyhmatLimiter,
           valintapisteetLimiter,
           hakijaryhmatLimiter,
-          koskioppijatLimiter);
-
-  private final ConcurrencyLimiter valintaperusteetLimiter =
-      new ConcurrencyLimiter(16, "valintaperusteet", this.executor);
-  private final ConcurrencyLimiter suorituksetLimiter =
-      new ConcurrencyLimiter(1000, "suoritukset", this.executor);
+          koskioppijatLimiter,
+          valintaperusteetLimiter,
+          suorituksetLimiter);
 
   private final CloudWatchClient cloudWatchClient;
 
@@ -633,7 +635,8 @@ public class LaskentaResurssiProvider {
                                         valintaperusteet,
                                         hakemukset,
                                         suoritustiedotDTO,
-                                        nyt))));
+                                        nyt))),
+                this.executor);
 
     LOG.info(
         "(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.",
