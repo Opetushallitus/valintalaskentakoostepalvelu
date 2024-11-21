@@ -66,10 +66,6 @@ public class LaskentaResurssiProvider {
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "parametrit", this.executor);
   private final ConcurrencyLimiter hakuLimiter =
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "haku", this.executor);
-  private final ConcurrencyLimiter ataruhakemuksetLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "ataruhakemukset", this.executor);
-  private final ConcurrencyLimiter hakuapphakemuksetLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakuapphakemukset", this.executor);
   private final ConcurrencyLimiter hakukohderyhmatLimiter =
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakukohderyhmat", this.executor);
   private final ConcurrencyLimiter valintapisteetLimiter =
@@ -78,7 +74,11 @@ public class LaskentaResurssiProvider {
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakijaryhmat", this.executor);
   private final ConcurrencyLimiter koskioppijatLimiter =
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "koskioppijat", this.executor);
+  private final ConcurrencyLimiter hakuapphakemuksetLimiter =
+      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakuapp", this.executor);
 
+  private final ConcurrencyLimiter ataruhakemuksetLimiter =
+      new ConcurrencyLimiter(16, "ataruhakemukset", this.executor);
   private final ConcurrencyLimiter valintaperusteetLimiter =
       new ConcurrencyLimiter(16, "valintaperusteet", this.executor);
   private final ConcurrencyLimiter suorituksetLimiter =
