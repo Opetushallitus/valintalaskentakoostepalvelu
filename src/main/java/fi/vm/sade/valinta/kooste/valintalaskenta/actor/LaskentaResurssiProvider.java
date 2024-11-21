@@ -640,10 +640,16 @@ public class LaskentaResurssiProvider {
             koskiOppijaByOppijaOid)
         .thenApplyAsync(
             laskeDTO -> {
-              invokeDurations.put("Total", Optional.of(Duration.between(start, Instant.now())));
-              this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
-
               laskeDTO.populoiSuoritustiedotHakemuksille(suoritustiedotDTO);
+              invokeDurations.put("Total", Optional.of(Duration.between(start, Instant.now())));
+              LOG.info(
+                  "Haettiin lähtötiedot hakukohteelle "
+                      + hakukohdeOid
+                      + ", start: "
+                      + start
+                      + ", end: "
+                      + Instant.now());
+              this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
               return laskeDTO;
             },
             this.executor)
