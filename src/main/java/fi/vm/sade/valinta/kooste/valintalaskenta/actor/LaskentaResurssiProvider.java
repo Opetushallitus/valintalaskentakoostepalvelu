@@ -533,7 +533,7 @@ public class LaskentaResurssiProvider {
         henkiloViitteet.thenComposeAsync(
             hws ->
                 this.suorituksetLimiter.withConcurrencyLimit(
-                    hws.size() + 25,
+                    hws.size() + 50,
                     waitDurations,
                     invokeDurations,
                     () -> {
