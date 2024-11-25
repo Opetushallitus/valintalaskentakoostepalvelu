@@ -128,18 +128,23 @@ public class LaskentaResurssiProvider {
 
   static class ConcurrencyLimiter {
 
+    public static final Duration TIMEOUT = Duration.ofMillis(Long.MIN_VALUE + 1);
+    public static final Duration ERROR = Duration.ofMillis(Long.MIN_VALUE + 2);
+
     private int maxPermits;
     private final String vaihe;
     private final Semaphore semaphore;
     private final ExecutorService executor;
-    private final AtomicInteger ongoing;
+    private final AtomicInteger waiting;
+    private final AtomicInteger active;
 
     public ConcurrencyLimiter(int permits, String vaihe, ExecutorService executor) {
       this.vaihe = vaihe;
       this.maxPermits = permits;
       this.semaphore = new Semaphore(permits, true);
       this.executor = executor;
-      this.ongoing = new AtomicInteger(0);
+      this.waiting = new AtomicInteger(0);
+      this.active = new AtomicInteger(0);
     }
 
     public void setMaxPermits(int newPermits) {
@@ -155,36 +160,62 @@ public class LaskentaResurssiProvider {
       }
     }
 
-    public int getOngoing() {
-      return this.ongoing.get();
+    public int getWaiting() {
+      return this.waiting.get();
+    }
+
+    public int getActive() {
+      return this.active.get();
     }
 
     public String getVaihe() {
       return this.vaihe;
     }
 
+    public static String asLabel(Duration duration) {
+      if (duration == TIMEOUT) {
+        return "timeout";
+      } else if (duration == ERROR) {
+        return "error";
+      }
+      return duration.toMillis() + "";
+    }
+
     public <T> CompletableFuture<T> withConcurrencyLimit(
         int permits,
-        Map<String, Optional<Duration>> waitDurations,
-        Map<String, Optional<Duration>> invokeDurations,
+        Map<String, Duration> waitDurations,
+        Map<String, Duration> invokeDurations,
         Supplier<CompletableFuture<T>> supplier) {
-      invokeDurations.put(this.vaihe, Optional.empty()); // invoket voi timeoutata
 
       Instant waitStart = Instant.now();
-      this.ongoing.incrementAndGet();
+      this.waiting.incrementAndGet();
       return CompletableFuture.supplyAsync(
           () -> {
             this.semaphore.acquireUninterruptibly(Math.min(this.maxPermits, permits));
+            this.waiting.decrementAndGet();
+            this.active.incrementAndGet();
             try {
               Instant invokeStart = Instant.now();
-              waitDurations.put(this.vaihe, Optional.of(Duration.between(waitStart, invokeStart)));
-              T result = supplier.get().join();
-              invokeDurations.put(
-                  this.vaihe, Optional.of(Duration.between(invokeStart, Instant.now())));
+              waitDurations.put(this.vaihe, Duration.between(waitStart, invokeStart));
+              T result =
+                  supplier
+                      .get()
+                      .exceptionallyAsync(
+                          e -> {
+                            if (e instanceof TimeoutException) {
+                              invokeDurations.put(this.vaihe, TIMEOUT);
+                            } else {
+                              invokeDurations.put(this.vaihe, ERROR);
+                            }
+                            throw new CompletionException(e);
+                          },
+                          this.executor)
+                      .join();
+              invokeDurations.put(this.vaihe, Duration.between(invokeStart, Instant.now()));
               return result;
             } finally {
               semaphore.release(permits);
-              this.ongoing.decrementAndGet();
+              this.active.decrementAndGet();
             }
           },
           this.executor);
@@ -208,8 +239,8 @@ public class LaskentaResurssiProvider {
 
   private void tallennaLokitJaMetriikat(
       String hakukohdeOid,
-      Map<String, Optional<Duration>> waitDurations,
-      Map<String, Optional<Duration>> invokeDurations) {
+      Map<String, Duration> waitDurations,
+      Map<String, Duration> invokeDurations) {
     Collection<MetricDatum> datums = new ArrayList<>();
     datums.addAll(
         waitDurations.entrySet().stream()
@@ -217,7 +248,7 @@ public class LaskentaResurssiProvider {
                 e ->
                     MetricDatum.builder()
                         .metricName("odotus")
-                        .value((double) e.getValue().get().toMillis())
+                        .value((double) e.getValue().toMillis())
                         .storageResolution(60)
                         .dimensions(
                             List.of(Dimension.builder().name("vaihe").value(e.getKey()).build()))
@@ -230,17 +261,17 @@ public class LaskentaResurssiProvider {
         invokeDurations.entrySet().stream()
             .map(
                 e -> {
-                  if (e.getValue().isPresent()) {
+                  if (e.getValue() == ConcurrencyLimiter.ERROR) {
                     return MetricDatum.builder()
-                        .metricName("kesto")
-                        .value((double) e.getValue().get().toMillis())
+                        .metricName("errors")
+                        .value(1.0)
                         .storageResolution(60)
                         .dimensions(
                             List.of(Dimension.builder().name("vaihe").value(e.getKey()).build()))
                         .timestamp(Instant.now())
-                        .unit(StandardUnit.MILLISECONDS)
+                        .unit(StandardUnit.COUNT)
                         .build();
-                  } else {
+                  } else if (e.getValue() == ConcurrencyLimiter.TIMEOUT) {
                     return MetricDatum.builder()
                         .metricName("timeouts")
                         .value(1.0)
@@ -249,6 +280,16 @@ public class LaskentaResurssiProvider {
                             List.of(Dimension.builder().name("vaihe").value(e.getKey()).build()))
                         .timestamp(Instant.now())
                         .unit(StandardUnit.COUNT)
+                        .build();
+                  } else {
+                    return MetricDatum.builder()
+                        .metricName("kesto")
+                        .value((double) e.getValue().toMillis())
+                        .storageResolution(60)
+                        .dimensions(
+                            List.of(Dimension.builder().name("vaihe").value(e.getKey()).build()))
+                        .timestamp(Instant.now())
+                        .unit(StandardUnit.MILLISECONDS)
                         .build();
                   }
                 })
@@ -268,11 +309,7 @@ public class LaskentaResurssiProvider {
             + hakukohdeOid
             + ": "
             + waitDurations.entrySet().stream()
-                .map(
-                    e ->
-                        e.getKey()
-                            + ":"
-                            + e.getValue().map(d -> d.toMillis() + "").orElse("timeout"))
+                .map(e -> e.getKey() + ":" + ConcurrencyLimiter.asLabel(e.getValue()))
                 .collect(Collectors.joining(", ")));
 
     LOG.info(
@@ -280,24 +317,22 @@ public class LaskentaResurssiProvider {
             + hakukohdeOid
             + ": "
             + invokeDurations.entrySet().stream()
-                .map(
-                    e ->
-                        e.getKey()
-                            + ":"
-                            + e.getValue().map(d -> d.toMillis() + "").orElse("timeout"))
+                .map(e -> e.getKey() + ":" + ConcurrencyLimiter.asLabel(e.getValue()))
                 .collect(Collectors.joining(", ")));
   }
 
   @Scheduled(initialDelay = 15, fixedDelay = 15, timeUnit = TimeUnit.SECONDS)
   public void tallennaMaarat() {
-    Collection<MetricDatum> datums =
+    Collection<MetricDatum> datums = new ArrayList<>();
+
+    datums.addAll(
         this.limiters.values().stream()
-            .filter(limiter -> limiter.getOngoing() > 0)
+            .filter(limiter -> limiter.getActive() > 0)
             .map(
                 limiter ->
                     MetricDatum.builder()
-                        .metricName("ongoing")
-                        .value((double) limiter.getOngoing())
+                        .metricName("active")
+                        .value((double) limiter.getActive())
                         .storageResolution(1)
                         .dimensions(
                             List.of(
@@ -308,7 +343,27 @@ public class LaskentaResurssiProvider {
                         .timestamp(Instant.now())
                         .unit(StandardUnit.COUNT)
                         .build())
-            .toList();
+            .toList());
+
+    datums.addAll(
+        this.limiters.values().stream()
+            .filter(limiter -> limiter.getWaiting() > 0)
+            .map(
+                limiter ->
+                    MetricDatum.builder()
+                        .metricName("waiting")
+                        .value((double) limiter.getWaiting())
+                        .storageResolution(1)
+                        .dimensions(
+                            List.of(
+                                Dimension.builder()
+                                    .name("vaihe")
+                                    .value(limiter.getVaihe())
+                                    .build()))
+                        .timestamp(Instant.now())
+                        .unit(StandardUnit.COUNT)
+                        .build())
+            .toList());
 
     if (!datums.isEmpty()) {
       CompletableFuture.supplyAsync(
@@ -464,8 +519,8 @@ public class LaskentaResurssiProvider {
       Date nyt) {
 
     Instant start = Instant.now();
-    Map<String, Optional<Duration>> waitDurations = new ConcurrentHashMap<>();
-    Map<String, Optional<Duration>> invokeDurations = new ConcurrentHashMap<>();
+    Map<String, Duration> waitDurations = new ConcurrentHashMap<>();
+    Map<String, Duration> invokeDurations = new ConcurrentHashMap<>();
 
     final CompletableFuture<ParametritDTO> parametritDTOFuture =
         this.parametritLimiter.withConcurrencyLimit(
@@ -673,7 +728,7 @@ public class LaskentaResurssiProvider {
         .thenApplyAsync(
             laskeDTO -> {
               laskeDTO.populoiSuoritustiedotHakemuksille(suoritustiedotDTO);
-              invokeDurations.put("Total", Optional.of(Duration.between(start, Instant.now())));
+              invokeDurations.put("Total", Duration.between(start, Instant.now()));
               LOG.info(
                   "Haettiin lähtötiedot hakukohteelle "
                       + hakukohdeOid
@@ -689,8 +744,7 @@ public class LaskentaResurssiProvider {
         .exceptionally(
             ex -> {
               if (ex instanceof TimeoutException) {
-                invokeDurations.put(
-                    "Total (timeout)", Optional.of(Duration.between(start, Instant.now())));
+                invokeDurations.put("Total (timeout)", Duration.between(start, Instant.now()));
                 this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
               }
               throw new RuntimeException(ex);
