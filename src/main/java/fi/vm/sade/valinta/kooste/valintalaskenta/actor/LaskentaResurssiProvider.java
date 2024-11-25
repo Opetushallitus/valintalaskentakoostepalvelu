@@ -20,6 +20,7 @@ import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyn
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dao.ParametritDao;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
@@ -57,6 +58,7 @@ public class LaskentaResurssiProvider {
   private final KoskiService koskiService;
   private final HakemuksetConverterUtil hakemuksetConverterUtil;
   private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
+  private final ParametritDao parametritDao;
   private final ExecutorService executor = Executors.newWorkStealingPool(256);
 
   private final int NO_LIMIT_PERMITS = Integer.MAX_VALUE;
@@ -71,8 +73,7 @@ public class LaskentaResurssiProvider {
   private final ConcurrencyLimiter hakijaryhmatLimiter =
       new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakijaryhmat", this.executor);
   private final ConcurrencyLimiter koskioppijatLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "koskioppijat", this.executor);
-
+      new ConcurrencyLimiter(16, "koskioppijat", this.executor);
   private final ConcurrencyLimiter ataruhakemuksetLimiter =
       new ConcurrencyLimiter(16, "ataruhakemukset", this.executor);
   private final ConcurrencyLimiter valintaperusteetLimiter =
@@ -80,17 +81,17 @@ public class LaskentaResurssiProvider {
   private final ConcurrencyLimiter suorituksetLimiter =
       new ConcurrencyLimiter(1000, "suoritukset", this.executor);
 
-  private final Collection<ConcurrencyLimiter> limiters =
-      List.of(
-          parametritLimiter,
-          hakuLimiter,
-          ataruhakemuksetLimiter,
-          hakukohderyhmatLimiter,
-          valintapisteetLimiter,
-          hakijaryhmatLimiter,
-          koskioppijatLimiter,
-          valintaperusteetLimiter,
-          suorituksetLimiter);
+  private final Map<String, ConcurrencyLimiter> limiters =
+      Map.of(
+          "parametritLimiter", parametritLimiter,
+          "hakuLimiter", hakuLimiter,
+          "ataruhakemuksetLimiter", ataruhakemuksetLimiter,
+          "hakukohderyhmatLimiter", hakukohderyhmatLimiter,
+          "valintapisteetLimiter", valintapisteetLimiter,
+          "hakijaryhmatLimiter", hakijaryhmatLimiter,
+          "koskioppijatLimiter", koskioppijatLimiter,
+          "valintaperusteetLimiter", valintaperusteetLimiter,
+          "suorituksetLimiter", suorituksetLimiter);
 
   private final CloudWatchClient cloudWatchClient;
 
@@ -108,6 +109,7 @@ public class LaskentaResurssiProvider {
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       OhjausparametritAsyncResource ohjausparametritAsyncResource,
       CloudWatchClient cloudWatchClient,
+      ParametritDao parametritDao,
       @Value("${environment.name}") String environmentName) {
     this.ataruAsyncResource = ataruAsyncResource;
     this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
@@ -120,11 +122,13 @@ public class LaskentaResurssiProvider {
     this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
     this.cloudWatchClient = cloudWatchClient;
     this.environmentName = environmentName;
+    this.parametritDao = parametritDao;
+    this.lueParametrit();
   }
 
   static class ConcurrencyLimiter {
 
-    private final int maxPermits;
+    private int maxPermits;
     private final String vaihe;
     private final Semaphore semaphore;
     private final ExecutorService executor;
@@ -136,6 +140,19 @@ public class LaskentaResurssiProvider {
       this.semaphore = new Semaphore(permits, true);
       this.executor = executor;
       this.ongoing = new AtomicInteger(0);
+    }
+
+    public void setMaxPermits(int newPermits) {
+      this.maxPermits = newPermits;
+      int dPermits = newPermits - this.maxPermits;
+      if (dPermits == 0) {
+        return;
+      }
+      if (dPermits > 0) {
+        this.semaphore.release(dPermits);
+      } else {
+        this.executor.submit(() -> this.semaphore.acquireUninterruptibly(dPermits));
+      }
     }
 
     public int getOngoing() {
@@ -172,6 +189,21 @@ public class LaskentaResurssiProvider {
           },
           this.executor);
     }
+  }
+
+  @Scheduled(initialDelay = 15, fixedDelay = 15, timeUnit = TimeUnit.SECONDS)
+  public void lueParametrit() {
+    this.executor.submit(
+        () -> {
+          this.parametritDao
+              .lueParametrit()
+              .forEach(
+                  (k, v) -> {
+                    if (this.limiters.containsKey(k)) {
+                      this.limiters.get(k).setMaxPermits(Integer.parseInt(v));
+                    }
+                  });
+        });
   }
 
   private void tallennaLokitJaMetriikat(
@@ -259,7 +291,7 @@ public class LaskentaResurssiProvider {
   @Scheduled(initialDelay = 15, fixedDelay = 15, timeUnit = TimeUnit.SECONDS)
   public void tallennaMaarat() {
     Collection<MetricDatum> datums =
-        this.limiters.stream()
+        this.limiters.values().stream()
             .filter(limiter -> limiter.getOngoing() > 0)
             .map(
                 limiter ->
