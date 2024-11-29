@@ -247,6 +247,7 @@ public class HttpClients {
     return new RestCasClient(
         new CasConfig.CasConfigBuilder(
                 username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setNumberOfRetries(0)
             .setJsessionName("JSESSIONID")
             .build());
   }

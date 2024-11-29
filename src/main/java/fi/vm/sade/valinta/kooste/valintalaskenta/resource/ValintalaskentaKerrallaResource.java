@@ -114,7 +114,7 @@ public class ValintalaskentaKerrallaResource {
                         .body(
                             "Odottamaton virhe laskennan tietojen hakemisessa! "
                                 + cause.getMessage()));
-                throw new RuntimeException(e);
+                return null;
               });
     } catch (Throwable e) {
       LOG.error(
