@@ -13,4 +13,4 @@ INSERT INTO parametrit (nimi, arvo) VALUES ('ataruhakemuksetLimiter', '16') ON C
 INSERT INTO parametrit (nimi, arvo) VALUES ('valintaperusteetLimiter', '16') ON CONFLICT DO NOTHING;
 
 -- käytetään eri lailla, permittejä varataan per hakija
-INSERT INTO parametrit (nimi, arvo) VALUES ('suorituksetLimiter', '1000') ON CONFLICT DO NOTHING;
+INSERT INTO parametrit (nimi, arvo) VALUES ('suorituksetLimiter', '2200') ON CONFLICT DO NOTHING;
