@@ -28,7 +28,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -63,23 +62,22 @@ public class LaskentaResurssiProvider {
 
   private final int NO_LIMIT_PERMITS = Integer.MAX_VALUE;
   private final ConcurrencyLimiter parametritLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "parametrit", this.executor);
-  private final ConcurrencyLimiter hakuLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "haku", this.executor);
+      new ConcurrencyLimiter("parametrit", this.executor);
+  private final ConcurrencyLimiter hakuLimiter = new ConcurrencyLimiter("haku", this.executor);
   private final ConcurrencyLimiter hakukohderyhmatLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakukohderyhmat", this.executor);
+      new ConcurrencyLimiter("hakukohderyhmat", this.executor);
   private final ConcurrencyLimiter valintapisteetLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "valintapisteet", this.executor);
+      new ConcurrencyLimiter("valintapisteet", this.executor);
   private final ConcurrencyLimiter hakijaryhmatLimiter =
-      new ConcurrencyLimiter(NO_LIMIT_PERMITS, "hakijaryhmat", this.executor);
+      new ConcurrencyLimiter("hakijaryhmat", this.executor);
   private final ConcurrencyLimiter koskioppijatLimiter =
-      new ConcurrencyLimiter(16, "koskioppijat", this.executor);
+      new ConcurrencyLimiter("koskioppijat", this.executor);
   private final ConcurrencyLimiter ataruhakemuksetLimiter =
-      new ConcurrencyLimiter(16, "ataruhakemukset", this.executor);
+      new ConcurrencyLimiter("ataruhakemukset", this.executor);
   private final ConcurrencyLimiter valintaperusteetLimiter =
-      new ConcurrencyLimiter(16, "valintaperusteet", this.executor);
+      new ConcurrencyLimiter("valintaperusteet", this.executor);
   private final ConcurrencyLimiter suorituksetLimiter =
-      new ConcurrencyLimiter(1000, "suoritukset", this.executor);
+      new ConcurrencyLimiter("suoritukset", this.executor);
 
   private final Map<String, ConcurrencyLimiter> limiters =
       Map.of(
@@ -124,102 +122,6 @@ public class LaskentaResurssiProvider {
     this.environmentName = environmentName;
     this.parametritDao = parametritDao;
     this.lueParametrit();
-  }
-
-  static class ConcurrencyLimiter {
-
-    public static final Duration TIMEOUT = Duration.ofMillis(Long.MIN_VALUE + 1);
-    public static final Duration ERROR = Duration.ofMillis(Long.MIN_VALUE + 2);
-
-    private int maxPermits;
-    private final String vaihe;
-    private final Semaphore semaphore;
-    private final ExecutorService executor;
-    private final AtomicInteger waiting;
-    private final AtomicInteger active;
-
-    public ConcurrencyLimiter(int permits, String vaihe, ExecutorService executor) {
-      this.vaihe = vaihe;
-      this.maxPermits = permits;
-      this.semaphore = new Semaphore(permits, true);
-      this.executor = executor;
-      this.waiting = new AtomicInteger(0);
-      this.active = new AtomicInteger(0);
-    }
-
-    public void setMaxPermits(int newPermits) {
-      this.maxPermits = newPermits;
-      int dPermits = newPermits - this.maxPermits;
-      if (dPermits == 0) {
-        return;
-      }
-      if (dPermits > 0) {
-        this.semaphore.release(dPermits);
-      } else {
-        this.executor.submit(() -> this.semaphore.acquireUninterruptibly(dPermits));
-      }
-    }
-
-    public int getWaiting() {
-      return this.waiting.get();
-    }
-
-    public int getActive() {
-      return this.active.get();
-    }
-
-    public String getVaihe() {
-      return this.vaihe;
-    }
-
-    public static String asLabel(Duration duration) {
-      if (duration == TIMEOUT) {
-        return "timeout";
-      } else if (duration == ERROR) {
-        return "error";
-      }
-      return duration.toMillis() + "";
-    }
-
-    public <T> CompletableFuture<T> withConcurrencyLimit(
-        int permits,
-        Map<String, Duration> waitDurations,
-        Map<String, Duration> invokeDurations,
-        Supplier<CompletableFuture<T>> supplier) {
-
-      Instant waitStart = Instant.now();
-      this.waiting.incrementAndGet();
-      return CompletableFuture.supplyAsync(
-          () -> {
-            this.semaphore.acquireUninterruptibly(Math.min(this.maxPermits, permits));
-            this.waiting.decrementAndGet();
-            this.active.incrementAndGet();
-            try {
-              Instant invokeStart = Instant.now();
-              waitDurations.put(this.vaihe, Duration.between(waitStart, invokeStart));
-              T result =
-                  supplier
-                      .get()
-                      .exceptionallyAsync(
-                          e -> {
-                            if (e instanceof TimeoutException) {
-                              invokeDurations.put(this.vaihe, TIMEOUT);
-                            } else {
-                              invokeDurations.put(this.vaihe, ERROR);
-                            }
-                            throw new CompletionException(e);
-                          },
-                          this.executor)
-                      .join();
-              invokeDurations.put(this.vaihe, Duration.between(invokeStart, Instant.now()));
-              return result;
-            } finally {
-              semaphore.release(permits);
-              this.active.decrementAndGet();
-            }
-          },
-          this.executor);
-    }
   }
 
   @Scheduled(initialDelay = 15, fixedDelay = 15, timeUnit = TimeUnit.SECONDS)
@@ -309,7 +211,7 @@ public class LaskentaResurssiProvider {
             + hakukohdeOid
             + ": "
             + waitDurations.entrySet().stream()
-                .map(e -> e.getKey() + ":" + ConcurrencyLimiter.asLabel(e.getValue()))
+                .map(e -> e.getKey() + ":" + ConcurrencyLimiter.asDurationString(e.getValue()))
                 .collect(Collectors.joining(", ")));
 
     LOG.info(
@@ -317,7 +219,7 @@ public class LaskentaResurssiProvider {
             + hakukohdeOid
             + ": "
             + invokeDurations.entrySet().stream()
-                .map(e -> e.getKey() + ":" + ConcurrencyLimiter.asLabel(e.getValue()))
+                .map(e -> e.getKey() + ":" + ConcurrencyLimiter.asDurationString(e.getValue()))
                 .collect(Collectors.joining(", ")));
   }
 
@@ -336,10 +238,7 @@ public class LaskentaResurssiProvider {
                         .storageResolution(1)
                         .dimensions(
                             List.of(
-                                Dimension.builder()
-                                    .name("vaihe")
-                                    .value(limiter.getVaihe())
-                                    .build()))
+                                Dimension.builder().name("vaihe").value(limiter.getNimi()).build()))
                         .timestamp(Instant.now())
                         .unit(StandardUnit.COUNT)
                         .build())
@@ -356,10 +255,7 @@ public class LaskentaResurssiProvider {
                         .storageResolution(1)
                         .dimensions(
                             List.of(
-                                Dimension.builder()
-                                    .name("vaihe")
-                                    .value(limiter.getVaihe())
-                                    .build()))
+                                Dimension.builder().name("vaihe").value(limiter.getNimi()).build()))
                         .timestamp(Instant.now())
                         .unit(StandardUnit.COUNT)
                         .build())
@@ -711,7 +607,8 @@ public class LaskentaResurssiProvider {
         "(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.",
         uuid,
         hakukohdeOid);
-    return getLaskeDtoFuture(
+    CompletableFuture<LaskeDTO> result = new CompletableFuture<>();
+    getLaskeDtoFuture(
             uuid,
             hakuFuture,
             hakukohdeOid,
@@ -725,7 +622,7 @@ public class LaskentaResurssiProvider {
             hakijaryhmat,
             hakemukset,
             koskiOppijaByOppijaOid)
-        .thenApplyAsync(
+        .thenAcceptAsync(
             laskeDTO -> {
               laskeDTO.populoiSuoritustiedotHakemuksille(suoritustiedotDTO);
               invokeDurations.put("Total", Duration.between(start, Instant.now()));
@@ -737,18 +634,29 @@ public class LaskentaResurssiProvider {
                       + ", end: "
                       + Instant.now());
               this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
-              return laskeDTO;
+              result.complete(laskeDTO);
             },
             this.executor)
         .orTimeout(9 * 60 * 1000l, TimeUnit.MILLISECONDS)
-        .exceptionally(
+        .exceptionallyAsync(
             ex -> {
-              if (ex instanceof TimeoutException) {
-                invokeDurations.put("Total (timeout)", Duration.between(start, Instant.now()));
-                this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
-              }
-              throw new RuntimeException(ex);
-            });
+              Throwable underlyingCause = getUnderlyingCause(ex);
+              invokeDurations.put(
+                  "Total" + (underlyingCause instanceof TimeoutException ? " (timeout)" : ""),
+                  Duration.between(start, Instant.now()));
+              this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
+              result.completeExceptionally(underlyingCause);
+              return null;
+            },
+            this.executor);
+    return result;
+  }
+
+  private static Throwable getUnderlyingCause(Throwable t) {
+    if (t.getCause() != null) {
+      return getUnderlyingCause(t.getCause());
+    }
+    return t;
   }
 
   private <T> CompletableFuture<T> createResurssiFuture(
