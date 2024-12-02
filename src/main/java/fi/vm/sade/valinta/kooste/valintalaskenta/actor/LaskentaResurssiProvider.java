@@ -608,7 +608,8 @@ public class LaskentaResurssiProvider {
         "(Uuid: {}) Odotetaan kaikkien resurssihakujen valmistumista hakukohteelle {}, jotta voidaan palauttaa ne yhtenä pakettina.",
         uuid,
         hakukohdeOid);
-    return getLaskeDtoFuture(
+    CompletableFuture<LaskeDTO> result = new CompletableFuture<>();
+    getLaskeDtoFuture(
             uuid,
             hakuFuture,
             hakukohdeOid,
@@ -622,7 +623,7 @@ public class LaskentaResurssiProvider {
             hakijaryhmat,
             hakemukset,
             koskiOppijaByOppijaOid)
-        .thenApplyAsync(
+        .thenAcceptAsync(
             laskeDTO -> {
               laskeDTO.populoiSuoritustiedotHakemuksille(suoritustiedotDTO);
               invokeDurations.put("Total", Duration.between(start, Instant.now()));
@@ -634,18 +635,21 @@ public class LaskentaResurssiProvider {
                       + ", end: "
                       + Instant.now());
               this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
-              return laskeDTO;
+              result.complete(laskeDTO);
             },
             this.executor)
         .orTimeout(9 * 60 * 1000l, TimeUnit.MILLISECONDS)
-        .exceptionally(
+        .exceptionallyAsync(
             ex -> {
               if (ex instanceof TimeoutException) {
                 invokeDurations.put("Total (timeout)", Duration.between(start, Instant.now()));
                 this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
               }
-              throw new RuntimeException(ex);
-            });
+              result.completeExceptionally(ex);
+              return null;
+            },
+            this.executor);
+    return result;
   }
 
   private <T> CompletableFuture<T> createResurssiFuture(

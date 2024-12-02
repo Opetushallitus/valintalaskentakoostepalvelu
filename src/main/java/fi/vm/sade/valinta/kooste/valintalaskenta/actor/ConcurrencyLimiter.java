@@ -119,7 +119,9 @@ public class ConcurrencyLimiter {
       Supplier<CompletableFuture<T>> supplier) {
 
     Instant waitStart = Instant.now();
-    return CompletableFuture.supplyAsync(
+    CompletableFuture<T> future = new CompletableFuture<>();
+
+    this.executor.submit(
         () -> {
           // haetaan lupa suorittaa pyyntö ja tallennetaan odottamiseen mennyt aika
           this.waiting.incrementAndGet();
@@ -134,27 +136,25 @@ public class ConcurrencyLimiter {
           // suoritetaan pyyntö
           this.active.incrementAndGet();
           try {
-            T result =
-                supplier
-                    .get()
-                    .exceptionallyAsync(
-                        e -> {
-                          if (e instanceof TimeoutException) {
-                            invokeDurations.put(this.nimi, TIMEOUT);
-                          } else {
-                            invokeDurations.put(this.nimi, ERROR);
-                          }
-                          throw new CompletionException(e);
-                        },
-                        this.executor)
-                    .join();
+            T result = supplier.get().get();
             invokeDurations.put(this.nimi, Duration.between(invokeStart, Instant.now()));
-            return result;
+            future.complete(result);
+          } catch (ExecutionException e) {
+            if (e.getCause() instanceof TimeoutException) {
+              invokeDurations.put(this.nimi, TIMEOUT);
+            } else {
+              invokeDurations.put(this.nimi, ERROR);
+            }
+            future.completeExceptionally(e.getCause());
+          } catch (Exception e) {
+            invokeDurations.put(this.nimi, ERROR);
+            future.completeExceptionally(e);
           } finally {
             semaphore.release(permits);
             this.active.decrementAndGet();
           }
-        },
-        this.executor);
+        });
+
+    return future;
   }
 }
