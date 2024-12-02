@@ -20,8 +20,9 @@ public class ConcurrencyLimiter {
 
   private static final Logger LOG = LoggerFactory.getLogger(ConcurrencyLimiter.class);
 
-  public static final Duration TIMEOUT = Duration.ofMillis(Long.MIN_VALUE + 1);
-  public static final Duration ERROR = Duration.ofMillis(Long.MIN_VALUE + 2);
+  public static final Duration ONGOING = Duration.ofMillis(Long.MIN_VALUE + 1);
+  public static final Duration TIMEOUT = Duration.ofMillis(Long.MIN_VALUE + 2);
+  public static final Duration ERROR = Duration.ofMillis(Long.MIN_VALUE + 3);
 
   private int maxPermits;
   private final String nimi;
@@ -95,7 +96,9 @@ public class ConcurrencyLimiter {
   }
 
   public static String asDurationString(Duration duration) {
-    if (duration == TIMEOUT) {
+    if (duration == ONGOING) {
+      return "ongoing";
+    } else if (duration == TIMEOUT) {
       return "timeout";
     } else if (duration == ERROR) {
       return "error";
@@ -136,16 +139,19 @@ public class ConcurrencyLimiter {
           // suoritetaan pyyntö
           this.active.incrementAndGet();
           try {
+            invokeDurations.put(this.nimi, ONGOING);
             T result = supplier.get().get();
             invokeDurations.put(this.nimi, Duration.between(invokeStart, Instant.now()));
             future.complete(result);
           } catch (ExecutionException e) {
-            if (e.getCause() instanceof TimeoutException) {
+            Throwable underlyingCause = getUnderlyingCause(e);
+            if (underlyingCause instanceof TimeoutException) {
               invokeDurations.put(this.nimi, TIMEOUT);
+              future.completeExceptionally(underlyingCause);
             } else {
               invokeDurations.put(this.nimi, ERROR);
+              future.completeExceptionally(e);
             }
-            future.completeExceptionally(e.getCause());
           } catch (Exception e) {
             invokeDurations.put(this.nimi, ERROR);
             future.completeExceptionally(e);
@@ -156,5 +162,12 @@ public class ConcurrencyLimiter {
         });
 
     return future;
+  }
+
+  private static Throwable getUnderlyingCause(Throwable t) {
+    if (t.getCause() != null) {
+      return getUnderlyingCause(t.getCause());
+    }
+    return t;
   }
 }

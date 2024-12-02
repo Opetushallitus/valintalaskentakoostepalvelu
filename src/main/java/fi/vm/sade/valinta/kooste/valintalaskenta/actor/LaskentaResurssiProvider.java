@@ -641,15 +641,23 @@ public class LaskentaResurssiProvider {
         .orTimeout(9 * 60 * 1000l, TimeUnit.MILLISECONDS)
         .exceptionallyAsync(
             ex -> {
-              if (ex instanceof TimeoutException) {
-                invokeDurations.put("Total (timeout)", Duration.between(start, Instant.now()));
-                this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
-              }
-              result.completeExceptionally(ex);
+              Throwable underlyingCause = getUnderlyingCause(ex);
+              invokeDurations.put(
+                  "Total" + (underlyingCause instanceof TimeoutException ? " (timeout)" : ""),
+                  Duration.between(start, Instant.now()));
+              this.tallennaLokitJaMetriikat(hakukohdeOid, waitDurations, invokeDurations);
+              result.completeExceptionally(underlyingCause);
               return null;
             },
             this.executor);
     return result;
+  }
+
+  private static Throwable getUnderlyingCause(Throwable t) {
+    if (t.getCause() != null) {
+      return getUnderlyingCause(t.getCause());
+    }
+    return t;
   }
 
   private <T> CompletableFuture<T> createResurssiFuture(
