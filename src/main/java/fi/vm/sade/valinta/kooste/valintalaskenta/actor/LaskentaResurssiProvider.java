@@ -140,6 +140,13 @@ public class LaskentaResurssiProvider {
         });
   }
 
+  public int jononpituus() {
+    return this.limiters.values().stream()
+        .map(l -> l.getWaiting())
+        .max(Integer::compareTo)
+        .orElseThrow();
+  }
+
   private void tallennaLokitJaMetriikat(
       String hakukohdeOid,
       Map<String, Duration> waitDurations,

@@ -55,6 +55,11 @@ public class ValintalaskentaKerrallaResource {
     return t;
   }
 
+  @GetMapping(value = "/lahtotiedot/jononpituus", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<Integer> jononpituus() {
+    return ResponseEntity.status(HttpStatus.OK).body(this.laskentaResurssiProvider.jononpituus());
+  }
+
   @GetMapping(
       value = "/haku/{hakuOid}/hakukohde/{hakukohdeOid}/lahtotiedot",
       produces = MediaType.APPLICATION_JSON_VALUE)
