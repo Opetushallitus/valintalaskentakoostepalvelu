@@ -123,16 +123,30 @@ public class ConcurrencyLimiter {
 
     Instant waitStart = Instant.now();
     CompletableFuture<T> future = new CompletableFuture<>();
+    int requiredPermits = Math.min(this.maxPermits, permits);
 
     this.executor.submit(
         () -> {
           // haetaan lupa suorittaa pyyntö ja tallennetaan odottamiseen mennyt aika
           this.waiting.incrementAndGet();
           try {
-            this.semaphore.acquireUninterruptibly(Math.min(this.maxPermits, permits));
+            this.semaphore.acquireUninterruptibly(requiredPermits);
           } finally {
             this.waiting.decrementAndGet();
           }
+
+          if (nimi.equals("suoritukset")) {
+            LOG.info(
+                "Haettiin "
+                    + permits
+                    + " permittiä, jäi "
+                    + this.semaphore.availablePermits()
+                    + " permittiä, ajossa "
+                    + this.getActive()
+                    + ", odottaa "
+                    + this.getWaiting());
+          }
+
           Instant invokeStart = Instant.now();
           waitDurations.put(this.nimi, Duration.between(waitStart, invokeStart));
 
@@ -156,7 +170,7 @@ public class ConcurrencyLimiter {
             invokeDurations.put(this.nimi, ERROR);
             future.completeExceptionally(e);
           } finally {
-            semaphore.release(permits);
+            semaphore.release(requiredPermits);
             this.active.decrementAndGet();
           }
         });
