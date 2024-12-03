@@ -54,8 +54,8 @@ public class ConcurrencyLimiter {
    * @param newPermits uusi lupien määrä
    */
   public void setMaxPermits(int newPermits) {
-    this.maxPermits = newPermits;
     int dPermits = newPermits - this.maxPermits;
+    this.maxPermits = newPermits;
     if (dPermits == 0) {
       return;
     }
