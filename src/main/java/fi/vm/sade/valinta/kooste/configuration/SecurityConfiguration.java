@@ -2,9 +2,9 @@ package fi.vm.sade.valinta.kooste.configuration;
 
 import fi.vm.sade.java_utils.security.OpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl;
-import org.jasig.cas.client.session.SingleSignOutFilter;
-import org.jasig.cas.client.validation.Cas20ProxyTicketValidator;
-import org.jasig.cas.client.validation.TicketValidator;
+import org.apereo.cas.client.session.SingleSignOutFilter;
+import org.apereo.cas.client.validation.Cas20ProxyTicketValidator;
+import org.apereo.cas.client.validation.TicketValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,18 +16,21 @@ import org.springframework.security.cas.ServiceProperties;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
 @Profile({"default", "dev"})
 @Configuration
 @Order(2)
 @EnableMethodSecurity(securedEnabled = true)
 @EnableWebSecurity
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class SecurityConfiguration {
   private Environment environment;
 
   private String service;
@@ -87,10 +90,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   //
 
   @Bean
-  public CasAuthenticationFilter casAuthenticationFilter() throws Exception {
+  public CasAuthenticationFilter casAuthenticationFilter(
+      AuthenticationConfiguration authenticationConfiguration) throws Exception {
     OpintopolkuCasAuthenticationFilter casAuthenticationFilter =
         new OpintopolkuCasAuthenticationFilter(serviceProperties());
-    casAuthenticationFilter.setAuthenticationManager(authenticationManager());
+    casAuthenticationFilter.setAuthenticationManager(
+        authenticationConfiguration.getAuthenticationManager());
     casAuthenticationFilter.setFilterProcessesUrl("/j_spring_cas_security_check");
     return casAuthenticationFilter;
   }
@@ -121,35 +126,34 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     return casAuthenticationEntryPoint;
   }
 
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    http.headers()
-        .disable()
-        .csrf()
-        .disable()
-        .authorizeHttpRequests()
-        .regexMatchers("^/?$")
-        .permitAll()
-        .regexMatchers("^/buildversion.txt$")
-        .permitAll()
-        .regexMatchers("^/swagger-ui(/.*)?")
-        .permitAll()
-        .regexMatchers("^/swagger(/.*)?")
-        .permitAll()
-        .regexMatchers("^/v3/api-docs(/.*)?")
-        .permitAll()
-        .anyRequest()
-        .authenticated()
-        .and()
-        .addFilter(casAuthenticationFilter())
-        .exceptionHandling()
-        .authenticationEntryPoint(casAuthenticationEntryPoint())
-        .and()
-        .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class);
-  }
+  @Bean
+  public SecurityFilterChain filterChain(
+      HttpSecurity http, CasAuthenticationFilter casAuthenticationFilter) throws Exception {
 
-  @Override
-  protected void configure(AuthenticationManagerBuilder auth) {
-    auth.authenticationProvider(casAuthenticationProvider());
+    HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+    requestCache.setMatchingRequestParameterName(null);
+
+    http.headers(AbstractHttpConfigurer::disable)
+        .csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(
+            (authorizeHttpRequests) ->
+                authorizeHttpRequests
+                    .requestMatchers(new RegexRequestMatcher("^/?$", "GET"))
+                    .permitAll()
+                    .requestMatchers(new RegexRequestMatcher("^/buildversion.txt$", "GET"))
+                    .permitAll()
+                    .requestMatchers(new RegexRequestMatcher("^/swagger-ui(/.*)?", "GET"))
+                    .permitAll()
+                    .requestMatchers(new RegexRequestMatcher("^/swagger(/.*)?", "GET"))
+                    .permitAll()
+                    .requestMatchers(new RegexRequestMatcher("^/v3/api-docs(/.*)?", "GET"))
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .addFilter(casAuthenticationFilter)
+        .exceptionHandling(eh -> eh.authenticationEntryPoint(casAuthenticationEntryPoint()))
+        .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class);
+
+    return http.build();
   }
 }

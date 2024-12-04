@@ -3,7 +3,9 @@ package fi.vm.sade.valinta.kooste.erillishaku.resource.dto;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import java.util.Collection;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class Prosessi {
   public Osatyo kokonaistyo = new Osatyo();
   public String dokumenttiId;

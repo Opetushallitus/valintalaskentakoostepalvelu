@@ -23,6 +23,7 @@ public class Koekutsukirje {
 
   private String tarjoaja;
   private Osoite addressLabel;
+
   /** Kielikoodi ISO 639-1. */
   private String languageCode;
 
