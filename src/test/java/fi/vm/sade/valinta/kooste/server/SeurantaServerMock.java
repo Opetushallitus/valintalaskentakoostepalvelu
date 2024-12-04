@@ -20,7 +20,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class SeurantaServerMock extends MockServer {
 
   private static final int mockSeurantaPort = PortChecker.findFreeLocalPort();

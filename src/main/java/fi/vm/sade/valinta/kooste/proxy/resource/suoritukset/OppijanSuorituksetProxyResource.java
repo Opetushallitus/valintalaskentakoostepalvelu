@@ -28,14 +28,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +55,9 @@ public class OppijanSuorituksetProxyResource {
 
   @Autowired private SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
 
-  @Autowired private OhjausparametritAsyncResource ohjausparametritAsyncResource;
+  @Autowired
+  @Qualifier("OhjausparametritAsyncResource")
+  private OhjausparametritAsyncResource ohjausparametritAsyncResource;
 
   @Autowired private ApplicationAsyncResource applicationAsyncResource;
 

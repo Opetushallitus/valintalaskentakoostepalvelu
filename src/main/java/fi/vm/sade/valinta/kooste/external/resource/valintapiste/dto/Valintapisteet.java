@@ -21,7 +21,9 @@ public class Valintapisteet {
 
   public Valintapisteet() {}
 
-  /** @param a Tallettaja and AdditionalData */
+  /**
+   * @param a Tallettaja and AdditionalData
+   */
   public Valintapisteet(Pair<String, ApplicationAdditionalDataDTO> a) {
     this(
         a.getRight().getOid(),

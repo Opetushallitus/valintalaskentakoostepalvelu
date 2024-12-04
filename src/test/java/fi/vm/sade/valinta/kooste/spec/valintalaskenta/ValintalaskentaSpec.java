@@ -7,7 +7,9 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.*;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class ValintalaskentaSpec {
 
   public static class HakemusOsallistuminenBuilder {

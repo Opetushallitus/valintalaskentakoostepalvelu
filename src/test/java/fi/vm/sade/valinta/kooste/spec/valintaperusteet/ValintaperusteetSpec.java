@@ -7,7 +7,9 @@ import fi.vm.sade.valinta.kooste.spec.ConstantsSpec;
 import java.util.Arrays;
 import org.mockito.Mockito;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class ValintaperusteetSpec extends ConstantsSpec {
 
   // ValintaperusteetDTO
