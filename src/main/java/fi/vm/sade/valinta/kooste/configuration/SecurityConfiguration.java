@@ -152,7 +152,8 @@ public class SecurityConfiguration {
                     .authenticated())
         .addFilter(casAuthenticationFilter)
         .exceptionHandling(eh -> eh.authenticationEntryPoint(casAuthenticationEntryPoint()))
-        .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class);
+        .addFilterBefore(singleSignOutFilter(), CasAuthenticationFilter.class)
+        .requestCache(cache -> cache.requestCache(requestCache));
 
     return http.build();
   }

@@ -13,10 +13,14 @@ public class DevApp {
     System.setProperty("server.ssl.enabled", "true");
     System.setProperty("server.port", "8443");
 
+    //System.setProperty(
+    //    "cas.service.valintalaskentakoostepalvelu",
+    //    String.format(
+    //        "https://virkailija.%sopintopolku.fi/valintalaskentakoostepalvelu", ENVIRONMENT));
     System.setProperty(
-        "cas.service.valintalaskentakoostepalvelu",
-        String.format(
-            "https://virkailija.%sopintopolku.fi/valintalaskentakoostepalvelu", ENVIRONMENT));
+            "cas.service.valintalaskentakoostepalvelu",
+            String.format(
+                    "https://localhost:8443/valintalaskentakoostepalvelu", ENVIRONMENT));
     System.setProperty("cas-service.sendRenew", "false");
     System.setProperty("cas-service.key", "valintalaskentakoostepalvelu");
 
