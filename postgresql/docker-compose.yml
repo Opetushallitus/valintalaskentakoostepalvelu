@@ -3,7 +3,8 @@ services:
   db:
     container_name: "valintalaskentakoostepalvelu-postgres"
     environment:
-      - POSTGRES_PASSWORD="postgres"
+      - POSTGRES_USER="oph"
+      - POSTGRES_PASSWORD="oph"
     build:
       context: "."
     ports:
