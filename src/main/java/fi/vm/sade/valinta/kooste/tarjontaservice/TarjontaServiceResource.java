@@ -24,7 +24,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController("TarjontaServiceResource")
 @RequestMapping("/resources/tarjonta-service")
-// @PreAuthorize("isAuthenticated()")
 @Tag(
     name = "/tarjonta-service",
     description = "Proxy-rajapinnat vanhan tarjonnan tietojen hakemiseen")
@@ -135,11 +134,11 @@ public class TarjontaServiceResource {
         new com.google.gson.reflect.TypeToken<ResultV1RDTO<List<HakuV1RDTO>>>() {}.getType());
   }
 
-  @GetMapping(value = "/search", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
+  @GetMapping(value = "/rest/v1/hakukohde/search", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
   @Operation(
       summary = "Palauttaa listan hakukohteista annetuilla parametreilla",
       description = "Palauttaa listan hakukohteista annetuilla parametreilla.")
-  public CompletableFuture<ResultV1RDTO<HakutuloksetV1RDTO<HakukohdeHakutulosV1RDTO>>> search(
+  public CompletableFuture<String> search(
       @RequestParam(value = "searchTerms", required = false) String searchTerms,
       @RequestParam(value = "hakukohteenNimiUri", required = false) String hakukohteenNimiUri,
       @RequestParam(value = "organisationOid", required = false) List<String> organisationOids,
@@ -198,10 +197,8 @@ public class TarjontaServiceResource {
             .toUri()
             .getQuery();
 
-    return this.tarjontaClient.<ResultV1RDTO<HakutuloksetV1RDTO<HakukohdeHakutulosV1RDTO>>>getJson(
+    return this.tarjontaClient.getString(
         urlConfiguration.url("tarjonta-service.hakukohde.search") + "?" + queryString,
-        Duration.ofMinutes(5),
-        new com.google.gson.reflect.TypeToken<
-            ResultV1RDTO<HakutuloksetV1RDTO<HakukohdeHakutulosV1RDTO>>>() {}.getType());
+        Duration.ofMinutes(5));
   }
 }
