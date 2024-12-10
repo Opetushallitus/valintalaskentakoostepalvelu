@@ -8,13 +8,13 @@ import static org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import fi.vm.sade.javautils.poi.OphCellStyles.OphXssfCellStyles;
+import fi.vm.sade.valinta.kooste.util.OphCellStyles;
 import java.awt.*;
 import java.awt.Color;
 import java.io.*;
 import java.util.*;
 import java.util.List;
-import org.apache.poi.POIXMLException;
+import org.apache.poi.ooxml.POIXMLException;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
@@ -96,7 +96,7 @@ public class Excel {
     XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
     int hiddenSheetCount = 0;
     XSSFDataFormat fmt = workbook.createDataFormat();
-    OphXssfCellStyles defaultStyles = new OphXssfCellStyles(workbook);
+    OphCellStyles defaultStyles = new OphCellStyles(workbook);
     defaultStyles.visit(
         s -> {
           s.setDataFormat(fmt.getFormat("@"));
@@ -105,29 +105,29 @@ public class Excel {
     for (int i = 0; i < 22; ++i) {
       sheet.setDefaultColumnStyle(i, defaultStyles.getUnsafeStyle());
     }
-    OphXssfCellStyles hiddenStyles = new OphXssfCellStyles(workbook);
+    OphCellStyles hiddenStyles = new OphCellStyles(workbook);
     hiddenStyles.visit(s -> s.setHidden(true));
 
-    OphXssfCellStyles alignRightStyles = new OphXssfCellStyles(workbook);
+    OphCellStyles alignRightStyles = new OphCellStyles(workbook);
     alignRightStyles.visit(alignRightStyle -> alignRightStyle.setDataFormat(fmt.getFormat("@")));
-    OphXssfCellStyles alignCenterStyles = new OphXssfCellStyles(workbook);
+    OphCellStyles alignCenterStyles = new OphCellStyles(workbook);
     alignCenterStyles.visit(
         alignCenterStyle -> {
           alignCenterStyle.setDataFormat(fmt.getFormat("@"));
           alignCenterStyle.setAlignment(CENTER);
         });
-    OphXssfCellStyles lockedStyles = new OphXssfCellStyles(workbook);
+    OphCellStyles lockedStyles = new OphCellStyles(workbook);
     lockedStyles.visit(
         lockedStyle -> {
-          lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY));
+          lockedStyle.setFillForegroundColor(new XSSFColor(Color.GRAY, null));
           lockedStyle.setFillPattern(SOLID_FOREGROUND);
           lockedStyle.setDataFormat(fmt.getFormat("@"));
         });
-    OphXssfCellStyles editableStyles = new OphXssfCellStyles(workbook);
+    OphCellStyles editableStyles = new OphCellStyles(workbook);
     editableStyles.visit(
         editableStyle -> {
           editableStyle.setDataFormat(fmt.getFormat("@"));
-          editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)));
+          editableStyle.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153), null));
           editableStyle.setFillPattern(SOLID_FOREGROUND);
           editableStyle.setAlignment(LEFT);
           editableStyle.setLocked(false);

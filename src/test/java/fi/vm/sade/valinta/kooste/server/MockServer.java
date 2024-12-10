@@ -12,7 +12,9 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import org.hamcrest.Matchers;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class MockServer {
 
   private final HttpServer httpServer;

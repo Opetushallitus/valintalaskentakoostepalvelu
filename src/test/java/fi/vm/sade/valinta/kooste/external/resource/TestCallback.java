@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class TestCallback {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestCallback.class);
@@ -36,7 +38,7 @@ public class TestCallback {
             new TypeToken<List<Hakemus>>() {}.getType());
 
     cb.completed(
-        javax.ws.rs.core.Response.ok(new ClassPathResource("listfull.json").getInputStream())
+        jakarta.ws.rs.core.Response.ok(new ClassPathResource("listfull.json").getInputStream())
             .build());
   }
 
@@ -55,7 +57,7 @@ public class TestCallback {
             },
             new TypeToken<LaskentaDto>() {}.getType());
     cb2.completed(
-        javax.ws.rs.core.Response.ok(new ClassPathResource("resetoi.json").getInputStream())
+        jakarta.ws.rs.core.Response.ok(new ClassPathResource("resetoi.json").getInputStream())
             .build());
   }
 }

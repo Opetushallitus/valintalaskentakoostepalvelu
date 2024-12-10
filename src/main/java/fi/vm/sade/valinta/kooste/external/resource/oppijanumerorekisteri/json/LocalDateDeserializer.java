@@ -15,7 +15,7 @@ public class LocalDateDeserializer extends JsonDeserializer {
   public Object deserialize(JsonParser p, DeserializationContext ctxt)
       throws IOException, JsonProcessingException {
     if (!p.hasToken(JsonToken.VALUE_STRING)) {
-      throw ctxt.wrongTokenException(p, JsonToken.VALUE_STRING, null);
+      throw ctxt.wrongTokenException(p, LocalDate.class, JsonToken.VALUE_STRING, null);
     }
     String string = p.getText().trim();
     if (string.isEmpty()) {

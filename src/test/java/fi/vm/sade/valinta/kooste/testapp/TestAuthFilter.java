@@ -1,8 +1,8 @@
 package fi.vm.sade.valinta.kooste.testapp;
 
 import fi.vm.sade.valinta.sharedutils.FakeAuthenticationInitialiser;
+import jakarta.servlet.*;
 import java.io.IOException;
-import javax.servlet.*;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;

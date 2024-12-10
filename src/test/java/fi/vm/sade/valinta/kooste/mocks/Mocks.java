@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 @Profile("mockresources")
 @Service
 public class Mocks {

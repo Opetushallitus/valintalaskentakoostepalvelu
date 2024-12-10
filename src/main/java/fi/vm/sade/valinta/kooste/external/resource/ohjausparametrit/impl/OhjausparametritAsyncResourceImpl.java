@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
-@Component("OhjausparametritAsyncResourceImpl")
+@Component("OhjausparametritAsyncResource")
 public class OhjausparametritAsyncResourceImpl implements OhjausparametritAsyncResource {
   private final HttpClient client;
   private final UrlConfiguration urlConfiguration;

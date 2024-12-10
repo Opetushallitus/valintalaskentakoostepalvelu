@@ -9,7 +9,9 @@ import fi.vm.sade.sijoittelu.domain.IlmoittautumisTila;
 import fi.vm.sade.sijoittelu.domain.ValintatuloksenTila;
 import org.junit.jupiter.api.Test;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class ValidoiTilatUtilTest {
 
   @Test

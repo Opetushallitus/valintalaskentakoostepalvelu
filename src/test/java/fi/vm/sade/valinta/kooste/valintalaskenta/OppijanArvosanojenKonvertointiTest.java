@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
   private static final Logger LOG =
       LoggerFactory.getLogger(OppijanArvosanojenKonvertointiTest.class);

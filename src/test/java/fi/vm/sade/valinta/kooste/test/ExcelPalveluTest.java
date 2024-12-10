@@ -9,7 +9,9 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class ExcelPalveluTest {
   @Test
   public void testaaXlsTiedostonLuontia() throws IOException {
