@@ -36,13 +36,12 @@ public class HttpClient {
 
   public CompletableFuture<String> getString(String url, Duration timeout) {
     HttpRequest request =
-            buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
-                    .header("Accept", "application/json")
-                    .GET()
-                    .timeout(timeout)
-                    .build();
-    return this.makeRequest(request, null)
-            .thenApply(this::parseTxt);
+        buildWithCallerIdAndCsrfHeaders(HttpRequest.newBuilder(URI.create(url)))
+            .header("Accept", "application/json")
+            .GET()
+            .timeout(timeout)
+            .build();
+    return this.makeRequest(request, null).thenApply(this::parseTxt);
   }
 
   public <O> CompletableFuture<O> getJson(String url, Duration timeout, Type outputType) {
