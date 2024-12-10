@@ -134,7 +134,9 @@ public class TarjontaServiceResource {
         new com.google.gson.reflect.TypeToken<ResultV1RDTO<List<HakuV1RDTO>>>() {}.getType());
   }
 
-  @GetMapping(value = "/rest/v1/hakukohde/search", produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
+  @GetMapping(
+      value = "/rest/v1/hakukohde/search",
+      produces = MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
   @Operation(
       summary = "Palauttaa listan hakukohteista annetuilla parametreilla",
       description = "Palauttaa listan hakukohteista annetuilla parametreilla.")
