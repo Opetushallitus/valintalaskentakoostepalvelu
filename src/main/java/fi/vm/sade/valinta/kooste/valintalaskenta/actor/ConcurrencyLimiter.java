@@ -63,8 +63,8 @@ public class ConcurrencyLimiter {
       LOG.info("Lisätään vaiheen " + this.nimi + " limitteriin " + dPermits + " permittiä.");
       this.semaphore.release(dPermits);
     } else {
-      LOG.info("Vähennetään vaiheen " + this.nimi + " limitteristä " + dPermits + " permittiä.");
-      this.executor.submit(() -> this.semaphore.acquireUninterruptibly(dPermits));
+      LOG.info("Vähennetään vaiheen " + this.nimi + " limitteristä " + -dPermits + " permittiä.");
+      this.executor.submit(() -> this.semaphore.acquireUninterruptibly(-dPermits));
     }
   }
 
