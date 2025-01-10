@@ -16,11 +16,7 @@ import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.ValinnantulosRequest;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
@@ -283,6 +279,16 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 hakukohdeOid),
             Duration.ofMinutes(30),
             new TypeToken<HakukohdeDTO>() {}.getType()));
+  }
+
+  @Override
+  public Observable<Map<String, HyvaksynnanEhto>> getHyvaksynnanehdot(String hakukohdeOid) {
+    return Observable.fromFuture(
+        this.client.getJson(
+            this.urlConfiguration.url(
+                "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot", hakukohdeOid),
+            Duration.ofMinutes(30),
+            new TypeToken<Map<String, HyvaksynnanEhto>>() {}.getType()));
   }
 
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {

@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaHakukohde;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HyvaksynnanEhto;
 import fi.vm.sade.valinta.kooste.mocks.MockAtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -86,6 +87,7 @@ public class ValintalaskennanTulosExcelTest {
         };
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -113,6 +115,8 @@ public class ValintalaskennanTulosExcelTest {
   public void sheetContents() {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.singletonMap(
+                "Hakemus 1", new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -151,6 +155,9 @@ public class ValintalaskennanTulosExcelTest {
                 "Laskennan tulos",
                 "Selite",
                 "Kokonaispisteet",
+                "Hyväksynnän ehto (FI)",
+                "Hyväksynnän ehto (SV)",
+                "Hyväksynnän ehto (EN)",
                 "keskiarvo",
                 "pääsykoetulos"),
             asList(
@@ -164,6 +171,9 @@ public class ValintalaskennanTulosExcelTest {
                 "HYVAKSYTTAVISSA",
                 "",
                 "666",
+                "ehto 1",
+                "villkor 1",
+                "condition 1",
                 "9",
                 "10")),
         getWorksheetData(workbook.getSheetAt(0)));
@@ -173,6 +183,9 @@ public class ValintalaskennanTulosExcelTest {
   public void ataruSheetContents() {
     XSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.singletonMap(
+                "1.2.246.562.11.00000000000000000063",
+                new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -213,6 +226,9 @@ public class ValintalaskennanTulosExcelTest {
                 "Laskennan tulos",
                 "Selite",
                 "Kokonaispisteet",
+                "Hyväksynnän ehto (FI)",
+                "Hyväksynnän ehto (SV)",
+                "Hyväksynnän ehto (EN)",
                 "keskiarvo",
                 "pääsykoetulos"),
             asList(
@@ -226,6 +242,9 @@ public class ValintalaskennanTulosExcelTest {
                 "HYVAKSYTTAVISSA",
                 "",
                 "666",
+                "ehto 1",
+                "villkor 1",
+                "condition 1",
                 "9",
                 "10")),
         getWorksheetData(ataruWorkbook.getSheetAt(0)));
@@ -235,6 +254,7 @@ public class ValintalaskennanTulosExcelTest {
   public void sarakkeidenSisaltoOnOikeinVaikkaSeTulisiEriJarjestyksessaEriHakijoille() {
     XSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -272,6 +292,9 @@ public class ValintalaskennanTulosExcelTest {
                 "Laskennan tulos",
                 "Selite",
                 "Kokonaispisteet",
+                "Hyväksynnän ehto (FI)",
+                "Hyväksynnän ehto (SV)",
+                "Hyväksynnän ehto (EN)",
                 "Ammatillisen perustutkinnon keskiarvo",
                 "lukion keskiarvo",
                 "pääsykoetulos"),
@@ -287,6 +310,9 @@ public class ValintalaskennanTulosExcelTest {
                 "",
                 "19",
                 "",
+                "",
+                "",
+                "",
                 "9",
                 "8"),
             asList(
@@ -300,6 +326,9 @@ public class ValintalaskennanTulosExcelTest {
                 "HYVAKSYTTAVISSA",
                 "",
                 "17",
+                "",
+                "",
+                "",
                 "3.2",
                 "",
                 "10")),
@@ -310,6 +339,7 @@ public class ValintalaskennanTulosExcelTest {
   public void emptySheet() {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -381,6 +411,7 @@ public class ValintalaskennanTulosExcelTest {
         NullPointerException.class,
         () ->
             ValintalaskennanTulosExcel.luoExcel(
+                Collections.emptyMap(),
                 haku,
                 hakukohde,
                 Collections.singletonList(tarjoaja),
@@ -402,6 +433,7 @@ public class ValintalaskennanTulosExcelTest {
   public void generoiTiedosto() throws IOException {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),

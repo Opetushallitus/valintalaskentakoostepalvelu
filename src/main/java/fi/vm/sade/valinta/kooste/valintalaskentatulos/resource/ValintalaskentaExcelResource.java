@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HyvaksynnanEhto;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
@@ -36,11 +37,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -290,6 +287,9 @@ public class ValintalaskentaExcelResource {
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid) {
     DeferredResult<ResponseEntity<byte[]>> result = new DeferredResult<>();
 
+    Observable<Map<String, HyvaksynnanEhto>> hyvaksynnanEhdot =
+        valintaTulosServiceAsyncResource.getHyvaksynnanehdot(hakukohdeOid);
+
     Observable<AbstractHakukohde> hakukohdeObservable =
         Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
     Observable<List<Organisaatio>> tarjoajatObservable =
@@ -318,6 +318,7 @@ public class ValintalaskentaExcelResource {
             });
     final Observable<XSSFWorkbook> workbookObservable =
         Observable.combineLatest(
+            hyvaksynnanEhdot,
             hakuObservable,
             hakukohdeObservable,
             tarjoajatObservable,
