@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
@@ -24,9 +23,6 @@ public interface ValintaperusteetAsyncResource {
       Collection<String> hakukohdeOids);
 
   CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid);
-
-  // @GET /valintaperusteet-service/resources/hakukohde/haku/{}
-  Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid);
 
   CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
       String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
