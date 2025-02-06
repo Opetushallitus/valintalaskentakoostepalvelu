@@ -8,6 +8,7 @@ import com.codepoetics.protonpack.StreamUtils;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.AbstractHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HyvaksynnanEhto;
 import fi.vm.sade.valinta.kooste.util.ExcelExportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.FunktioTulosDTO;
@@ -34,6 +35,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ValintalaskennanTulosExcel {
   public static XSSFWorkbook luoExcel(
+      Map<String, HyvaksynnanEhto> hyvaksynnanEhdot,
       Haku haku,
       AbstractHakukohde hakukohdeDTO,
       List<Organisaatio> tarjoajat,
@@ -82,7 +84,7 @@ public class ValintalaskennanTulosExcel {
                         .map(h -> h.name)
                         .collect(Collectors.toList());
                 addRow(sheet, allColumnHeaders);
-                addJonosijaRows(hakemusByOid, jono, sheet, dynamicColumns);
+                addJonosijaRows(hakemusByOid, jono, sheet, dynamicColumns, hyvaksynnanEhdot);
               }
             });
     return workbook;
@@ -118,12 +120,14 @@ public class ValintalaskennanTulosExcel {
       Map<String, HakemusWrapper> hakemusByOid,
       ValintatietoValintatapajonoDTO jono,
       XSSFSheet sheet,
-      List<Column> dynamicColumns) {
+      List<Column> dynamicColumns,
+      Map<String, HyvaksynnanEhto> hyvaksynnanEhdot) {
     sortedJonosijat(jono)
         .map(
             hakija -> {
               final HakemusRivi hakemusRivi =
-                  new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()));
+                  new HakemusRivi(
+                      hakija, hakemusByOid.get(hakija.getHakemusOid()), hyvaksynnanEhdot);
               return Stream.concat(fixedColumns.stream(), dynamicColumns.stream())
                   .map(column -> column.extractor.apply(hakemusRivi))
                   .collect(Collectors.toList());
@@ -206,12 +210,18 @@ public class ValintalaskennanTulosExcel {
   private static class HakemusRivi {
     public final JonosijaDTO hakija;
     public final HakemusWrapper hakemus;
+    public final HyvaksynnanEhto hyvaksynnanEhto;
 
-    HakemusRivi(final JonosijaDTO hakija, final HakemusWrapper hakemus) {
+    HakemusRivi(
+        final JonosijaDTO hakija,
+        final HakemusWrapper hakemus,
+        Map<String, HyvaksynnanEhto> hyvaksynnanEhdot) {
       this.hakija = hakija;
       this.hakemus =
           Objects.requireNonNull(
               hakemus, String.format("Hakemusta oidilla %s ei löytynyt", hakija.getHakemusOid()));
+      this.hyvaksynnanEhto =
+          hyvaksynnanEhdot.getOrDefault(hakija.getHakemusOid(), new HyvaksynnanEhto());
     }
   }
 
@@ -230,7 +240,10 @@ public class ValintalaskennanTulosExcel {
           new Column(
               "Kokonaispisteet",
               14,
-              rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo())));
+              rivi -> nullSafeToString(getJarjestyskriteeri(rivi.hakija).getArvo())),
+          new Column("Hyväksynnän ehto (FI)", 30, rivi -> rivi.hyvaksynnanEhto.fi),
+          new Column("Hyväksynnän ehto (SV)", 30, rivi -> rivi.hyvaksynnanEhto.sv),
+          new Column("Hyväksynnän ehto (EN)", 30, rivi -> rivi.hyvaksynnanEhto.en));
 
   private static Stream<JonosijaDTO> sortedJonosijat(final ValintatietoValintatapajonoDTO jono) {
     return jono.getJonosijat().stream()

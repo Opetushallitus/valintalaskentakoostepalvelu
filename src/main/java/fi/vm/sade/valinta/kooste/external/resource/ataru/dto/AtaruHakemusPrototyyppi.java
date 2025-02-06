@@ -254,7 +254,9 @@ public class AtaruHakemusPrototyyppi {
     return syntymaAika.format(ErillishakuRivi.SYNTYMAAIKAFORMAT);
   }
 
-  /** @return ***HETU*** if {@link #henkilotunnus} is not empty, otherwise empty string */
+  /**
+   * @return ***HETU*** if {@link #henkilotunnus} is not empty, otherwise empty string
+   */
   private String getCensoredHETUIfExists() {
     if (this.henkilotunnus != null && this.henkilotunnus.length() > 0) {
       return "***HETU***";

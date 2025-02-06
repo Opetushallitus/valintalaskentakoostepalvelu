@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.ForbiddenException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -21,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 
 public class AuthorityCheckServiceTest {
@@ -97,7 +97,7 @@ public class AuthorityCheckServiceTest {
   @Test
   public void testCheckAuthorizationForHaku() {
     Assertions.assertThrows(
-        ForbiddenException.class,
+        AccessDeniedException.class,
         () -> authorityCheckService.checkAuthorizationForHaku("haku.oid", Collections.EMPTY_SET));
   }
 }

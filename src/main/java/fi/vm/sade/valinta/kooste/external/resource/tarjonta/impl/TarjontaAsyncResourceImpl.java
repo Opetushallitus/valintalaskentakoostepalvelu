@@ -69,7 +69,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
       @Qualifier("TarjontaHttpClient") HttpClient client,
       @Qualifier("KoutaCasClient") RestCasClient koutaClient,
       @Qualifier("HakukohderyhmapalveluCasClient") RestCasClient hakukohderyhmapalveluClient,
-      @Qualifier("OhjausparametritAsyncResourceImpl")
+      @Qualifier("OhjausparametritAsyncResource")
           OhjausparametritAsyncResource ohjausparametritAsyncResource) {
     this.client = client;
     this.koutaClient = koutaClient;

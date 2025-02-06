@@ -33,7 +33,7 @@ public class KoskiAsyncHttpClient {
     return asyncHttpClient(
         new DefaultAsyncHttpClientConfig.Builder()
             .setMaxRedirects(5)
-            .setConnectTimeout(10 * 1000)
+            .setConnectTimeout(Duration.ofMillis(10 * 1000))
             .build());
   }
 
@@ -107,8 +107,8 @@ public class KoskiAsyncHttpClient {
         new RequestBuilder()
             .setUrl(url)
             .setMethod(method)
-            .setRequestTimeout(timeoutInSeconds * 1000)
-            .setReadTimeout(timeoutInSeconds * 1000)
+            .setRequestTimeout(Duration.ofMillis(timeoutInSeconds * 1000))
+            .setReadTimeout(Duration.ofMillis(timeoutInSeconds * 1000))
             .addHeader("Caller-Id", CALLER_ID)
             .addHeader("CSRF", CSRF_VALUE)
             .addHeader("Cookie", String.format("CSRF=%s;", CSRF_VALUE))

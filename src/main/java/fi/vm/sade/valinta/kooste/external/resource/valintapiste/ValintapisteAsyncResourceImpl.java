@@ -14,7 +14,6 @@ import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.core.GenericType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,7 +44,7 @@ public class ValintapisteAsyncResourceImpl implements ValintapisteAsyncResource 
       try {
         List<Valintapisteet> pisteet =
             GSON.fromJson(
-                response.getResponseBody(), new GenericType<List<Valintapisteet>>() {}.getType());
+                response.getResponseBody(), new TypeToken<List<Valintapisteet>>() {}.getType());
         if (pisteet == null) {
           String s = response.getResponseBody();
           LOG.error("Valintapisteet null! Response {}", s);

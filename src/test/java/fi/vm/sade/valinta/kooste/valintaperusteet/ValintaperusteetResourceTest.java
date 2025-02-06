@@ -12,10 +12,10 @@ import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2.ValintaperusteetResourceResult;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
+import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

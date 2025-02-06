@@ -13,7 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.poi.util.IOUtils;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class GeneroiTilaKombinaatiot {
 
   private static <T> List<T> andNull(T[] t) {

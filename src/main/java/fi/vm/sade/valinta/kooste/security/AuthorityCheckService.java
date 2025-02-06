@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.ForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -88,7 +88,7 @@ public class AuthorityCheckService {
           String.format(
               "Käyttäjällä ei oikeutta haun %s tarjoajaan tai sen yläorganisaatioihin.", hakuOid);
       LOG.error(msg);
-      throw new ForbiddenException(msg);
+      throw new AccessDeniedException(msg);
     }
   }
 
@@ -111,7 +111,7 @@ public class AuthorityCheckService {
       String msg =
           String.format("Käyttäjällä ei oikeutta yhteenkään hakukohteeseen: %s", hakukohdeOids);
       LOG.error(msg);
-      throw new ForbiddenException(msg);
+      throw new AccessDeniedException(msg);
     }
   }
 
@@ -156,7 +156,7 @@ public class AuthorityCheckService {
               "Organisaatioiden %s parentOids -haku epäonnistui",
               String.join(", ", organisaatioOids));
       LOG.error(msg, e);
-      throw new ForbiddenException(msg);
+      throw new AccessDeniedException(msg);
     }
 
     return false;
@@ -195,7 +195,7 @@ public class AuthorityCheckService {
               "Käyttäjällä ei oikeutta valintaryhmän %s vastuuorganisaatioon tai sen yläorganisaatioihin.",
               valintaryhmaOid);
       LOG.error(msg);
-      throw new ForbiddenException(msg);
+      throw new AccessDeniedException(msg);
     }
   }
 

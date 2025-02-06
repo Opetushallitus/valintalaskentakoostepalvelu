@@ -5,7 +5,7 @@ import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import javax.ws.rs.ForbiddenException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class MockAuthorityCheckService extends AuthorityCheckService {
   @Override
   public void checkAuthorizationForHaku(String hakuOid, Collection<String> requiredRoles) {
     if (hakuOid.equals("unauthorized.oid")) {
-      throw new ForbiddenException("Test unauthorized");
+      throw new AccessDeniedException("Test unauthorized");
     }
   }
 
