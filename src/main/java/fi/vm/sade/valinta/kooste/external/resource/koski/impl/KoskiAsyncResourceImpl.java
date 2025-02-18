@@ -122,7 +122,7 @@ public class KoskiAsyncResourceImpl implements KoskiAsyncResource {
 
   private CompletableFuture<List<String>> pollMassaluovutusResults(
       int pollInterval, int pollCount, String urlToPoll) {
-    LOG.debug("Polling URL {} with interval {}", urlToPoll, pollInterval);
+    LOG.info("Polling URL {} with interval {}", urlToPoll, pollInterval);
     return httpClient
         .<KoskiOppijaQueryResult>getJsonAfterDelay(
             urlToPoll,
@@ -159,6 +159,7 @@ public class KoskiAsyncResourceImpl implements KoskiAsyncResource {
   }
 
   private CompletableFuture<KoskiOppija> getMassaluovutusResultItem(String resultUrl) {
+    LOG.info("Fetching massaluovutus result item from url {}", resultUrl);
     Realm realm =
         new Realm.Builder(koskiUsername, koskiPassword)
             .setUsePreemptiveAuth(false)
