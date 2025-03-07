@@ -64,4 +64,19 @@ public class Monivalinta extends Solu {
   public Teksti toTeksti() {
     return new Teksti(teksti, true, false, preferoituleveys);
   }
+
+  @Override
+  public String toString() {
+    return "Monivalinta{"
+        + "vaihtoehdot="
+        + vaihtoehdot
+        + ", teksti='"
+        + teksti
+        + '\''
+        + ", muokattava="
+        + muokattava
+        + ", preferoituleveys="
+        + preferoituleveys
+        + '}';
+  }
 }
