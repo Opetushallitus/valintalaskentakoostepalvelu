@@ -15,6 +15,7 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 import org.apache.poi.ooxml.POIXMLException;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
@@ -140,6 +141,7 @@ public class Excel {
 
     for (Rivi toisteinenrivi : rivit) {
       for (Rivi rivi : toisteinenrivi.getToisteisetRivit()) {
+        LOG.info("Rivi: {}", rivi);
         XSSFRow row = sheet.createRow(rowIndex);
         int cellNum = 0;
         for (Solu solu : rivi.getSolut()) {
@@ -163,7 +165,9 @@ public class Excel {
               }
               joukko.addAddress(rowIndex, cellNum);
             }
-            if (!numero.isTyhja()) {
+            if (numero.isTyhja()) {
+              cell.setCellType(CellType.BLANK);
+            } else {
               cell.setCellValue(numero.getNumero().doubleValue());
               alignRightStyles.apply(cell);
             }
