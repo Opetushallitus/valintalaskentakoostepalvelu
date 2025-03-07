@@ -6,7 +6,6 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
 import static org.apache.commons.collections.ListUtils.union;
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jasig.cas.client.util.CommonUtils.isNotEmpty;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.Changes;
@@ -646,7 +645,7 @@ public abstract class AbstractPistesyottoKoosteService {
         taso.stream().filter(ot -> ot.getOid().equals(tarjoajaOid)).findFirst();
     tarjoajaLevelReached = tarjoajaLevelReached || tarjoaja.isPresent();
 
-    if (isNotEmpty(oppilaitosRef.get()) && tarjoajaLevelReached) {
+    if (!isEmpty(oppilaitosRef.get()) && tarjoajaLevelReached) {
       return oppilaitosRef;
     }
     if (tarjoaja.isPresent() && isEmpty(oppilaitosRef.get())) {

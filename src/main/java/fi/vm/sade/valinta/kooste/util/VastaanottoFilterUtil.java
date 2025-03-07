@@ -10,7 +10,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.keyvalue.MultiKey;
 
-/** @author nobody is willing to claim such honor */
+/**
+ * @author nobody is willing to claim such honor
+ */
 public class VastaanottoFilterUtil {
   private static final Set<HakemuksenTila> PRESERVING_STATES =
       ImmutableSet.of(

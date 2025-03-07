@@ -95,7 +95,10 @@ public class PistesyottoExcel {
   public boolean onkoHakijaOsallistujaValintakokeeseen(String hakemus, String valintakoe) {
     return onkoHakijaOsallistuja.getOrDefault(hakemusValintakoeYhdiste(hakemus, valintakoe), false);
   }
-  /** @return < HakemusOid , < Tunniste , ValintakoeDTO > > */
+
+  /**
+   * @return < HakemusOid , < Tunniste , ValintakoeDTO > >
+   */
   private Map<String, Map<String, ValintakoeDTO>> valintakoeOidit(
       String hakukohdeOid, List<ValintakoeOsallistuminenDTO> osallistumistiedot) {
     Map<String, Map<String, ValintakoeDTO>> tunnisteOid = Maps.newHashMap();

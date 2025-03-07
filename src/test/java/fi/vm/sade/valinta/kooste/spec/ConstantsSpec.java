@@ -1,6 +1,8 @@
 package fi.vm.sade.valinta.kooste.spec;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class ConstantsSpec {
   public static final String HAKU1 = "HAKU1";
   public static final String HAKEMUS1 = "HAKEMUS1";

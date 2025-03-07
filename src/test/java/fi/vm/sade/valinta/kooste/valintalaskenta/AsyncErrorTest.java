@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 
-/** @author Jussi Jartamo @Ignore lokaaliin testaukseen. CAS virheen todentamiseen. */
+/**
+ * @author Jussi Jartamo @Ignore lokaaliin testaukseen. CAS virheen todentamiseen.
+ */
 @Disabled
 public class AsyncErrorTest {
 

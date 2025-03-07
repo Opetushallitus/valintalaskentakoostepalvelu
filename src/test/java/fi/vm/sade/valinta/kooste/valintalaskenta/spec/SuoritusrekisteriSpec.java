@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class SuoritusrekisteriSpec {
   public static class SuoritustietoBuilder {
     private final Map<String, String> m = Maps.newHashMap();

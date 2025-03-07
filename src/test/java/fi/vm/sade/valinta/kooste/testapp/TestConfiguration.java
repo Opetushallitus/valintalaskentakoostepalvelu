@@ -31,7 +31,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.route.KoekutsukirjeetService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KirjeetHakukohdeCache;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.KoekutsukirjeetImpl;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.service.OsoitetarratService;
-import fi.vm.sade.valintalaskenta.tulos.resource.ValintakoeResource;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
@@ -197,11 +196,6 @@ public class TestConfiguration {
   @Bean
   public RyhmasahkopostiAsyncResource getRyhmasahkopostiAsyncResource() {
     return Mockito.mock(RyhmasahkopostiAsyncResource.class);
-  }
-
-  @Bean
-  public ValintakoeResource getValintakoeResource() {
-    return Mockito.mock(ValintakoeResource.class);
   }
 
   @Bean
