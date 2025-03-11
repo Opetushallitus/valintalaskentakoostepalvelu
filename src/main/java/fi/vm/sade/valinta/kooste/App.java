@@ -1,12 +1,13 @@
 package fi.vm.sade.valinta.kooste;
 
-import java.io.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, MongoAutoConfiguration.class})
+@EnableScheduling
 public class App {
 
   public static final String CONTEXT_PATH = "/valintalaskentakoostepalvelu";

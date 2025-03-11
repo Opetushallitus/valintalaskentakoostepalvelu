@@ -21,12 +21,16 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 
 @Profile({"default", "dev"})
 @Configuration
 @Order(2)
 @EnableMethodSecurity(securedEnabled = true)
 @EnableWebSecurity
+@EnableJdbcHttpSession
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   private Environment environment;
 
@@ -151,5 +155,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(AuthenticationManagerBuilder auth) {
     auth.authenticationProvider(casAuthenticationProvider());
+  }
+
+  @Bean
+  public CookieSerializer cookieSerializer() {
+    DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+    serializer.setUseSecureCookie(true);
+    serializer.setCookieName("JSESSIONID");
+    serializer.setCookiePath("/valintalaskentakoostepalvelu");
+    serializer.setUseBase64Encoding(false);
+    return serializer;
   }
 }
