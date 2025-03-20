@@ -36,11 +36,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
@@ -54,7 +54,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
-/** @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa. */
+/**
+ * @Autowired(required = false) Camel-reitit valinnaisiksi poisrefaktorointia odotellessa.
+ */
 @RestController("ValintalaskentaExcelResource")
 @RequestMapping("/resources/valintalaskentaexcel")
 @PreAuthorize("isAuthenticated()")

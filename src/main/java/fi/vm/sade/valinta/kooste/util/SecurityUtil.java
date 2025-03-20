@@ -6,10 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.ws.rs.ForbiddenException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -93,13 +93,13 @@ public class SecurityUtil {
     SecurityContext context = SecurityContextHolder.getContext();
     if (context == null) {
       String msg = "No SecurityContext found";
-      throw new ForbiddenException(msg);
+      throw new AccessDeniedException(msg);
     }
 
     Authentication authentication = context.getAuthentication();
     if (authentication == null) {
       String msg = "No Authentication found in SecurityContext";
-      throw new ForbiddenException(msg);
+      throw new AccessDeniedException(msg);
     }
 
     return authentication.getAuthorities();

@@ -1,17 +1,12 @@
 package fi.vm.sade.valinta.kooste;
 
+import jakarta.servlet.*;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import org.jasig.cas.client.authentication.AttributePrincipalImpl;
-import org.jasig.cas.client.validation.AssertionImpl;
+import org.apereo.cas.client.authentication.AttributePrincipalImpl;
+import org.apereo.cas.client.validation.AssertionImpl;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.cas.authentication.CasAuthenticationToken;

@@ -11,7 +11,7 @@ public class XSSFSolu {
   private XSSFSolu() {}
 
   public static Solu asSolu(XSSFCell cell) {
-    if (CellType.NUMERIC.equals(cell.getCellTypeEnum())) {
+    if (CellType.NUMERIC.equals(cell.getCellType())) {
       if (DateUtil.isCellDateFormatted(cell)) {
         return new Paivamaara(cell.getDateCellValue());
       } else {
@@ -19,7 +19,7 @@ public class XSSFSolu {
       }
     } else {
       String rawValue;
-      if (CellType.STRING.equals(cell.getCellTypeEnum())) {
+      if (CellType.STRING.equals(cell.getCellType())) {
         rawValue = cell.getStringCellValue();
       } else {
         rawValue = StringUtils.EMPTY;

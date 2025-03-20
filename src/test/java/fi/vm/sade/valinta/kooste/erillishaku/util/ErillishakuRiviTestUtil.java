@@ -12,7 +12,9 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.Maksuvelvollisuus;
 import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import java.util.Date;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class ErillishakuRiviTestUtil {
 
   private static final String SUKUNIMI = "Sukunimi";

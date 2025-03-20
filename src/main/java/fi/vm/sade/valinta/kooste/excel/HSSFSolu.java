@@ -9,7 +9,7 @@ public class HSSFSolu {
   private HSSFSolu() {}
 
   public static Solu asSolu(HSSFCell cell) {
-    if (CellType.NUMERIC.equals(cell.getCellTypeEnum())) {
+    if (CellType.NUMERIC.equals(cell.getCellType())) {
       if (DateUtil.isCellDateFormatted(cell)) {
         return new Paivamaara(cell.getDateCellValue());
       } else {
@@ -17,7 +17,7 @@ public class HSSFSolu {
       }
     } else {
       String rawValue;
-      if (CellType.STRING.equals(cell.getCellTypeEnum())) {
+      if (CellType.STRING.equals(cell.getCellType())) {
         rawValue = cell.getStringCellValue();
       } else {
         rawValue = StringUtils.EMPTY;
