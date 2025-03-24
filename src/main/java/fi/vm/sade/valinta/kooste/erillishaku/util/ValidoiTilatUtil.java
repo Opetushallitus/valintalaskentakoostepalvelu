@@ -58,7 +58,9 @@ public class ValidoiTilatUtil {
   private static final Set<IlmoittautumisTila> EI_ILMOITTAUTUMISTA =
       Sets.newHashSet(Arrays.asList(IlmoittautumisTila.EI_TEHTY));
 
-  /** @return (null if ok) validation error */
+  /**
+   * @return (null if ok) validation error
+   */
   public static String validoi(
       HakemuksenTila hakemuksenTila,
       ValintatuloksenTila valintatuloksenTila,

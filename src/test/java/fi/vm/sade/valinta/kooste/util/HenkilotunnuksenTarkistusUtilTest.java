@@ -3,7 +3,9 @@ package fi.vm.sade.valinta.kooste.util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class HenkilotunnuksenTarkistusUtilTest {
 
   @Test

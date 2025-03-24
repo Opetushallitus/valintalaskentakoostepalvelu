@@ -7,13 +7,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.json.LocalDateDeserializer;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.json.LocalDateSerializer;
+import jakarta.validation.constraints.AssertTrue;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import javax.validation.constraints.AssertTrue;
 
 public class HenkiloPerustietoDto implements Serializable {
   private static final long serialVersionUID = -1263854768854256588L;

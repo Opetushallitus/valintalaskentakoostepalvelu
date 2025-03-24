@@ -21,7 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-/** @author Jussi Jartamo */
+/**
+ * @author Jussi Jartamo
+ */
 public class ValintatapajonoTuontiTest extends ValintatapajonoTestTools {
   private static final Logger LOG = LoggerFactory.getLogger(ValintatapajonoTuontiTest.class);
   private static final Type valinnanVaiheListType =

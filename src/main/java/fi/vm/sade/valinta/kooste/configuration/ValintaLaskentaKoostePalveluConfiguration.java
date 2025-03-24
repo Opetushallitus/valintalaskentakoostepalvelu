@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.configuration;
 
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import fi.vm.sade.valinta.dokumenttipalvelu.Dokumenttipalvelu;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
@@ -39,5 +40,10 @@ public class ValintaLaskentaKoostePalveluConfiguration {
       @Value("${aws.region}") final String region,
       @Value("${aws.bucket.name}") final String bucketName) {
     return new Dokumenttipalvelu(region, bucketName);
+  }
+
+  @Bean
+  public com.fasterxml.jackson.databind.Module jodaModule() {
+    return new JodaModule();
   }
 }

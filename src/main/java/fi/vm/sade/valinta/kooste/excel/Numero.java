@@ -117,4 +117,20 @@ public class Numero extends Solu {
   public Numero toNumero() {
     return this;
   }
+
+  @Override
+  public String toString() {
+    return "Numero{"
+        + "numero="
+        + numero
+        + ", min="
+        + min
+        + ", max="
+        + max
+        + ", muokattava="
+        + muokattava
+        + ", preferoituleveys="
+        + preferoituleveys
+        + '}';
+  }
 }
