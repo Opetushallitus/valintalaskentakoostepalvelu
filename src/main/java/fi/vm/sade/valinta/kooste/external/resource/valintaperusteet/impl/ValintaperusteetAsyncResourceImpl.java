@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
@@ -80,16 +79,6 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
 
     return httpClient.get(
         url, new TypeToken<List<ValintaperusteetDTO>>() {}, Collections.emptyMap(), 60 * 60 * 1000);
-  }
-
-  public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
-    return Observable.fromFuture(
-        this.httpClient.get(
-            this.urlConfiguration.url(
-                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku", hakuOid),
-            new TypeToken<List<HakukohdeViiteDTO>>() {},
-            Collections.emptyMap(),
-            10 * 60 * 1000));
   }
 
   @Override

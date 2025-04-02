@@ -134,3 +134,5 @@ valintalaskentakoostepalvelu.postgresql.password={{host_postgresql_valintalasken
 valintalaskentakoostepalvelu.postgresql.maxactive={{host_postgresql_valintalaskentakoostepalvelu_max_active}}
 valintalaskentakoostepalvelu.postgresql.maxwait={{host_postgresql_valintalaskentakoostepalvelu_max_wait}}
 valintalaskentakoostepalvelu.postgresql.driver=org.postgresql.Driver
+
+environment.name={{ataru_environment_name}}
