@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,7 +65,8 @@ public class HakemuksetResource {
     Preconditions.checkNotNull(hakuOid);
     Preconditions.checkNotNull(valinnanvaiheOid);
 
-    DeferredResult<Collection<HakemusDTO>> deferredResult = new DeferredResult<>(3600000l);
+    DeferredResult<Collection<HakemusDTO>> deferredResult =
+        new DeferredResult<>(Duration.ofHours(2).toMillis());
 
     Map<String, String> additionalAuditInfo = new HashMap<>();
     additionalAuditInfo.put("hakuOid", hakuOid);
