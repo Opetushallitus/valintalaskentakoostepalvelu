@@ -6,10 +6,13 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import io.reactivex.Observable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public interface AtaruAsyncResource {
   CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid);
+
+  CompletableFuture<List<String>> getApplicationOids(Set<String> hakukohdeOids);
 
   CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(
       String hakukohdeOid, boolean withHarkinnanvaraisuustieto);

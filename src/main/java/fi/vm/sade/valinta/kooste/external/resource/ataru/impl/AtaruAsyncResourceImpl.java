@@ -248,6 +248,16 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   @Override
+  public CompletableFuture<List<String>> getApplicationOids(Set<String> hakukohdeOids) {
+    return this.casClient.post(
+        this.urlConfiguration.url("ataru.application-oids"),
+        new TypeToken<>() {},
+        hakukohdeOids,
+        Collections.emptyMap(),
+        120000);
+  }
+
+  @Override
   public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(
       String hakukohdeOid, boolean withHarkinnanvaraisuustieto) {
     return getApplications(hakukohdeOid, Lists.newArrayList(), withHarkinnanvaraisuustieto);

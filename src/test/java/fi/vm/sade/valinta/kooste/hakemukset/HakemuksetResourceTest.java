@@ -16,10 +16,9 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.mocks.MockApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintalaskentaValintakoeAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
-import fi.vm.sade.valinta.kooste.mocks.Mocks;
+import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.mocks.*;
+import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
@@ -29,9 +28,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminen
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
@@ -82,6 +79,17 @@ public class HakemuksetResourceTest {
     HakukohdeJaValintaperusteDTO v4 =
         new HakukohdeJaValintaperusteDTO("1.2.246.562.5.28143628072", Lists.newArrayList(v3));
     MockValintaperusteetAsyncResource.setHakukohdeValintaperusteResult(Lists.newArrayList(v4));
+    MockTarjontaAsyncService.setMockHaku(
+        new Haku(
+            "1.2.3", new HashMap<>(), new HashSet<>(), "ataruform1", null, null, null, null, null));
+    MockAtaruAsyncResource.setByHakukohdeOidsResult(List.of(MockData.hakemusOid));
+    MockAtaruAsyncResource.setByOidsResult(
+        List.of(
+            new HakemusSpec.AtaruHakemusBuilder(
+                    MockData.hakemusOid, MockData.hakijaOid, MockData.hetu)
+                .setHakutoiveet(List.of("1.2.246.562.5.28143628072"))
+                .setSuomalainenPostinumero("00100")
+                .build()));
 
     MockResourcesApp.start();
   }
