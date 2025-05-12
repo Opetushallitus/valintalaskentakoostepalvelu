@@ -155,19 +155,6 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
   }
 
   @Override
-  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
-      Collection<String> hakukohdeOids) {
-    return Observable.fromFuture(
-        this.httpClient.post(
-            this.urlConfiguration.url(
-                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
-            new com.google.gson.reflect.TypeToken<List<HakukohdeJaValintakoeDTO>>() {},
-            Lists.newArrayList(hakukohdeOids),
-            Collections.emptyMap(),
-            10 * 60 * 1000));
-  }
-
-  @Override
   public Observable<Map<String, List<ValintatapajonoDTO>>> haeValintatapajonotSijoittelulle(
       Collection<String> hakukohdeOids) {
     return Observable.fromFuture(

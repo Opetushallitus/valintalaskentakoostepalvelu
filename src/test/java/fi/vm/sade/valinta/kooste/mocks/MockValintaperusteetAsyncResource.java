@@ -141,12 +141,6 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
   }
 
   @Override
-  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
-      Collection<String> hakukohdeOids) {
-    return Observable.just(hakukohdeResultReference.get());
-  }
-
-  @Override
   public Observable<List<ValinnanVaiheJonoillaDTO>> haeIlmanlaskentaa(String hakukohdeOid) {
     throw new UnsupportedOperationException();
   }
