@@ -54,16 +54,18 @@ public class HakukohteetResource {
                     .body("Hakukohteet -kutsu aikakatkaistiin"));
           });
 
-      resource.searchKoutaHakukohteet(hakuOid, hasValintakoe).whenCompleteAsync(
+      resource
+          .searchKoutaHakukohteet(hakuOid, hasValintakoe)
+          .whenCompleteAsync(
               (hakukohteet, e) -> {
-                  if (e != null) {
-                    LOG.error("Hakukohteet-kutsu epäonnistui haulle " + hakuOid, e);
-                    result.setErrorResult(
-                              ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                      .body("Hakukohteet-kutsu epäonnistui" + e.getMessage()));
-                  } else {
-                    result.setResult(ResponseEntity.status(HttpStatus.OK).body(hakukohteet));
-                  }
+                if (e != null) {
+                  LOG.error("Hakukohteet-kutsu epäonnistui haulle " + hakuOid, e);
+                  result.setErrorResult(
+                      ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                          .body("Hakukohteet-kutsu epäonnistui" + e.getMessage()));
+                } else {
+                  result.setResult(ResponseEntity.status(HttpStatus.OK).body(hakukohteet));
+                }
               });
     } catch (Exception e) {
       String msg = "Odottamaton virhe hakukohteiden hakemisessa haulle " + hakuOid;
