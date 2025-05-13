@@ -22,19 +22,16 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.Ohjausparame
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
+import io.reactivex.Single;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +49,7 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   private final HttpClient client;
   private final RestCasClient koutaClient;
   private final RestCasClient hakukohderyhmapalveluClient;
+  private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
   private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
   private final Integer KOUTA_OID_LENGTH = 35;
 
@@ -70,10 +68,12 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
       @Qualifier("KoutaCasClient") RestCasClient koutaClient,
       @Qualifier("HakukohderyhmapalveluCasClient") RestCasClient hakukohderyhmapalveluClient,
       @Qualifier("OhjausparametritAsyncResource")
-          OhjausparametritAsyncResource ohjausparametritAsyncResource) {
+          OhjausparametritAsyncResource ohjausparametritAsyncResource,
+      ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
     this.client = client;
     this.koutaClient = koutaClient;
     this.hakukohderyhmapalveluClient = hakukohderyhmapalveluClient;
+    this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
     this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
   }
 
@@ -255,6 +255,44 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
     } else {
       return this.getTarjontaHaku(hakuOid).thenApplyAsync(h -> new HashSet<>(h.getHakukohdeOids()));
     }
+  }
+
+  @Override
+  public CompletableFuture<List<KoutaHakukohde>> searchKoutaHakukohteet(
+      String hakuOid, Boolean hasValintakoe) {
+
+    CompletableFuture<Set<KoutaHakukohde>> hakukohteetF = this.findKoutaHakukohteetForHaku(hakuOid);
+
+    CompletableFuture<Map<String, KoutaHakukohde>> hakukohteetByOidF =
+        hakukohteetF.thenApplyAsync(
+            hakukohteet -> {
+              Map<String, KoutaHakukohde> hakukohteetByOid = new HashMap<>();
+              for (KoutaHakukohde hakukohde : hakukohteet) {
+                hakukohteetByOid.put(hakukohde.oid, hakukohde);
+              }
+              return hakukohteetByOid;
+            });
+
+    return hakukohteetByOidF.thenComposeAsync(
+        hakukohteet -> {
+          if (hasValintakoe == true) {
+            Single<List<KoutaHakukohde>> valintakokeetSingle =
+                Single.fromObservable(
+                        valintaperusteetAsyncResource.haeValintakokeetHakukohteille(
+                            hakukohteet.keySet().stream().toList()))
+                    .map(
+                        valintakokeet ->
+                            valintakokeet.stream()
+                                .map(valintakoe -> hakukohteet.get(valintakoe.getHakukohdeOid()))
+                                .toList());
+            CompletableFuture<List<KoutaHakukohde>> valintakokeetF = new CompletableFuture<>();
+            valintakokeetSingle.subscribe(
+                valintakokeetF::complete, valintakokeetF::completeExceptionally);
+            return valintakokeetF;
+          } else {
+            return CompletableFuture.completedFuture(hakukohteet.values().stream().toList());
+          }
+        });
   }
 
   @Override

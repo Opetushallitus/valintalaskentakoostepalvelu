@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
+import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValintaperusteetDTO;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ public interface TarjontaAsyncResource {
   CompletableFuture<AbstractHakukohde> haeHakukohde(String hakukohdeOid);
 
   CompletableFuture<Set<String>> haunHakukohteet(String hakuOid);
+
+  CompletableFuture<List<KoutaHakukohde>> searchKoutaHakukohteet(
+      String hakuOid, Boolean hasValintakoe);
 
   CompletableFuture<Toteutus> haeToteutus(String toteutusOid);
 

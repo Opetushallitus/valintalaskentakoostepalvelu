@@ -16,7 +16,7 @@ import org.asynchttpclient.RequestBuilder;
 import org.asynchttpclient.Response;
 
 /**
- * Wrapper-luokka CasClietille. Tätä käytetään jotta Spring Boot -migraation yhteydessä testien
+ * Wrapper-luokka CasClientille. Tätä käytetään jotta Spring Boot -migraation yhteydessä testien
  * mock-lähestymistapaa ei jouduttu refaktoroimaan isosti.
  */
 public class RestCasClient {
