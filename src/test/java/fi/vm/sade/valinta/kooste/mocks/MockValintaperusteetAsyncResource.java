@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.mocks;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
@@ -106,11 +105,6 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
   @Override
   public Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid) {
     return Observable.just(hakukohteetValinnanvaiheelleResultReference.get());
-  }
-
-  @Override
-  public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
