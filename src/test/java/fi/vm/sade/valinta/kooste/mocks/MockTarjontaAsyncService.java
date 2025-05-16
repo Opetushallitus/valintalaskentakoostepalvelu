@@ -4,9 +4,9 @@ import static fi.vm.sade.valinta.kooste.mocks.MockData.hakuOid;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import fi.vm.sade.valinta.kooste.external.resource.kouta.KoutaHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.hakukohteet.HakukohdeValintaFlags;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,8 +66,8 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
   }
 
   @Override
-  public CompletableFuture<List<KoutaHakukohde>> searchKoutaHakukohteet(
-      String hakuOid, Boolean hasValintakoe) {
+  public CompletableFuture<Map<String, HakukohdeValintaFlags>> searchKoutaHakukohteet(
+      String hakuOid) {
     return null;
   }
 

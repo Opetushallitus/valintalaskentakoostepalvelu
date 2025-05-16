@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteCreateDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ErrorV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.GenericSearchParamsV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
@@ -24,10 +25,10 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
+import fi.vm.sade.valinta.kooste.hakukohteet.HakukohdeValintaFlags;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
-import io.reactivex.Single;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Duration;
@@ -258,41 +259,19 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   }
 
   @Override
-  public CompletableFuture<List<KoutaHakukohde>> searchKoutaHakukohteet(
-      String hakuOid, Boolean hasValintakoe) {
-
-    CompletableFuture<Set<KoutaHakukohde>> hakukohteetF = this.findKoutaHakukohteetForHaku(hakuOid);
-
-    CompletableFuture<Map<String, KoutaHakukohde>> hakukohteetByOidF =
-        hakukohteetF.thenApplyAsync(
-            hakukohteet -> {
-              Map<String, KoutaHakukohde> hakukohteetByOid = new HashMap<>();
-              for (KoutaHakukohde hakukohde : hakukohteet) {
-                hakukohteetByOid.put(hakukohde.oid, hakukohde);
-              }
-              return hakukohteetByOid;
-            });
-
-    return hakukohteetByOidF.thenComposeAsync(
-        hakukohteet -> {
-          if (hasValintakoe == true) {
-            Single<List<KoutaHakukohde>> valintakokeetSingle =
-                Single.fromObservable(
-                        valintaperusteetAsyncResource.haeValintakokeetHakukohteille(
-                            hakukohteet.keySet().stream().toList()))
-                    .map(
-                        valintakokeet ->
-                            valintakokeet.stream()
-                                .map(valintakoe -> hakukohteet.get(valintakoe.getHakukohdeOid()))
-                                .toList());
-            CompletableFuture<List<KoutaHakukohde>> valintakokeetF = new CompletableFuture<>();
-            valintakokeetSingle.subscribe(
-                valintakokeetF::complete, valintakokeetF::completeExceptionally);
-            return valintakokeetF;
-          } else {
-            return CompletableFuture.completedFuture(hakukohteet.values().stream().toList());
-          }
-        });
+  public CompletableFuture<Map<String, HakukohdeValintaFlags>> searchKoutaHakukohteet(
+      String hakuOid) {
+    return valintaperusteetAsyncResource
+        .haunHakukohteetF(hakuOid, true)
+        .thenApply(
+            viitteet ->
+                viitteet.stream()
+                    .collect(
+                        Collectors.toMap(
+                            HakukohdeViiteCreateDTO::getOid,
+                            viite -> {
+                              return new HakukohdeValintaFlags(true);
+                            })));
   }
 
   @Override

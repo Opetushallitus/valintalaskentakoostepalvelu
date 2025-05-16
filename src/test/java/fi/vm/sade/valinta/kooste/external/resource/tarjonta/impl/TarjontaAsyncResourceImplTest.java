@@ -8,7 +8,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.ResultV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
@@ -168,41 +167,5 @@ public class TarjontaAsyncResourceImplTest {
         .thenReturn(CompletableFuture.completedFuture(new ResultV1RDTO<HakuV1RDTO>(null)));
     CompletableFuture<Haku> response = tarjontaAsyncResource.haeHaku("1.2.3.4");
     assertNotNull(response);
-  }
-
-  @Test
-  public void testSearchKoutaHakukohteet() {
-    String hakuOid = "1.2.246.562.29.00000000000000000800";
-
-    KoutaHakukohde koutaHakukohde1 = Mockito.mock(KoutaHakukohde.class);
-    ReflectionTestUtils.setField(koutaHakukohde1, "oid", "1.2.246.562.20.1");
-    KoutaHakukohde koutaHakukohde2 = Mockito.mock(KoutaHakukohde.class);
-    ReflectionTestUtils.setField(koutaHakukohde2, "oid", "1.2.246.562.20.2");
-
-    when(koutaClient.get(
-            eq(KOUTA_URL), eq(new TypeToken<Set<KoutaHakukohde>>() {}), anyMap(), anyInt()))
-        .thenReturn(CompletableFuture.completedFuture(Set.of(koutaHakukohde1, koutaHakukohde2)));
-
-    HakukohdeJaValintakoeDTO valintakoe1 = Mockito.mock(HakukohdeJaValintakoeDTO.class);
-    ReflectionTestUtils.setField(valintakoe1, "hakukohdeOid", "1.2.246.562.20.1");
-
-    when(valintaperusteetAsyncResource.haeValintakokeetHakukohteille(anyList()))
-        .thenReturn(io.reactivex.Observable.just(List.of(valintakoe1)));
-
-    CompletableFuture<List<KoutaHakukohde>> resultValintakokeetFalse =
-        tarjontaAsyncResource.searchKoutaHakukohteet(hakuOid, false);
-
-    assertNotNull(resultValintakokeetFalse);
-    List<KoutaHakukohde> hakukohteet = resultValintakokeetFalse.join();
-    assertEquals(2, hakukohteet.size());
-    assertTrue(hakukohteet.stream().anyMatch(h -> h.oid.equals("1.2.246.562.20.1")));
-    assertTrue(hakukohteet.stream().anyMatch(h -> h.oid.equals("1.2.246.562.20.2")));
-
-    CompletableFuture<List<KoutaHakukohde>> resultValintakokeetTrue =
-        tarjontaAsyncResource.searchKoutaHakukohteet(hakuOid, true);
-
-    List<KoutaHakukohde> hakukohteet2 = resultValintakokeetTrue.join();
-    assertEquals(1, hakukohteet2.size());
-    assertTrue(hakukohteet.stream().anyMatch(h -> h.oid.equals("1.2.246.562.20.1")));
   }
 }

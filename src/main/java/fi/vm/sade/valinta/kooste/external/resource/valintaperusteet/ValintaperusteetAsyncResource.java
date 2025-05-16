@@ -25,6 +25,9 @@ public interface ValintaperusteetAsyncResource {
 
   CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> haeHakijaryhmat(String hakukohdeOid);
 
+  CompletableFuture<List<HakukohdeViiteDTO>> haunHakukohteetF(
+      String hakuOid, Boolean vainValintakokeelliset);
+
   // @GET /valintaperusteet-service/resources/hakukohde/haku/{}
   Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid);
 
@@ -44,6 +47,10 @@ public interface ValintaperusteetAsyncResource {
   Observable<List<ValintaperusteetDTO>> valintaperusteet(String valinnanvaiheOid);
 
   Observable<List<ValintakoeDTO>> haeValintakokeetHakukohteelle(String hakukohdeOid);
+
+  // @POST /valintaperusteet-service/resources/hakukohde/valintakoe
+  CompletableFuture<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteilleF(
+      Collection<String> hakukohdeOids);
 
   // @POST /valintaperusteet-service/resources/hakukohde/valintakoe
   Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
