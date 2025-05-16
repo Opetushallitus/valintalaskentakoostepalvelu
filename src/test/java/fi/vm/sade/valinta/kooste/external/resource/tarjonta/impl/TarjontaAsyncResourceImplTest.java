@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.Ohjausparame
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
+import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import java.io.IOException;
@@ -39,10 +40,16 @@ public class TarjontaAsyncResourceImplTest {
   private final RestCasClient hakukohderyhmapalveluClient = mock(RestCasClient.class);
   private final OhjausparametritAsyncResource ohjausparametritAsyncResource =
       mock(OhjausparametritAsyncResource.class);
+  private final ValintaperusteetAsyncResource valintaperusteetAsyncResource =
+      mock(ValintaperusteetAsyncResource.class);
 
   private final TarjontaAsyncResourceImpl tarjontaAsyncResource =
       new TarjontaAsyncResourceImpl(
-          tarjontaClient, koutaClient, hakukohderyhmapalveluClient, ohjausparametritAsyncResource);
+          tarjontaClient,
+          koutaClient,
+          hakukohderyhmapalveluClient,
+          ohjausparametritAsyncResource,
+          valintaperusteetAsyncResource);
 
   private final UrlConfiguration urlConfiguration =
       new UrlConfiguration() {

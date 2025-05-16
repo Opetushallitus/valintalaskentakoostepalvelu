@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.*;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.HakukohdeValintaperusteetDTO;
+import fi.vm.sade.valinta.kooste.hakukohteet.HakukohdeValintaFlags;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,6 +62,12 @@ public class MockTarjontaAsyncService implements TarjontaAsyncResource {
 
   @Override
   public CompletableFuture<Set<String>> haunHakukohteet(String hakuOid) {
+    return null;
+  }
+
+  @Override
+  public CompletableFuture<Map<String, HakukohdeValintaFlags>> searchKoutaHakukohteet(
+      String hakuOid) {
     return null;
   }
 
