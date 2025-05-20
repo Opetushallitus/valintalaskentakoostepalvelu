@@ -5,7 +5,6 @@ import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSa
 import static fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util.PseudoSatunnainenOID.trimToNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.ErillishakuProsessiDTO;
 import fi.vm.sade.valinta.kooste.erillishaku.dto.Hakutyyppi;
@@ -13,6 +12,7 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.ErillishakuJson;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiService;
 import fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunVientiService;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti.DokumenttiProsessiKomponentti;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
@@ -26,6 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -57,7 +58,7 @@ public class ErillishakuResource {
   public static final String POIKKEUS_RIVIN_HAKEMINEN_HENKILOLLA_VIRHE =
       "Erillishakurivin hakeminen henkilön tiedoilla epäonnistui!";
 
-  @Autowired private Authorizer authorizer;
+  @Autowired private AuthorityCheckService authorityCheckService;
 
   @Autowired private DokumenttiProsessiKomponentti dokumenttiKomponentti;
 
@@ -85,7 +86,9 @@ public class ErillishakuResource {
       @RequestParam(value = "valintatapajonoOid", required = false) String valintatapajonoOid,
       HttpServletRequest request) {
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
-    authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
+    authorityCheckService.checkAuthorizationForHakukohteet(
+        List.of(hakukohdeOid), List.of(ROLE_TULOSTENTUONTI));
+
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
     vientiService.vie(
@@ -133,7 +136,8 @@ public class ErillishakuResource {
             + hakuOid
             + " hakemuksia");
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
-    authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
+    authorityCheckService.checkAuthorizationForHakukohteet(
+        List.of(hakukohdeOid), List.of(ROLE_TULOSTENTUONTI));
     ByteArrayOutputStream b;
     IOUtils.copy(file, b = new ByteArrayOutputStream());
     IOUtils.closeQuietly(file);
@@ -202,7 +206,8 @@ public class ErillishakuResource {
             + hakuOid
             + " hakemusta");
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
-    authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
+    authorityCheckService.checkAuthorizationForHakukohteet(
+        List.of(hakukohdeOid), List.of(ROLE_TULOSTENTUONTI));
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
     tuontiService.tuoJson(
@@ -269,7 +274,8 @@ public class ErillishakuResource {
             + hakuOid
             + " hakemusta");
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
-    authorizer.checkOrganisationAccess(tarjoajaOid, ROLE_TULOSTENTUONTI);
+    authorityCheckService.checkAuthorizationForHakukohteet(
+        List.of(hakukohdeOid), List.of(ROLE_TULOSTENTUONTI));
     ErillishakuProsessiDTO prosessi = new ErillishakuProsessiDTO(1);
     dokumenttiKomponentti.tuoUusiProsessi(prosessi);
     tuontiService.tuoJson(
