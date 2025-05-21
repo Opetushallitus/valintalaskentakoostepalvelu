@@ -32,8 +32,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ValintalaskennanTulosExcel {
+  private static final Logger LOG = LoggerFactory.getLogger(ValintalaskennanTulosExcel.class);
   public static XSSFWorkbook luoExcel(
       Map<String, HyvaksynnanEhto> hyvaksynnanEhdot,
       Haku haku,
@@ -41,6 +44,7 @@ public class ValintalaskennanTulosExcel {
       List<Organisaatio> tarjoajat,
       List<ValintatietoValinnanvaiheDTO> valinnanVaiheet,
       final List<HakemusWrapper> hakemukset) {
+    LOG.info("hyvaksynnanEhdot: {}", hyvaksynnanEhdot);
     final Map<String, HakemusWrapper> hakemusByOid =
         hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
 
