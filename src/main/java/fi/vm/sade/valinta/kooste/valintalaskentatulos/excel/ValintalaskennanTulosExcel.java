@@ -40,12 +40,14 @@ public class ValintalaskennanTulosExcel {
 
   public static XSSFWorkbook luoExcel(
       Map<String, HyvaksynnanEhto> hyvaksynnanEhdot,
+      Map<String, Map<String, HyvaksynnanEhto>> hyvaksynnanEhdotValintatapajonoissa,
       Haku haku,
       AbstractHakukohde hakukohdeDTO,
       List<Organisaatio> tarjoajat,
       List<ValintatietoValinnanvaiheDTO> valinnanVaiheet,
       final List<HakemusWrapper> hakemukset) {
     LOG.info("hyvaksynnanEhdot: {}", hyvaksynnanEhdot);
+    LOG.info("hyvaksynnanEhdotValintatapajonoissa: {}", hyvaksynnanEhdotValintatapajonoissa);
     final Map<String, HakemusWrapper> hakemusByOid =
         hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
 
@@ -89,7 +91,13 @@ public class ValintalaskennanTulosExcel {
                         .map(h -> h.name)
                         .collect(Collectors.toList());
                 addRow(sheet, allColumnHeaders);
-                addJonosijaRows(hakemusByOid, jono, sheet, dynamicColumns, hyvaksynnanEhdot);
+                addJonosijaRows(
+                    hakemusByOid,
+                    jono,
+                    sheet,
+                    dynamicColumns,
+                    hyvaksynnanEhdot,
+                    hyvaksynnanEhdotValintatapajonoissa);
               }
             });
     return workbook;
@@ -126,13 +134,17 @@ public class ValintalaskennanTulosExcel {
       ValintatietoValintatapajonoDTO jono,
       XSSFSheet sheet,
       List<Column> dynamicColumns,
-      Map<String, HyvaksynnanEhto> hyvaksynnanEhdot) {
+      Map<String, HyvaksynnanEhto> hyvaksynnanEhdot,
+      Map<String, Map<String, HyvaksynnanEhto>> hyvaksynnanEhdotValintatapajonoissa) {
     sortedJonosijat(jono)
         .map(
             hakija -> {
+              final Map<String, HyvaksynnanEhto> ehdot =
+                  jono.getSijoitteluajoId() == null
+                      ? hyvaksynnanEhdot
+                      : hyvaksynnanEhdotValintatapajonoissa.getOrDefault(jono.getOid(), Map.of());
               final HakemusRivi hakemusRivi =
-                  new HakemusRivi(
-                      hakija, hakemusByOid.get(hakija.getHakemusOid()), hyvaksynnanEhdot);
+                  new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()), ehdot);
               return Stream.concat(fixedColumns.stream(), dynamicColumns.stream())
                   .map(column -> column.extractor.apply(hakemusRivi))
                   .collect(Collectors.toList());
