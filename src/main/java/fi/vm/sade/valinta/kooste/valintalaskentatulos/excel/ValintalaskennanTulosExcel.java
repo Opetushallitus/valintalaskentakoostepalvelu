@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class ValintalaskennanTulosExcel {
   private static final Logger LOG = LoggerFactory.getLogger(ValintalaskennanTulosExcel.class);
+
   public static XSSFWorkbook luoExcel(
       Map<String, HyvaksynnanEhto> hyvaksynnanEhdot,
       Haku haku,
