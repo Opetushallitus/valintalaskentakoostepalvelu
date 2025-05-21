@@ -291,6 +291,7 @@ public class ValintalaskentaExcelResource {
 
     Observable<Map<String, HyvaksynnanEhto>> hyvaksynnanEhdot =
         valintaTulosServiceAsyncResource.getHyvaksynnanehdot(hakukohdeOid);
+    LOG.info("Haettu hyväksynnän ehdot: {}", hyvaksynnanEhdot);
 
     Observable<AbstractHakukohde> hakukohdeObservable =
         Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
