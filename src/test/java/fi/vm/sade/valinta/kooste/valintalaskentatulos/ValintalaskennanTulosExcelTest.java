@@ -116,9 +116,11 @@ public class ValintalaskennanTulosExcelTest {
   public void sheetContents() {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
-            Collections.singletonMap(
-                "Hakemus 1", new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
-            Collections.emptyMap(),
+            Map.of(),
+            Map.of(
+                "jonoOid1",
+                Map.of(
+                    "Hakemus 1", new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1"))),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -185,10 +187,12 @@ public class ValintalaskennanTulosExcelTest {
   public void ataruSheetContents() {
     XSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
-            Collections.singletonMap(
-                "1.2.246.562.11.00000000000000000063",
-                new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
-            Collections.emptyMap(),
+            Map.of(),
+            Map.of(
+                "jonoOid1",
+                Map.of(
+                    "1.2.246.562.11.00000000000000000063",
+                    new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1"))),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
