@@ -42,6 +42,7 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
   private static List<HakemusWrapper> byHakukohdeRes = Lists.newArrayList();
   private static List<HakemusWrapper> byOidsResult = Lists.newArrayList();
+  private static List<String> byHakukohdeOidsRes = Lists.newArrayList();
 
   public static class Result {
     public final Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit;
@@ -56,6 +57,11 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   @Override
   public CompletableFuture<List<HakemusWrapper>> getApplicationsByHakukohde(String hakukohdeOid) {
     return CompletableFuture.completedFuture(byHakukohdeRes);
+  }
+
+  @Override
+  public CompletableFuture<List<String>> getApplicationOids(Set<String> hakukohdeOids) {
+    return CompletableFuture.completedFuture(byHakukohdeOidsRes);
   }
 
   @Override
@@ -98,6 +104,10 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
 
   public static void setByOidsResult(List<HakemusWrapper> hakemukset) {
     byOidsResult = hakemukset;
+  }
+
+  public static void setByHakukohdeOidsResult(List<String> hakemusOidit) {
+    byHakukohdeOidsRes = hakemusOidit;
   }
 
   public static void clear() {
