@@ -291,6 +291,8 @@ public class ValintalaskentaExcelResource {
 
     Observable<Map<String, HyvaksynnanEhto>> hyvaksynnanEhdot =
         valintaTulosServiceAsyncResource.getHyvaksynnanehdot(hakukohdeOid);
+    Observable<Map<String, Map<String, HyvaksynnanEhto>>> hyvaksynnanEhdotValintatapajonoissa =
+        valintaTulosServiceAsyncResource.getHyvaksynnanehdotValintatapajonoissa(hakukohdeOid);
 
     Observable<AbstractHakukohde> hakukohdeObservable =
         Observable.fromFuture(tarjontaResource.haeHakukohde(hakukohdeOid));
@@ -321,6 +323,7 @@ public class ValintalaskentaExcelResource {
     final Observable<XSSFWorkbook> workbookObservable =
         Observable.combineLatest(
             hyvaksynnanEhdot,
+            hyvaksynnanEhdotValintatapajonoissa,
             hakuObservable,
             hakukohdeObservable,
             tarjoajatObservable,

@@ -88,6 +88,7 @@ public class ValintalaskennanTulosExcelTest {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             Collections.emptyMap(),
+            Collections.emptyMap(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -117,6 +118,7 @@ public class ValintalaskennanTulosExcelTest {
         ValintalaskennanTulosExcel.luoExcel(
             Collections.singletonMap(
                 "Hakemus 1", new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
+            Collections.emptyMap(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -186,6 +188,7 @@ public class ValintalaskennanTulosExcelTest {
             Collections.singletonMap(
                 "1.2.246.562.11.00000000000000000063",
                 new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
+            Collections.emptyMap(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -254,6 +257,7 @@ public class ValintalaskennanTulosExcelTest {
   public void sarakkeidenSisaltoOnOikeinVaikkaSeTulisiEriJarjestyksessaEriHakijoille() {
     XSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             Collections.emptyMap(),
             haku,
             hakukohde,
@@ -340,6 +344,7 @@ public class ValintalaskennanTulosExcelTest {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             Collections.emptyMap(),
+            Collections.emptyMap(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -412,6 +417,7 @@ public class ValintalaskennanTulosExcelTest {
         () ->
             ValintalaskennanTulosExcel.luoExcel(
                 Collections.emptyMap(),
+                Collections.emptyMap(),
                 haku,
                 hakukohde,
                 Collections.singletonList(tarjoaja),
@@ -433,6 +439,7 @@ public class ValintalaskennanTulosExcelTest {
   public void generoiTiedosto() throws IOException {
     XSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             Collections.emptyMap(),
             haku,
             hakukohde,
