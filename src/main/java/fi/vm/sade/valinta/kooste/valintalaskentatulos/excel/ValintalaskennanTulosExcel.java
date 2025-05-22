@@ -143,6 +143,11 @@ public class ValintalaskennanTulosExcel {
                   jono.getSijoitteluajoId() == null
                       ? hyvaksynnanEhdot
                       : hyvaksynnanEhdotValintatapajonoissa.getOrDefault(jono.getOid(), Map.of());
+              LOG.info(
+                  "Haettiin ehdot jonoOidin {} ja getSijoitteluajoIdn {} perusteella: {}",
+                  jono.getOid(),
+                  jono.getSijoitteluajoId(),
+                  ehdot);
               final HakemusRivi hakemusRivi =
                   new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()), ehdot);
               return Stream.concat(fixedColumns.stream(), dynamicColumns.stream())
