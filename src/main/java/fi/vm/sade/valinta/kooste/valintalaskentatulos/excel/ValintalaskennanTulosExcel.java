@@ -140,9 +140,10 @@ public class ValintalaskennanTulosExcel {
         .map(
             hakija -> {
               final Map<String, HyvaksynnanEhto> ehdot =
-                  jono.getSijoitteluajoId() == null
-                      ? hyvaksynnanEhdot
-                      : hyvaksynnanEhdotValintatapajonoissa.getOrDefault(jono.getOid(), Map.of());
+                  jono.isSiirretaanSijoitteluun()
+                          && Boolean.TRUE.equals(jono.getValmisSijoiteltavaksi())
+                      ? hyvaksynnanEhdotValintatapajonoissa.getOrDefault(jono.getOid(), Map.of())
+                      : hyvaksynnanEhdot;
               LOG.info(
                   "Haettiin ehdot jonoOidin {} ja getSijoitteluajoIdn {} perusteella: {}",
                   jono.getOid(),
