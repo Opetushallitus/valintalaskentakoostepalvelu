@@ -114,6 +114,12 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
   }
 
   @Override
+  public CompletableFuture<List<HakukohdeViiteDTO>> haunHakukohteetF(
+      String hakuOid, Boolean vainValintakokeelliset) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public CompletableFuture<List<ValintaperusteDTO>> findAvaimet(String hakukohdeOid) {
     return CompletableFuture.completedFuture(valintaperusteetResultReference.get());
   }
