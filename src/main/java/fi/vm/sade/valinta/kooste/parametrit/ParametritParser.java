@@ -4,6 +4,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -96,7 +97,17 @@ public class ParametritParser {
   }
 
   public boolean koetulostenTallentaminenEnabled() {
-    return isAllowedBetween(this.parametrit.getPH_KTT());
+    if (isOPH()) {
+      return true;
+    }
+    ParametriDTO param = this.parametrit.getPH_KTT();
+    Date now = Calendar.getInstance().getTime();
+    // vanhassa tarjonnassa on käytetty date_start kun uudessa on pelkkä date
+    Date start =
+        Optional.ofNullable(param)
+            .map(p -> Optional.ofNullable(p.getDateStart()).orElse(p.getDate()))
+            .orElse(null);
+    return start == null || !now.before(start);
   }
 
   public boolean koekutsujenMuodostaminenEnabled() {
