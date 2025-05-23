@@ -10,7 +10,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteerei
 import fi.vm.sade.valinta.kooste.mocks.MockValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.Mocks;
 import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
-import fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2.ValintaperusteetResourceResult;
+import fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource.ValintaperusteetResourceResult;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class ValintaperusteetResourceTest {
   private final String root =
       "http://localhost:"
           + MockResourcesApp.port
-          + "/valintalaskentakoostepalvelu/resources/V2valintaperusteet";
+          + "/valintalaskentakoostepalvelu/resources/valintaperusteet";
 
   private final HttpResourceBuilder.WebClientExposingHttpResource
       hakukohteenValintaperusteetResource =
