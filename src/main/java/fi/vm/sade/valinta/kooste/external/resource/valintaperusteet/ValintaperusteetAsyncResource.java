@@ -49,9 +49,6 @@ public interface ValintaperusteetAsyncResource {
   Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakukohteille(
       Collection<String> hakukohdeOids);
 
-  Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
-      Collection<String> hakukohdeOids);
-
   // @GET /valintaperusteet-service/resources/valinnanvaihe/{oid}/hakukohteet
   Observable<Set<String>> haeHakukohteetValinnanvaiheelle(String oid);
 
