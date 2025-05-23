@@ -23,7 +23,6 @@ import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTul
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.resource.ValintalaskentaExcelResource;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService;
 import fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResource;
-import fi.vm.sade.valinta.kooste.valintaperusteet.ValintaperusteetResourceV2;
 import fi.vm.sade.valinta.kooste.valintatapajono.route.ValintatapajonoVientiRoute;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.EPostiService;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.route.HyvaksymiskirjeetService;
@@ -151,11 +150,6 @@ public class TestConfiguration {
   @Bean
   public ValintaperusteetResource getValintaperusteetResource(ApplicationContext ctx) {
     return ctx.getAutowireCapableBeanFactory().createBean(ValintaperusteetResource.class);
-  }
-
-  @Bean
-  public ValintaperusteetResourceV2 getValintaperusteetResourceV2(ApplicationContext ctx) {
-    return ctx.getAutowireCapableBeanFactory().createBean(ValintaperusteetResourceV2.class);
   }
 
   @Bean

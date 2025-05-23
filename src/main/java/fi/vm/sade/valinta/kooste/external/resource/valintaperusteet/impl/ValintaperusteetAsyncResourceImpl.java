@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncResource {
@@ -82,14 +83,24 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         url, new TypeToken<List<ValintaperusteetDTO>>() {}, Collections.emptyMap(), 60 * 60 * 1000);
   }
 
-  public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
-    return Observable.fromFuture(
-        this.httpClient.get(
+  public CompletableFuture<List<HakukohdeViiteDTO>> haunHakukohteetF(
+      String hakuOid, Boolean vainValintakokeelliset) {
+    UriComponentsBuilder uriBuilder =
+        UriComponentsBuilder.fromUriString(
             this.urlConfiguration.url(
-                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku", hakuOid),
-            new TypeToken<List<HakukohdeViiteDTO>>() {},
-            Collections.emptyMap(),
-            10 * 60 * 1000));
+                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku", hakuOid));
+    if (vainValintakokeelliset) {
+      uriBuilder.queryParam("vainValintakokeelliset", "true");
+    }
+    return this.httpClient.get(
+        uriBuilder.toUriString(),
+        new TypeToken<List<HakukohdeViiteDTO>>() {},
+        Collections.emptyMap(),
+        10 * 60 * 1000);
+  }
+
+  public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
+    return Observable.fromFuture(this.haunHakukohteetF(hakuOid, false));
   }
 
   @Override
@@ -150,19 +161,6 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
                 "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
             new com.google.gson.reflect.TypeToken<List<HakukohdeJaValintakoeDTO>>() {},
             hakukohdeOids,
-            Collections.emptyMap(),
-            10 * 60 * 1000));
-  }
-
-  @Override
-  public Observable<List<HakukohdeJaValintakoeDTO>> haeValintakokeetHakutoiveille(
-      Collection<String> hakukohdeOids) {
-    return Observable.fromFuture(
-        this.httpClient.post(
-            this.urlConfiguration.url(
-                "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.valintakoe"),
-            new com.google.gson.reflect.TypeToken<List<HakukohdeJaValintakoeDTO>>() {},
-            Lists.newArrayList(hakukohdeOids),
             Collections.emptyMap(),
             10 * 60 * 1000));
   }

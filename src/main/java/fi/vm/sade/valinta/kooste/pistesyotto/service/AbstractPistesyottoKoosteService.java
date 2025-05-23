@@ -346,7 +346,7 @@ public abstract class AbstractPistesyottoKoosteService {
             lisatiedotO,
             hakemuksetO,
             kokeetO,
-            valintaperusteetAsyncResource.haeValintakokeetHakutoiveille(
+            valintaperusteetAsyncResource.haeValintakokeetHakukohteille(
                 Collections.singletonList(hakukohdeOid)),
             Observable.fromFuture(hakukohdeF),
             Observable.fromFuture(tarjoajatF),
