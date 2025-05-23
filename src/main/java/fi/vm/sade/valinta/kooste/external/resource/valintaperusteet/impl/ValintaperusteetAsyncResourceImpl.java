@@ -162,7 +162,7 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
             new com.google.gson.reflect.TypeToken<List<HakukohdeJaValintakoeDTO>>() {},
             hakukohdeOids,
             Collections.emptyMap(),
-            10 * 1000));
+            10 * 60 * 1000));
   }
 
   @Override

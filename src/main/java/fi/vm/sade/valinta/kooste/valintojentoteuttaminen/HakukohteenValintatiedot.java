@@ -1,10 +1,12 @@
 package fi.vm.sade.valinta.kooste.valintojentoteuttaminen;
 
-/** Esittää eri valintojen palveluista koostettuja hakukohde-kohtaisia tietoja. */
+/** Esittää eri palveluista koostettuja hakukohteen valintatietoja. */
 public class HakukohteenValintatiedot {
+  public String hakukohdeOid;
   public Boolean hasValintakoe;
 
-  public HakukohteenValintatiedot(Boolean hasValintakoe) {
+  public HakukohteenValintatiedot(String hakukohdeOid, Boolean hasValintakoe) {
+    this.hakukohdeOid = hakukohdeOid;
     this.hasValintakoe = hasValintakoe;
   }
 }

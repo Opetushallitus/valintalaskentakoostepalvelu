@@ -30,7 +30,7 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
                         Collectors.toMap(
                             HakukohdeViiteCreateDTO::getOid,
                             viite -> {
-                              return new HakukohteenValintatiedot(true);
+                              return new HakukohteenValintatiedot(viite.getOid(), true);
                             })));
   }
 }
