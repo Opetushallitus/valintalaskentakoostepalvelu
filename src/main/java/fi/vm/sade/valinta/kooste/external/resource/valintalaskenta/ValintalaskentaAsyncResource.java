@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintalaskenta;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.dto.HakukohdeLaskentaTehty;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
@@ -27,4 +28,8 @@ public interface ValintalaskentaAsyncResource {
   Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
   Observable<List<ValintatietoValinnanvaiheDTO>> hakukohde(String hakukohdeoid);
+
+  // Palauttaa tiedon onko hakukohteelle tehty jotain laskentaa, ei tietoa onko hakukohteen kaikki
+  // laskennat suoritettu
+  CompletableFuture<List<HakukohdeLaskentaTehty>> hakukohteidenLaskennanTila(String hakuOid);
 }
