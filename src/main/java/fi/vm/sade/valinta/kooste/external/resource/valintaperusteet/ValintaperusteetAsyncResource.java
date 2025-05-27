@@ -10,6 +10,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.dto.HakukohdeKoosteTieto;
 import io.reactivex.Observable;
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +31,8 @@ public interface ValintaperusteetAsyncResource {
 
   // @GET /valintaperusteet-service/resources/hakukohde/haku/{}
   Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid);
+
+  CompletableFuture<List<HakukohdeKoosteTieto>> haunHakukohdeTiedot(String Oid);
 
   CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
       String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
