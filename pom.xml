@@ -677,7 +677,7 @@
                                 <echo file="${project.build.outputDirectory}/static/buildversion.txt">
                                     <![CDATA[artifactId=${project.artifactId}
 version=${project.version}
-buildNumber=${build}
+buildNumber=${project.build}
 branchName=${branch}
 vcsRevision=${revision}
 buildTtime=${maven.build.timestamp}
