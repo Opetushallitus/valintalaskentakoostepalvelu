@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
         .haunHakukohdeTiedot(hakuOid)
         .thenApply(
             valintatiedot -> {
-              Date varasijatayttoPaattyy = ohausparametrit.join().getPH_VSTP().getDate();
+              Date haunVarasijatayttoPaattyy = ohausparametrit.join().getPH_VSTP().getDate();
               return valintatiedot.stream()
                   .collect(
                       Collectors.toMap(
@@ -44,9 +45,8 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
                             return new HakukohteenValintatiedot(
                                 ht.hakukohdeOid,
                                 ht.hasValintakoe,
-                                ht.varasijatayttoPaattyy == null
-                                    ? varasijatayttoPaattyy
-                                    : ht.varasijatayttoPaattyy);
+                                ObjectUtils.min(
+                                    haunVarasijatayttoPaattyy, ht.varasijatayttoPaattyy));
                           }));
             });
   }
