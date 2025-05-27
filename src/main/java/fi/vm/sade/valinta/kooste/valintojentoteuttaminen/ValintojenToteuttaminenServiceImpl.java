@@ -1,36 +1,53 @@
 package fi.vm.sade.valinta.kooste.valintojentoteuttaminen;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteCreateDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttaminenService {
   private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
+  private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
 
   @Autowired
   public ValintojenToteuttaminenServiceImpl(
-      ValintaperusteetAsyncResource valintaperusteetAsyncResource) {
+      ValintaperusteetAsyncResource valintaperusteetAsyncResource,
+      @Qualifier("OhjausparametritAsyncResource")
+          OhjausparametritAsyncResource ohjausparametritAsyncResource) {
     this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
+    this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
   }
 
   @Override
   public CompletableFuture<Map<String, HakukohteenValintatiedot>> valintatiedotHakukohteittain(
       String hakuOid) {
+    CompletableFuture<ParametritDTO> ohausparametrit =
+        ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+
     return valintaperusteetAsyncResource
-        .haunHakukohteetF(hakuOid, true)
+        .haunHakukohdeTiedot(hakuOid)
         .thenApply(
-            viitteet ->
-                viitteet.stream()
-                    .collect(
-                        Collectors.toMap(
-                            HakukohdeViiteCreateDTO::getOid,
-                            viite -> {
-                              return new HakukohteenValintatiedot(viite.getOid(), true);
-                            })));
+            valintatiedot -> {
+              Date haunVarasijatayttoPaattyy = ohausparametrit.join().getPH_VSTP().getDate();
+              return valintatiedot.stream()
+                  .collect(
+                      Collectors.toMap(
+                          ht -> ht.hakukohdeOid,
+                          ht -> {
+                            return new HakukohteenValintatiedot(
+                                ht.hakukohdeOid,
+                                ht.hasValintakoe,
+                                ObjectUtils.min(haunVarasijatayttoPaattyy, ht.varasijatayttoPaattyy));
+                          }));
+            });
   }
 }
