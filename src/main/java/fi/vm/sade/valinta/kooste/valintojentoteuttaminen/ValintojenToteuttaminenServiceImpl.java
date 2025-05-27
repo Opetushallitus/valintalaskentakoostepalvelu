@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintojentoteuttaminen;
 
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import java.util.Date;
@@ -36,7 +37,9 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
         .haunHakukohdeTiedot(hakuOid)
         .thenApply(
             valintatiedot -> {
-              Date haunVarasijatayttoPaattyy = ohausparametrit.join().getPH_VSTP().getDate();
+              ParametriDTO vstpParametri = ohausparametrit.join().getPH_VSTP();
+              Date haunVarasijatayttoPaattyy =
+                  vstpParametri == null ? null : ohausparametrit.join().getPH_VSTP().getDate();
               return valintatiedot.stream()
                   .collect(
                       Collectors.toMap(
