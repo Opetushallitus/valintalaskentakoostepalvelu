@@ -1,6 +1,7 @@
 package fi.vm.sade.valinta.kooste.mocks;
 
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.dto.HakukohdeLaskentaTehty;
 import fi.vm.sade.valintalaskenta.domain.dto.JonoDto;
 import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
@@ -74,6 +75,12 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
 
   @Override
   public Observable<List<ValintatietoValinnanvaiheDTO>> hakukohde(String hakukohdeoid) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public CompletableFuture<List<HakukohdeLaskentaTehty>> hakukohteidenLaskennanTila(
+      String hakuOid) {
     throw new UnsupportedOperationException();
   }
 }

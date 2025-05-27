@@ -7,6 +7,7 @@ import static fi.vm.sade.valintalaskenta.domain.HakukohteenLaskennanTila.VIRHE;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.dto.HakukohdeLaskentaTehty;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
@@ -415,8 +416,19 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
         this.httpclient.get(
             this.urlConfiguration.url(
                 "valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeoid),
-            new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
+  }
+
+  @Override
+  public CompletableFuture<List<HakukohdeLaskentaTehty>> hakukohteidenLaskennanTila(
+      String hakuOid) {
+    return this.httpclient.get(
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.haku.lasketut-hakukohteet", hakuOid),
+        new TypeToken<>() {},
+        Collections.emptyMap(),
+        60 * 1000);
   }
 }
