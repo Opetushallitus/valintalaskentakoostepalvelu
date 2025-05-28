@@ -10,6 +10,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.dto.HakukohdeKoosteTieto;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import io.reactivex.Observable;
 import java.util.Collection;
@@ -110,6 +111,11 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
 
   @Override
   public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public CompletableFuture<List<HakukohdeKoosteTieto>> haunHakukohdeTiedot(String hakuOid) {
     throw new UnsupportedOperationException();
   }
 
