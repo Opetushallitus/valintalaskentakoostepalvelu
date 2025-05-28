@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import java.lang.reflect.Type;
 import java.time.Duration;
-import java.time.temporal.TemporalUnit;
 import java.util.Map;
 import java.util.concurrent.*;
 import org.asynchttpclient.*;
