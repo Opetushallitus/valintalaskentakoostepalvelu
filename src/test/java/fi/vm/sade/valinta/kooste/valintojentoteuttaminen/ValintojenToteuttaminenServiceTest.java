@@ -8,9 +8,9 @@ import static org.mockito.Mockito.when;
 
 import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.dto.HakukohdeLaskentaTehty;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl;
+import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
