@@ -40,6 +40,8 @@ public class ParametritDTO {
 
   private ParametriDTO PH_HKP;
 
+  private ParametriDTO PH_VSTP;
+
   private Boolean synteettisetHakemukset;
 
   public void setPH_EVR(ParametriDTO PH_EVR) {
@@ -112,6 +114,10 @@ public class ParametritDTO {
 
   public void setPH_VTSSV(ParametriDTO PH_VTSSV) {
     this.PH_VTSSV = PH_VTSSV;
+  }
+
+  public void setPH_VSTP(ParametriDTO PH_VSTP) {
+    this.PH_VSTP = PH_VSTP;
   }
 
   public void setTarget(String target) {
@@ -192,6 +198,10 @@ public class ParametritDTO {
 
   public ParametriDTO getPH_VLS() {
     return PH_VLS;
+  }
+
+  public ParametriDTO getPH_VSTP() {
+    return PH_VSTP;
   }
 
   public String getTarget() {
