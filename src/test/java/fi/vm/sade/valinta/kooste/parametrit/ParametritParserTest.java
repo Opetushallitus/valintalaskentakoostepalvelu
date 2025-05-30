@@ -66,17 +66,39 @@ public class ParametritParserTest {
     Calendar cal = Calendar.getInstance();
     cal.add(Calendar.SECOND, -100);
     ph_ktt.setDateStart(cal.getTime());
-    cal.add(Calendar.SECOND, 200);
-    ph_ktt.setDateEnd(cal.getTime());
     parametritDTO.setPH_KTT(ph_ktt);
     ParametritParser parametritParser = new ParametritParser(parametritDTO, ROOTOID);
     assertTrue(parametritParser.koetulostenTallentaminenEnabled());
 
+    cal.add(Calendar.SECOND, 200);
     ph_ktt.setDateStart(cal.getTime());
     parametritParser = new ParametritParser(parametritDTO, ROOTOID);
     assertFalse(parametritParser.koetulostenTallentaminenEnabled());
 
     ph_ktt.setDateStart(null);
+    parametritParser = new ParametritParser(parametritDTO, ROOTOID);
+    assertTrue(parametritParser.koetulostenTallentaminenEnabled());
+  }
+
+  @Test
+  public void testKoetulostenTallentaminenEnabledWithKoutaSettings() {
+    this.setNormalUser();
+
+    ParametritDTO parametritDTO = new ParametritDTO();
+    ParametriDTO ph_ktt = new ParametriDTO();
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.SECOND, -100);
+    ph_ktt.setDate(cal.getTime());
+    parametritDTO.setPH_KTT(ph_ktt);
+    ParametritParser parametritParser = new ParametritParser(parametritDTO, ROOTOID);
+    assertTrue(parametritParser.koetulostenTallentaminenEnabled());
+
+    cal.add(Calendar.SECOND, 200);
+    ph_ktt.setDate(cal.getTime());
+    parametritParser = new ParametritParser(parametritDTO, ROOTOID);
+    assertFalse(parametritParser.koetulostenTallentaminenEnabled());
+
+    ph_ktt.setDate(null);
     parametritParser = new ParametritParser(parametritDTO, ROOTOID);
     assertTrue(parametritParser.koetulostenTallentaminenEnabled());
   }
