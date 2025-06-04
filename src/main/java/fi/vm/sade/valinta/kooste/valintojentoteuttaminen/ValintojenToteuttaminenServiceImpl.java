@@ -1,28 +1,37 @@
 package fi.vm.sade.valinta.kooste.valintojentoteuttaminen;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.valinta.kooste.dto.HakukohdeKoosteTieto;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
+import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttaminenService {
   private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
   private final ValintalaskentaAsyncResource valintalaskentaAsyncResource;
+  private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
 
   @Autowired
   public ValintojenToteuttaminenServiceImpl(
       ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-      ValintalaskentaAsyncResource valintalaskentaAsyncResource) {
+      ValintalaskentaAsyncResource valintalaskentaAsyncResource,
+      @Qualifier("OhjausparametritAsyncResource")
+          OhjausparametritAsyncResource ohjausparametritAsyncResource) {
     this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
     this.valintalaskentaAsyncResource = valintalaskentaAsyncResource;
+    this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
   }
 
   @Override
@@ -30,29 +39,40 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
       String hakuOid) {
     CompletableFuture<List<HakukohdeLaskentaTehty>> laskennatF =
         valintalaskentaAsyncResource.hakukohteidenLaskennanTila(hakuOid);
-    CompletableFuture<List<HakukohdeViiteDTO>> hakukohteetF =
-        valintaperusteetAsyncResource.haunHakukohteetF(hakuOid, true);
-    return CompletableFuture.allOf(laskennatF, hakukohteetF)
+    CompletableFuture<List<HakukohdeKoosteTieto>> hakukohdeTiedotF =
+        valintaperusteetAsyncResource.haunHakukohdeTiedot(hakuOid);
+    CompletableFuture<ParametritDTO> ohjausparametritF =
+        ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
+    return CompletableFuture.allOf(laskennatF, hakukohdeTiedotF, ohjausparametritF)
         .thenApply(
             x -> {
               List<HakukohdeLaskentaTehty> laskennat = laskennatF.join();
-              List<HakukohdeViiteDTO> hakukohteet = hakukohteetF.join();
-              Stream<String> foundHakukohdeOids =
-                  Stream.concat(
-                          laskennat.stream().map(l -> l.hakukohdeOid),
-                          hakukohteet.stream().map(HakukohdeViiteDTO::getOid))
-                      .distinct();
-              return foundHakukohdeOids
-                  .map(
-                      hk -> {
-                        boolean laskettu =
-                            laskennat.stream()
-                                .anyMatch(l -> l.hakukohdeOid.equals(hk) && l.lastModified != null);
-                        boolean hasValintakoe =
-                            hakukohteet.stream().anyMatch(h -> h.getOid().equals(hk));
-                        return new HakukohteenValintatiedot(hk, hasValintakoe, laskettu);
-                      })
-                  .collect(Collectors.toMap(v -> v.hakukohdeOid, v -> v));
+              List<HakukohdeKoosteTieto> hakukohdeTiedot = hakukohdeTiedotF.join();
+              ParametriDTO vstpParametri = ohjausparametritF.join().getPH_VSTP();
+              Date haunVarasijatayttoPaattyy =
+                  vstpParametri == null ? null : vstpParametri.getDate();
+              Map<String, HakukohteenValintatiedot> result = new HashMap<>();
+
+              hakukohdeTiedot.forEach(
+                  hakukohdetieto -> {
+                    result.putIfAbsent(
+                        hakukohdetieto.hakukohdeOid,
+                        new HakukohteenValintatiedot(hakukohdetieto.hakukohdeOid));
+                    HakukohteenValintatiedot valintatieto = result.get(hakukohdetieto.hakukohdeOid);
+                    valintatieto.hasValintakoe = hakukohdetieto.hasValintakoe;
+                    valintatieto.varasijatayttoPaattyy =
+                        ObjectUtils.min(
+                            haunVarasijatayttoPaattyy, hakukohdetieto.varasijatayttoPaattyy);
+                  });
+
+              laskennat.forEach(
+                  laskenta -> {
+                    result.putIfAbsent(
+                        laskenta.hakukohdeOid, new HakukohteenValintatiedot(laskenta.hakukohdeOid));
+                    HakukohteenValintatiedot valintatieto = result.get(laskenta.hakukohdeOid);
+                    valintatieto.laskettu = valintatieto.laskettu || laskenta.lastModified != null;
+                  });
+              return result;
             });
   }
 }

@@ -12,6 +12,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
+import fi.vm.sade.valinta.kooste.dto.HakukohdeKoosteTieto;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
@@ -101,6 +102,16 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
 
   public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
     return Observable.fromFuture(this.haunHakukohteetF(hakuOid, false));
+  }
+
+  public CompletableFuture<List<HakukohdeKoosteTieto>> haunHakukohdeTiedot(String Oid) {
+    return httpClient.get(
+        this.urlConfiguration.url(
+            "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku.koostetiedot",
+            Oid),
+        new TypeToken<List<HakukohdeKoosteTieto>>() {},
+        Collections.emptyMap(),
+        60 * 60 * 1000);
   }
 
   @Override
