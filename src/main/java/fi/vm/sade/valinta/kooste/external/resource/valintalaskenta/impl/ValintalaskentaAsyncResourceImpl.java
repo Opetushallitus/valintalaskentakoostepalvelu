@@ -17,6 +17,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.Laskentakutsu;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
 import io.reactivex.Observable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -415,8 +416,19 @@ public class ValintalaskentaAsyncResourceImpl implements ValintalaskentaAsyncRes
         this.httpclient.get(
             this.urlConfiguration.url(
                 "valintalaskenta-laskenta-service.hakukohde.valinnanvaihe", hakukohdeoid),
-            new TypeToken<List<ValintatietoValinnanvaiheDTO>>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
             10 * 60 * 1000));
+  }
+
+  @Override
+  public CompletableFuture<List<HakukohdeLaskentaTehty>> hakukohteidenLaskennanTila(
+      String hakuOid) {
+    return this.httpclient.get(
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.haku.lasketut-hakukohteet", hakuOid),
+        new TypeToken<>() {},
+        Collections.emptyMap(),
+        60 * 1000);
   }
 }

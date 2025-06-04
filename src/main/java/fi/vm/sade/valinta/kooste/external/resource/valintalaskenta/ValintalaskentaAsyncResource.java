@@ -5,6 +5,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
 import io.reactivex.Observable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -27,4 +28,8 @@ public interface ValintalaskentaAsyncResource {
   Observable<String> laskeKaikki(LaskeDTO laskeDTO, SuoritustiedotDTO suoritukset);
 
   Observable<List<ValintatietoValinnanvaiheDTO>> hakukohde(String hakukohdeoid);
+
+  // Palauttaa tiedon onko hakukohteelle tehty jotain laskentaa, ei tietoa onko hakukohteen kaikki
+  // laskennat suoritettu
+  CompletableFuture<List<HakukohdeLaskentaTehty>> hakukohteidenLaskennanTila(String hakuOid);
 }

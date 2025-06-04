@@ -6,6 +6,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.LaskeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.SuoritustiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.ValinnanvaiheDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanvaiheDTO;
+import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
 import io.reactivex.Observable;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -74,6 +75,12 @@ public class MockValintalaskentaAsyncResource implements ValintalaskentaAsyncRes
 
   @Override
   public Observable<List<ValintatietoValinnanvaiheDTO>> hakukohde(String hakukohdeoid) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public CompletableFuture<List<HakukohdeLaskentaTehty>> hakukohteidenLaskennanTila(
+      String hakuOid) {
     throw new UnsupportedOperationException();
   }
 }

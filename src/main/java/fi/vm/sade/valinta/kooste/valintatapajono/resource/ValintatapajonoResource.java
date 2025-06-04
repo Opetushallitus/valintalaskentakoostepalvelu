@@ -3,8 +3,8 @@ package fi.vm.sade.valinta.kooste.valintatapajono.resource;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 import fi.vm.sade.auditlog.User;
-import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
+import fi.vm.sade.valinta.kooste.security.AuthorityCheckService;
 import fi.vm.sade.valinta.kooste.valintatapajono.dto.ValintatapajonoRivit;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoDataRiviListAdapter;
 import fi.vm.sade.valinta.kooste.valintatapajono.excel.ValintatapajonoExcel;
@@ -58,7 +58,7 @@ public class ValintatapajonoResource {
       "ROLE_APP_VALINTOJENTOTEUTTAMINEN_TULOSTENTUONTI";
   private final Logger LOG = LoggerFactory.getLogger(ValintatapajonoResource.class);
 
-  @Autowired private Authorizer authorizer;
+  @Autowired private AuthorityCheckService authorityCheckService;
   @Autowired private ValintatapajonoTuontiService valintatapajonoTuontiService;
 
   @Autowired(required = false)
@@ -80,8 +80,8 @@ public class ValintatapajonoResource {
       @RequestParam(value = "hakuOid", required = false) String hakuOid,
       @RequestParam(value = "hakukohdeOid", required = false) String hakukohdeOid,
       @RequestParam(value = "valintatapajonoOid", required = false) String valintatapajonoOid) {
-    String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
-    authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
+    authorityCheckService.checkAuthorizationForHakukohteet(
+        List.of(hakukohdeOid), List.of(ROLE_TULOSTENTUONTI));
     DokumenttiProsessi prosessi =
         new DokumenttiProsessi("Valintatapajono", "vienti", hakuOid, Arrays.asList(hakukohdeOid));
     valintatapajonoVienti.vie(prosessi, hakuOid, hakukohdeOid, valintatapajonoOid);
@@ -124,7 +124,8 @@ public class ValintatapajonoResource {
         });
 
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
-    authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
+    authorityCheckService.checkAuthorizationForHakukohteet(
+        List.of(hakukohdeOid), List.of(ROLE_TULOSTENTUONTI));
     final ByteArrayOutputStream bytes;
     try {
       IOUtils.copy(file, bytes = new ByteArrayOutputStream());
@@ -201,7 +202,8 @@ public class ValintatapajonoResource {
         });
 
     String tarjoajaOid = findTarjoajaOid(hakukohdeOid);
-    authorizer.checkOrganisationAccess(tarjoajaOid, ValintatapajonoResource.ROLE_TULOSTENTUONTI);
+    authorityCheckService.checkAuthorizationForHakukohteet(
+        List.of(hakukohdeOid), List.of(ROLE_TULOSTENTUONTI));
     valintatapajonoTuontiService.tuo(
         (valinnanvaiheet, hakemukset) -> rivit.getRivit(),
         hakuOid,
