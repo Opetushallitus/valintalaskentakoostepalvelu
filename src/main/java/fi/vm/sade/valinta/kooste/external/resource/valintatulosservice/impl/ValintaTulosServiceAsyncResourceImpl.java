@@ -291,6 +291,16 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
             new TypeToken<Map<String, HyvaksynnanEhto>>() {}.getType()));
   }
 
+  @Override
+  public CompletableFuture<HaunHakukohdeTulosTiedotRajaimille> getHaunHakukohdeTiedot(
+      String hakuOid) {
+    return this.client.getJson(
+        this.urlConfiguration.url(
+            "valintalaskenta-laskenta-service.haku.lasketut-hakukohteet", hakuOid),
+        Duration.ofMinutes(1),
+        new TypeToken<HaunHakukohdeTulosTiedotRajaimille>() {}.getType());
+  }
+
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
     @Override
     public JsonElement serialize(
