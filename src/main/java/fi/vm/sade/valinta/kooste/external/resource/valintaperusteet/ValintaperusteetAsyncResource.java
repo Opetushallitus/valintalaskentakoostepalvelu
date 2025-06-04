@@ -1,16 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintaperusteet;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeImportDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeJaValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValinnanVaiheJonoillaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintakoeDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
-import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoDTO;
-import fi.vm.sade.valinta.kooste.dto.HakukohdeKoosteTieto;
+import fi.vm.sade.service.valintaperusteet.dto.*;
 import io.reactivex.Observable;
 import java.util.Collection;
 import java.util.List;
@@ -32,7 +22,7 @@ public interface ValintaperusteetAsyncResource {
   // @GET /valintaperusteet-service/resources/hakukohde/haku/{}
   Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid);
 
-  CompletableFuture<List<HakukohdeKoosteTieto>> haunHakukohdeTiedot(String Oid);
+  CompletableFuture<List<HakukohdeKoosteTietoDTO>> haunHakukohdeTiedot(String Oid);
 
   CompletableFuture<List<ValintaperusteetDTO>> haeValintaperusteet(
       String hakukohdeOid, Integer valinnanVaiheJarjestysluku);
