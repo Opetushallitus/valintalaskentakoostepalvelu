@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.valintojentoteuttaminen;
 
-import fi.vm.sade.valinta.kooste.dto.HakukohdeKoosteTieto;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeKoosteTietoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
@@ -39,7 +39,7 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
       String hakuOid) {
     CompletableFuture<List<HakukohdeLaskentaTehty>> laskennatF =
         valintalaskentaAsyncResource.hakukohteidenLaskennanTila(hakuOid);
-    CompletableFuture<List<HakukohdeKoosteTieto>> hakukohdeTiedotF =
+    CompletableFuture<List<HakukohdeKoosteTietoDTO>> hakukohdeTiedotF =
         valintaperusteetAsyncResource.haunHakukohdeTiedot(hakuOid);
     CompletableFuture<ParametritDTO> ohjausparametritF =
         ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid);
@@ -47,7 +47,7 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
         .thenApply(
             x -> {
               List<HakukohdeLaskentaTehty> laskennat = laskennatF.join();
-              List<HakukohdeKoosteTieto> hakukohdeTiedot = hakukohdeTiedotF.join();
+              List<HakukohdeKoosteTietoDTO> hakukohdeTiedot = hakukohdeTiedotF.join();
               ParametriDTO vstpParametri = ohjausparametritF.join().getPH_VSTP();
               Date haunVarasijatayttoPaattyy =
                   vstpParametri == null ? null : vstpParametri.getDate();

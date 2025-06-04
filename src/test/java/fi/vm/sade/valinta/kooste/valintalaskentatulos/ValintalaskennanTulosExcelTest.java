@@ -494,7 +494,8 @@ public class ValintalaskennanTulosExcelTest {
         "Vaihe " + jarjestysnumero,
         d,
         jonot,
-        Collections.emptyList());
+        Collections.emptyList(),
+        "hakukohdeOid");
   }
 
   private ValintatietoValintatapajonoDTO valintatapajono(

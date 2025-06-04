@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import fi.vm.sade.valinta.kooste.dto.HakukohdeKoosteTieto;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeKoosteTietoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.impl.OhjausparametritAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
@@ -55,9 +55,8 @@ public class ValintojenToteuttaminenServiceTest {
   @Before
   public void setUp() {
     Date date = getDate();
-    HakukohdeKoosteTieto hakukohdeKooste =
-        new HakukohdeKoosteTieto(
-            HAKUKOHDE_OID_2, true, date);
+    HakukohdeKoosteTietoDTO hakukohdeKooste =
+        new HakukohdeKoosteTietoDTO(HAKUKOHDE_OID_2, true, date);
 
     when(valintalaskentaAsyncResource.hakukohteidenLaskennanTila(eq(HAKU_OID)))
         .thenReturn(
