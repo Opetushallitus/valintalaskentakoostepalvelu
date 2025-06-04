@@ -127,4 +127,9 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
       String hakuOid) {
     return null;
   }
+
+  public Observable<Map<String, Map<String, HyvaksynnanEhto>>>
+      getHyvaksynnanehdotValintatapajonoissa(String hakukohdeOid) {
+    return Observable.just(Collections.emptyMap());
+  }
 }

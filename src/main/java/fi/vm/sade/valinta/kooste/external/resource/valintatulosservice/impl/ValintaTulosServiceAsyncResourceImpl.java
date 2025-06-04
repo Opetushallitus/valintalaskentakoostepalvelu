@@ -301,6 +301,17 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         new TypeToken<HaunHakukohdeTulosTiedotRajaimille>() {}.getType());
   }
 
+  @Override
+  public Observable<Map<String, Map<String, HyvaksynnanEhto>>>
+      getHyvaksynnanehdotValintatapajonoissa(String hakukohdeOid) {
+    return Observable.fromFuture(
+        this.client.getJson(
+            this.urlConfiguration.url(
+                "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot.jonoissa", hakukohdeOid),
+            Duration.ofMinutes(30),
+            new TypeToken<Map<String, Map<String, HyvaksynnanEhto>>>() {}.getType()));
+  }
+
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
     @Override
     public JsonElement serialize(
