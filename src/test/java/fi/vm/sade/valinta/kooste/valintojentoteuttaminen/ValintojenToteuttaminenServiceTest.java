@@ -11,8 +11,8 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HaunHakukohdeTulosTiedot;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakukohdeTulosTiedot;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HaunHakukohdeTulosTiedot;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl;
 import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
 import java.util.Date;
@@ -56,8 +56,7 @@ public class ValintojenToteuttaminenServiceTest {
         .thenReturn(CompletableFuture.completedFuture(List.of(dto)));
     when(valintaTulosServiceAsyncResource.getHaunHakukohdeTiedot(eq(HAKU_OID)))
         .thenReturn(
-            CompletableFuture.completedFuture(
-                new HaunHakukohdeTulosTiedot(HAKU_OID, Set.of())));
+            CompletableFuture.completedFuture(new HaunHakukohdeTulosTiedot(HAKU_OID, Set.of())));
   }
 
   @Test

@@ -292,8 +292,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   }
 
   @Override
-  public CompletableFuture<HaunHakukohdeTulosTiedot> getHaunHakukohdeTiedot(
-      String hakuOid) {
+  public CompletableFuture<HaunHakukohdeTulosTiedot> getHaunHakukohdeTiedot(String hakuOid) {
     return this.client.getJson(
         this.urlConfiguration.url(
             "valinta-tulos-service.haku.valintatulostiedothakukohteille", hakuOid),

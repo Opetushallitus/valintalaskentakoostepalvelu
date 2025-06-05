@@ -8,8 +8,7 @@ public class HakukohdeTulosTiedot {
 
   public Boolean julkaisematta;
 
-  public HakukohdeTulosTiedot(
-      String oid, Boolean sijoittelematta, Boolean julkaisematta) {
+  public HakukohdeTulosTiedot(String oid, Boolean sijoittelematta, Boolean julkaisematta) {
     this.oid = oid;
     this.sijoittelematta = sijoittelematta;
     this.julkaisematta = julkaisematta;

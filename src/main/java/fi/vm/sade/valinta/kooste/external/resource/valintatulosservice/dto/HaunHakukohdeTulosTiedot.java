@@ -8,8 +8,7 @@ public class HaunHakukohdeTulosTiedot {
 
   public Set<HakukohdeTulosTiedot> hakukohteet;
 
-  public HaunHakukohdeTulosTiedot(
-      String oid, Set<HakukohdeTulosTiedot> hakukohteet) {
+  public HaunHakukohdeTulosTiedot(String oid, Set<HakukohdeTulosTiedot> hakukohteet) {
     this.oid = oid;
     this.hakukohteet = hakukohteet;
   }
