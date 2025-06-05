@@ -4,8 +4,8 @@ import fi.vm.sade.service.valintaperusteet.dto.HakukohdeKoosteTietoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HaunHakukohdeTulosTiedotRajaimille;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.TulosTiedotHakukohdeRajaimille;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakukohdeTulosTiedot;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HaunHakukohdeTulosTiedot;
 import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
 import java.util.HashMap;
 import java.util.List;
@@ -38,14 +38,14 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
         valintalaskentaAsyncResource.hakukohteidenLaskennanTila(hakuOid);
     CompletableFuture<List<HakukohdeKoosteTietoDTO>> hakukohdeTiedotF =
         valintaperusteetAsyncResource.haunHakukohdeTiedot(hakuOid);
-    CompletableFuture<HaunHakukohdeTulosTiedotRajaimille> tulosF =
+    CompletableFuture<HaunHakukohdeTulosTiedot> tulosF =
         valintaTulosServiceAsyncResource.getHaunHakukohdeTiedot(hakuOid);
     return CompletableFuture.allOf(laskennatF, hakukohdeTiedotF, tulosF)
         .thenApply(
             x -> {
               List<HakukohdeLaskentaTehty> laskennat = laskennatF.join();
               List<HakukohdeKoosteTietoDTO> hakukohdeTiedot = hakukohdeTiedotF.join();
-              Set<TulosTiedotHakukohdeRajaimille> tulokset = tulosF.join().hakukohteet;
+              Set<HakukohdeTulosTiedot> tulokset = tulosF.join().hakukohteet;
               Map<String, HakukohteenValintatiedot> result = new HashMap<>();
               hakukohdeTiedot.forEach(
                   hakukohdetieto -> {
