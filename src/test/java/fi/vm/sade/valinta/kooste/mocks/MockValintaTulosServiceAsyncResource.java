@@ -123,7 +123,7 @@ public class MockValintaTulosServiceAsyncResource implements ValintaTulosService
   }
 
   @Override
-  public CompletableFuture<HaunHakukohdeTulosTiedotRajaimille> getHaunHakukohdeTiedot(
+  public CompletableFuture<HaunHakukohdeTulosTiedot> getHaunHakukohdeTiedot(
       String hakuOid) {
     return null;
   }

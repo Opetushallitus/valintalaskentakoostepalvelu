@@ -59,5 +59,5 @@ public interface ValintaTulosServiceAsyncResource {
 
   Observable<Map<String, HyvaksynnanEhto>> getHyvaksynnanehdot(String hakukohdeOid);
 
-  CompletableFuture<HaunHakukohdeTulosTiedotRajaimille> getHaunHakukohdeTiedot(String hakuOid);
+  CompletableFuture<HaunHakukohdeTulosTiedot> getHaunHakukohdeTiedot(String hakuOid);
 }

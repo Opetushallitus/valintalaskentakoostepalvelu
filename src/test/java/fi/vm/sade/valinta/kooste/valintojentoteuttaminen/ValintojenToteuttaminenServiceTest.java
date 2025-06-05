@@ -11,8 +11,8 @@ import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.Valintalasken
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HaunHakukohdeTulosTiedotRajaimille;
-import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.TulosTiedotHakukohdeRajaimille;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HaunHakukohdeTulosTiedot;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.HakukohdeTulosTiedot;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl;
 import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
 import java.util.Date;
@@ -57,7 +57,7 @@ public class ValintojenToteuttaminenServiceTest {
     when(valintaTulosServiceAsyncResource.getHaunHakukohdeTiedot(eq(HAKU_OID)))
         .thenReturn(
             CompletableFuture.completedFuture(
-                new HaunHakukohdeTulosTiedotRajaimille(HAKU_OID, Set.of())));
+                new HaunHakukohdeTulosTiedot(HAKU_OID, Set.of())));
   }
 
   @Test
@@ -80,11 +80,11 @@ public class ValintojenToteuttaminenServiceTest {
     when(valintaTulosServiceAsyncResource.getHaunHakukohdeTiedot(eq(HAKU_OID)))
         .thenReturn(
             CompletableFuture.completedFuture(
-                new HaunHakukohdeTulosTiedotRajaimille(
+                new HaunHakukohdeTulosTiedot(
                     HAKU_OID,
                     Set.of(
-                        new TulosTiedotHakukohdeRajaimille(HAKUKOHDE_OID_2, true, false),
-                        new TulosTiedotHakukohdeRajaimille(hakukohdeOid3, true, true)))));
+                        new HakukohdeTulosTiedot(HAKUKOHDE_OID_2, true, false),
+                        new HakukohdeTulosTiedot(hakukohdeOid3, true, true)))));
     Map<String, HakukohteenValintatiedot> result =
         service.valintatiedotHakukohteittain(HAKU_OID).join();
     assertNotNull(result);

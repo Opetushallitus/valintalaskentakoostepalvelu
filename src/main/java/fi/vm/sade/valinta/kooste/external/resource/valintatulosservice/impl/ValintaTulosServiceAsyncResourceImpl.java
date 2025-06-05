@@ -292,13 +292,13 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   }
 
   @Override
-  public CompletableFuture<HaunHakukohdeTulosTiedotRajaimille> getHaunHakukohdeTiedot(
+  public CompletableFuture<HaunHakukohdeTulosTiedot> getHaunHakukohdeTiedot(
       String hakuOid) {
     return this.client.getJson(
         this.urlConfiguration.url(
-            "valintalaskenta-laskenta-service.haku.lasketut-hakukohteet", hakuOid),
+            "valinta-tulos-service.haku.valintatulostiedothakukohteille", hakuOid),
         Duration.ofMinutes(1),
-        new TypeToken<HaunHakukohdeTulosTiedotRajaimille>() {}.getType());
+        new TypeToken<HaunHakukohdeTulosTiedot>() {}.getType());
   }
 
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
