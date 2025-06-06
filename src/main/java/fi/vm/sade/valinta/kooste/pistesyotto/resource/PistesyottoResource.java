@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -405,6 +407,9 @@ public class PistesyottoResource {
     return result;
   }
 
+  private final ThreadPoolExecutor excelVientiPool =
+      (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
+
   @PostMapping(value = "/vienti", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
@@ -447,7 +452,10 @@ public class PistesyottoResource {
                 DokumenttiProsessi prosessi =
                     new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-                vientiService.vie(hakuOid, hakukohdeOid, auditSession, prosessi);
+                excelVientiPool.submit(
+                    () -> {
+                      vientiService.vie(hakuOid, hakukohdeOid, auditSession, prosessi);
+                    });
                 result.setResult(
                     ResponseEntity.status(HttpStatus.OK).body(prosessi.toProsessiId()));
               } else {
