@@ -166,6 +166,11 @@ public class KoosteTestProfileConfiguration {
     return REST_CAS_CLIENT;
   }
 
+  @Bean(name = "ValintaTulosServiceCasClient")
+  public RestCasClient getValintaTulosServiceCasClient() {
+    return REST_CAS_CLIENT;
+  }
+
   @Bean(name = "ViestintapalveluCasClient")
   public RestCasClient getViestintapalveluCasClient() {
     return REST_CAS_CLIENT;
