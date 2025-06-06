@@ -29,12 +29,12 @@ import java.util.stream.Stream;
 import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class ValintalaskennanTulosExcel {
-  public static XSSFWorkbook luoExcel(
+  public static SXSSFWorkbook luoExcel(
       Map<String, HyvaksynnanEhto> hyvaksynnanEhdot,
       Haku haku,
       AbstractHakukohde hakukohdeDTO,
@@ -44,7 +44,7 @@ public class ValintalaskennanTulosExcel {
     final Map<String, HakemusWrapper> hakemusByOid =
         hakemukset.stream().collect(Collectors.toMap(HakemusWrapper::getOid, h -> h));
 
-    XSSFWorkbook workbook = new XSSFWorkbook();
+    SXSSFWorkbook workbook = new SXSSFWorkbook(100);
     valinnanVaiheet.stream()
         .flatMap(
             vaihe ->
@@ -58,7 +58,7 @@ public class ValintalaskennanTulosExcel {
         .sorted(ValintalaskennanTulosExcel::byReverseDateAndPriority)
         .forEach(
             (jonoSheet) -> {
-              final XSSFSheet sheet = workbook.createSheet(jonoSheet.sheetName);
+              final SXSSFSheet sheet = workbook.createSheet(jonoSheet.sheetName);
               final ValinnanvaiheDTO vaihe = jonoSheet.vaihe;
               final ValintatietoValintatapajonoDTO jono = jonoSheet.jono;
 
@@ -119,7 +119,7 @@ public class ValintalaskennanTulosExcel {
   private static void addJonosijaRows(
       Map<String, HakemusWrapper> hakemusByOid,
       ValintatietoValintatapajonoDTO jono,
-      XSSFSheet sheet,
+      SXSSFSheet sheet,
       List<Column> dynamicColumns,
       Map<String, HyvaksynnanEhto> hyvaksynnanEhdot) {
     sortedJonosijat(jono)
@@ -267,18 +267,18 @@ public class ValintalaskennanTulosExcel {
     return o == null ? "" : o.toString();
   }
 
-  private static void setColumnWidths(final XSSFSheet sheet) {
+  private static void setColumnWidths(final SXSSFSheet sheet) {
     for (int i = 0, columnCount = fixedColumns.size(); i < columnCount; i++) {
       sheet.setColumnWidth(i, fixedColumns.get(i).widthInCharacters * 256);
     }
   }
 
-  private static void addRow(final XSSFSheet sheet, String... values) {
+  private static void addRow(final SXSSFSheet sheet, String... values) {
     addRow(sheet, asList(values));
   }
 
-  private static void addRow(final XSSFSheet sheet, List<String> values) {
-    final XSSFRow row = sheet.createRow(sheet.getPhysicalNumberOfRows());
+  private static void addRow(final SXSSFSheet sheet, List<String> values) {
+    final SXSSFRow row = sheet.createRow(sheet.getPhysicalNumberOfRows());
     for (int col = 0, count = values.size(); col < count; col++) {
       row.createCell(col).setCellValue(values.get(col));
     }
