@@ -26,7 +26,7 @@
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>10.0.0-SNAPSHOT</sijoittelu.version>
         <valinta-sharedutils.version>6.0-SNAPSHOT</valinta-sharedutils.version>
-        <valintaperusteet.version>7.1-BRANCH-SNAPSHOT</valintaperusteet.version>
+        <valintaperusteet.version>7.1-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>7.1.0-SNAPSHOT</valintalaskenta.version>
     </properties>
 
