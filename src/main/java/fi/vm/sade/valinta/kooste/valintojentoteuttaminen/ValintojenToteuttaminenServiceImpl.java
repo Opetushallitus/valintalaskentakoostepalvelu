@@ -1,14 +1,13 @@
 package fi.vm.sade.valinta.kooste.valintojentoteuttaminen;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeKoosteTietoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,29 +29,32 @@ public class ValintojenToteuttaminenServiceImpl implements ValintojenToteuttamin
       String hakuOid) {
     CompletableFuture<List<HakukohdeLaskentaTehty>> laskennatF =
         valintalaskentaAsyncResource.hakukohteidenLaskennanTila(hakuOid);
-    CompletableFuture<List<HakukohdeViiteDTO>> hakukohteetF =
-        valintaperusteetAsyncResource.haunHakukohteetF(hakuOid, true);
-    return CompletableFuture.allOf(laskennatF, hakukohteetF)
+    CompletableFuture<List<HakukohdeKoosteTietoDTO>> hakukohdeTiedotF =
+        valintaperusteetAsyncResource.haunHakukohdeTiedot(hakuOid);
+    return CompletableFuture.allOf(laskennatF, hakukohdeTiedotF)
         .thenApply(
             x -> {
               List<HakukohdeLaskentaTehty> laskennat = laskennatF.join();
-              List<HakukohdeViiteDTO> hakukohteet = hakukohteetF.join();
-              Stream<String> foundHakukohdeOids =
-                  Stream.concat(
-                          laskennat.stream().map(l -> l.hakukohdeOid),
-                          hakukohteet.stream().map(HakukohdeViiteDTO::getOid))
-                      .distinct();
-              return foundHakukohdeOids
-                  .map(
-                      hk -> {
-                        boolean laskettu =
-                            laskennat.stream()
-                                .anyMatch(l -> l.hakukohdeOid.equals(hk) && l.lastModified != null);
-                        boolean hasValintakoe =
-                            hakukohteet.stream().anyMatch(h -> h.getOid().equals(hk));
-                        return new HakukohteenValintatiedot(hk, hasValintakoe, laskettu);
-                      })
-                  .collect(Collectors.toMap(v -> v.hakukohdeOid, v -> v));
+              List<HakukohdeKoosteTietoDTO> hakukohdeTiedot = hakukohdeTiedotF.join();
+              Map<String, HakukohteenValintatiedot> result = new HashMap<>();
+              hakukohdeTiedot.forEach(
+                  hakukohdetieto -> {
+                    result.putIfAbsent(
+                        hakukohdetieto.hakukohdeOid,
+                        new HakukohteenValintatiedot(hakukohdetieto.hakukohdeOid));
+                    HakukohteenValintatiedot valintatieto = result.get(hakukohdetieto.hakukohdeOid);
+                    valintatieto.hasValintakoe = hakukohdetieto.hasValintakoe;
+                    valintatieto.varasijatayttoPaattyy = hakukohdetieto.varasijatayttoPaattyy;
+                  });
+
+              laskennat.forEach(
+                  laskenta -> {
+                    result.putIfAbsent(
+                        laskenta.hakukohdeOid, new HakukohteenValintatiedot(laskenta.hakukohdeOid));
+                    HakukohteenValintatiedot valintatieto = result.get(laskenta.hakukohdeOid);
+                    valintatieto.laskettu = valintatieto.laskettu || laskenta.lastModified != null;
+                  });
+              return result;
             });
   }
 }

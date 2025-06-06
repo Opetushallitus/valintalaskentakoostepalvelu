@@ -6,11 +6,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import fi.vm.sade.service.valintaperusteet.dto.HakukohdeViiteDTO;
+import fi.vm.sade.service.valintaperusteet.dto.HakukohdeKoosteTietoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.impl.ValintalaskentaAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.impl.ValintaperusteetAsyncResourceImpl;
 import fi.vm.sade.valintalaskenta.domain.valinta.HakukohdeLaskentaTehty;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -33,28 +35,35 @@ public class ValintojenToteuttaminenServiceTest {
   private static final String HAKU_OID = "123.123.123.123";
   private static final String HAKUKOHDE_OID_1 = "123.123.123.111";
   private static final String HAKUKOHDE_OID_2 = "123.123.123.222";
+  private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
   @Before
-  public void setUp() {
-    HakukohdeViiteDTO dto = new HakukohdeViiteDTO();
-    dto.setOid(HAKUKOHDE_OID_2);
+  public void setUp() throws ParseException {
+    Date varasijatayttoPaattyy = dateFormat.parse("31.01.2020 00:00");
+    HakukohdeKoosteTietoDTO hakukohdeKooste =
+        new HakukohdeKoosteTietoDTO(HAKUKOHDE_OID_2, true, varasijatayttoPaattyy);
+
     when(valintalaskentaAsyncResource.hakukohteidenLaskennanTila(eq(HAKU_OID)))
         .thenReturn(
             CompletableFuture.completedFuture(
                 List.of(new HakukohdeLaskentaTehty(HAKUKOHDE_OID_1, new Date()))));
-    when(valintaperusteetAsyncResource.haunHakukohteetF(eq(HAKU_OID), eq(true)))
-        .thenReturn(CompletableFuture.completedFuture(List.of(dto)));
+
+    when(valintaperusteetAsyncResource.haunHakukohdeTiedot(eq(HAKU_OID)))
+        .thenReturn(CompletableFuture.completedFuture(List.of(hakukohdeKooste)));
   }
 
   @Test
-  public void fetchesValintatiedotHakukohteittain() {
+  public void fetchesValintatiedotHakukohteittain() throws ParseException {
     Map<String, HakukohteenValintatiedot> result =
         service.valintatiedotHakukohteittain(HAKU_OID).join();
     assertNotNull(result);
     assertEquals(2, result.size());
     assertEquals(
-        new HakukohteenValintatiedot(HAKUKOHDE_OID_1, false, true), result.get(HAKUKOHDE_OID_1));
+        new HakukohteenValintatiedot(HAKUKOHDE_OID_1, false, true, null),
+        result.get(HAKUKOHDE_OID_1));
     assertEquals(
-        new HakukohteenValintatiedot(HAKUKOHDE_OID_2, true, false), result.get(HAKUKOHDE_OID_2));
+        new HakukohteenValintatiedot(
+            HAKUKOHDE_OID_2, true, false, dateFormat.parse("31.01.2020 00:00")),
+        result.get(HAKUKOHDE_OID_2));
   }
 }
