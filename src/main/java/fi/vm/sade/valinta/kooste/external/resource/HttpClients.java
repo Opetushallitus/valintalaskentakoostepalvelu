@@ -142,6 +142,22 @@ public class HttpClients {
         ValintaTulosServiceAsyncResourceImpl.getGson());
   }
 
+  @Profile({"default", "dev"})
+  @Bean(name = "ValintaTulosServiceCasClient")
+  public RestCasClient getValintaTulosServiceCasClient(
+      @Value("${valintalaskentakoostepalvelu.app.username.to.valinta-tulos-service}")
+          String username,
+      @Value("${valintalaskentakoostepalvelu.app.password.to.valinta-tulos-service}")
+          String password) {
+    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
+    String service = UrlConfiguration.getInstance().url("valinta-tulos-service.auth.login");
+    return new RestCasClient(
+        new CasConfig.CasConfigBuilder(
+                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
+            .setJsessionName("session")
+            .build());
+  }
+
   @Bean(name = "OhjausparametritHttpClient")
   public HttpClient getOhjausparametritHttpClient(CookieManager cookieManager) {
     return new HttpClient(
