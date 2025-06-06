@@ -1,19 +1,19 @@
 package fi.vm.sade.valinta.kooste.excel;
 
 import java.util.Collection;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 public class MonivalintaJoukko {
   private final Collection<String> joukko;
   private final XSSFDataValidationHelper dvHelper;
-  private final XSSFSheet sheet;
+  private final SXSSFSheet sheet;
   private final XSSFDataValidationConstraint dvConstraint;
 
   public MonivalintaJoukko(
-      Collection<String> joukko, XSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
+      Collection<String> joukko, SXSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
     this.joukko = joukko;
     this.dvHelper = dvHelper;
     this.sheet = sheet;
@@ -24,7 +24,7 @@ public class MonivalintaJoukko {
 
   public MonivalintaJoukko(
       Collection<String> joukko,
-      XSSFSheet sheet,
+      SXSSFSheet sheet,
       XSSFDataValidationHelper dvHelper,
       String formula) {
     this.joukko = joukko;

@@ -42,7 +42,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,7 +318,7 @@ public class ValintalaskentaExcelResource {
                     applicationResource.getApplicationsByOid(haku.oid, hakukohdeOid));
               }
             });
-    final Observable<XSSFWorkbook> workbookObservable =
+    final Observable<SXSSFWorkbook> workbookObservable =
         Observable.combineLatest(
             hyvaksynnanEhdot,
             hakuObservable,

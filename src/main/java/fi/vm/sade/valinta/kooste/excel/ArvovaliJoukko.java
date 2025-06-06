@@ -2,18 +2,18 @@ package fi.vm.sade.valinta.kooste.excel;
 
 import org.apache.poi.ss.usermodel.DataValidationConstraint.OperatorType;
 import org.apache.poi.ss.usermodel.DataValidationConstraint.ValidationType;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint;
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 public class ArvovaliJoukko {
   private final XSSFDataValidationHelper dvHelper;
-  private final XSSFSheet sheet;
+  private final SXSSFSheet sheet;
   private final XSSFDataValidationConstraint dvConstraint;
 
   public ArvovaliJoukko(
-      Number min, Number max, XSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
+      Number min, Number max, SXSSFSheet sheet, XSSFDataValidationHelper dvHelper) {
     this.dvHelper = dvHelper;
     this.sheet = sheet;
 
