@@ -4,42 +4,61 @@ public class ParametritDTO {
 
   private String target;
 
+  // Valintatulokset siirrettävä sijoitteluun viimeistään
   private ParametriDTO PH_VTSSV;
 
+  // Varasijasäännöt astuvat voimaan
   private ParametriDTO PH_VSSAV;
 
+  // Valintatulosten julkistaminen hakijoille
   private ParametriDTO PH_VTJH;
 
+  // Ehdolliset valinnat raukeavat
   private ParametriDTO PH_EVR;
 
+  // Opiskelijan paikan vastaanotto päättyy
   private ParametriDTO PH_OPVP;
 
+  // Hakijakohtaisen paikan vastaanottoaika
   private ParametriDTO PH_HPVOA;
 
+  // Ilmoittautuminen päättyy
   private ParametriDTO PH_IP;
 
+  // Tarjonnan julkaisun takaraja
   private ParametriDTO PH_TJT;
 
+  // Hakukohteiden lisäämisen ja poistamisen takaraja
   private ParametriDTO PH_HKLPT;
 
+  // Hakukohteiden muokkaamisen takaraja
   private ParametriDTO PH_HKMT;
 
+  // Koekutsujen muodostaminen
   private ParametriDTO PH_KKM;
 
+  // Harkinnanvaraisen valinnan päätösten tallentaminen päättyy
   private ParametriDTO PH_HVVPTP;
 
+  // Koetulosten tallentaminen
   private ParametriDTO PH_KTT;
 
+  // Oppilaitosten virkailijoiden valintapalvelun käyttö estetty
   private ParametriDTO PH_OLVVPKE;
 
+  // Valintalaskennan suorittaminen
   private ParametriDTO PH_VLS;
 
+  // Sijoittelun suorittaminen
   private ParametriDTO PH_SS;
 
+  // Jälkiohjauskirjeen lähettäminen iPostiin
   private ParametriDTO PH_JKLIP;
 
+  // Hakukierros päättyy
   private ParametriDTO PH_HKP;
 
+  // Varasijatäyttö päättyy
   private ParametriDTO PH_VSTP;
 
   private Boolean synteettisetHakemukset;

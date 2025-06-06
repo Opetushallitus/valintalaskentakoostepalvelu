@@ -94,14 +94,14 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
     return Observable.fromFuture(this.haunHakukohteetF(hakuOid, false));
   }
 
-  public CompletableFuture<List<HakukohdeKoosteTietoDTO>> haunHakukohdeTiedot(String Oid) {
+  public CompletableFuture<List<HakukohdeKoosteTietoDTO>> haunHakukohdeTiedot(String hakuOid) {
     return httpClient.get(
         this.urlConfiguration.url(
             "valintaperusteet-service.valintalaskentakoostepalvelu.hakukohde.haku.koostetiedot",
-            Oid),
+            hakuOid),
         new TypeToken<List<HakukohdeKoosteTietoDTO>>() {},
         Collections.emptyMap(),
-        60 * 60 * 1000);
+        60 * 1000);
   }
 
   @Override

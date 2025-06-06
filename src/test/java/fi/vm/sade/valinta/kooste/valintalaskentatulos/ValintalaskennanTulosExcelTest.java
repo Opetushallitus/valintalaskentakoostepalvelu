@@ -495,7 +495,7 @@ public class ValintalaskennanTulosExcelTest {
         d,
         jonot,
         Collections.emptyList(),
-        "hakukohdeOid");
+        hakukohde.oid);
   }
 
   private ValintatietoValintatapajonoDTO valintatapajono(
