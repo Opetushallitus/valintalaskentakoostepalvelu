@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -62,7 +63,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
       String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
     String virheviesti =
         String.format(
-            "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
+            "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus",
             auditSession.getPersonOid(), hakuOid, hakukohdeOid);
     PoikkeusKasittelijaSovitin poikkeuskasittelija =
         new PoikkeusKasittelijaSovitin(
@@ -77,7 +78,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
     prosessi.inkrementoiKokonaistyota();
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
         .takeUntil(
-            Observable.error(new RuntimeException(virheviesti)).delay(2, TimeUnit.MINUTES, true))
+            Observable.error(new TimeoutException(virheviesti)).delay(2, TimeUnit.MINUTES, true))
         .flatMap(
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
