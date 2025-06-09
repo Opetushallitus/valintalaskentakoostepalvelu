@@ -76,7 +76,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             });
     prosessi.inkrementoiKokonaistyota();
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
-        .timeout(119, TimeUnit.MINUTES)
+        .timeout(2, TimeUnit.MINUTES)
         .flatMap(
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
