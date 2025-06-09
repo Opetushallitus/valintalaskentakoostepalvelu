@@ -76,7 +76,13 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             });
     prosessi.inkrementoiKokonaistyota();
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
-        .timeout(2, TimeUnit.MINUTES)
+        .takeUntil(
+            Observable.error(
+                    new RuntimeException(
+                        String.format(
+                            "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
+                            auditSession.getPersonOid(), hakuOid, hakukohdeOid)))
+                .delay(2, TimeUnit.MINUTES, true))
         .flatMap(
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
