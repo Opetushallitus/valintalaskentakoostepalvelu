@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -77,8 +76,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             });
     prosessi.inkrementoiKokonaistyota();
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
-        .takeUntil(
-            Observable.error(new TimeoutException(virheviesti)).delay(2, TimeUnit.MINUTES, true))
+        .takeUntil(Observable.never().timeout(1, TimeUnit.MINUTES))
         .flatMap(
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
