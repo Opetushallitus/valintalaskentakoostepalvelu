@@ -60,14 +60,14 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
 
   public void vie(
       String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
+    String virheviesti =
+        String.format(
+            "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
+            auditSession.getPersonOid(), hakuOid, hakukohdeOid);
     PoikkeusKasittelijaSovitin poikkeuskasittelija =
         new PoikkeusKasittelijaSovitin(
             poikkeus -> {
-              LOG.error(
-                  String.format(
-                      "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
-                      auditSession.getPersonOid(), hakuOid, hakukohdeOid),
-                  poikkeus);
+              LOG.error(virheviesti, poikkeus);
               prosessi
                   .getPoikkeukset()
                   .add(
@@ -77,12 +77,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
     prosessi.inkrementoiKokonaistyota();
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
         .takeUntil(
-            Observable.error(
-                    new RuntimeException(
-                        String.format(
-                            "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
-                            auditSession.getPersonOid(), hakuOid, hakukohdeOid)))
-                .delay(2, TimeUnit.MINUTES, true))
+            Observable.error(new RuntimeException(virheviesti)).delay(2, TimeUnit.MINUTES, true))
         .flatMap(
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
