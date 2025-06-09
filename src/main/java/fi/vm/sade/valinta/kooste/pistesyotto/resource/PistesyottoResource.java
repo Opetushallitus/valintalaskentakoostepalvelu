@@ -38,10 +38,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -454,12 +452,10 @@ public class PistesyottoResource {
                 DokumenttiProsessi prosessi =
                     new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-                Callable<String> vientiTask =
+                excelVientiPool.submit(
                     () -> {
                       vientiService.vie(hakuOid, hakukohdeOid, auditSession, prosessi);
-                      return prosessi.getId();
-                    };
-                excelVientiPool.invokeAll(List.of(vientiTask), 2, TimeUnit.HOURS);
+                    });
                 result.setResult(
                     ResponseEntity.status(HttpStatus.OK).body(prosessi.toProsessiId()));
               } else {
