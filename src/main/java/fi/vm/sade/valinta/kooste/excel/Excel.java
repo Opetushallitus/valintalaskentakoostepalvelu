@@ -147,7 +147,6 @@ public class Excel {
 
     for (Rivi toisteinenrivi : rivit) {
       for (Rivi rivi : toisteinenrivi.getToisteisetRivit()) {
-        LOG.info("Rivi: {}", rivi);
         SXSSFRow row = sheet.createRow(rowIndex);
         int cellNum = 0;
         for (Solu solu : rivi.getSolut()) {
