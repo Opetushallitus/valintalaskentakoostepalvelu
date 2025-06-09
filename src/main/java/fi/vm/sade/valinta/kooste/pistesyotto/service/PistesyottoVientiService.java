@@ -19,6 +19,7 @@ import io.reactivex.Observable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -75,6 +76,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             });
     prosessi.inkrementoiKokonaistyota();
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
+        .timeout(119, TimeUnit.MINUTES)
         .flatMap(
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
