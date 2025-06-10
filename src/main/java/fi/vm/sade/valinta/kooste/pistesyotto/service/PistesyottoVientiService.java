@@ -64,6 +64,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
         String.format(
             "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus",
             auditSession.getPersonOid(), hakuOid, hakukohdeOid);
+
     PoikkeusKasittelijaSovitin poikkeuskasittelija =
         new PoikkeusKasittelijaSovitin(
             poikkeus -> {
@@ -76,7 +77,6 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
             });
     prosessi.inkrementoiKokonaistyota();
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
-        .takeUntil(Observable.never().timeout(1, TimeUnit.MINUTES))
         .flatMap(
             p -> {
               PistesyottoExcel pistesyottoExcel = p.getLeft();
@@ -91,6 +91,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
                       pistesyottoExcel.getExcel().vieXlsx());
               return Observable.just(id).zipWith(tallennus, Pair::of);
             })
+        .takeUntil(Observable.never().timeout(2, TimeUnit.MINUTES))
         .subscribe(
             idWithResponse -> {
               prosessi.inkrementoiTehtyjaToita();
