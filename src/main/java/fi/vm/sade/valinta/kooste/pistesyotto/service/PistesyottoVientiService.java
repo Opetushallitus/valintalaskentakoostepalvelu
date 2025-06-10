@@ -79,6 +79,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
         .flatMap(
             p -> {
+              LOG.info("Käsitellään valmis excel prosessille {}", prosessi.getId());
               PistesyottoExcel pistesyottoExcel = p.getLeft();
               String id = UUID.randomUUID().toString();
               Observable<ResponseEntity<Void>> tallennus =
@@ -94,6 +95,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
         .takeUntil(Observable.never().timeout(2, TimeUnit.MINUTES))
         .subscribe(
             idWithResponse -> {
+              LOG.info("Excel tallennettu prosessille {}", prosessi.getId());
               prosessi.inkrementoiTehtyjaToita();
               prosessi.setDokumenttiId(idWithResponse.getLeft());
             },
