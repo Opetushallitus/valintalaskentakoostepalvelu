@@ -75,7 +75,7 @@ public class ViestintapalveluProxyResource {
   public DeferredResult<ResponseEntity<List<TemplateHistory>>> getTemplateHistory(
       @RequestParam(value = "templateName") String templateName,
       @RequestParam(value = "languageCode") String languageCode,
-      @RequestParam(value = "oid") String oid,
+      @RequestParam(value = "oid", required = false) String oid,
       @RequestParam(value = "tag", required = false) String tag,
       @RequestParam(value = "applicationPeriod") String applicationPeriod) {
     DeferredResult<ResponseEntity<List<TemplateHistory>>> result =
