@@ -62,8 +62,8 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
       String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
     String virheviesti =
         String.format(
-            "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus",
-            auditSession.getPersonOid(), hakuOid, hakukohdeOid);
+            "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus, prosessi %s",
+            auditSession.getPersonOid(), hakuOid, hakukohdeOid, prosessi.getId());
 
     PoikkeusKasittelijaSovitin poikkeuskasittelija =
         new PoikkeusKasittelijaSovitin(
@@ -79,7 +79,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
         .flatMap(
             p -> {
-              LOG.info("Käsitellään valmis excel prosessille {}", prosessi.getId());
+              LOG.info("Käsitellään ja tallennetaan excel prosessille {}", prosessi.getId());
               PistesyottoExcel pistesyottoExcel = p.getLeft();
               String id = UUID.randomUUID().toString();
               Observable<ResponseEntity<Void>> tallennus =
