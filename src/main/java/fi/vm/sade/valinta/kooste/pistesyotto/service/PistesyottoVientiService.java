@@ -92,7 +92,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
                       pistesyottoExcel.getExcel().vieXlsx());
               return Observable.just(id).zipWith(tallennus, Pair::of);
             })
-        .takeUntil(Observable.never().timeout(2, TimeUnit.MINUTES))
+        .takeUntil(Observable.never().timeout(2, TimeUnit.HOURS))
         .subscribe(
             idWithResponse -> {
               LOG.info("Excel tallennettu prosessille {}", prosessi.getId());
