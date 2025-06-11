@@ -17,6 +17,7 @@ import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
+import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.TilaHakijalleDto;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
@@ -30,6 +31,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,13 +46,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosServiceAsyncResource {
   private final HttpClient client;
-
+  private final RestCasClient casClient;
   private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public ValintaTulosServiceAsyncResourceImpl(
-      @Qualifier("ValintaTulosServiceHttpClient") HttpClient client) {
+      @Qualifier("ValintaTulosServiceHttpClient") HttpClient client,
+      @Qualifier("ValintaTulosServiceCasClient") RestCasClient casClient) {
     this.client = client;
+    this.casClient = casClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
   }
 
@@ -289,6 +293,16 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot", hakukohdeOid),
             Duration.ofMinutes(30),
             new TypeToken<Map<String, HyvaksynnanEhto>>() {}.getType()));
+  }
+
+  @Override
+  public CompletableFuture<HaunHakukohdeTulosTiedot> getHaunHakukohdeTiedot(String hakuOid) {
+    return this.casClient.get(
+        this.urlConfiguration.url(
+            "valinta-tulos-service.haku.valintatulostiedothakukohteille", hakuOid),
+        new com.google.gson.reflect.TypeToken<>() {},
+        Collections.emptyMap(),
+        60 * 1000);
   }
 
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
