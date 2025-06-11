@@ -16,7 +16,12 @@ import java.util.*;
 import java.util.List;
 import org.apache.poi.ooxml.POIXMLException;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,11 +97,12 @@ public class Excel {
   }
 
   public InputStream vieXlsx() {
-    XSSFWorkbook workbook = new XSSFWorkbook();
-    XSSFSheet sheet = workbook.createSheet(nimi);
-    XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(sheet);
+    SXSSFWorkbook workbook = new SXSSFWorkbook(100);
+    SXSSFSheet sheet = workbook.createSheet(nimi);
+    // sheet.trackAllColumnsForAutoSizing();
+    XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(null);
     int hiddenSheetCount = 0;
-    XSSFDataFormat fmt = workbook.createDataFormat();
+    DataFormat fmt = workbook.createDataFormat();
     OphCellStyles defaultStyles = new OphCellStyles(workbook);
     defaultStyles.visit(
         s -> {
@@ -141,11 +147,10 @@ public class Excel {
 
     for (Rivi toisteinenrivi : rivit) {
       for (Rivi rivi : toisteinenrivi.getToisteisetRivit()) {
-        LOG.info("Rivi: {}", rivi);
-        XSSFRow row = sheet.createRow(rowIndex);
+        SXSSFRow row = sheet.createRow(rowIndex);
         int cellNum = 0;
         for (Solu solu : rivi.getSolut()) {
-          XSSFCell cell = null;
+          SXSSFCell cell = null;
           if (solu.isTeksti()) {
             cell = row.createCell(cellNum, STRING);
             cell.setCellValue(solu.toTeksti().getTeksti());
@@ -184,14 +189,15 @@ public class Excel {
 
             if (monivalinta.getVaihtoehdot().toString().length() >= excelSolunMaxPituus
                 && !constraintSets.containsKey(monivalinta.getVaihtoehdot())) {
-              XSSFSheet hiddenSheet;
+              SXSSFSheet hiddenSheet;
               String sheetName = String.valueOf(cellNum);
               try {
                 hiddenSheet = workbook.createSheet(sheetName);
+                // hiddenSheet.trackAllColumnsForAutoSizing();
                 int i = 0;
                 for (String vaihtoehto : monivalinta.getVaihtoehdot()) {
-                  XSSFRow hiddenRow = hiddenSheet.createRow(i);
-                  XSSFCell hiddenCell = hiddenRow.createCell(0);
+                  SXSSFRow hiddenRow = hiddenSheet.createRow(i);
+                  SXSSFCell hiddenCell = hiddenRow.createCell(0);
                   hiddenCell.setCellValue(vaihtoehto);
                   i++;
                 }
@@ -261,7 +267,7 @@ public class Excel {
     }
     for (int sarake : sarakkeetVaaka) {
       try {
-        XSSFRow r = sheet.getRow(sarake);
+        SXSSFRow r = sheet.getRow(sarake);
         if (r != null) {
           r.setZeroHeight(true);
           hiddenStyles.apply(r);
@@ -270,6 +276,7 @@ public class Excel {
         LOG.error("Excel throws", e);
       }
     }
+    /*
     for (int i = 0; i < leveysPreferenssit.size(); ++i) {
       int preferenssi = leveysPreferenssit.get(i);
       if (preferenssi == 0) {
@@ -280,6 +287,7 @@ public class Excel {
         sheet.setColumnWidth(i, preferenssi);
       }
     }
+    */
     return export(workbook);
   }
 
@@ -291,7 +299,7 @@ public class Excel {
     leveysPreferenssit.set(column, preferenssi);
   }
 
-  public static InputStream export(final XSSFWorkbook workbook) {
+  public static InputStream export(final SXSSFWorkbook workbook) {
     ByteArrayOutputStream b;
     try {
       workbook.write(b = new ByteArrayOutputStream());
