@@ -99,7 +99,7 @@ public class Excel {
   public InputStream vieXlsx() {
     SXSSFWorkbook workbook = new SXSSFWorkbook(100);
     SXSSFSheet sheet = workbook.createSheet(nimi);
-    sheet.trackAllColumnsForAutoSizing();
+    // sheet.trackAllColumnsForAutoSizing();
     XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper(null);
     int hiddenSheetCount = 0;
     DataFormat fmt = workbook.createDataFormat();
@@ -193,7 +193,7 @@ public class Excel {
               String sheetName = String.valueOf(cellNum);
               try {
                 hiddenSheet = workbook.createSheet(sheetName);
-                hiddenSheet.trackAllColumnsForAutoSizing();
+                // hiddenSheet.trackAllColumnsForAutoSizing();
                 int i = 0;
                 for (String vaihtoehto : monivalinta.getVaihtoehdot()) {
                   SXSSFRow hiddenRow = hiddenSheet.createRow(i);
@@ -276,6 +276,7 @@ public class Excel {
         LOG.error("Excel throws", e);
       }
     }
+    /*
     for (int i = 0; i < leveysPreferenssit.size(); ++i) {
       int preferenssi = leveysPreferenssit.get(i);
       if (preferenssi == 0) {
@@ -286,6 +287,7 @@ public class Excel {
         sheet.setColumnWidth(i, preferenssi);
       }
     }
+    */
     return export(workbook);
   }
 
