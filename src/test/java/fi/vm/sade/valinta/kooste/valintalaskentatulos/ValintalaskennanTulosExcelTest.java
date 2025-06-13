@@ -42,9 +42,9 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Function;
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -85,7 +85,7 @@ public class ValintalaskennanTulosExcelTest {
           a.setNimi("Erittäin-., **pitkä valintatapajon**on");
           return a;
         };
-    XSSFWorkbook workbook =
+    SXSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             Collections.emptyMap(),
             haku,
@@ -113,7 +113,7 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void sheetContents() {
-    XSSFWorkbook workbook =
+    SXSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             Collections.singletonMap(
                 "Hakemus 1", new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
@@ -181,7 +181,7 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void ataruSheetContents() {
-    XSSFWorkbook ataruWorkbook =
+    SXSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
             Collections.singletonMap(
                 "1.2.246.562.11.00000000000000000063",
@@ -252,7 +252,7 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void sarakkeidenSisaltoOnOikeinVaikkaSeTulisiEriJarjestyksessaEriHakijoille() {
-    XSSFWorkbook ataruWorkbook =
+    SXSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
             Collections.emptyMap(),
             haku,
@@ -337,7 +337,7 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void emptySheet() {
-    XSSFWorkbook workbook =
+    SXSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             Collections.emptyMap(),
             haku,
@@ -431,7 +431,7 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void generoiTiedosto() throws IOException {
-    XSSFWorkbook workbook =
+    SXSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
             Collections.emptyMap(),
             haku,
@@ -467,7 +467,7 @@ public class ValintalaskennanTulosExcelTest {
     };
   }
 
-  private List<List<String>> getWorksheetData(final XSSFSheet sheet) {
+  private List<List<String>> getWorksheetData(final SXSSFSheet sheet) {
     List<List<String>> sheetData = new ArrayList<>();
     for (int rowNum = 0; rowNum <= sheet.getLastRowNum(); rowNum++) {
       sheetData.add(getRowData(sheet.getRow(rowNum)));
@@ -475,7 +475,7 @@ public class ValintalaskennanTulosExcelTest {
     return sheetData;
   }
 
-  private List<String> getRowData(final XSSFRow row) {
+  private List<String> getRowData(final SXSSFRow row) {
     final ArrayList<String> rowData = new ArrayList<>();
     if (row != null) {
       for (int col = 0; col < row.getLastCellNum(); col++) {

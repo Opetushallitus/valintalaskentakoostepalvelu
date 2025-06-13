@@ -19,6 +19,7 @@ import io.reactivex.Observable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -59,14 +60,15 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
 
   public void vie(
       String hakuOid, String hakukohdeOid, AuditSession auditSession, DokumenttiProsessi prosessi) {
+    String virheviesti =
+        String.format(
+            "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus, prosessi %s",
+            auditSession.getPersonOid(), hakuOid, hakukohdeOid, prosessi.getId());
+
     PoikkeusKasittelijaSovitin poikkeuskasittelija =
         new PoikkeusKasittelijaSovitin(
             poikkeus -> {
-              LOG.error(
-                  String.format(
-                      "Käyttäjän %s tekemässä haun %s hakukohteen %s pistesyötön viennissä tapahtui poikkeus:",
-                      auditSession.getPersonOid(), hakuOid, hakukohdeOid),
-                  poikkeus);
+              LOG.error(virheviesti, poikkeus);
               prosessi
                   .getPoikkeukset()
                   .add(
@@ -77,6 +79,7 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
     muodostaPistesyottoExcel(hakuOid, hakukohdeOid, auditSession, prosessi, Collections.emptyList())
         .flatMap(
             p -> {
+              LOG.info("Käsitellään ja tallennetaan excel prosessille {}", prosessi.getId());
               PistesyottoExcel pistesyottoExcel = p.getLeft();
               String id = UUID.randomUUID().toString();
               Observable<ResponseEntity<Void>> tallennus =
@@ -89,8 +92,10 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
                       pistesyottoExcel.getExcel().vieXlsx());
               return Observable.just(id).zipWith(tallennus, Pair::of);
             })
+        .takeUntil(Observable.never().timeout(2, TimeUnit.HOURS))
         .subscribe(
             idWithResponse -> {
+              LOG.info("Excel tallennettu prosessille {}", prosessi.getId());
               prosessi.inkrementoiTehtyjaToita();
               prosessi.setDokumenttiId(idWithResponse.getLeft());
             },
