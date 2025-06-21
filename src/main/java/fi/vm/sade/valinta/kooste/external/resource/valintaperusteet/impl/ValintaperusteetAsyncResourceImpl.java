@@ -90,10 +90,6 @@ public class ValintaperusteetAsyncResourceImpl implements ValintaperusteetAsyncR
         10 * 60 * 1000);
   }
 
-  public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
-    return Observable.fromFuture(this.haunHakukohteetF(hakuOid, false));
-  }
-
   public CompletableFuture<List<HakukohdeKoosteTietoDTO>> haunHakukohdeTiedot(String hakuOid) {
     return httpClient.get(
         this.urlConfiguration.url(
