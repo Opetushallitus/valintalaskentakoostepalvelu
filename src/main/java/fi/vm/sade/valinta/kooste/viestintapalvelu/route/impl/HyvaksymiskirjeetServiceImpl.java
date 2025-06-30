@@ -342,7 +342,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             hakuOid, asiointikieli),
         String.format(
             "Haun %s hyväksymiskirjeiden muodostaminen asiointikielelle %s epäonnistui",
-            hakuOid, asiointikieli));
+            hakuOid, asiointikieli),
+        3,
+        TimeUnit.HOURS);
   }
 
   @Override
@@ -392,7 +394,9 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
             hakuOid, asiointikieli),
         String.format(
             "Haun %s jälkiohjauskirjeiden muodostaminen asiointikielelle %s epäonnistui",
-            hakuOid, asiointikieli));
+            hakuOid, asiointikieli),
+        3,
+        TimeUnit.HOURS);
   }
 
   public ProsessiId hyvaksymiskirjeetHaulleHakukohteittain(HyvaksymiskirjeDTO hyvaksymiskirjeDTO) {
@@ -800,6 +804,18 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
       String startMessage,
       String successMessage,
       String errorMessage) {
+    return yhdenKirjeeranProsessi(
+        executor, task, startMessage, successMessage, errorMessage, 1, TimeUnit.HOURS);
+  }
+
+  private ProsessiId yhdenKirjeeranProsessi(
+      ExecutorService executor,
+      Function<DokumenttiProsessi, CompletableFuture<String>> task,
+      String startMessage,
+      String successMessage,
+      String errorMessage,
+      long timeout,
+      TimeUnit timeoutUnit) {
     DokumenttiProsessi prosessi = new DokumenttiProsessi("", "", "", Collections.emptyList());
     dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
     prosessi.setKokonaistyo(1);
@@ -808,7 +824,7 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
         () -> {
           try {
             LOG.info(startMessage);
-            String batchId = task.apply(prosessi).get(1, TimeUnit.HOURS);
+            String batchId = task.apply(prosessi).get(timeout, timeoutUnit);
             LOG.info(successMessage);
             prosessi.inkrementoiTehtyjaToita();
             prosessi.setDokumenttiId(batchId);
