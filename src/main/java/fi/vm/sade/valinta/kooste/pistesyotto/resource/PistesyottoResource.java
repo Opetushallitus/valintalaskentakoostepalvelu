@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -206,7 +208,12 @@ public class PistesyottoResource {
                             pistetiedot, ifUnmodifiedSince, auditSession)
                         .toFuture()
                         .get();
-                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body(errors));
+                result.setResult(
+                    ResponseEntity.status(
+                            errors.isEmpty()
+                                ? HttpStatus.NO_CONTENT
+                                : HttpStatus.PRECONDITION_FAILED)
+                        .body(errors));
               } else {
                 String msg =
                     String.format(
@@ -384,11 +391,10 @@ public class PistesyottoResource {
                         hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedot, auditSession)))
         .subscribe(
             errors -> {
-              if (errors.isEmpty()) {
-                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
-              } else {
-                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body(errors));
-              }
+              result.setResult(
+                  ResponseEntity.status(
+                          errors.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.PRECONDITION_FAILED)
+                      .body(errors));
             },
             error -> {
               if (error instanceof AccessDeniedException) {
@@ -404,6 +410,9 @@ public class PistesyottoResource {
 
     return result;
   }
+
+  private final ThreadPoolExecutor excelVientiPool =
+      (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
 
   @PostMapping(value = "/vienti", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
@@ -447,7 +456,10 @@ public class PistesyottoResource {
                 DokumenttiProsessi prosessi =
                     new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
-                vientiService.vie(hakuOid, hakukohdeOid, auditSession, prosessi);
+                excelVientiPool.submit(
+                    () -> {
+                      vientiService.vie(hakuOid, hakukohdeOid, auditSession, prosessi);
+                    });
                 result.setResult(
                     ResponseEntity.status(HttpStatus.OK).body(prosessi.toProsessiId()));
               } else {

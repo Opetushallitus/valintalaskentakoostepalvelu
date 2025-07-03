@@ -42,9 +42,9 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Function;
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -85,8 +85,9 @@ public class ValintalaskennanTulosExcelTest {
           a.setNimi("Erittäin-., **pitkä valintatapajon**on");
           return a;
         };
-    XSSFWorkbook workbook =
+    SXSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             Collections.emptyMap(),
             haku,
             hakukohde,
@@ -113,10 +114,13 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void sheetContents() {
-    XSSFWorkbook workbook =
+    SXSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
-            Collections.singletonMap(
-                "Hakemus 1", new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
+            Map.of(),
+            Map.of(
+                "jonoOid1",
+                Map.of(
+                    "Hakemus 1", new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1"))),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -181,11 +185,86 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void ataruSheetContents() {
-    XSSFWorkbook ataruWorkbook =
+    SXSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
-            Collections.singletonMap(
+            Map.of(),
+            Map.of(
+                "jonoOid1",
+                Map.of(
+                    "1.2.246.562.11.00000000000000000063",
+                    new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1"))),
+            haku,
+            hakukohde,
+            Collections.singletonList(tarjoaja),
+            asList(
+                valinnanvaihe(
+                    1,
+                    nyt.toDate(),
+                    asList(
+                        valintatapajono(1, ataruJonosijat()),
+                        valintatapajono(2, Collections.emptyList()))),
+                valinnanvaihe(
+                    2,
+                    nyt.minusMonths(12).toDate(),
+                    Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
+            Collections.singletonList(
+                MockAtaruAsyncResource.getAtaruHakemusWrapper(
+                    "1.2.246.562.11.00000000000000000063")));
+
+    assertEquals(
+        asList(
+            asList("Haku", "Haku 1"),
+            asList("Tarjoaja", "Tarjoaja 1"),
+            asList("Hakukohde", "Hakukohde 1"),
+            asList("Vaihe", "Vaihe 1"),
+            asList(
+                "Päivämäärä",
+                ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
+            asList("Jono", "Erittäin pitkä valintatapajonon nimi 1"),
+            Collections.emptyList(),
+            asList(
+                "Jonosija",
+                "Sukunimi",
+                "Etunimi",
+                "Henkilötunnus",
+                "Sähköpostiosoite",
+                "Hakemus OID",
+                "Hakutoive",
+                "Laskennan tulos",
+                "Selite",
+                "Kokonaispisteet",
+                "Hyväksynnän ehto (FI)",
+                "Hyväksynnän ehto (SV)",
+                "Hyväksynnän ehto (EN)",
+                "keskiarvo",
+                "pääsykoetulos"),
+            asList(
+                "2",
+                "TAUsuL4BQc",
+                "Zl2A5",
+                "020202A0202",
+                "ukhBW@example.com",
+                "1.2.246.562.11.00000000000000000063",
+                "1",
+                "HYVAKSYTTAVISSA",
+                "",
+                "666",
+                "ehto 1",
+                "villkor 1",
+                "condition 1",
+                "9",
+                "10")),
+        getWorksheetData(ataruWorkbook.getSheetAt(0)));
+  }
+
+  @Test
+  public void ataruSheetContentsWithHakemuskohtainenEhdollisuus() {
+    SXSSFWorkbook ataruWorkbook =
+        ValintalaskennanTulosExcel.luoExcel(
+            Map.of(
                 "1.2.246.562.11.00000000000000000063",
                 new HyvaksynnanEhto("ltt", "ehto 1", "villkor 1", "condition 1")),
+            Map.of(),
             haku,
             hakukohde,
             Collections.singletonList(tarjoaja),
@@ -252,8 +331,9 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void sarakkeidenSisaltoOnOikeinVaikkaSeTulisiEriJarjestyksessaEriHakijoille() {
-    XSSFWorkbook ataruWorkbook =
+    SXSSFWorkbook ataruWorkbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             Collections.emptyMap(),
             haku,
             hakukohde,
@@ -337,8 +417,9 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void emptySheet() {
-    XSSFWorkbook workbook =
+    SXSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             Collections.emptyMap(),
             haku,
             hakukohde,
@@ -412,6 +493,7 @@ public class ValintalaskennanTulosExcelTest {
         () ->
             ValintalaskennanTulosExcel.luoExcel(
                 Collections.emptyMap(),
+                Collections.emptyMap(),
                 haku,
                 hakukohde,
                 Collections.singletonList(tarjoaja),
@@ -431,8 +513,9 @@ public class ValintalaskennanTulosExcelTest {
 
   @Test
   public void generoiTiedosto() throws IOException {
-    XSSFWorkbook workbook =
+    SXSSFWorkbook workbook =
         ValintalaskennanTulosExcel.luoExcel(
+            Collections.emptyMap(),
             Collections.emptyMap(),
             haku,
             hakukohde,
@@ -467,7 +550,7 @@ public class ValintalaskennanTulosExcelTest {
     };
   }
 
-  private List<List<String>> getWorksheetData(final XSSFSheet sheet) {
+  private List<List<String>> getWorksheetData(final SXSSFSheet sheet) {
     List<List<String>> sheetData = new ArrayList<>();
     for (int rowNum = 0; rowNum <= sheet.getLastRowNum(); rowNum++) {
       sheetData.add(getRowData(sheet.getRow(rowNum)));
@@ -475,7 +558,7 @@ public class ValintalaskennanTulosExcelTest {
     return sheetData;
   }
 
-  private List<String> getRowData(final XSSFRow row) {
+  private List<String> getRowData(final SXSSFRow row) {
     final ArrayList<String> rowData = new ArrayList<>();
     if (row != null) {
       for (int col = 0; col < row.getLastCellNum(); col++) {

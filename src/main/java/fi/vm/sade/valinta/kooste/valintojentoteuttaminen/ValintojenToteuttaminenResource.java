@@ -24,6 +24,9 @@ import org.springframework.web.context.request.async.DeferredResult;
     name = "/valintojen-toteuttaminen",
     description = "Rajapintoja valintojen toteuttamisen käyttöliittymää varten")
 public class ValintojenToteuttaminenResource {
+  private static final String VALINTAKAYTTAJA_ROLE =
+      "hasAnyRole('ROLE_APP_VALINTOJENTOTEUTTAMINEN_READ',"
+          + "'ROLE_APP_VALINTOJENTOTEUTTAMINEN_READ_UPDATE','ROLE_APP_VALINTOJENTOTEUTTAMINEN_CRUD')";
   private final ValintojenToteuttaminenService service;
   private final Logger LOG = LoggerFactory.getLogger(ValintojenToteuttaminenResource.class);
 
@@ -35,7 +38,7 @@ public class ValintojenToteuttaminenResource {
   @GetMapping(
       value = "/haku/{hakuOid}/valintatiedot-hakukohteittain",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('ROLE_APP_VALINTAPERUSTEET_READ', 'ROLE_APP_VALINTAPERUSTEET_CRUD')")
+  @PreAuthorize(VALINTAKAYTTAJA_ROLE)
   @Operation(
       summary =
           "Hae haun hakukohteiden valintatietoja, joita käytetään hakukohteiden suodatuksessa",

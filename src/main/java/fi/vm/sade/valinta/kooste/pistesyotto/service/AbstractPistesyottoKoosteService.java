@@ -341,6 +341,7 @@ public abstract class AbstractPistesyottoKoosteService {
     prosessi.inkrementoiKokonaistyota();
     kokeetO.connect();
     osallistumistiedotO.connect();
+    LOG.info("Palautetaan yhdistävä excelinmuodostus-Observable prosessille {}", prosessi.getId());
     return Observable.zip(
             osallistumistiedotO,
             lisatiedotO,
