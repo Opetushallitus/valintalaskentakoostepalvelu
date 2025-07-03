@@ -208,7 +208,12 @@ public class PistesyottoResource {
                             pistetiedot, ifUnmodifiedSince, auditSession)
                         .toFuture()
                         .get();
-                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body(errors));
+                result.setResult(
+                    ResponseEntity.status(
+                            errors.isEmpty()
+                                ? HttpStatus.NO_CONTENT
+                                : HttpStatus.PRECONDITION_FAILED)
+                        .body(errors));
               } else {
                 String msg =
                     String.format(
@@ -386,11 +391,10 @@ public class PistesyottoResource {
                         hakuOid, hakukohdeOid, ifUnmodifiedSince, pistetiedot, auditSession)))
         .subscribe(
             errors -> {
-              if (errors.isEmpty()) {
-                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
-              } else {
-                result.setResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body(errors));
-              }
+              result.setResult(
+                  ResponseEntity.status(
+                          errors.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.PRECONDITION_FAILED)
+                      .body(errors));
             },
             error -> {
               if (error instanceof AccessDeniedException) {
