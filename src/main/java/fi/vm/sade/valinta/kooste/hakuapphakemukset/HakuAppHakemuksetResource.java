@@ -234,7 +234,7 @@ public class HakuAppHakemuksetResource {
   @GetMapping(value = "/{hakemusOid}", produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Hakee yhden hakemuksen tiedot oidilla.")
   public CompletableFuture<Map<String, Object>> findApplicationByOid(
-      @PathVariable final String hakemusOid, HttpServletRequest request) {
+      @PathVariable("hakemusOid") final String hakemusOid, HttpServletRequest request) {
 
     Preconditions.checkNotNull(hakemusOid);
 
