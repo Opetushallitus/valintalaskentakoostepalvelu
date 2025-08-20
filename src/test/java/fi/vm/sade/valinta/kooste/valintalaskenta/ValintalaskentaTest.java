@@ -128,14 +128,23 @@ public class ValintalaskentaTest {
   private final String hakuOid = "hakuOid";
   private final String ataruHakuOid = "1.2.246.562.29.805206009510";
   private final Haku hakuDTO =
-      new Haku(hakuOid, new HashMap<>(), new HashSet<>(), null, null, null, null, null, null);
+      new Haku(
+          hakuOid,
+          new HashMap<>(),
+          new HashSet<>(),
+          null,
+          "haunkohdejoukko_11#",
+          null,
+          null,
+          null,
+          null);
   private final Haku ataruHakuDTO =
       new Haku(
           ataruHakuOid,
           new HashMap<>(),
           new HashSet<>(),
           "ataru-lomake-avain",
-          null,
+          "haunkohdejoukko_11#",
           null,
           null,
           null,
@@ -240,23 +249,24 @@ public class ValintalaskentaTest {
     when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid2, ataruHakuOid))
         .thenReturn(Observable.just(Collections.singletonList(new Oppija())));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            List.of(personOid1), ataruHakuOid, true))
-        .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
-    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid, true))
+            List.of(personOid1), ataruHakuOid, false))
         .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            List.of("personOid"), ataruHakuOid, true))
+            List.of(personOid1), hakuOid, false))
+        .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
+    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+            List.of("personOid"), ataruHakuOid, false))
         .thenReturn(
             CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            List.of("personOid"), hakuOid, true))
+            List.of("personOid"), hakuOid, false))
         .thenReturn(
             CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            Collections.emptyList(), ataruHakuOid, true))
+            Collections.emptyList(), ataruHakuOid, false))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            Collections.emptyList(), hakuOid, true))
+            Collections.emptyList(), hakuOid, false))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
     when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid))

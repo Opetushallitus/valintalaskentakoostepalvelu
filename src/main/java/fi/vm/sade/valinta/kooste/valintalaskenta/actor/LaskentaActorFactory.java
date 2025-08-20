@@ -633,12 +633,13 @@ public class LaskentaActorFactory {
                   "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
                   oppijaOids,
                   hakukohdeOid);
+              Boolean fetchEnsikertalaisuus = haku.isKorkeakouluhaku();
               return createResurssiFuture(
                       tunniste,
                       "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
                       () ->
                           suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-                              oppijaOids, hakuOid, true),
+                              oppijaOids, hakuOid, fetchEnsikertalaisuus),
                       retryHakemuksetAndOppijat)
                   .thenApply(
                       oppijat -> {
