@@ -136,23 +136,24 @@ public class ValintalaskentaTest {
     when(suoritusrekisteriAsyncResource.getOppijatByHakukohde(ataruHakukohdeOid2, ataruHakuOid))
         .thenReturn(Observable.just(Collections.singletonList(new Oppija())));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            List.of(personOid1), ataruHakuOid, true))
-        .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
-    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(List.of(personOid1), hakuOid, true))
+            List.of(personOid1), ataruHakuOid, false))
         .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            List.of("personOid"), ataruHakuOid, true))
+            List.of(personOid1), hakuOid, false))
+        .thenReturn(CompletableFuture.completedFuture(Collections.singletonList(oppijaFromSure1)));
+    when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+            List.of("personOid"), ataruHakuOid, false))
         .thenReturn(
             CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            List.of("personOid"), hakuOid, true))
+            List.of("personOid"), hakuOid, false))
         .thenReturn(
             CompletableFuture.completedFuture(Collections.singletonList(anonOppijaFromSure)));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            Collections.emptyList(), ataruHakuOid, true))
+            Collections.emptyList(), ataruHakuOid, false))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
     when(suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-            Collections.emptyList(), hakuOid, true))
+            Collections.emptyList(), hakuOid, false))
         .thenReturn(CompletableFuture.completedFuture(Collections.emptyList()));
 
     when(tarjontaAsyncResource.hakukohdeRyhmasForHakukohdes(hakuOid))

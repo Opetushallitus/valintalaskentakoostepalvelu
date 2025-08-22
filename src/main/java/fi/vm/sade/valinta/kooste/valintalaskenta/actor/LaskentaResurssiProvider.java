@@ -495,49 +495,53 @@ public class LaskentaResurssiProvider {
             this.executor);
 
     CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
-        henkiloViitteet.thenComposeAsync(
-            hws ->
-                this.suorituksetLimiter.withConcurrencyLimit(
-                    hws.size() + 50,
-                    waitDurations,
-                    invokeDurations,
-                    () -> {
-                      LOG.info(
-                          "Haetaan suoritukset hakukohteen "
-                              + hakukohdeOid
-                              + " "
-                              + hws.size()
-                              + " oppijalle");
+        hakuFuture.thenComposeAsync(
+            haku ->
+                henkiloViitteet.thenComposeAsync(
+                    hws ->
+                        this.suorituksetLimiter.withConcurrencyLimit(
+                            hws.size() + 50,
+                            waitDurations,
+                            invokeDurations,
+                            () -> {
+                              LOG.info(
+                                  "Haetaan suoritukset hakukohteen "
+                                      + hakukohdeOid
+                                      + " "
+                                      + hws.size()
+                                      + " oppijalle");
 
-                      LOG.info("Got henkiloViittees: {}", hws);
-                      Map<String, String> masterToOriginal =
-                          hws.stream()
-                              .collect(
-                                  Collectors.toMap(
-                                      HenkiloViiteDto::getMasterOid,
-                                      HenkiloViiteDto::getHenkiloOid));
-                      List<String> oppijaOids = new ArrayList<>(masterToOriginal.keySet());
-                      LOG.info(
-                          "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
-                          oppijaOids,
-                          hakukohdeOid);
-                      return createResurssiFuture(
-                              tunniste,
-                              "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
-                              () ->
-                                  suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-                                      oppijaOids, hakuOid, true),
-                              retryHakemuksetAndOppijat)
-                          .thenApply(
-                              oppijat -> {
-                                oppijat.forEach(
-                                    oppija ->
-                                        oppija.setOppijanumero(
-                                            masterToOriginal.get(oppija.getOppijanumero())));
-                                return oppijat;
-                              });
-                    }),
-            this.executor);
+                              LOG.info("Got henkiloViittees: {}", hws);
+                              Map<String, String> masterToOriginal =
+                                  hws.stream()
+                                      .collect(
+                                          Collectors.toMap(
+                                              HenkiloViiteDto::getMasterOid,
+                                              HenkiloViiteDto::getHenkiloOid));
+                              List<String> oppijaOids = new ArrayList<>(masterToOriginal.keySet());
+                              LOG.info(
+                                  "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
+                                  oppijaOids,
+                                  hakukohdeOid);
+                              Boolean fetchEnsikertalaisuus = haku.isKorkeakouluhaku();
+                              return createResurssiFuture(
+                                      tunniste,
+                                      "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
+                                      () ->
+                                          suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
+                                              oppijaOids, hakuOid, fetchEnsikertalaisuus),
+                                      retryHakemuksetAndOppijat)
+                                  .thenApply(
+                                      oppijat -> {
+                                        oppijat.forEach(
+                                            oppija ->
+                                                oppija.setOppijanumero(
+                                                    masterToOriginal.get(
+                                                        oppija.getOppijanumero())));
+                                        return oppijat;
+                                      });
+                            }),
+                    this.executor));
 
     CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes =
         this.hakukohderyhmatLimiter.withConcurrencyLimit(
