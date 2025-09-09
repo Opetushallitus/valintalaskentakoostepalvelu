@@ -154,43 +154,6 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>2.0.16</version>
             </dependency>
-            <!-- Alla olevat Tomcat-riippuvuudet lisätty Snyk-raportin perusteella. Voi mahdollisesti poistaa
-                 seuraavan riippuvuuksien versiopäivityksen yhteydessä -->
-            <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-catalina</artifactId>
-                <version>10.1.44</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-jni</artifactId>
-                <version>10.1.44</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-juli</artifactId>
-                <version>10.1.44</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-servlet-api</artifactId>
-                <version>10.1.44</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-util</artifactId>
-                <version>10.1.44</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
-                <version>10.1.44</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat</groupId>
-                <artifactId>tomcat-coyote</artifactId>
-                <version>10.1.44</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -442,8 +405,8 @@
         <!-- logging -->
         <dependency>
             <groupId>ch.qos.logback.access</groupId>
-            <artifactId>tomcat</artifactId>
-            <version>2.0.3</version>
+            <artifactId>logback-access-tomcat</artifactId>
+            <version>2.0.6</version>
         </dependency>
 
         <!-- reactive -->
