@@ -100,11 +100,6 @@ public class MockValintaperusteetAsyncResource implements ValintaperusteetAsyncR
   }
 
   @Override
-  public Observable<List<HakukohdeViiteDTO>> haunHakukohteet(String hakuOid) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public CompletableFuture<List<HakukohdeKoosteTietoDTO>> haunHakukohdeTiedot(String hakuOid) {
     throw new UnsupportedOperationException();
   }
