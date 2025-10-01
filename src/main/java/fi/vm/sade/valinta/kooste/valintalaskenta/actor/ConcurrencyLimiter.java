@@ -133,24 +133,22 @@ public class ConcurrencyLimiter {
             this.waiting.decrementAndGet();
           }
 
-          if (nimi.equals("suoritukset")) {
-            LOG.info(
-                "Haettiin "
-                    + permits
-                    + " permittiä, jäi "
-                    + this.semaphore.availablePermits()
-                    + " permittiä, ajossa "
-                    + this.getActive()
-                    + ", odottaa "
-                    + this.getWaiting());
-          }
-
-          Instant invokeStart = Instant.now();
-          waitDurations.put(this.nimi, Duration.between(waitStart, invokeStart));
-
-          // suoritetaan pyyntö
           this.active.incrementAndGet();
           try {
+            if (nimi.equals("suoritukset")) {
+              LOG.info(
+                  "Haettiin {} permittiä, saatiin {} permittiä, jäi {} permittiä, ajossa {}, odottaa {}",
+                  permits,
+                  requiredPermits,
+                  this.semaphore.availablePermits(),
+                  this.getActive(),
+                  this.getWaiting());
+            }
+
+            Instant invokeStart = Instant.now();
+            waitDurations.put(this.nimi, Duration.between(waitStart, invokeStart));
+
+            // suoritetaan pyyntö
             invokeDurations.put(this.nimi, ONGOING);
             T result = supplier.get().get();
             invokeDurations.put(this.nimi, Duration.between(invokeStart, Instant.now()));
@@ -164,12 +162,18 @@ public class ConcurrencyLimiter {
               invokeDurations.put(this.nimi, ERROR);
               future.completeExceptionally(e);
             }
-          } catch (Exception e) {
+          } catch (Throwable e) {
             invokeDurations.put(this.nimi, ERROR);
             future.completeExceptionally(e);
           } finally {
             semaphore.release(requiredPermits);
             this.active.decrementAndGet();
+            LOG.info(
+                "Vapautettiin {} permittiä, vapaana on {} permittiä, ajossa {}, odottaa {}",
+                requiredPermits,
+                this.semaphore.availablePermits(),
+                this.getActive(),
+                this.getWaiting());
           }
         });
 
