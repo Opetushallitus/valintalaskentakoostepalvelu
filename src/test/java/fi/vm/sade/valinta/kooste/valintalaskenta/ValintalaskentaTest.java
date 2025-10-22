@@ -52,29 +52,6 @@ public class ValintalaskentaTest {
   private final String hakuOid = "hakuOid";
   private final String ataruHakuOid = "1.2.246.562.29.805206009510";
 
-  private final Haku hakuDTO =
-      new Haku(
-          hakuOid,
-          new HashMap<>(),
-          new HashSet<>(),
-          null,
-          "haunkohdejoukko_11#",
-          null,
-          null,
-          null,
-          null);
-  private final Haku ataruHakuDTO =
-      new Haku(
-          ataruHakuOid,
-          new HashMap<>(),
-          new HashSet<>(),
-          "ataru-lomake-avain",
-          "haunkohdejoukko_11#",
-          null,
-          null,
-          null,
-          null);
-
   private final Oppija oppijaFromSure1 = new Oppija();
   private final Oppija anonOppijaFromSure = new Oppija();
   private final List<String> hakemusOids = new ArrayList<>();
