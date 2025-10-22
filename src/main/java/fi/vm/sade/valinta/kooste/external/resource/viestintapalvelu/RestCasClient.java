@@ -50,8 +50,8 @@ public class RestCasClient {
       final TypeToken<T> typeToken,
       final Object body,
       final Map<String, String> headers,
-      final int requestTimeout) {
-    return this.post(url, body, headers, requestTimeout)
+      final int requestTimeoutMillis) {
+    return this.post(url, body, headers, requestTimeoutMillis)
         .thenApply(response -> this.gson.fromJson(response.getResponseBody(), typeToken.getType()));
   }
 
@@ -60,36 +60,43 @@ public class RestCasClient {
       final TypeToken<T> typeToken,
       final Object body,
       final Map<String, String> headers,
-      final int requestTimeout) {
-    return this.postPlaintext(url, body, headers, requestTimeout)
+      final int requestTimeoutMillis) {
+    return this.postPlaintext(url, body, headers, requestTimeoutMillis)
         .thenApply(response -> this.gson.fromJson(response.getResponseBody(), typeToken.getType()));
   }
 
   public CompletableFuture<Response> post(
-      final String url, final Object body, final Map<String, String> headers, final int timeout) {
+      final String url,
+      final Object body,
+      final Map<String, String> headers,
+      final int timeoutMillis) {
     return this.executeAndThrowOnError(
-        withHeaders(request(url, "POST", timeout).setBody(this.gson.toJson(body)), headers)
+        withHeaders(request(url, "POST", timeoutMillis).setBody(this.gson.toJson(body)), headers)
             .build());
   }
 
   public CompletableFuture<Response> postPlaintext(
-      final String url, final Object body, final Map<String, String> headers, final int timeout) {
+      final String url,
+      final Object body,
+      final Map<String, String> headers,
+      final int timeoutMillis) {
     return this.executeAndThrowOnError(
-        withHeaders(request(url, "POST", timeout).setBody(body.toString()), headers).build());
+        withHeaders(request(url, "POST", timeoutMillis).setBody(body.toString()), headers).build());
   }
 
   public <T> CompletableFuture<T> get(
       final String url,
       final TypeToken<T> typeToken,
       final Map<String, String> headers,
-      final int timeout) {
-    return this.get(url, headers, timeout)
+      final int timeoutMillis) {
+    return this.get(url, headers, timeoutMillis)
         .thenApply(response -> this.gson.fromJson(response.getResponseBody(), typeToken.getType()));
   }
 
   public CompletableFuture<Response> get(
-      final String url, final Map<String, String> headers, final int timeout) {
-    return this.executeAndThrowOnError(withHeaders(request(url, "GET", timeout), headers).build());
+      final String url, final Map<String, String> headers, final int timeoutMillis) {
+    return this.executeAndThrowOnError(
+        withHeaders(request(url, "GET", timeoutMillis), headers).build());
   }
 
   public <T> CompletableFuture<T> put(
@@ -97,21 +104,25 @@ public class RestCasClient {
       final TypeToken<T> typeToken,
       final Object body,
       final Map<String, String> headers,
-      final int timeout) {
-    return this.put(url, body, headers, timeout)
+      final int timeoutMillis) {
+    return this.put(url, body, headers, timeoutMillis)
         .thenApply(response -> this.gson.fromJson(response.getResponseBody(), typeToken.getType()));
   }
 
   public CompletableFuture<Response> put(
-      final String url, final Object body, final Map<String, String> headers, final int timeout) {
+      final String url,
+      final Object body,
+      final Map<String, String> headers,
+      final int timeoutMillis) {
     return this.executeAndThrowOnError(
-        withHeaders(request(url, "PUT", timeout).setBody(this.gson.toJson(body)), headers).build());
+        withHeaders(request(url, "PUT", timeoutMillis).setBody(this.gson.toJson(body)), headers)
+            .build());
   }
 
   public CompletableFuture<String> delete(
-      final String url, final Map<String, String> headers, final int timeout) {
+      final String url, final Map<String, String> headers, final int timeoutMillis) {
     return this.executeAndThrowOnError(
-            withHeaders(request(url, "DELETE", timeout), headers).build())
+            withHeaders(request(url, "DELETE", timeoutMillis), headers).build())
         .thenApply(r -> r.getResponseBody());
   }
 
@@ -142,19 +153,22 @@ public class RestCasClient {
                 throw new RestCasClientException(
                     response,
                     String.format(
-                        "Error calling url %s with method %s, response code %s",
-                        request.getUrl(), request.getMethod(), response.getStatusCode()));
+                        "Error calling url %s with method %s, response code %s, message: %s",
+                        request.getUrl(),
+                        request.getMethod(),
+                        response.getStatusCode(),
+                        response.getResponseBody()));
               }
             });
   }
 
-  private static RequestBuilder request(final String url, final String method, int timeout) {
+  private static RequestBuilder request(final String url, final String method, int timeoutMillis) {
     final RequestBuilder requestBuilder =
         new RequestBuilder()
             .setUrl(url)
             .setMethod(method)
-            .setRequestTimeout(Duration.ofSeconds(timeout))
-            .setReadTimeout(Duration.ofSeconds(timeout))
+            .setRequestTimeout(Duration.ofMillis(timeoutMillis))
+            .setReadTimeout(Duration.ofMillis(timeoutMillis))
             .addHeader("Caller-Id", CALLER_ID)
             .addHeader("CSRF", CSRF_VALUE)
             .addHeader("Cookie", String.format("CSRF=%s;", CSRF_VALUE));

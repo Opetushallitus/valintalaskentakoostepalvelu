@@ -1,6 +1,7 @@
 logging:
   level:
     fi.vm.sade.javautils.nio.cas: warn  # CasClient näyttää tunkevan INFO-entryyn koko responsen joten filtteröidään ne pois
+    com.github.dockerjava: info
 
 springdoc:
   show-actuator: false
