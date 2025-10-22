@@ -131,7 +131,7 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
                           new TypeToken<List<Oppija>>() {},
                           oidBatch,
                           Collections.emptyMap(),
-                          5 * 60 * 1000);
+                          15 * 60 * 1000);
                     })
                 .collect(Collectors.toList()))
         .thenApplyAsync(
