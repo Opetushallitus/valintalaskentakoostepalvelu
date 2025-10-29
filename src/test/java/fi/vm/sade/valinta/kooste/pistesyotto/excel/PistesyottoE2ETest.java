@@ -152,11 +152,13 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     mockToReturnJson(
         PUT,
-        "/valintapiste-service/api/haku/testioidi1/hakukohde/1.2.246.562.5.85532589612",
+        "/valintalaskenta-laskenta-service/resources/valintapisteet/haku/testioidi1/hakukohde/1.2.246.562.5.85532589612",
         Collections.emptySet());
 
     mockToReturnJson(
-        POST, "/valintapiste-service/api/pisteet-with-hakemusoids", pisteetFromValintaPisteService);
+        POST,
+        "/valintalaskenta-laskenta-service/resources/valintapisteet/pisteet-with-hakemusoids",
+        pisteetFromValintaPisteService);
   }
 
   @Test
@@ -172,7 +174,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     mockForward(
         PUT,
         fakeValintaPisteService.addHandler(
-            "/valintapiste-service/api/pisteet-with-hakemusoids",
+            "/valintalaskenta-laskenta-service/resources/valintapisteet/pisteet-with-hakemusoids",
             exchange -> {
               try {
                 List<Valintapisteet> valintapisteList =
@@ -225,7 +227,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     mockForward(
         PUT,
         fakeValintaPisteService.addHandler(
-            "/valintapiste-service/api/pisteet-with-hakemusoids",
+            "/valintalaskenta-laskenta-service/resources/valintapisteet/pisteet-with-hakemusoids",
             exchange -> {
               exchange.getResponseHeaders().add("Content-Type", "application/json");
               exchange.sendResponseHeaders(200, 0);
