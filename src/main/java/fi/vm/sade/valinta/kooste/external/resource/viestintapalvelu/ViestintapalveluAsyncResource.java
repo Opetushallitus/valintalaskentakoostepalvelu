@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ViestintapalveluAsyncResource {
 
-  Duration VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA = Duration.of(60, ChronoUnit.MINUTES);
+  Duration VIESTINTAPALVELUN_MAKSIMI_POLLAUS_AIKA = Duration.of(3, ChronoUnit.HOURS);
 
   CompletableFuture<LetterResponse> vieLetterBatch(LetterBatch letterBatch);
 

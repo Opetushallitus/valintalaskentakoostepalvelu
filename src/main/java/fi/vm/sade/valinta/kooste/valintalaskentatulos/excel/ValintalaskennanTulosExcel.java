@@ -36,6 +36,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 public class ValintalaskennanTulosExcel {
   public static SXSSFWorkbook luoExcel(
       Map<String, HyvaksynnanEhto> hyvaksynnanEhdot,
+      Map<String, Map<String, HyvaksynnanEhto>> hyvaksynnanEhdotValintatapajonoissa,
       Haku haku,
       AbstractHakukohde hakukohdeDTO,
       List<Organisaatio> tarjoajat,
@@ -84,7 +85,13 @@ public class ValintalaskennanTulosExcel {
                         .map(h -> h.name)
                         .collect(Collectors.toList());
                 addRow(sheet, allColumnHeaders);
-                addJonosijaRows(hakemusByOid, jono, sheet, dynamicColumns, hyvaksynnanEhdot);
+                addJonosijaRows(
+                    hakemusByOid,
+                    jono,
+                    sheet,
+                    dynamicColumns,
+                    hyvaksynnanEhdot,
+                    hyvaksynnanEhdotValintatapajonoissa);
               }
             });
     return workbook;
@@ -121,13 +128,17 @@ public class ValintalaskennanTulosExcel {
       ValintatietoValintatapajonoDTO jono,
       SXSSFSheet sheet,
       List<Column> dynamicColumns,
-      Map<String, HyvaksynnanEhto> hyvaksynnanEhdot) {
+      Map<String, HyvaksynnanEhto> hyvaksynnanEhdot,
+      Map<String, Map<String, HyvaksynnanEhto>> hyvaksynnanEhdotValintatapajonoissa) {
     sortedJonosijat(jono)
         .map(
             hakija -> {
+              final Map<String, HyvaksynnanEhto> ehdot =
+                  hyvaksynnanEhdot.containsKey(hakija.getHakemusOid())
+                      ? hyvaksynnanEhdot
+                      : hyvaksynnanEhdotValintatapajonoissa.getOrDefault(jono.getOid(), Map.of());
               final HakemusRivi hakemusRivi =
-                  new HakemusRivi(
-                      hakija, hakemusByOid.get(hakija.getHakemusOid()), hyvaksynnanEhdot);
+                  new HakemusRivi(hakija, hakemusByOid.get(hakija.getHakemusOid()), ehdot);
               return Stream.concat(fixedColumns.stream(), dynamicColumns.stream())
                   .map(column -> column.extractor.apply(hakemusRivi))
                   .collect(Collectors.toList());
