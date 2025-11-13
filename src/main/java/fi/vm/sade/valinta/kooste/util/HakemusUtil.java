@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory;
 
 public class HakemusUtil {
   private static final Logger LOG = LoggerFactory.getLogger(HakemusUtil.class);
-  public static final Map<String, Map<HakemuksenTila, String>> TILAT = valmistaTilat();
+  public static final Map<String, Map<HakemuksenTila, String>> TILAT = valmistaTilat(false);
+  public static final Map<String, Map<HakemuksenTila, String>> TILAT_FOR_LETTER =
+      valmistaTilat(true);
   private static final Map<String, String> VARASIJALLA = varasijallaTilat();
   private static final Map<String, String> VARASIJAT = varasijaTekstinTilat();
   private static final Map<String, String> EHDOLLINEN = ehdollinenTekstinTilat();
@@ -99,11 +101,11 @@ public class HakemusUtil {
     return Collections.unmodifiableMap(kielet);
   }
 
-  private static Map<String, Map<HakemuksenTila, String>> valmistaTilat() {
+  private static Map<String, Map<HakemuksenTila, String>> valmistaTilat(final boolean forLetter) {
     Map<String, Map<HakemuksenTila, String>> kielet =
         new HashMap<String, Map<HakemuksenTila, String>>();
     Map<HakemuksenTila, String> fi = new HashMap<>();
-    fi.put(HYLATTY, "Hylätty");
+    fi.put(HYLATTY, forLetter ? "Et saanut opiskelupaikkaa" : "Hylätty");
     fi.put(VARALLA, "Varalla");
     fi.put(VARASIJALTA_HYVAKSYTTY, "Varasijalta hyväksytty");
     fi.put(PERUUNTUNUT, "Peruuntunut");
@@ -113,7 +115,7 @@ public class HakemusUtil {
     fi.put(PERUNUT, "Perunut");
 
     Map<HakemuksenTila, String> sv = new HashMap<>();
-    sv.put(HYLATTY, "Underkänd");
+    sv.put(HYLATTY, forLetter ? "Du fick inte studieplats" : "Underkänd");
     sv.put(VARALLA, "På reservplats");
     sv.put(VARASIJALTA_HYVAKSYTTY, "Godkänd från reservplats");
     sv.put(PERUUNTUNUT, "Annullerad");
@@ -123,7 +125,7 @@ public class HakemusUtil {
     sv.put(PERUNUT, "Annullerad");
 
     Map<HakemuksenTila, String> en = new HashMap<HakemuksenTila, String>();
-    en.put(HYLATTY, "Rejected");
+    en.put(HYLATTY, forLetter ? "You were not offered admission" : "Rejected");
     en.put(VARALLA, "On a waiting list");
     en.put(PERUUNTUNUT, "Cancelled");
     en.put(HYVAKSYTTY, "Accepted");
@@ -170,7 +172,7 @@ public class HakemusUtil {
       return HakemusUtil.varasijallaConverter(
           valintatapajono.getVarasijanNumero(), preferoitukielikoodi);
     } else {
-      return HakemusUtil.TILAT.get(preferoitukielikoodi).get(valintatapajono.getTila());
+      return HakemusUtil.TILAT_FOR_LETTER.get(preferoitukielikoodi).get(valintatapajono.getTila());
     }
   }
 
