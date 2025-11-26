@@ -1,0 +1,23 @@
+{
+  "queryId": "%1$s",
+  "requestedBy": "1.2.246.562.24.16951077817",
+  "query": {
+    "type": "valintalaskenta",
+    "format": "application/json",
+    "rajapäivä": "2024-07-03",
+    "oppijaOids": [
+      "%2$s"
+    ],
+    "koulutusmuoto": "ammatillinenkoulutus",
+    "suoritustyypit": [
+      "ammatillinentutkinto",
+      "ammatillinentutkintoosittainen"
+    ]
+  },
+  "createdAt": "2024-07-03T13:32:42.870472+03:00",
+  "startedAt": "2024-07-03T13:32:43.521930+03:00",
+  "finishedAt": "2024-07-03T13:32:43.764141+03:00",
+  "files": [],
+  "resultsUrl": "http://localhost/koski/would/be/here/%1$s",
+  "status": "%3$s"
+}
