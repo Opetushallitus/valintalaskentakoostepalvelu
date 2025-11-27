@@ -191,8 +191,8 @@ public class HakuAppHakemuksetResource {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Hakee yhden hakemuksen tiedot oidilla.")
   public CompletableFuture<List<String>> findApplicationEligibilities(
-      @PathVariable final String hakuOid,
-      @PathVariable final String hakukohdeOid,
+      @PathVariable("hakuOid") final String hakuOid,
+      @PathVariable("hakukohdeOid") final String hakukohdeOid,
       HttpServletRequest request) {
 
     Preconditions.checkNotNull(hakuOid);
