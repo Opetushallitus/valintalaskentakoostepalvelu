@@ -1,0 +1,678 @@
+{
+  "oppijaOid": "%s",
+  "opiskeluoikeudet": [
+    {
+      "tyyppi": {
+        "koodiarvo": "ammatillinenkoulutus",
+        "nimi": {
+          "fi": "Ammatillinen koulutus",
+          "sv": "Yrkesutbildning",
+          "en": "Vocational education and training"
+        },
+        "lyhytNimi": {
+          "fi": "Ammatillinen koulutus"
+        },
+        "koodistoUri": "opiskeluoikeudentyyppi",
+        "koodistoVersio": 1
+      },
+      "oid": "1.2.246.562.15.36706825456",
+      "versionumero": 2,
+      "aikaleima": "2020-10-07T08:39:25.323928",
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.57118763579",
+        "oppilaitosnumero": {
+          "koodiarvo": "00000",
+          "nimi": {
+            "fi": "Tuntematon",
+            "sv": "Okänd",
+            "en": "Unknown"
+          },
+          "lyhytNimi": {
+            "fi": "Tuntematon",
+            "sv": "Okänd",
+            "en": "Unknown"
+          },
+          "koodistoUri": "oppilaitosnumero",
+          "koodistoVersio": 1
+        },
+        "nimi": {
+          "fi": "Tuntematon",
+          "sv": "Okänd",
+          "en": "Unknown"
+        },
+        "kotipaikka": {
+          "koodiarvo": "091",
+          "nimi": {
+            "fi": "Helsinki",
+            "sv": "Helsingfors"
+          },
+          "koodistoUri": "kunta",
+          "koodistoVersio": 2
+        }
+      },
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          {
+            "koodiarvo": "lasna",
+            "nimi": {
+              "fi": "Läsnä",
+              "sv": "Närvarande",
+              "en": "Present"
+            },
+            "koodistoUri": "koskiopiskeluoikeudentila",
+            "koodistoVersio": 1
+          }
+        ]
+      },
+      "suoritukset": [
+        {
+          "tyyppi": {
+            "koodiarvo": "ammatillinentutkinto",
+            "nimi": {
+              "fi": "Ammatillinen tutkinto",
+              "sv": "Yrkesinriktad examen",
+              "en": "Vocational education  qualification"
+            },
+            "koodistoUri": "suorituksentyyppi",
+            "koodistoVersio": 1
+          },
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "355102",
+              "nimi": {
+                "fi": "Leipurin ammattitutkinto",
+                "sv": "Yrkesexamen för bagare",
+                "en": "Baker, FQ"
+              },
+              "lyhytNimi": {
+                "fi": "Leipurin at",
+                "sv": "Yrkesexamen för bagare",
+                "en": "Baker, Further Qualification"
+              },
+              "koodistoUri": "koulutus",
+              "koodistoVersio": 12
+            },
+            "koulutustyyppi": {
+              "koodiarvo": "11",
+              "nimi": {
+                "fi": "Ammattitutkinto",
+                "sv": "Yrkesexamen",
+                "en": "Further vocational qualification"
+              },
+              "lyhytNimi": {
+                "fi": "Ammattitutkinto",
+                "sv": "Yrkesexamen"
+              },
+              "koodistoUri": "koulutustyyppi",
+              "koodistoVersio": 2
+            }
+          },
+          "suoritustapa": {
+            "koodiarvo": "ops",
+            "nimi": {
+              "fi": "Ammatillinen perustutkinto",
+              "sv": "Yrkesinriktad grundexamen",
+              "en": "Initial vocational qualification"
+            },
+            "lyhytNimi": {
+              "fi": "ops",
+              "sv": "ops",
+              "en": "ops"
+            },
+            "koodistoUri": "ammatillisentutkinnonsuoritustapa",
+            "koodistoVersio": 1
+          },
+          "osasuoritukset": []
+        }
+      ]
+    },
+    {
+      "tyyppi": {
+        "koodiarvo": "ammatillinenkoulutus",
+        "nimi": {
+          "fi": "Ammatillinen koulutus",
+          "sv": "Yrkesutbildning",
+          "en": "Vocational education and training"
+        },
+        "lyhytNimi": {
+          "fi": "Ammatillinen koulutus"
+        },
+        "koodistoUri": "opiskeluoikeudentyyppi",
+        "koodistoVersio": 1
+      },
+      "oid": "1.2.246.562.15.21629507753",
+      "versionumero": 2,
+      "aikaleima": "2019-09-05T08:02:34.070696",
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.84189747029",
+        "oppilaitosnumero": {
+          "koodiarvo": "01963",
+          "nimi": {
+            "fi": "Lappeenrannan musiikkiopisto",
+            "sv": "Lappeenrannan musiikkiopisto",
+            "en": "Lappeenrannan musiikkiopisto"
+          },
+          "lyhytNimi": {
+            "fi": "Lappeenrannan musiikkiopisto",
+            "sv": "Lappeenrannan musiikkiopisto",
+            "en": "Lappeenrannan musiikkiopisto"
+          },
+          "koodistoUri": "oppilaitosnumero",
+          "koodistoVersio": 1
+        },
+        "nimi": {
+          "fi": "Lappeenrannan musiikkiopisto",
+          "sv": "Lappeenrannan musiikkiopisto",
+          "en": "Lappeenrannan musiikkiopisto"
+        },
+        "kotipaikka": {
+          "koodiarvo": "405",
+          "nimi": {
+            "fi": "Lappeenranta",
+            "sv": "Villmanstrand"
+          },
+          "koodistoUri": "kunta",
+          "koodistoVersio": 2
+        }
+      },
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          {
+            "koodiarvo": "lasna",
+            "nimi": {
+              "fi": "Läsnä",
+              "sv": "Närvarande",
+              "en": "Present"
+            },
+            "koodistoUri": "koskiopiskeluoikeudentila",
+            "koodistoVersio": 1
+          }
+        ]
+      },
+      "suoritukset": [
+        {
+          "tyyppi": {
+            "koodiarvo": "ammatillinentutkinto",
+            "nimi": {
+              "fi": "Ammatillinen tutkinto",
+              "sv": "Yrkesinriktad examen",
+              "en": "Vocational education  qualification"
+            },
+            "koodistoUri": "suorituksentyyppi",
+            "koodistoVersio": 1
+          },
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "355102",
+              "nimi": {
+                "fi": "Leipurin ammattitutkinto",
+                "sv": "Yrkesexamen för bagare",
+                "en": "Baker, FQ"
+              },
+              "lyhytNimi": {
+                "fi": "Leipurin at",
+                "sv": "Yrkesexamen för bagare",
+                "en": "Baker, Further Qualification"
+              },
+              "koodistoUri": "koulutus",
+              "koodistoVersio": 12
+            },
+            "koulutustyyppi": {
+              "koodiarvo": "11",
+              "nimi": {
+                "fi": "Ammattitutkinto",
+                "sv": "Yrkesexamen",
+                "en": "Further vocational qualification"
+              },
+              "lyhytNimi": {
+                "fi": "Ammattitutkinto",
+                "sv": "Yrkesexamen"
+              },
+              "koodistoUri": "koulutustyyppi",
+              "koodistoVersio": 2
+            }
+          },
+          "suoritustapa": {
+            "koodiarvo": "ops",
+            "nimi": {
+              "fi": "Ammatillinen perustutkinto",
+              "sv": "Yrkesinriktad grundexamen",
+              "en": "Initial vocational qualification"
+            },
+            "lyhytNimi": {
+              "fi": "ops",
+              "sv": "ops",
+              "en": "ops"
+            },
+            "koodistoUri": "ammatillisentutkinnonsuoritustapa",
+            "koodistoVersio": 1
+          },
+          "osasuoritukset": []
+        }
+      ]
+    },
+    {
+      "tyyppi": {
+        "koodiarvo": "ammatillinenkoulutus",
+        "nimi": {
+          "fi": "Ammatillinen koulutus",
+          "sv": "Yrkesutbildning",
+          "en": "Vocational education and training"
+        },
+        "lyhytNimi": {
+          "fi": "Ammatillinen koulutus"
+        },
+        "koodistoUri": "opiskeluoikeudentyyppi",
+        "koodistoVersio": 1
+      },
+      "oid": "1.2.246.562.15.89933846126",
+      "versionumero": 2,
+      "aikaleima": "2022-10-26T13:08:33.062318",
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.65473955667",
+        "oppilaitosnumero": {
+          "koodiarvo": "01677",
+          "nimi": {
+            "fi": "Raudaskylän kristillinen opisto",
+            "sv": "Raudaskylän kristillinen opisto",
+            "en": "Raudaskylän kristillinen opisto"
+          },
+          "lyhytNimi": {
+            "fi": "Raudaskylän kristillinen opisto",
+            "sv": "Raudaskylän kristillinen opisto",
+            "en": "Raudaskylän kristillinen opisto"
+          },
+          "koodistoUri": "oppilaitosnumero",
+          "koodistoVersio": 1
+        },
+        "nimi": {
+          "fi": "Raudaskylän kristillinen opisto",
+          "sv": "Raudaskylän kristillinen opisto",
+          "en": "Raudaskylän kristillinen opisto"
+        },
+        "kotipaikka": {
+          "koodiarvo": "977",
+          "nimi": {
+            "fi": "Ylivieska",
+            "sv": "Ylivieska"
+          },
+          "koodistoUri": "kunta",
+          "koodistoVersio": 2
+        }
+      },
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          {
+            "koodiarvo": "lasna",
+            "nimi": {
+              "fi": "Läsnä",
+              "sv": "Närvarande",
+              "en": "Present"
+            },
+            "koodistoUri": "koskiopiskeluoikeudentila",
+            "koodistoVersio": 1
+          }
+        ]
+      },
+      "suoritukset": [
+        {
+          "tyyppi": {
+            "koodiarvo": "ammatillinentutkinto",
+            "nimi": {
+              "fi": "Ammatillinen tutkinto",
+              "sv": "Yrkesinriktad examen",
+              "en": "Vocational education  qualification"
+            },
+            "koodistoUri": "suorituksentyyppi",
+            "koodistoVersio": 1
+          },
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "374115",
+              "nimi": {
+                "fi": "Mielenterveys- ja päihdetyön ammattitutkinto",
+                "sv": "Yrkesexamen i mentalhälsoarbete och missbrukarvård",
+                "en": "Further Vocational Qualification in Mental Health and Intoxicant Abuse Welfare Work"
+              },
+              "lyhytNimi": {
+                "fi": "Mielenterveys- ja päihdetyön at",
+                "en": "Further Vocational Qualification in Mental Health and Intoxicant Abuse Welfare Work"
+              },
+              "koodistoUri": "koulutus",
+              "koodistoVersio": 12
+            },
+            "koulutustyyppi": {
+              "koodiarvo": "11",
+              "nimi": {
+                "fi": "Ammattitutkinto",
+                "sv": "Yrkesexamen",
+                "en": "Further vocational qualification"
+              },
+              "lyhytNimi": {
+                "fi": "Ammattitutkinto",
+                "sv": "Yrkesexamen"
+              },
+              "koodistoUri": "koulutustyyppi",
+              "koodistoVersio": 2
+            }
+          },
+          "suoritustapa": {
+            "koodiarvo": "reformi",
+            "nimi": {
+              "fi": "Reformin mukainen näyttö",
+              "sv": "Kunnandet visas i yrkesprov (reformen)",
+              "en": "Reform"
+            },
+            "lyhytNimi": {
+              "fi": "Reformi",
+              "sv": "Kunnandet visas i yrkesprov (reformen)"
+            },
+            "koodistoUri": "ammatillisentutkinnonsuoritustapa",
+            "koodistoVersio": 1
+          },
+          "osasuoritukset": []
+        }
+      ]
+    },
+    {
+      "tyyppi": {
+        "koodiarvo": "ammatillinenkoulutus",
+        "nimi": {
+          "fi": "Ammatillinen koulutus",
+          "sv": "Yrkesutbildning",
+          "en": "Vocational education and training"
+        },
+        "lyhytNimi": {
+          "fi": "Ammatillinen koulutus"
+        },
+        "koodistoUri": "opiskeluoikeudentyyppi",
+        "koodistoVersio": 1
+      },
+      "oid": "1.2.246.562.15.73473304613",
+      "versionumero": 2,
+      "aikaleima": "2020-03-06T11:59:27.102042",
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.70472828204",
+        "oppilaitosnumero": {
+          "koodiarvo": "01923",
+          "nimi": {
+            "fi": "Musiikkiopisto Juvenalia",
+            "sv": "Musiikkiopisto Juvenalia",
+            "en": "Musiikkiopisto Juvenalia"
+          },
+          "lyhytNimi": {
+            "fi": "Musiikkiopisto Juvenalia",
+            "sv": "Musiikkiopisto Juvenalia",
+            "en": "Musiikkiopisto Juvenalia"
+          },
+          "koodistoUri": "oppilaitosnumero",
+          "koodistoVersio": 1
+        },
+        "nimi": {
+          "fi": "Musiikkiopisto Juvenalia",
+          "sv": "Musiikkiopisto Juvenalia",
+          "en": "Musiikkiopisto Juvenalia"
+        },
+        "kotipaikka": {
+          "koodiarvo": "049",
+          "nimi": {
+            "fi": "Espoo",
+            "sv": "Esbo"
+          },
+          "koodistoUri": "kunta",
+          "koodistoVersio": 2
+        }
+      },
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          {
+            "koodiarvo": "lasna",
+            "nimi": {
+              "fi": "Läsnä",
+              "sv": "Närvarande",
+              "en": "Present"
+            },
+            "koodistoUri": "koskiopiskeluoikeudentila",
+            "koodistoVersio": 1
+          }
+        ]
+      },
+      "suoritukset": [
+        {
+          "tyyppi": {
+            "koodiarvo": "ammatillinentutkinto",
+            "nimi": {
+              "fi": "Ammatillinen tutkinto",
+              "sv": "Yrkesinriktad examen",
+              "en": "Vocational education  qualification"
+            },
+            "koodistoUri": "suorituksentyyppi",
+            "koodistoVersio": 1
+          },
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "457442",
+              "nimi": {
+                "fi": "Sähkö- ja automaatioalan erikoisammattitutkinto",
+                "sv": "Specialyrkesexamen inom el- och automationsbranschen",
+                "en": "Specialist vocational qualification in Electrical Engineering and Automation Technology"
+              },
+              "lyhytNimi": {
+                "fi": "Sähkö- ja automaatioalan eat",
+                "en": "Specialist vocational qualification in Electrical Engineering and Automation Technology"
+              },
+              "koodistoUri": "koulutus",
+              "koodistoVersio": 12
+            },
+            "koulutustyyppi": {
+              "koodiarvo": "12",
+              "nimi": {
+                "fi": "Erikoisammattitutkinto",
+                "sv": "Specialyrkesexamen",
+                "en": "Specialist vocational qualification"
+              },
+              "lyhytNimi": {
+                "fi": "Erikoisammattitutkinto",
+                "sv": "Specialyrkesexamen"
+              },
+              "koodistoUri": "koulutustyyppi",
+              "koodistoVersio": 2
+            }
+          },
+          "suoritustapa": {
+            "koodiarvo": "reformi",
+            "nimi": {
+              "fi": "Reformin mukainen näyttö",
+              "sv": "Kunnandet visas i yrkesprov (reformen)",
+              "en": "Reform"
+            },
+            "lyhytNimi": {
+              "fi": "Reformi",
+              "sv": "Kunnandet visas i yrkesprov (reformen)"
+            },
+            "koodistoUri": "ammatillisentutkinnonsuoritustapa",
+            "koodistoVersio": 1
+          },
+          "vahvistus": {
+            "päivä": "2020-03-06"
+          },
+          "osasuoritukset": [
+            {
+              "tyyppi": {
+                "koodiarvo": "ammatillisentutkinnonosa",
+                "nimi": {
+                  "fi": "Ammatillisen tutkinnon osa",
+                  "sv": "Yrkesexamensdel",
+                  "en": "A vocational education qualification unit"
+                },
+                "koodistoUri": "suorituksentyyppi",
+                "koodistoVersio": 1
+              },
+              "koulutusmoduuli": {
+                "laajuus": 1.0,
+                "tunniste": {
+                  "koodiarvo": "300447",
+                  "nimi": {
+                    "fi": "Automaatiojärjestelmien asennuksien johtaminen",
+                    "sv": "Ledning av installationer av automationssystem"
+                  },
+                  "lyhytNimi": {
+                    "fi": "Automaatiojärjestelmien asennuksien johtaminen",
+                    "sv": "Ledning av installationer av automationssystem"
+                  },
+                  "koodistoUri": "tutkinnonosat",
+                  "koodistoVersio": 2
+                }
+              },
+              "arviointi": [
+                {
+                  "arvosana": {
+                    "koodiarvo": "1",
+                    "nimi": {
+                      "fi": "1"
+                    },
+                    "lyhytNimi": {
+                      "fi": "1"
+                    },
+                    "koodistoUri": "arviointiasteikkoammatillinen15",
+                    "koodistoVersio": 1
+                  },
+                  "päivä": "2020-03-06",
+                  "hyväksytty": true
+                }
+              ],
+              "keskiarvoSisältääMukautettujaArvosanoja": false,
+              "korotettuKeskiarvoSisältääMukautettujaArvosanoja": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tyyppi": {
+        "koodiarvo": "ammatillinenkoulutus",
+        "nimi": {
+          "fi": "Ammatillinen koulutus",
+          "sv": "Yrkesutbildning",
+          "en": "Vocational education and training"
+        },
+        "lyhytNimi": {
+          "fi": "Ammatillinen koulutus"
+        },
+        "koodistoUri": "opiskeluoikeudentyyppi",
+        "koodistoVersio": 1
+      },
+      "oid": "1.2.246.562.15.70390933581",
+      "versionumero": 1,
+      "aikaleima": "2022-08-16T08:23:00.697411",
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.57118763579",
+        "oppilaitosnumero": {
+          "koodiarvo": "00000",
+          "nimi": {
+            "fi": "Tuntematon",
+            "sv": "Okänd",
+            "en": "Unknown"
+          },
+          "lyhytNimi": {
+            "fi": "Tuntematon",
+            "sv": "Okänd",
+            "en": "Unknown"
+          },
+          "koodistoUri": "oppilaitosnumero",
+          "koodistoVersio": 1
+        },
+        "nimi": {
+          "fi": "Tuntematon",
+          "sv": "Okänd",
+          "en": "Unknown"
+        },
+        "kotipaikka": {
+          "koodiarvo": "091",
+          "nimi": {
+            "fi": "Helsinki",
+            "sv": "Helsingfors"
+          },
+          "koodistoUri": "kunta",
+          "koodistoVersio": 2
+        }
+      },
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          {
+            "koodiarvo": "lasna",
+            "nimi": {
+              "fi": "Läsnä",
+              "sv": "Närvarande",
+              "en": "Present"
+            },
+            "koodistoUri": "koskiopiskeluoikeudentila",
+            "koodistoVersio": 1
+          }
+        ]
+      },
+      "suoritukset": [
+        {
+          "tyyppi": {
+            "koodiarvo": "ammatillinentutkinto",
+            "nimi": {
+              "fi": "Ammatillinen tutkinto",
+              "sv": "Yrkesinriktad examen",
+              "en": "Vocational education  qualification"
+            },
+            "koodistoUri": "suorituksentyyppi",
+            "koodistoVersio": 1
+          },
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "355102",
+              "nimi": {
+                "fi": "Leipurin ammattitutkinto",
+                "sv": "Yrkesexamen för bagare",
+                "en": "Baker, FQ"
+              },
+              "lyhytNimi": {
+                "fi": "Leipurin at",
+                "sv": "Yrkesexamen för bagare",
+                "en": "Baker, Further Qualification"
+              },
+              "koodistoUri": "koulutus",
+              "koodistoVersio": 12
+            },
+            "koulutustyyppi": {
+              "koodiarvo": "11",
+              "nimi": {
+                "fi": "Ammattitutkinto",
+                "sv": "Yrkesexamen",
+                "en": "Further vocational qualification"
+              },
+              "lyhytNimi": {
+                "fi": "Ammattitutkinto",
+                "sv": "Yrkesexamen"
+              },
+              "koodistoUri": "koulutustyyppi",
+              "koodistoVersio": 2
+            }
+          },
+          "suoritustapa": {
+            "koodiarvo": "ops",
+            "nimi": {
+              "fi": "Ammatillinen perustutkinto",
+              "sv": "Yrkesinriktad grundexamen",
+              "en": "Initial vocational qualification"
+            },
+            "lyhytNimi": {
+              "fi": "ops",
+              "sv": "ops",
+              "en": "ops"
+            },
+            "koodistoUri": "ammatillisentutkinnonsuoritustapa",
+            "koodistoVersio": 1
+          },
+          "keskiarvo": 4.0,
+          "osasuoritukset": []
+        }
+      ]
+    }
+  ]
+}
