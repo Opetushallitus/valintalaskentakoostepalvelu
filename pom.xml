@@ -667,8 +667,7 @@ vcsRevision=${revision}
 buildTtime=${maven.build.timestamp}
 ]]>
                                 </echo>
-                                <loadfile property="buildversiontxt"
-                                          srcFile="${project.build.outputDirectory}/static/buildversion.txt"/>
+                                <loadfile property="buildversiontxt" srcFile="${project.build.outputDirectory}/static/buildversion.txt"/>
                                 <echo message="${buildversiontxt}"/>
                                 <echo file="target/mavenversion.txt">${project.version}</echo>
                             </target>
