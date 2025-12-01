@@ -27,8 +27,6 @@ import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruHakemusPrototyyppi;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.dto.AtaruSyntheticApplicationResponse;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.LukuvuosimaksuMuutos;
@@ -66,41 +64,31 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
   private static final Logger LOG = LoggerFactory.getLogger(ErillishaunTuontiService.class);
 
   private final AtaruAsyncResource ataruAsyncResource;
-  private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource;
   private final Scheduler scheduler;
   private KoodistoCachedAsyncResource koodistoCachedAsyncResource;
-  private final TarjontaAsyncResource hakuV1AsyncResource;
 
   public ErillishaunTuontiService(
       AtaruAsyncResource ataruAsyncResource,
-      OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
       KoodistoCachedAsyncResource koodistoCachedAsyncResource,
-      TarjontaAsyncResource hakuV1AsyncResource,
       Scheduler scheduler) {
     super(koodistoCachedAsyncResource);
     this.ataruAsyncResource = ataruAsyncResource;
-    this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
     this.valintaTulosServiceAsyncResource = valintaTulosServiceAsyncResource;
     this.koodistoCachedAsyncResource = koodistoCachedAsyncResource;
-    this.hakuV1AsyncResource = hakuV1AsyncResource;
     this.scheduler = scheduler;
   }
 
   @Autowired
   public ErillishaunTuontiService(
       AtaruAsyncResource ataruAsyncResource,
-      OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       ValintaTulosServiceAsyncResource valintaTulosServiceAsyncResource,
-      KoodistoCachedAsyncResource koodistoCachedAsyncResource,
-      TarjontaAsyncResource hakuV1AsyncResource) {
+      KoodistoCachedAsyncResource koodistoCachedAsyncResource) {
     this(
         ataruAsyncResource,
-        oppijanumerorekisteriAsyncResource,
         valintaTulosServiceAsyncResource,
         koodistoCachedAsyncResource,
-        hakuV1AsyncResource,
         newThread());
   }
 
@@ -180,8 +168,6 @@ public class ErillishaunTuontiService extends ErillishaunTuontiValidator {
       final ImportedErillisHakuExcel erillishakuExcel,
       final boolean saveApplications,
       final ErillishakuDTO haku) {
-    final String username = auditSession.getPersonOid();
-
     LOG.info("Aloitetaan tuonti. Rivit=" + erillishakuExcel.rivit.size());
     final List<ErillishakuRivi> rivit = autoTaytto(erillishakuExcel.rivit);
     validoiRivit(prosessi, haku, rivit, saveApplications);

@@ -59,13 +59,6 @@ public class ErillishaunTuontiServiceTest {
   protected static final String PERSON_1_OID = "1.2.246.562.24.64735725450";
   protected static final String PERSON_2_OID = "1.2.246.562.24.64735725451";
 
-  public static TarjontaAsyncResource mockTarjonta() {
-    final TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
-    when(tarjontaAsyncResource.haeHaku(Mockito.any()))
-        .thenReturn(CompletableFuture.completedFuture(getDummyHaku()));
-    return tarjontaAsyncResource;
-  }
-
   public static Haku getDummyHaku() {
     HakuV1RDTO dto = new HakuV1RDTO();
     dto.setTarjoajaOids(new String[0]);
@@ -184,7 +177,7 @@ public class ErillishaunTuontiServiceTest {
                 henkiloPrototyypit.addAll(dtos);
                 return Futures.immediateFuture(singletonList(henkiloJollaOnEriOid));
               });
-      importRows(singletonList(erillishakuRivi), mockHenkiloAsyncResource);
+      importRows(singletonList(erillishakuRivi));
 
       assertEquals(MockData.hakijaOid, erillishakuRivi.getPersonOid());
       assertEquals(1, erillishaunValinnantulokset.size());
@@ -264,7 +257,6 @@ public class ErillishaunTuontiServiceTest {
     public void tilojenTuontiEpaonnistuu() {
       final ValintaTulosServiceAsyncResource failingValintaTuloseServiceAsyncResource =
           mock(ValintaTulosServiceAsyncResource.class);
-      final TarjontaAsyncResource tarjontaAsyncResource = mockTarjonta();
       when(failingValintaTuloseServiceAsyncResource.postErillishaunValinnantulokset(
               any(), anyString(), anyList()))
           .thenAnswer(
@@ -288,10 +280,8 @@ public class ErillishaunTuontiServiceTest {
       final ErillishaunTuontiService tuontiService =
           new ErillishaunTuontiService(
               applicationAsyncResource,
-              henkiloAsyncResource,
               failingValintaTuloseServiceAsyncResource,
               koodistoCachedAsyncResource,
-              tarjontaAsyncResource,
               Schedulers.trampoline());
       tuontiService.tuoExcelistä(
           new AuditSession(PERSON_2_OID, emptyList(), "", ""),
@@ -306,14 +296,11 @@ public class ErillishaunTuontiServiceTest {
       final AtaruAsyncResource failingResource = mock(AtaruAsyncResource.class);
       when(failingResource.putApplicationPrototypes(Mockito.any()))
           .thenReturn(Observable.error(new RuntimeException("simulated HTTP fail")));
-      final TarjontaAsyncResource tarjontaAsyncResource = mockTarjonta();
       final ErillishaunTuontiService tuontiService =
           new ErillishaunTuontiService(
               failingResource,
-              henkiloAsyncResource,
               valintaTulosServiceAsyncResource,
               koodistoCachedAsyncResource,
-              tarjontaAsyncResource,
               Schedulers.trampoline());
       assertNull(henkiloAsyncResource.henkiloPrototyypit);
       KirjeProsessi prosessi = new ErillishakuProsessiDTO(1);
@@ -463,27 +450,20 @@ class ErillisHakuTuontiTestCase {
     final ErillishaunTuontiService tuontiService =
         new ErillishaunTuontiService(
             applicationAsyncResource,
-            henkiloAsyncResource,
             valintaTulosServiceAsyncResource,
             koodistoCachedAsyncResource,
-            tarjontaAsyncResource,
             Schedulers.trampoline());
     tuontiService.tuoExcelistä(
         new AuditSession(PERSON_1_OID, new ArrayList<>(), "", ""), prosessi, erillisHaku, data);
     Mockito.verify(prosessi).valmistui("ok");
   }
 
-  protected void importRows(
-      List<ErillishakuRivi> rivit,
-      MockOppijanumerorekisteriAsyncResource mockHenkiloAsyncResource) {
-    final TarjontaAsyncResource tarjontaAsyncResource = mockTarjonta();
+  protected void importRows(List<ErillishakuRivi> rivit) {
     final ErillishaunTuontiService tuontiService =
         new ErillishaunTuontiService(
             applicationAsyncResource,
-            mockHenkiloAsyncResource,
             valintaTulosServiceAsyncResource,
             koodistoCachedAsyncResource,
-            tarjontaAsyncResource,
             Schedulers.trampoline());
     tuontiService.tuoJson(
         new AuditSession(PERSON_1_OID, new ArrayList<>(), "", ""),
