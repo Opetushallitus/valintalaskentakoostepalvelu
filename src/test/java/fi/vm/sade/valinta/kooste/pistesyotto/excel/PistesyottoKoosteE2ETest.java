@@ -236,7 +236,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
 
     mockToReturnJson(
         GET,
-        "/valintapiste-service/api/haku/testihaku/hakukohde/testihakukohde",
+        "/valintalaskenta-laskenta-service/resources/valintapisteet/haku/testihaku/hakukohde/testihakukohde",
         applicationAdditionalDataDtos.stream()
             .map(APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET)
             .collect(Collectors.toList()));
@@ -314,7 +314,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         GET, "/haku-app/applications/" + applicationAdditionaData.getOid(), hakemusHakuAppista);
     mockToReturnJson(
         POST,
-        "/valintapiste-service/api/pisteet-with-hakemusoids",
+        "/valintalaskenta-laskenta-service/resources/valintapisteet/pisteet-with-hakemusoids",
         Collections.singletonList(
             APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET.apply(applicationAdditionaData)));
     final Semaphore suoritusCounter = new Semaphore(0);
@@ -413,7 +413,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         GET, "/haku-app/applications/" + applicationAdditionalDataDto.getOid(), hakemusHakuAppista);
     mockToReturnJson(
         POST,
-        "/valintapiste-service/api/pisteet-with-hakemusoids",
+        "/valintalaskenta-laskenta-service/resources/valintapisteet/pisteet-with-hakemusoids",
         Collections.singletonList(
             APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET.apply(applicationAdditionalDataDto)));
     mockToReturnJson(
@@ -471,7 +471,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
         GET, "/haku-app/applications/" + applicationAdditionalDataDto.getOid(), hakemusHakuAppista);
     mockToReturnJson(
         POST,
-        "/valintapiste-service/api/pisteet-with-hakemusoids",
+        "/valintalaskenta-laskenta-service/resources/valintapisteet/pisteet-with-hakemusoids",
         Collections.singletonList(
             APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET.apply(applicationAdditionalDataDto)));
     mockToReturnJson(
@@ -518,7 +518,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     mockForward(
         PUT,
         fakeValintaPisteService.addHandler(
-            "/valintapiste-service/api/pisteet-with-hakemusoids",
+            "/valintalaskenta-laskenta-service/resources/valintapisteet/pisteet-with-hakemusoids",
             exchange -> {
               exchange.getResponseHeaders().add("Content-Type", "application/json");
               exchange.sendResponseHeaders(200, 0);
@@ -533,7 +533,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     mockForward(
         PUT,
         fakeValintaPisteService.addHandler(
-            "/valintapiste-service/api/pisteet-with-hakemusoids",
+            "/valintalaskenta-laskenta-service/resources/valintapisteet/pisteet-with-hakemusoids",
             exchange -> {
               List<Valintapisteet> valintapisteetList =
                   new Gson()
@@ -628,7 +628,7 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
       List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos) {
     mockToReturnJson(
         GET,
-        "/valintapiste-service/api/haku/testihaku/hakukohde/testihakukohde",
+        "/valintalaskenta-laskenta-service/resources/valintapisteet/haku/testihaku/hakukohde/testihakukohde",
         applicationAdditionalDataDtos.stream()
             .map(APPLICATION_ADDITIONAL_DATA_DTO_VALINTAPISTEET)
             .collect(Collectors.toList()));

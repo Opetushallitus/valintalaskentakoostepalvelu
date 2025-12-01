@@ -31,7 +31,7 @@ public class ValintapisteAsyncResourceImpl implements ValintapisteAsyncResource 
   Logger LOG = LoggerFactory.getLogger(ValintapisteAsyncResource.class);
 
   public ValintapisteAsyncResourceImpl(
-      @Qualifier("ValintapisteServiceCasClient") RestCasClient casClient) {
+      @Qualifier("ValintalaskentaCasClient") RestCasClient casClient) {
     this.casClient = casClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
   }
