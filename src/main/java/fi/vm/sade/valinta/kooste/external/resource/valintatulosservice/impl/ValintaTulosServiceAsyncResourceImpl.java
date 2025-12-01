@@ -9,12 +9,16 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import fi.vm.sade.auditlog.Changes;
+import fi.vm.sade.auditlog.Target;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
+import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ErillishakuOperation;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.*;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
@@ -25,8 +29,6 @@ import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -240,35 +242,63 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   @Override
   public Observable<List<ValintatulosUpdateStatus>> postErillishaunValinnantulokset(
       AuditSession auditSession, String valintatapajonoOid, List<Valinnantulos> valinnantulokset) {
+
+    // Logitetaan pyyntö, koska valinta-tulos-service ei tiedä, kuka pyynnön on oikeasti tehnyt.
+    valinnantulokset.forEach(
+        tulos -> {
+          Target.Builder target = new Target.Builder().setField("type", "ERILLISHAUN_VALINTATULOS");
+          target.setField("henkiloOid", tulos.getHenkiloOid());
+          target.setField("hakemusOid", tulos.getHakemusOid());
+          target.setField("valintatapajonoOid", tulos.getValintatapajonoOid());
+          target.setField("hakukohdeOid", tulos.getHakukohdeOid());
+          KoosteAudit.AUDIT.log(
+              auditSession.asAuditUser(),
+              ErillishakuOperation.ERILLISHAUN_VALINTATULOSTEN_VIENTI,
+              target.build(),
+              Changes.EMPTY);
+        });
+
+    String url =
+        this.urlConfiguration.url(
+            "valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid);
+
     return Observable.fromFuture(
-        this.client.postJson(
-            this.urlConfiguration.url(
-                "valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid),
-            Duration.ofMinutes(30l),
-            new ValinnantulosRequest(auditSession, valinnantulokset),
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<ValintatulosUpdateStatus>>() {}.getType(),
-            builder ->
-                builder.setHeader(
-                    "X-If-Unmodified-Since", auditSession.getIfUnmodifiedSince().get())));
+        this.casClient.post(
+            url,
+            new com.google.gson.reflect.TypeToken<>() {},
+            new ValinnantulosRequest(valinnantulokset),
+            Map.of(
+                "Accept",
+                "application/json",
+                "Content-Type",
+                "application/json",
+                "X-If-Unmodified-Since",
+                auditSession.getIfUnmodifiedSince().orElseThrow()),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<List<Valinnantulos>> getErillishaunValinnantulokset(
       AuditSession auditSession, String valintatapajonoOid) {
+    // Logitetaan pyyntö, koska valinta-tulos-service ei tiedä, kuka pyynnön on oikeasti tehnyt.
+    Target.Builder target =
+        new Target.Builder()
+            .setField("type", "ERILLISHAUN_VALINTATULOS")
+            .setField("valintatapajonoOid", valintatapajonoOid);
+    KoosteAudit.AUDIT.log(
+        auditSession.asAuditUser(),
+        ErillishakuOperation.ERILLISHAUN_VALINTATULOSTEN_TUONTI,
+        target.build(),
+        Changes.EMPTY);
+
     String url =
         this.urlConfiguration.url(
             "valinta-tulos-service.erillishaku.valinnan-tulos", valintatapajonoOid);
-    url += "?sessionId=" + URLEncoder.encode(auditSession.getSessionId(), StandardCharsets.UTF_8);
-    url += "&uid=" + URLEncoder.encode(auditSession.getUid(), StandardCharsets.UTF_8);
-    url +=
-        "&inetAddress=" + URLEncoder.encode(auditSession.getInetAddress(), StandardCharsets.UTF_8);
-    url += "&userAgent=" + URLEncoder.encode(auditSession.getUserAgent(), StandardCharsets.UTF_8);
-    url += "&hyvaksymiskirjeet=true";
+    url += "?hyvaksymiskirjeet=true";
 
     return Observable.fromFuture(
-        this.client.getJson(
-            url, Duration.ofMinutes(30), new TypeToken<List<Valinnantulos>>() {}.getType()));
+        this.casClient.get(
+            url, new com.google.gson.reflect.TypeToken<>() {}, Collections.emptyMap(), 60 * 1000));
   }
 
   @Override
