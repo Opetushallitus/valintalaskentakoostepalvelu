@@ -248,6 +248,9 @@ public abstract class AbstractPistesyottoKoosteService {
               if (puuttuvatHakemukset.isEmpty()) {
                 return Observable.just(hakemukset);
               }
+              LOG.warn(
+                  "Valintakokeen osallistumisissa oli hakemuksia, joita ei löytynyt hakukohteelta: {}",
+                  String.join(", ", puuttuvatHakemukset));
               prosessi.inkrementoiKokonaistyota();
               return getHakemuksetByOids(new ArrayList<>(puuttuvatHakemukset))
                   .map(
