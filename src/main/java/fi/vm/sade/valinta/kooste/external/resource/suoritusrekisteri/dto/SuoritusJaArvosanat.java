@@ -2,10 +2,10 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.comparators.BooleanComparator;
-import org.joda.time.DateTime;
 
 public class SuoritusJaArvosanat implements Comparable<SuoritusJaArvosanat> {
 
@@ -46,10 +46,10 @@ public class SuoritusJaArvosanat implements Comparable<SuoritusJaArvosanat> {
               .get(suoritus.getTila())
               .compareTo(tilaToPrioriteetti.get(o.getSuoritus().getTila()));
       if (tila == 0) {
-        final DateTime current =
-            ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(suoritus.getValmistuminen());
-        final DateTime oDate =
-            ArvosanaWrapper.ARVOSANA_DTF.parseDateTime(o.getSuoritus().getValmistuminen());
+        final LocalDate current =
+            LocalDate.parse(suoritus.getValmistuminen(), ArvosanaWrapper.ARVOSANA_DTF);
+        final LocalDate oDate =
+            LocalDate.parse(o.getSuoritus().getValmistuminen(), ArvosanaWrapper.ARVOSANA_DTF);
         return oDate.compareTo(current);
       } else {
         return tila;

@@ -14,6 +14,7 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -21,7 +22,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +39,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
   private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final LocalDateTime suoritusValmisDeadline;
 
-  public static final org.joda.time.format.DateTimeFormatter VALMISTUMINEN_DTF =
-      DateTimeFormat.forPattern("dd.MM.yyyy");
+  public static final DateTimeFormatter VALMISTUMINEN_DTF = DateTimeFormatter.ofPattern("d.M.yyyy");
 
   @Autowired
   public HarkinnanvaraisuusAsyncResourceImpl(
@@ -70,7 +69,7 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                   pkSuoritukset.stream()
                       .max(
                           Comparator.comparing(
-                              s -> VALMISTUMINEN_DTF.parseDateTime(s.getValmistuminen())));
+                              s -> LocalDate.parse(s.getValmistuminen(), VALMISTUMINEN_DTF)));
               return viimeisin.map(s -> "KESKEYTYNYT".equals(s.getTila())).orElse(false);
             });
   }
@@ -118,8 +117,9 @@ public class HarkinnanvaraisuusAsyncResourceImpl implements HarkinnanvaraisuusAs
                       .anyMatch(
                           sa ->
                               PK_KOMO.equals(sa.getSuoritus().getKomo())
-                                  && VALMISTUMINEN_DTF
-                                          .parseDateTime(sa.getSuoritus().getValmistuminen())
+                                  && LocalDate.parse(
+                                              sa.getSuoritus().getValmistuminen(),
+                                              VALMISTUMINEN_DTF)
                                           .getYear()
                                       >= 2018
                                   && !sa.getSuoritus().isYksilollistettyMaAi()

@@ -7,11 +7,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -269,17 +269,17 @@ public class ValintaTulosServiceProxyResource {
   public static class ValintaTulosServiceSerializersModule extends SimpleModule {
     public ValintaTulosServiceSerializersModule() {
       super(ValintaTulosServiceSerializersModule.class.getSimpleName());
-      addSerializer(DateTime.class, new DateTimeJsonSerializer());
+      addSerializer(ZonedDateTime.class, new ZonedDateTimeJsonSerializer());
     }
   }
 
-  private static class DateTimeJsonSerializer extends JsonSerializer<DateTime> {
+  private static class ZonedDateTimeJsonSerializer extends JsonSerializer<ZonedDateTime> {
     @Override
     public void serialize(
-        DateTime dateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+        ZonedDateTime dateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
         throws IOException {
       String timestampAsString =
-          ValintaTulosServiceAsyncResource.valintaTulosServiceCompatibleFormatter.print(dateTime);
+          ValintaTulosServiceAsyncResource.valintaTulosServiceCompatibleFormatter.format(dateTime);
       jsonGenerator.writeString(timestampAsString);
     }
   }

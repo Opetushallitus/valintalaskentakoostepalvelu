@@ -12,9 +12,11 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.joda.time.DateTime;
 
 /**
  * @author Jussi Jartamo
@@ -101,8 +103,8 @@ public class SuoritusrekisteriSpec {
       return ArvosanaBuilder.this;
     }
 
-    public ArvosanaBuilder setMyonnetty(DateTime myonnetty) {
-      arvosana.setMyonnetty(ArvosanaWrapper.ARVOSANA_DTF.print(myonnetty));
+    public ArvosanaBuilder setMyonnetty(LocalDate myonnetty) {
+      arvosana.setMyonnetty(ArvosanaWrapper.ARVOSANA_DTF.format(myonnetty));
       return ArvosanaBuilder.this;
     }
 
@@ -392,10 +394,10 @@ public class SuoritusrekisteriSpec {
     return new OppijaBuilder();
   }
 
-  public static ParametritDTO laskennanalkamisparametri(DateTime alkamisaika) {
+  public static ParametritDTO laskennanalkamisparametri(LocalDate alkamisaika) {
     ParametritDTO p = new ParametritDTO();
     ParametriDTO p0 = new ParametriDTO();
-    p0.setDateStart(alkamisaika.toDate());
+    p0.setDateStart(Date.from(alkamisaika.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     p.setPH_VLS(p0);
     return p;
   }
