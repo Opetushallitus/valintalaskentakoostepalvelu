@@ -139,7 +139,9 @@ public class AmmatillisenKielikoetulosOperationsTest {
                 "kielikoe_fi",
                 hyvaksytty,
                 Date.from(
-                    LocalDate.of(2016, 10, 26).atStartOfDay(ZoneId.systemDefault()).toInstant()))));
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant()))));
     syotetytTulokset.put(
         HAKEMUS_OID_2,
         Arrays.asList(
@@ -147,12 +149,16 @@ public class AmmatillisenKielikoetulosOperationsTest {
                 "kielikoe_fi",
                 hyvaksytty,
                 Date.from(
-                    LocalDate.of(2016, 10, 26).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant())),
             new SingleKielikoeTulos(
                 "kielikoe_sv",
                 hyvaksytty,
                 Date.from(
-                    LocalDate.of(2016, 10, 26).atStartOfDay(ZoneId.systemDefault()).toInstant()))));
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant()))));
   }
 
   @Test
@@ -293,12 +299,16 @@ public class AmmatillisenKielikoetulosOperationsTest {
                 "kielikoe_fi",
                 tyhja,
                 Date.from(
-                    LocalDate.of(2016, 10, 26).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant())),
             new SingleKielikoeTulos(
                 "kielikoe_sv",
                 tyhja,
                 Date.from(
-                    LocalDate.of(2016, 10, 26).atStartOfDay(ZoneId.systemDefault()).toInstant()))));
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant()))));
     AmmatillisenKielikoetulosOperations source2Updates =
         new AmmatillisenKielikoetulosOperations(
             SOURCE_OID_2, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);

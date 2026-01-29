@@ -397,7 +397,7 @@ public class SuoritusrekisteriSpec {
   public static ParametritDTO laskennanalkamisparametri(LocalDate alkamisaika) {
     ParametritDTO p = new ParametritDTO();
     ParametriDTO p0 = new ParametriDTO();
-    p0.setDateStart(Date.from(alkamisaika.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    p0.setDateStart(Date.from(alkamisaika.atStartOfDay(ZoneId.of("Europe/Helsinki")).toInstant()));
     p.setPH_VLS(p0);
     return p;
   }

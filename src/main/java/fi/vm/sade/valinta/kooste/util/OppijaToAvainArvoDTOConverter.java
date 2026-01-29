@@ -135,6 +135,6 @@ public class OppijaToAvainArvoDTOConverter {
     return ofNullable(parametritDTO)
         .flatMap(parametrit -> ofNullable(parametrit.getPH_VLS()))
         .flatMap(parametri -> ofNullable(parametri.getDateStart()))
-        .map(date -> date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        .map(date -> date.toInstant().atZone(ZoneId.of("Europe/Helsinki")).toLocalDate());
   }
 }

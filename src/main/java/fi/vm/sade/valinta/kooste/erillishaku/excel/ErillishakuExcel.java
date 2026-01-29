@@ -237,7 +237,7 @@ public class ErillishakuExcel {
                   : ErillishakuDataRivi.LAHETETTYFORMAT.format(
                       LocalDateTime.ofInstant(
                           rivi.getHyvaksymiskirjeLahetetty().toInstant(),
-                          ZoneId.systemDefault()))));
+                          ZoneId.of("Europe/Helsinki")))));
       a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
       a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
       if (tyyppi == Hakutyyppi.KORKEAKOULU) {
