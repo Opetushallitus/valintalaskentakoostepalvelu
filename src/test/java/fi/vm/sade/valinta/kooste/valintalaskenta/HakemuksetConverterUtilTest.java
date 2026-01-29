@@ -34,6 +34,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
 import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,8 +47,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hamcrest.collection.IsMapContaining;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1291,7 +1290,7 @@ public class HakemuksetConverterUtilTest {
 
   @Test
   public void preferoiArvosanaaYliSuoritusmerkinnan() {
-    ParametritDTO parametrit = SuoritusrekisteriSpec.laskennanalkamisparametri(new DateTime());
+    ParametritDTO parametrit = SuoritusrekisteriSpec.laskennanalkamisparametri(LocalDate.now());
     HakemusDTO hakemus = new HakemusDTO();
     Oppija oppija =
         new SuoritusrekisteriSpec.OppijaBuilder()
@@ -2568,7 +2567,7 @@ public class HakemuksetConverterUtilTest {
 
   @Test
   public void pkSuoritusArvosanojenPoisFiltterointi() {
-    DateTime nyt = DateTime.now();
+    LocalDate nyt = LocalDate.now();
     HakemusDTO hakemus = new HakemusDTO();
     Oppija suoritus =
         new SuoritusrekisteriSpec.OppijaBuilder()
@@ -2611,7 +2610,7 @@ public class HakemuksetConverterUtilTest {
 
   @Test
   public void pkSamanAineenToistuessaKaytetaanParasta() {
-    DateTime nyt = DateTime.now();
+    LocalDate nyt = LocalDate.now();
     HakemusDTO hakemus = new HakemusDTO();
     Oppija suoritus =
         new SuoritusrekisteriSpec.OppijaBuilder()
@@ -2661,7 +2660,7 @@ public class HakemuksetConverterUtilTest {
 
   @Test
   public void kaytetanVainKyseisenHakemuksenItseSyotettyjaArvosanoja() {
-    DateTime nyt = DateTime.now();
+    LocalDate nyt = LocalDate.now();
     HakemusDTO hakemus = new HakemusDTO();
     hakemus.setHakemusoid(HAKEMUS1_OID);
     Oppija suoritus =
@@ -3032,7 +3031,7 @@ public class HakemuksetConverterUtilTest {
 
   @Test
   public void lkSuoritusVainTaltaHakemuseltaJosEiVahvistettu1() {
-    DateTime nyt = DateTime.now();
+    LocalDate nyt = LocalDate.now();
     HakemusDTO hakemus = new HakemusDTO();
     hakemus.setHakemusoid(HAKEMUS1_OID);
     Oppija toisellaHakemuksellaKorkeampiArvosana =
@@ -3796,7 +3795,7 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hylatty)
-            .setMyonnetty(new LocalDate(2015, 10, 1).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2015, 10, 1))
             .build()
             .build()
             .suoritus()
@@ -3810,7 +3809,7 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hyvaksytty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .build()
             .suoritus()
@@ -3824,7 +3823,7 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hylatty)
-            .setMyonnetty(new LocalDate(2016, 9, 23).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 9, 23))
             .build()
             .build()
             .suoritus()
@@ -3838,7 +3837,7 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("SV")
             .setAsteikko_hyvaksytty()
             .setArvosana(hylatty)
-            .setMyonnetty(new LocalDate(2016, 9, 23).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 9, 23))
             .build()
             .build()
             .build();
@@ -3872,7 +3871,7 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hylatty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .build()
             .build();
@@ -3899,14 +3898,14 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hyvaksytty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .arvosana()
             .setAine("kielikoe")
             .setLisatieto("SV")
             .setAsteikko_hyvaksytty()
             .setArvosana(ei_osallistunut)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .build()
             .build();
@@ -3939,14 +3938,14 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hyvaksytty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .arvosana()
             .setAine("kielikoe")
             .setLisatieto("SV")
             .setAsteikko_hyvaksytty()
             .setArvosana(ei_osallistunut)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .build()
             .build();
@@ -3980,14 +3979,14 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hylatty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .arvosana()
             .setAine("kielikoe")
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hyvaksytty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .build()
             .build();
@@ -4016,14 +4015,14 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hylatty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .arvosana()
             .setAine("kielikoe")
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hylatty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .build()
             .build();
@@ -4057,7 +4056,7 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_Osakoe()
             .setArvosana(hylatty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .build()
             .build();
@@ -4087,14 +4086,13 @@ public class HakemuksetConverterUtilTest {
             .setLisatieto("FI")
             .setAsteikko_hyvaksytty()
             .setArvosana(hyvaksytty)
-            .setMyonnetty(new LocalDate(2016, 5, 18).toDateTimeAtStartOfDay())
+            .setMyonnetty(LocalDate.of(2016, 5, 18))
             .build()
             .build()
             .build();
 
     ParametritDTO parametritJoissLaskentaAlkoiEnnenSuoritusta =
-        SuoritusrekisteriSpec.laskennanalkamisparametri(
-            new LocalDate(2016, 5, 16).toDateTimeAtStartOfDay());
+        SuoritusrekisteriSpec.laskennanalkamisparametri(LocalDate.of(2016, 5, 16));
     hakemuksetConverterUtil.mergeKeysOfOppijaAndHakemus(
         false,
         haku,

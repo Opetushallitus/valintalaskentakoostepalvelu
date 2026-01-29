@@ -23,6 +23,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import io.reactivex.Observable;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +131,8 @@ public class ValintakoekutsutExcelService {
                               Optional.ofNullable(hakemusOids).orElse(Collections.emptySet()));
                       prosessi.inkrementoiTehtyjaToita();
                       String id = UUID.randomUUID().toString();
-                      long expirationDate = DateTime.now().plusHours(168).toDate().getTime();
+                      long expirationDate =
+                          Instant.now().plus(168, ChronoUnit.HOURS).toEpochMilli();
 
                       dokumenttiAsyncResource
                           .tallenna(
