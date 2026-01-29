@@ -15,18 +15,19 @@ import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Maksuntila;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 
 public class ErillishakuDataRivi extends DataRivi {
 
   private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ErillishakuDataRivi.class);
-  static final DateTimeFormatter LAHETETTYFORMAT = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
+  static final DateTimeFormatter LAHETETTYFORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
   private final ErillishakuRiviKuuntelija kuuntelija;
   private final Hakutyyppi tyyppi;
 
@@ -133,7 +134,8 @@ public class ErillishakuDataRivi extends DataRivi {
     if (StringUtils.isNotEmpty(arvo)
         && !ErillishakuExcel.HEADER_HYVAKSYMISKIRJE_LAHETETTY.equals(arvo)) {
       try {
-        return LAHETETTYFORMAT.parseDateTime(arvo).toDate();
+        LocalDateTime dateTime = LocalDateTime.parse(arvo, LAHETETTYFORMAT);
+        return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
       } catch (Exception e) {
         LOG.warn("Could not parse hyvaksymiskirjeLahetetty '{}'", arvo);
       }

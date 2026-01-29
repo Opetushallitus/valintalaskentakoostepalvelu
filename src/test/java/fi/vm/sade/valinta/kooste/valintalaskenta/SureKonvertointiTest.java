@@ -17,6 +17,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -55,7 +55,12 @@ public class SureKonvertointiTest {
 
     ParametritDTO pmetrit = new ParametritDTO();
     ParametriDTO ph_vls = new ParametriDTO();
-    ph_vls.setDateStart(DateTime.now().minusDays(1).toDate()); // LASKENTA ALKANUT PAIVA SITTEN
+    ph_vls.setDateStart(
+        java.util.Date.from(
+            LocalDate.now()
+                .minusDays(1)
+                .atStartOfDay(java.time.ZoneId.systemDefault())
+                .toInstant())); // LASKENTA ALKANUT PAIVA SITTEN
     pmetrit.setPH_VLS(ph_vls);
 
     List<AvainArvoDTO> aa =
