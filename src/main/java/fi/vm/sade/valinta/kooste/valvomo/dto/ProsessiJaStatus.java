@@ -1,8 +1,7 @@
 package fi.vm.sade.valinta.kooste.valvomo.dto;
 
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
+import java.time.Duration;
+import java.time.Instant;
 
 public class ProsessiJaStatus<T> {
 
@@ -52,9 +51,9 @@ public class ProsessiJaStatus<T> {
 
   private static <T> String createDurationSoFar(T prosessi) {
     if (prosessi instanceof Timestamped) {
-      DateTime createdAt = new DateTime(((Timestamped) prosessi).getCreatedAt().getTime());
-      Duration duration = new Interval(createdAt, DateTime.now()).toDuration();
-      return String.valueOf(duration.getStandardSeconds());
+      Instant createdAt = ((Timestamped) prosessi).getCreatedAt().toInstant();
+      Duration duration = Duration.between(createdAt, Instant.now());
+      return String.valueOf(duration.getSeconds());
     }
     return "<< process is not timestamped >>";
   }
