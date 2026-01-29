@@ -59,7 +59,7 @@ public class SureKonvertointiTest {
         java.util.Date.from(
             LocalDate.now()
                 .minusDays(1)
-                .atStartOfDay(java.time.ZoneId.systemDefault())
+                .atStartOfDay(java.time.ZoneId.of("Europe/Helsinki"))
                 .toInstant())); // LASKENTA ALKANUT PAIVA SITTEN
     pmetrit.setPH_VLS(ph_vls);
 
