@@ -135,7 +135,7 @@ public class ErillishakuDataRivi extends DataRivi {
         && !ErillishakuExcel.HEADER_HYVAKSYMISKIRJE_LAHETETTY.equals(arvo)) {
       try {
         LocalDateTime dateTime = LocalDateTime.parse(arvo, LAHETETTYFORMAT);
-        return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
+        return Date.from(dateTime.atZone(ZoneId.of("Europe/Helsinki")).toInstant());
       } catch (Exception e) {
         LOG.warn("Could not parse hyvaksymiskirjeLahetetty '{}'", arvo);
       }
