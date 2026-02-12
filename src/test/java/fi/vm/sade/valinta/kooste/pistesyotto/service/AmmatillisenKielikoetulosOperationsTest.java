@@ -21,9 +21,12 @@ import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaCo
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +37,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
-import org.joda.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -134,14 +136,29 @@ public class AmmatillisenKielikoetulosOperationsTest {
         HAKEMUS_OID_1,
         Collections.singletonList(
             new SingleKielikoeTulos(
-                "kielikoe_fi", hyvaksytty, new LocalDate(2016, 10, 26).toDate())));
+                "kielikoe_fi",
+                hyvaksytty,
+                Date.from(
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant()))));
     syotetytTulokset.put(
         HAKEMUS_OID_2,
         Arrays.asList(
             new SingleKielikoeTulos(
-                "kielikoe_fi", hyvaksytty, new LocalDate(2016, 10, 26).toDate()),
+                "kielikoe_fi",
+                hyvaksytty,
+                Date.from(
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant())),
             new SingleKielikoeTulos(
-                "kielikoe_sv", hyvaksytty, new LocalDate(2016, 10, 26).toDate())));
+                "kielikoe_sv",
+                hyvaksytty,
+                Date.from(
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant()))));
   }
 
   @Test
@@ -278,8 +295,20 @@ public class AmmatillisenKielikoetulosOperationsTest {
     syotetytTulokset.put(
         HAKEMUS_OID_2,
         Arrays.asList(
-            new SingleKielikoeTulos("kielikoe_fi", tyhja, new LocalDate(2016, 10, 26).toDate()),
-            new SingleKielikoeTulos("kielikoe_sv", tyhja, new LocalDate(2016, 10, 26).toDate())));
+            new SingleKielikoeTulos(
+                "kielikoe_fi",
+                tyhja,
+                Date.from(
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant())),
+            new SingleKielikoeTulos(
+                "kielikoe_sv",
+                tyhja,
+                Date.from(
+                    LocalDate.of(2016, 10, 26)
+                        .atStartOfDay(ZoneId.of("Europe/Helsinki"))
+                        .toInstant()))));
     AmmatillisenKielikoetulosOperations source2Updates =
         new AmmatillisenKielikoetulosOperations(
             SOURCE_OID_2, oppijatSuresta, syotetytTulokset, findPersonOidByHakemusOid);

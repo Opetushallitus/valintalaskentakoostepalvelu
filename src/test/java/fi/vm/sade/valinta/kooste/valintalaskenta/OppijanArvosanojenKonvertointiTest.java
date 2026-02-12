@@ -5,8 +5,8 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
+import java.time.LocalDate;
 import java.util.*;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
 
   @Test
   public void yoItseilmoitetutOhitetaan() {
-    DateTime nyt = DateTime.now();
+    LocalDate nyt = LocalDate.now();
 
     Oppija suoritus =
         oppija()
@@ -87,8 +87,6 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
 
   @Test
   public void yoArvosanatOtetaanHuomioonVaikkaKirjausOlisiTehtyLiianMyohaan() {
-    DateTime nyt = DateTime.now();
-
     Oppija suoritus =
         oppija()
             .suoritus()
@@ -291,7 +289,6 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
   @Test
   public void yoArvosanatRoolitukset() {
     {
-      DateTime nyt = DateTime.now();
       Oppija suoritus =
           oppija()
               .suoritus()
@@ -331,7 +328,6 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
     }
     //
     {
-      DateTime nyt = DateTime.now();
       Oppija suoritus =
           oppija()
               .suoritus()
@@ -404,7 +400,6 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
     }
 
     {
-      DateTime nyt = DateTime.now();
       Oppija suoritus =
           oppija()
               .suoritus()
@@ -417,18 +412,11 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
               .setAsteikko_yo()
               .setArvosana("M")
               .setPisteet(20)
-              // .setMyonnetty(nyt.minusDays(1))
               .build()
               .build()
               .build();
-      // AIDINKIELI
-      // Assert.assertTrue("A_ROOLI löytyy ja sen arvo on 11",
-      //        aa.stream().filter(a -> "A_ROOLI".equals(a.getAvain()) &&
-      // "11".equals(a.getArvo())).count() == 1L);
 
       List<AvainMetatiedotDTO> aa = YoToAvainSuoritustietoDTOConverter.convert(suoritus);
-      // LOG.error("{}", new GsonBuilder().setPrettyPrinting().create().toJson(aa));
-      // AIDINKIELI
       Assertions.assertTrue(
           aa.stream()
                   .filter(
@@ -448,7 +436,6 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
           "A löytyy ja se sisältää oikeat roolit");
     }
     {
-      DateTime nyt = DateTime.now();
       Oppija suoritus =
           oppija()
               .suoritus()
@@ -684,7 +671,7 @@ public class OppijanArvosanojenKonvertointiTest extends SuoritusrekisteriSpec {
       }
     }
     {
-      DateTime nyt = DateTime.now();
+      LocalDate nyt = LocalDate.now();
       Oppija suoritus =
           oppija()
               .suoritus()

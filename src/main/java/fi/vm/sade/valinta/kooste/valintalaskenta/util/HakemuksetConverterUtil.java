@@ -36,13 +36,13 @@ import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
 import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -891,7 +891,7 @@ public class HakemuksetConverterUtil {
               Predicate<SuoritusJaArvosanat> p = e.getValue();
               suoritukset.stream()
                   .filter(s -> p.test(s) && wrap(s).isValmis())
-                  .map(s -> wrap(s).getValmistuminenAsDateTime())
+                  .map(s -> wrap(s).getValmistuminenAsLocalDate())
                   .findFirst()
                   .ifPresent(
                       date -> {
@@ -902,10 +902,9 @@ public class HakemuksetConverterUtil {
     return vuodet;
   }
 
-  private Integer suorituskausi(DateTime valmistumisPvm) {
-    if (valmistumisPvm.isBefore(
-        SuoritusJaArvosanatWrapper.VALMISTUMIS_DTF.parseDateTime(
-            "01.08." + valmistumisPvm.getYear()))) {
+  private Integer suorituskausi(LocalDate valmistumisPvm) {
+    LocalDate augustFirst = LocalDate.of(valmistumisPvm.getYear(), 8, 1);
+    if (valmistumisPvm.isBefore(augustFirst)) {
       return 2;
     } else {
       return 1;
@@ -955,11 +954,11 @@ public class HakemuksetConverterUtil {
                                   if (!wrapper.isKeskeytynyt()
                                       && LISAPISTEKOULUTUS_SUORITUSVUOSI_MAP.containsKey(
                                           s.getSuoritus().getKomo())
-                                      && wrapper.getValmistuminenAsDateTime() != null) {
+                                      && wrapper.getValmistuminenAsLocalDate() != null) {
                                     suoritusvuosiMap.put(
                                         LISAPISTEKOULUTUS_SUORITUSVUOSI_MAP.get(
                                             s.getSuoritus().getKomo()),
-                                        wrapper.getValmistuminenAsDateTime().getYear());
+                                        wrapper.getValmistuminenAsLocalDate().getYear());
                                   }
                                   return !wrapper.isKeskeytynyt();
                                 })
@@ -982,7 +981,7 @@ public class HakemuksetConverterUtil {
     return Stream.concat(
             suoritukset.stream()
                 .filter(s -> wrap(s).isPerusopetus() && (wrap(s).isValmis() || wrap(s).isKesken()))
-                .map(s -> wrap(s).getValmistuminenAsDateTime().getYear()),
+                .map(s -> wrap(s).getValmistuminenAsLocalDate().getYear()),
             hakemus.getAvaimet().stream()
                 .filter(
                     a ->
@@ -1046,10 +1045,10 @@ public class HakemuksetConverterUtil {
             "Haulla {} ei ole hakukausiVuotta, käytetään nykyistä vuotta henkilöOidille {}",
             haku.oid,
             s.getSuoritusJaArvosanat().getSuoritus().getHenkiloOid());
-        edellinenVuosi = new DateTime().getYear() - 1;
+        edellinenVuosi = Year.now().getValue() - 1;
       }
-      DateTime relevantStart = new DateTime(edellinenVuosi, 1, 1, 0, 0);
-      return s.getValmistuminenAsDateTime().isAfter(relevantStart);
+      LocalDate relevantStart = LocalDate.of(edellinenVuosi, 1, 1);
+      return s.getValmistuminenAsLocalDate().isAfter(relevantStart);
     } else {
       return hakukaudella(haku, s);
     }
@@ -1060,12 +1059,12 @@ public class HakemuksetConverterUtil {
       return true; // TODO: Saako Koutan hakujen kanssa huomioida myös sellaiset suoritukset jotka
       // eivät ole hakukaudella?
     }
-    DateTime valmistuminen = s.getValmistuminenAsDateTime();
+    LocalDate valmistuminen = s.getValmistuminenAsLocalDate();
     int hakuvuosi = haku.hakukausiVuosi;
-    DateTime kStart = new DateTime(hakuvuosi, 1, 1, 0, 0).minus(1);
-    DateTime kEnd = new DateTime(hakuvuosi, 7, 31, 0, 0).plusDays(1);
-    DateTime sStart = new DateTime(hakuvuosi, 8, 1, 0, 0).minus(1);
-    DateTime sEnd = new DateTime(hakuvuosi, 12, 31, 0, 0).plusDays(1);
+    LocalDate kStart = LocalDate.of(hakuvuosi, 1, 1).minusDays(1);
+    LocalDate kEnd = LocalDate.of(hakuvuosi, 7, 31).plusDays(1);
+    LocalDate sStart = LocalDate.of(hakuvuosi, 8, 1).minusDays(1);
+    LocalDate sEnd = LocalDate.of(hakuvuosi, 12, 31).plusDays(1);
     if (haku.hakukausiUri.startsWith("kausi_k#")) {
       return valmistuminen.isAfter(kStart) && valmistuminen.isBefore(kEnd);
     } else if (haku.hakukausiUri.startsWith("kausi_s#")) {
