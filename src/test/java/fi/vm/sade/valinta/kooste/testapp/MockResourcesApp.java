@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.testapp;
 
-import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.kooste.App;
+import fi.vm.sade.valinta.sharedutils.PortChecker;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;

@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import fi.vm.sade.integrationtest.util.PortChecker;
+import fi.vm.sade.valinta.sharedutils.PortChecker;
 import java.net.InetSocketAddress;
 import java.util.List;
 import org.hamcrest.Matchers;

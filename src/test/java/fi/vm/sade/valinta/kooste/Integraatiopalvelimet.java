@@ -6,8 +6,8 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import com.google.gson.*;
-import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import fi.vm.sade.valinta.sharedutils.PortChecker;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import java.lang.reflect.Type;
 import java.util.Date;

@@ -1,5 +1,7 @@
 package fi.vm.sade.valinta.kooste.testapp;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
 import fi.vm.sade.javautils.opintopolku_spring_security.OidProvider;
 import fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer;
@@ -205,5 +207,12 @@ public class TestConfiguration {
   @Bean
   public OrganisationHierarchyAuthorizer getOrganisationHierarchyAuthorizer() {
     return Mockito.mock(OrganisationHierarchyAuthorizer.class);
+  }
+
+  @Bean
+  public ObjectMapper objectMapper() {
+    final ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    return mapper;
   }
 }

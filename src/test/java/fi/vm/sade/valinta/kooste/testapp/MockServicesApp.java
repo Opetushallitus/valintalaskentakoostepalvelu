@@ -1,9 +1,9 @@
 package fi.vm.sade.valinta.kooste.testapp;
 
-import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.kooste.App;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
+import fi.vm.sade.valinta.sharedutils.PortChecker;
 
 /**
  * Starts a spring boot application for running integration tests that call external services mocked
