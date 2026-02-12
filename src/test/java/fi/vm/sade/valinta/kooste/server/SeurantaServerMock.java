@@ -7,11 +7,11 @@ import static javax.ws.rs.HttpMethod.*;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTyyppi;
+import fi.vm.sade.valinta.sharedutils.PortChecker;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
