@@ -50,7 +50,7 @@ public class ValintojenToteuttaminenResource {
   public DeferredResult<ResponseEntity<Map<String, HakukohteenValintatiedot>>> searchHakukohteet(
       @PathVariable("hakuOid") String hakuOid) {
     DeferredResult<ResponseEntity<Map<String, HakukohteenValintatiedot>>> result =
-        new DeferredResult<>(60 * 1000L);
+        new DeferredResult<>(180 * 1000L);
     try {
       result.onTimeout(
           () -> {
