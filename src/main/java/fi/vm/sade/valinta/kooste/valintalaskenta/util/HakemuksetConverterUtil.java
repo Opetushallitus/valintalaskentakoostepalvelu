@@ -30,10 +30,10 @@ import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.OppijaToAvainArvoDTOConverter;
 import fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter;
 import fi.vm.sade.valinta.kooste.util.sure.YoToAvainSuoritustietoDTOConverter;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.PohjakoulutusToinenAste;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
-import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -696,10 +696,11 @@ public class HakemuksetConverterUtil {
       return of(PohjakoulutusToinenAste.KESKEYTYNYT);
     }
 
-    if (PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
+    if (hakuAppPk.isPresent()
+        && PohjakoulutusToinenAste.YLIOPPILAS.equals(pohjakoulutusHakemukselta)) {
       if (LocalDateTime.now().isBefore(abienPohjaKoulutusPaattelyLeikkuriPvm)
           || !isHakijaAbiturientti(haku, hakemusDTO)) {
-        // hakemuksella yo-tutkinto, mutta ei löytynyt suresta ylempänä,
+        // hakuapp-hakemuksella yo-tutkinto, mutta ei löytynyt suresta ylempänä,
         // luotetaan silti hakemukseen koska poikkeussääntö
         return of(PohjakoulutusToinenAste.YLIOPPILAS);
       }
@@ -756,7 +757,9 @@ public class HakemuksetConverterUtil {
               PohjakoulutusToinenAste.PERUSKOULU,
               PohjakoulutusToinenAste.OSITTAIN_YKSILOLLISTETTY,
               PohjakoulutusToinenAste.ALUEITTAIN_YKSILOLLISTETTY,
-              PohjakoulutusToinenAste.YKSILOLLISTETTY);
+              PohjakoulutusToinenAste.YKSILOLLISTETTY,
+              PohjakoulutusToinenAste.OSITTAIN_RAJATTU,
+              PohjakoulutusToinenAste.PAAOSIN_TAI_KOKONAAN_RAJATTU);
       if (vuosi <= 2017 && pkPohjakoulutukset.contains(pohjakoulutus)) {
         LOG.info(
             "Hakijalle ei löytynyt pohjakoulutusta suoritusrekisteristä mutta hakemuksella on perusopetus ennen vuotta 2018. Käytetään sitä.");
