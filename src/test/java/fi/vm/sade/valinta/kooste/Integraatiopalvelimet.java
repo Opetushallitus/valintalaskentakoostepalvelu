@@ -33,7 +33,10 @@ public class Integraatiopalvelimet {
       new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
 
   static {
-    ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(15));
+    ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(30));
+    ConfigurationProperties.socketConnectionTimeout((int) TimeUnit.SECONDS.toMillis(30));
+    ConfigurationProperties.nioEventLoopThreadCount(5);
+    ConfigurationProperties.disableSystemOut(true);
   }
 
   public static void mockForward(String method, MockServer server) {
@@ -74,7 +77,8 @@ public class Integraatiopalvelimet {
                 .withStatusCode(200)
                 .withHeaders(
                     new org.mockserver.model.Header(
-                        "Content-Type", "application/json; charset=utf-8"))
+                        "Content-Type", "application/json; charset=utf-8"),
+                    new org.mockserver.model.Header("Connection", "close"))
                 .withBody(r));
   }
 
@@ -88,7 +92,8 @@ public class Integraatiopalvelimet {
                 .withHeaders(
                     new org.mockserver.model.Header("Set-Cookie", cookieName + "=" + cookieValue),
                     new org.mockserver.model.Header(
-                        "Content-Type", "application/json; charset=utf-8"))
+                        "Content-Type", "application/json; charset=utf-8"),
+                    new org.mockserver.model.Header("Connection", "close"))
                 .withBody(r));
   }
 
@@ -101,7 +106,8 @@ public class Integraatiopalvelimet {
                 .withStatusCode(200)
                 .withHeaders(
                     new org.mockserver.model.Header(
-                        "Content-Type", "application/json; charset=utf-8"))
+                        "Content-Type", "application/json; charset=utf-8"),
+                    new org.mockserver.model.Header("Connection", "close"))
                 .withBody(r));
   }
 
@@ -114,7 +120,8 @@ public class Integraatiopalvelimet {
                 .withStatusCode(200)
                 .withHeaders(
                     new org.mockserver.model.Header(
-                        "Content-Type", "application/json; charset=utf-8"))
+                        "Content-Type", "application/json; charset=utf-8"),
+                    new org.mockserver.model.Header("Connection", "close"))
                 .withBody(r));
   }
 
@@ -127,32 +134,45 @@ public class Integraatiopalvelimet {
                 .withStatusCode(200)
                 .withHeaders(
                     new org.mockserver.model.Header(
-                        "Content-Disposition", "attachment; filename=\"" + n + "\""))
+                        "Content-Disposition", "attachment; filename=\"" + n + "\""),
+                    new org.mockserver.model.Header("Connection", "close"))
                 .withBody(r));
   }
 
   public static void mockToNoContent(String method, String p) {
     mockServer
         .when(request().withMethod(method).withPath(p))
-        .respond(response().withStatusCode(204));
+        .respond(
+            response()
+                .withStatusCode(204)
+                .withHeader(new org.mockserver.model.Header("Connection", "close")));
   }
 
   public static void mockToNotFound(String method, String p) {
     mockServer
         .when(request().withMethod(method).withPath(p))
-        .respond(response().withStatusCode(404));
+        .respond(
+            response()
+                .withStatusCode(404)
+                .withHeader(new org.mockserver.model.Header("Connection", "close")));
   }
 
   public static void mockToInternalServerError(String method, String p) {
     mockServer
         .when(request().withMethod(method).withPath(p))
-        .respond(response().withStatusCode(500));
+        .respond(
+            response()
+                .withStatusCode(500)
+                .withHeader(new org.mockserver.model.Header("Connection", "close")));
   }
 
   public static void mockToAccept(String method, String p) {
     mockServer
         .when(request().withMethod(method).withPath(p))
-        .respond(response().withStatusCode(200));
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withHeader(new org.mockserver.model.Header("Connection", "close")));
   }
 
   public static void mockToReturnJsonWithParams(

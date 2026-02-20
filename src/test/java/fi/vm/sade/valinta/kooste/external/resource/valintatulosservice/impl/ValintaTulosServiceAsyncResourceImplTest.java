@@ -23,13 +23,13 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoA
 import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import io.reactivex.Observable;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -186,7 +186,8 @@ public class ValintaTulosServiceAsyncResourceImplTest {
             VastaanottoAikarajaMennytDTO.class);
     assertEquals(hakemusOid, parsedDto.getHakemusOid());
     assertEquals(
-        new DateTime(2016, 7, 15, 12, 0, 0, DateTimeZone.UTC), parsedDto.getVastaanottoDeadline());
+        ZonedDateTime.of(2016, 7, 15, 12, 0, 0, 0, ZoneOffset.UTC),
+        parsedDto.getVastaanottoDeadline());
     assertTrue(parsedDto.isMennyt());
   }
 }

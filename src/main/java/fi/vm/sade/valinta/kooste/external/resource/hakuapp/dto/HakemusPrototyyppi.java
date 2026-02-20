@@ -188,7 +188,8 @@ public class HakemusPrototyyppi {
       return null;
     }
 
-    LocalDate localDate = syntymaAika.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    LocalDate localDate =
+        syntymaAika.toInstant().atZone(ZoneId.of("Europe/Helsinki")).toLocalDate();
     return localDate.format(ErillishakuRivi.SYNTYMAAIKAFORMAT);
   }
 

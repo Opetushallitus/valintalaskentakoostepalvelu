@@ -8,15 +8,13 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.*;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,11 +36,10 @@ public class YoToAvainSuoritustietoDTOConverter {
     // SUORITUSVUOSI: 2012,
     // SUORITUSLUKUKAUSI: 1,
     if (!StringUtils.isBlank(a.getMyonnetty())) {
-      DateTime dt = new ArvosanaWrapper(a).getMyonnettyAsDateTime();
-      x.put("SUORITUSVUOSI", "" + dt.getYear());
-      LocalDate ld = new LocalDate(dt.getYear(), 8, 1);
-      DateTime dt0 = ld.toDateTime(LocalTime.MIDNIGHT);
-      if (!(dt.isEqual(dt0) || dt.isAfter(dt0))) {
+      LocalDate date = new ArvosanaWrapper(a).getMyonnettyAsLocalDate();
+      x.put("SUORITUSVUOSI", "" + date.getYear());
+      LocalDate augustFirst = LocalDate.of(date.getYear(), 8, 1);
+      if (date.isBefore(augustFirst)) {
         x.put("SUORITUSLUKUKAUSI", "1");
       } else {
         x.put("SUORITUSLUKUKAUSI", "2");
