@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.testapp;
 import fi.vm.sade.valinta.kooste.App;
 import fi.vm.sade.valinta.kooste.Integraatiopalvelimet;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
-import fi.vm.sade.valinta.sharedutils.PortChecker;
+import org.springframework.test.util.TestSocketUtils;
 
 /**
  * Starts a spring boot application for running integration tests that call external services mocked
@@ -14,7 +14,7 @@ public class MockServicesApp {
   public static final int port =
       Integer.parseInt(
           System.getProperty(
-              "valintakooste.port", String.valueOf(PortChecker.findFreeLocalPort())));
+              "valintakooste.port", String.valueOf(TestSocketUtils.findAvailableTcpPort())));
 
   public static final String resourcesAddress =
       "http://localhost:" + port + "/valintalaskentakoostepalvelu/resources";
