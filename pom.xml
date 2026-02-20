@@ -58,6 +58,7 @@
                 <artifactId>httpclient</artifactId>
                 <version>4.5.14</version>
                 <exclusions>
+                    <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
@@ -79,6 +80,7 @@
                 <artifactId>opintopolku-spring-security</artifactId>
                 <version>0.6.0-SNAPSHOT</version>
                 <exclusions>
+                    <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-api</artifactId>
@@ -95,6 +97,7 @@
                 <artifactId>java-cas</artifactId>
                 <version>1.2.4-SNAPSHOT</version>
                 <exclusions>
+                    <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-simple</artifactId>
@@ -106,6 +109,7 @@
                 <artifactId>opintopolku-cas-servlet-filter</artifactId>
                 <version>1.0.1-SNAPSHOT</version>
                 <exclusions>
+                    <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
@@ -123,6 +127,7 @@
                 <version>2018-15-SNAPSHOT</version>
                 <scope>compile</scope>
                 <exclusions>
+                    <!-- näitä ei tarvita -->
                     <exclusion>
                         <groupId>com.wordnik</groupId>
                         <artifactId>*</artifactId>
@@ -135,6 +140,7 @@
                 <version>2020.01-SNAPSHOT</version>
                 <scope>compile</scope>
                 <exclusions>
+                    <!-- näitä ei tarvita -->
                     <exclusion>
                         <groupId>fi.vm.sade.generic</groupId>
                         <artifactId>generic-common</artifactId>
@@ -155,6 +161,7 @@
                 <artifactId>organisaatio-api</artifactId>
                 <version>2023.09.111204.RELEASE</version>
                 <exclusions>
+                    <!-- tätä ei tarvita, voi häiritä uudemman springdocin toimintaa -->
                     <exclusion>
                         <groupId>org.springdoc</groupId>
                         <artifactId>*</artifactId>
@@ -171,6 +178,7 @@
                 <artifactId>sijoittelu-algoritmi-domain</artifactId>
                 <version>${sijoittelu.version}</version>
                 <exclusions>
+                    <!-- näitä ei tarvita -->
                     <exclusion>
                         <groupId>org.codehaus.jackson</groupId>
                         <artifactId>jackson-core-asl</artifactId>
@@ -191,6 +199,7 @@
                 <artifactId>valintalaskenta-domain</artifactId>
                 <version>${valintalaskenta.version}</version>
                 <exclusions>
+                    <!-- näitä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
@@ -206,6 +215,7 @@
                 <artifactId>sharedutils</artifactId>
                 <version>${valinta-sharedutils.version}</version>
                 <exclusions>
+                    <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
@@ -257,6 +267,7 @@
                 <artifactId>java-http</artifactId>
                 <version>1.0.1-SNAPSHOT</version>
                 <exclusions>
+                    <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
@@ -373,6 +384,7 @@
                 <version>5.15.0</version>
                 <scope>test</scope>
                 <exclusions>
+                    <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
@@ -386,6 +398,7 @@
                 <type>test-jar</type>
                 <scope>test</scope>
                 <exclusions>
+                    <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-log4j12</artifactId>
@@ -417,37 +430,52 @@
                 <scope>test</scope>
             </dependency>
 
-            <!-- fix transitive dependency version conflicts -->
+            <!-- korjaa versiokonflikti kirjaston
+             org.mock-server:mockserver-netty:5.15.0 sisällä -->
             <dependency>
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <version>1.9.4</version>
             </dependency>
+
+            <!-- korjaa versiokonflikti kirjastojen
+             fi.vm.sade.valintaperusteet:sharedutils:8.0-SNAPSHOT ja
+             org.apache.poi:poi:5.5.1 ja
+             org.apache.poi:poi-ooxml:5.5.1 välillä-->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>4.5.0</version>
             </dependency>
-            <dependency>
-                <groupId>com.nimbusds</groupId>
-                <artifactId>nimbus-jose-jwt</artifactId>
-                <version>9.37.3</version>
-            </dependency>
+
+            <!-- korjaa versiokonflikti kirjastojen
+             fi.vm.sade.tarjonta:tarjonta-api:2018-15-SNAPSHOT ja
+             org.mock-server:mockserver-netty:5.15.0 välillä -->
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>4.0.1</version>
             </dependency>
+
+            <!-- korjaa versiokonflikti kirjastojen
+             fi.vm.sade.valintaperusteet:sharedutils:8.0-SNAPSHOT ja
+             org.mock-server:mockserver-netty:5.15.0 välillä -->
             <dependency>
-                <groupId>javax.annotation</groupId>
-                <artifactId>javax.annotation-api</artifactId>
-                <version>1.3.2</version>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>9.37.3</version>
             </dependency>
+
+            <!-- korjaa versiokonflikti kirjastojen
+             fi.vm.sade.sijoittelu:sijoittelu-algoritmi-domain:10.1.0-SNAPSHOT ja
+             org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.15 välillä -->
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
                 <version>2.2.41</version>
             </dependency>
+
+            <!-- korjaa haavoittuneet versiot, fi.vm.sade.tarjonta:tarjonta-api:2018-15-SNAPSHOT kirjastoja -->
             <dependency>
                 <groupId>org.apache.cxf</groupId>
                 <artifactId>cxf-core</artifactId>
@@ -458,11 +486,10 @@
                 <artifactId>cxf-rt-frontend-jaxrs</artifactId>
                 <version>4.1.4</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-transports-http</artifactId>
-                <version>4.1.4</version>
-            </dependency>
+
+            <!-- korjaa versiokonflikti kirjastojen
+             fi.vm.sade.valintaperusteet:sharedutils:8.0-SNAPSHOT ja
+             org.springframework.boot:spring-boot-starter-test:3.5.10 välillä -->
             <dependency>
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
@@ -650,12 +677,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.skyscreamer</groupId>
-                    <artifactId>jsonassert</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
