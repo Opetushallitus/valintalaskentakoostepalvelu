@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import fi.vm.sade.valinta.sharedutils.PortChecker;
 import java.net.InetSocketAddress;
 import java.util.List;
 import org.hamcrest.Matchers;
@@ -19,7 +18,7 @@ public class MockServer {
 
   private final HttpServer httpServer;
   private final List<String> paths = Lists.newArrayList();
-  private int freeLocalPort;
+  private int port;
 
   public MockServer() {
     this.httpServer = startServer();
@@ -32,13 +31,12 @@ public class MockServer {
     HttpServer server = null;
     while (++numberOfAttempt <= maxAttempts && !succeededToStart) {
       try {
-        freeLocalPort = PortChecker.findFreeLocalPort();
-        server = HttpServer.create(new InetSocketAddress(freeLocalPort), 0);
+        server = HttpServer.create(new InetSocketAddress(0), 0);
         server.setExecutor(null);
         server.start();
         succeededToStart = true;
-        System.out.println(
-            "Started " + getClass().getName() + " listening in port " + freeLocalPort);
+        port = server.getAddress().getPort();
+        System.out.println("Started " + getClass().getName() + " listening in port " + port);
       } catch (Exception e) {
         System.err.println(
             getClass().getName()
@@ -64,7 +62,7 @@ public class MockServer {
     System.out.println(
         getClass().getName()
             + " listening in port "
-            + freeLocalPort
+            + port
             + " added handler for path '"
             + path
             + "'");
