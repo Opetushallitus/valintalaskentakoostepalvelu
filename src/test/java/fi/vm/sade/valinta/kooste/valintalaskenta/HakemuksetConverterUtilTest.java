@@ -26,6 +26,7 @@ import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.Parametr
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
+import fi.vm.sade.valinta.kooste.valintalaskenta.dto.PohjakoulutusToinenAste;
 import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
@@ -33,7 +34,6 @@ import fi.vm.sade.valintalaskenta.domain.dto.AvainMetatiedotDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakukohdeDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.Lisapistekoulutus;
-import fi.vm.sade.valintalaskenta.domain.dto.PohjakoulutusToinenAste;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -515,6 +515,39 @@ public class HakemuksetConverterUtilTest {
     Assertions.assertEquals(
         PohjakoulutusToinenAste.YLIOPPILAS,
         hakemuksetConverterUtil.pohjakoulutus(haku, h, suoritukset).get());
+  }
+
+  @Test
+  public void
+      pohjakoulutusPaaosinTaiKokonaanRajattuJosHakemuksellaPaaosinTaiKokonaanRajattuJaLeikkuriPvmOnTulevaisuudessa() {
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("9999-12-31", "9999-12-31", harkinnanvaraisuusAsyncResource);
+    HakemusDTO h = new HakemusDTO();
+    h.setHakijaOid("1.2.3.4.5.6");
+    h.setAvaimet(
+        List.of(
+            new AvainArvoDTO(
+                "base-education-2nd", PohjakoulutusToinenAste.PAAOSIN_TAI_KOKONAAN_RAJATTU),
+            new AvainArvoDTO("pohjakoulutus_vuosi", "2017")));
+    Assertions.assertEquals(
+        PohjakoulutusToinenAste.PAAOSIN_TAI_KOKONAAN_RAJATTU,
+        hakemuksetConverterUtil.pohjakoulutus(haku, h, Collections.emptyList()).get());
+  }
+
+  @Test
+  public void
+      pohjakoulutusOsittainRajattuJosHakemuksellaOsittainRajattuJaLeikkuriPvmOnTulevaisuudessa() {
+    hakemuksetConverterUtil =
+        new HakemuksetConverterUtil("9999-12-31", "9999-12-31", harkinnanvaraisuusAsyncResource);
+    HakemusDTO h = new HakemusDTO();
+    h.setHakijaOid("1.2.3.4.5.6");
+    h.setAvaimet(
+        List.of(
+            new AvainArvoDTO("base-education-2nd", PohjakoulutusToinenAste.OSITTAIN_RAJATTU),
+            new AvainArvoDTO("pohjakoulutus_vuosi", "2017")));
+    Assertions.assertEquals(
+        PohjakoulutusToinenAste.OSITTAIN_RAJATTU,
+        hakemuksetConverterUtil.pohjakoulutus(haku, h, Collections.emptyList()).get());
   }
 
   @Test
