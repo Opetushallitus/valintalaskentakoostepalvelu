@@ -155,7 +155,8 @@ public class HttpClients {
         new CasConfig.CasConfigBuilder(
                 username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
             .setJsessionName("session")
-            .build());
+            .build(),
+        ValintaTulosServiceAsyncResourceImpl.getGson());
   }
 
   @Bean(name = "OhjausparametritHttpClient")
