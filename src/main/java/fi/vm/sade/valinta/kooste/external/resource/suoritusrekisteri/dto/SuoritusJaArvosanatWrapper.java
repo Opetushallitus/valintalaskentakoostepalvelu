@@ -3,12 +3,11 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ public class SuoritusJaArvosanatWrapper {
   private static final Map<String, String> KOMO_TO_STRING_MAPPER = createKomoToStringMapper();
   public static final String HAKEMUS_OID_PREFIX = "1.2.246.562.11";
 
-  public static final String SUORITUS_PVM_FORMAT = "dd.MM.yyyy";
+  public static final String SUORITUS_PVM_FORMAT = "d.M.yyyy";
   public static final DateTimeFormatter ARVOSANA_PVM_FORMATTER =
       DateTimeFormatter.ofPattern(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT);
 
@@ -58,17 +57,16 @@ public class SuoritusJaArvosanatWrapper {
   }
 
   private final SuoritusJaArvosanat suoritusJaArvosanat;
-  public static final org.joda.time.format.DateTimeFormatter VALMISTUMIS_DTF =
-      DateTimeFormat.forPattern("dd.MM.yyyy");
+  public static final DateTimeFormatter VALMISTUMIS_DTF = DateTimeFormatter.ofPattern("d.M.yyyy");
 
-  public DateTime getValmistuminenAsDateTime() {
+  public LocalDate getValmistuminenAsLocalDate() {
     if (suoritusJaArvosanat.getSuoritus().getValmistuminen() == null) {
       LOG.error(
           "Suorituksella ei ole valmistumispäivämäärää: {}",
           new Gson().toJson(suoritusJaArvosanat.getSuoritus()));
       throw new RuntimeException("Suorituksella ei ole valmistumispäivämäärää");
     }
-    return VALMISTUMIS_DTF.parseDateTime(suoritusJaArvosanat.getSuoritus().getValmistuminen());
+    return LocalDate.parse(suoritusJaArvosanat.getSuoritus().getValmistuminen(), VALMISTUMIS_DTF);
   }
 
   public static SuoritusJaArvosanatWrapper wrap(SuoritusJaArvosanat s) {

@@ -31,6 +31,8 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.BooleanUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +124,7 @@ public class ErillishaunVientiService {
                   .tallenna(
                       uuid,
                       "erillishaku.xlsx",
-                      DateTime.now().plusHours(1).toDate().getTime(),
+                      Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli(),
                       List.of("erillishaku"),
                       "application/octet-stream",
                       excel.getExcel().vieXlsx())
