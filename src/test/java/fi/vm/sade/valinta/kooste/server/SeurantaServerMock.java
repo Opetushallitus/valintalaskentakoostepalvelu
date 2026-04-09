@@ -1,13 +1,10 @@
 package fi.vm.sade.valinta.kooste.server;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.*;
-import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.*;
+import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.HAKU1;
 import static fi.vm.sade.valinta.kooste.spec.ConstantsSpec.UUID1;
-import static javax.ws.rs.HttpMethod.*;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.seuranta.dto.HakukohdeDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.seuranta.dto.LaskentaTila;
@@ -25,7 +22,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
  */
 public class SeurantaServerMock extends MockServer {
 
-  private static final int mockSeurantaPort = PortChecker.findFreeLocalPort();
   private static final ConcurrentLinkedQueue<LaskentaDto> laskentaQueue =
       new ConcurrentLinkedQueue<>();
 
