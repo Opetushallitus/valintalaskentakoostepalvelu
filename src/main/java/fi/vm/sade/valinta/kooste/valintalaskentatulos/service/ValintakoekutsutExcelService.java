@@ -135,7 +135,7 @@ public class ValintakoekutsutExcelService {
                       dokumenttiAsyncResource
                           .tallenna(
                               id,
-                              "valintakoekutsut.xls",
+                              "valintakoekutsut.xlsx",
                               expirationDate,
                               prosessi.getTags(),
                               "application/vnd.ms-excel",
