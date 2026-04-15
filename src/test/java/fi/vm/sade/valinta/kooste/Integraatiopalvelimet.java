@@ -6,7 +6,6 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 import com.google.gson.*;
-import fi.vm.sade.integrationtest.util.PortChecker;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import java.lang.reflect.Type;
@@ -29,8 +28,7 @@ import org.slf4j.LoggerFactory;
 public class Integraatiopalvelimet {
   private static final Logger LOG = LoggerFactory.getLogger(Integraatiopalvelimet.class);
 
-  public static ClientAndServerWithHost mockServer =
-      new ClientAndServerWithHost(PortChecker.findFreeLocalPort());
+  public static ClientAndServerWithHost mockServer = new ClientAndServerWithHost();
 
   static {
     ConfigurationProperties.maxSocketTimeout(TimeUnit.SECONDS.toMillis(15));
@@ -51,7 +49,7 @@ public class Integraatiopalvelimet {
             });
   }
 
-  public static void mockForward(String method, String path, int port) {
+  private static void mockForward(String method, String path, int port) {
     LOG.info(
         "mockForward: "
             + method
@@ -201,9 +199,9 @@ public class Integraatiopalvelimet {
   public static class ClientAndServerWithHost extends ClientAndServer {
     private final int port;
 
-    ClientAndServerWithHost(int port) {
-      super(port);
-      this.port = port;
+    ClientAndServerWithHost() {
+      super();
+      this.port = getPort();
     }
 
     String getHost() {
