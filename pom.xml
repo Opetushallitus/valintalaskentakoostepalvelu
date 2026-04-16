@@ -487,6 +487,23 @@
                 <version>9.9</version>
             </dependency>
 
+            <!-- Transitiiviset depsut -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>10.1.54</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http</artifactId>
+                <version>4.1.132.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http2</artifactId>
+                <version>4.1.132.Final</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
