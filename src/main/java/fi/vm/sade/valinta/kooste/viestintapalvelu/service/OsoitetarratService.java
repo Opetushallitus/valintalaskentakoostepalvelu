@@ -29,13 +29,14 @@ import io.reactivex.Observable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.poi.util.IOUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -408,7 +409,7 @@ public class OsoitetarratService {
   }
 
   private Date defaultExpirationDate() {
-    return DateTime.now().plusHours(168).toDate(); // almost a day
+    return Date.from(Instant.now().plus(168, ChronoUnit.HOURS)); // almost a day
   }
 
   private PoikkeusKasittelijaSovitin poikkeuskasittelija(DokumenttiProsessi prosessi) {

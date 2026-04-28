@@ -1,8 +1,9 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
-import org.joda.time.DateTime;
 
 public class DokumenttiUtils {
 
@@ -11,6 +12,6 @@ public class DokumenttiUtils {
   }
 
   public static Date defaultExpirationDate() {
-    return DateTime.now().plusHours(168).toDate();
+    return Date.from(Instant.now().plus(168, ChronoUnit.HOURS));
   }
 }

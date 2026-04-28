@@ -38,12 +38,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,7 +228,7 @@ public class ValintalaskentaExcelResource {
                             return dokumenttiAsyncResource.tallenna(
                                 id,
                                 "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
-                                DateTime.now().plusHours(24).toDate().getTime(),
+                                Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli(),
                                 Arrays.asList("taulukkolaskennat", hakukohdeOid),
                                 "application/vnd.ms-excel",
                                 xls);

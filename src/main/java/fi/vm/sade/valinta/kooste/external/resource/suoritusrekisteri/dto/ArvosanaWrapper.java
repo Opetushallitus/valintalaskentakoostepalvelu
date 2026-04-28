@@ -2,11 +2,11 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto;
 
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +31,7 @@ public class ArvosanaWrapper {
   private final Set<String> KOERYHMA_96_REAALI =
       Sets.newHashSet(
           "RR", "RO", "RY", "UE", "UO", "ET", "FF", "PS", "HI", "FY", "KE", "BI", "GE", "TE", "YH");
-  public static final org.joda.time.format.DateTimeFormatter ARVOSANA_DTF =
-      DateTimeFormat.forPattern("dd.MM.yyyy");
+  public static final DateTimeFormatter ARVOSANA_DTF = DateTimeFormatter.ofPattern("d.M.yyyy");
 
   public ArvosanaWrapper(Arvosana arvosana) {
     this.arvosana = arvosana;
@@ -70,19 +69,19 @@ public class ArvosanaWrapper {
     return "J".equals(arvosana.getAine());
   }
 
-  public DateTime getMyonnettyAsDateTime() {
+  public LocalDate getMyonnettyAsLocalDate() {
     if (arvosana.getMyonnetty() == null) {
       LOG.error("Arvosanalla ei ole myöntämispäivämäärää: {}", new Gson().toJson(arvosana));
       throw new RuntimeException("Arvosanalla ei ole myöntämispäivämäärää");
     }
-    return ARVOSANA_DTF.parseDateTime(arvosana.getMyonnetty());
+    return LocalDate.parse(arvosana.getMyonnetty(), ARVOSANA_DTF);
   }
 
-  public boolean onkoMyonnettyEnnen(DateTime referenssiPvm) {
+  public boolean onkoMyonnettyEnnen(LocalDate referenssiPvm) {
     if (referenssiPvm == null) {
       return true;
     }
-    return referenssiPvm.isAfter(getMyonnettyAsDateTime());
+    return referenssiPvm.isAfter(getMyonnettyAsLocalDate());
   }
 
   public Arvosana getArvosana() {
