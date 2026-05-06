@@ -116,9 +116,9 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("valintalaskentakoostepalvelu.app.password.to.valintaperusteet", "");
     p0.setProperty("valintalaskentakoostepalvelu.maxWorkerCount", "0");
 
-    p0.setProperty("omatsivut.email.application.modify.link.en", "https://en.test.domain/token/");
-    p0.setProperty("omatsivut.email.application.modify.link.fi", "https://fi.test.domain/token/");
-    p0.setProperty("omatsivut.email.application.modify.link.sv", "https://sv.test.domain/token/");
+    p0.setProperty("oma-opiskelijavalinta.tuloskirje.api.en", "https://en.test.domain/token/");
+    p0.setProperty("oma-opiskelijavalinta.tuloskirje.api.fi", "https://fi.test.domain/token/");
+    p0.setProperty("oma-opiskelijavalinta.tuloskirje.api.sv", "https://sv.test.domain/token/");
 
     p0.setProperty("valintalaskentakoostepalvelu.tarjonta.sync.cron", "0 0 0 * * SUN-SAT");
 
