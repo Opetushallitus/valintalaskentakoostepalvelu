@@ -123,10 +123,9 @@ host.haku.en={{host_haku_en}}
 url-haku=https://${host.haku}
 url-haku-en=https://${host.haku.en}
 url-haku-sv=https://${host.haku.sv}
-omatsivut.email.application.modify.link.en=${url-haku-en}/omatsivut/tuloskirjeet/
-omatsivut.email.application.modify.link.fi=${url-haku}/omatsivut/tuloskirjeet/
-omatsivut.email.application.modify.link.sv=${url-haku-sv}/omatsivut/tuloskirjeet/
-
+oma-opiskelijavalinta.tuloskirje.api.en=${url-haku-en}/oma-opiskelijavalinta/api/tuloskirje/
+oma-opiskelijavalinta.tuloskirje.api.fi=${url-haku-fi}/oma-opiskelijavalinta/api/tuloskirje/
+oma-opiskelijavalinta.tuloskirje.api.sv=${url-haku-fi}/oma-opiskelijavalinta/api/tuloskirje/
 aws.region={{aws_region}}
 aws.bucket.name={{dokumenttipalvelu_aws_bucket_name}}
 
