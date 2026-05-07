@@ -120,12 +120,12 @@ valintalaskentakoostepalvelu.rajapinnat.kela-service.rest.url=https://${host.vir
 host.haku={{host_haku}}
 host.haku.sv={{host_haku_sv}}
 host.haku.en={{host_haku_en}}
-url-haku=https://${host.haku}
+url-haku=https://${host.haku.fi}
 url-haku-en=https://${host.haku.en}
 url-haku-sv=https://${host.haku.sv}
 oma-opiskelijavalinta.tuloskirje.api.en=${url-haku-en}/oma-opiskelijavalinta/api/tuloskirje/
 oma-opiskelijavalinta.tuloskirje.api.fi=${url-haku-fi}/oma-opiskelijavalinta/api/tuloskirje/
-oma-opiskelijavalinta.tuloskirje.api.sv=${url-haku-fi}/oma-opiskelijavalinta/api/tuloskirje/
+oma-opiskelijavalinta.tuloskirje.api.sv=${url-haku-sv}/oma-opiskelijavalinta/api/tuloskirje/
 aws.region={{aws_region}}
 aws.bucket.name={{dokumenttipalvelu_aws_bucket_name}}
 
