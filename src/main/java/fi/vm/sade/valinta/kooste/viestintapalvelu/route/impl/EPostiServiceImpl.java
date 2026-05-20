@@ -37,9 +37,9 @@ public class EPostiServiceImpl implements EPostiService {
       OppijantunnistusAsyncResource oppijantunnistusAsyncResource,
       ViestintapalveluAsyncResource viestintapalveluAsyncResource,
       OhjausparametritAsyncResource ohjausparametritAsyncResource,
-      @Value("${omatsivut.email.application.modify.link.en}") String secureLinkUrlEn,
-      @Value("${omatsivut.email.application.modify.link.fi}") String secureLinkUrlFi,
-      @Value("${omatsivut.email.application.modify.link.sv}") String secureLinkUrlSv) {
+      @Value("${oma-opiskelijavalinta.tuloskirje.api.en}") String secureLinkUrlEn,
+      @Value("${oma-opiskelijavalinta.tuloskirje.api.fi}") String secureLinkUrlFi,
+      @Value("${oma-opiskelijavalinta.tuloskirje.api.sv}") String secureLinkUrlSv) {
     this.oppijantunnistusAsyncResource = oppijantunnistusAsyncResource;
     this.viestintapalveluAsyncResource = viestintapalveluAsyncResource;
     this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;

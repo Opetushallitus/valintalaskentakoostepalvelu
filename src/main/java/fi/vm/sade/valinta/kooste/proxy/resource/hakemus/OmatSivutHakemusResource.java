@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
+@Deprecated // TODO poista OY-5547
 @RestController
 @RequestMapping("/resources/proxy/valintatulos")
 public class OmatSivutHakemusResource {
