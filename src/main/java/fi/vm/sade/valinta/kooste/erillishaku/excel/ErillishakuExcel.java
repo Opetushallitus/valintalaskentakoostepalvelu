@@ -11,6 +11,8 @@ import fi.vm.sade.valinta.kooste.excel.arvo.BooleanArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.MonivalintaArvo;
 import fi.vm.sade.valinta.kooste.excel.arvo.TekstiArvo;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoCachedAsyncResource;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -232,8 +234,10 @@ public class ErillishakuExcel {
           new TekstiArvo(
               rivi.getHyvaksymiskirjeLahetetty() == null
                   ? ""
-                  : ErillishakuDataRivi.LAHETETTYFORMAT.print(
-                      rivi.getHyvaksymiskirjeLahetetty().getTime())));
+                  : ErillishakuDataRivi.LAHETETTYFORMAT.format(
+                      LocalDateTime.ofInstant(
+                          rivi.getHyvaksymiskirjeLahetetty().toInstant(),
+                          ZoneId.of("Europe/Helsinki")))));
       a.add(ErillishakuDataRivi.vastaanottoTila(tyyppi, rivi.getVastaanottoTila()));
       a.add(ErillishakuDataRivi.ilmoittautumisTila(rivi.getIlmoittautumisTila()));
       if (tyyppi == Hakutyyppi.KORKEAKOULU) {

@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.valintojentoteuttaminen;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ValintojenToteuttaminenServiceTest {
 
@@ -47,7 +47,7 @@ public class ValintojenToteuttaminenServiceTest {
   private static final String HAKUKOHDE_OID_2 = "123.123.123.222";
   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
-  @Before
+  @BeforeEach
   public void setUp() throws ParseException {
     Date varasijatayttoPaattyy = dateFormat.parse("31.01.2020 00:00");
     HakukohdeKoosteTietoDTO hakukohdeKooste =
