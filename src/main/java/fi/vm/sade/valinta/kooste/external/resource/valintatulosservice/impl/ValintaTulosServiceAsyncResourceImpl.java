@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -39,8 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.apache.commons.io.IOUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -64,8 +63,8 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return DateDeserializer.gsonBuilder()
         .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonSerializer())
         .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeJsonDeserializer())
-        .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonDeserializer())
-        .registerTypeAdapter(DateTime.class, new VtsDateTimeJsonSerializer())
+        .registerTypeAdapter(ZonedDateTime.class, new VtsZonedDateTimeJsonDeserializer())
+        .registerTypeAdapter(ZonedDateTime.class, new VtsZonedDateTimeJsonSerializer())
         .create();
   }
 
@@ -365,24 +364,25 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     }
   }
 
-  private static class VtsDateTimeJsonDeserializer implements JsonDeserializer<DateTime> {
+  private static class VtsZonedDateTimeJsonDeserializer implements JsonDeserializer<ZonedDateTime> {
     @Override
-    public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public ZonedDateTime deserialize(
+        JsonElement json, Type typeOfT, JsonDeserializationContext context)
         throws JsonParseException {
       String dateAsString = json.getAsString();
       try {
-        return DateTime.parse(dateAsString, valintaTulosServiceCompatibleFormatter);
-      } catch (IllegalArgumentException iae) {
-        return DateTime.parse(dateAsString, ISODateTimeFormat.dateTime());
+        return ZonedDateTime.parse(dateAsString, valintaTulosServiceCompatibleFormatter);
+      } catch (java.time.format.DateTimeParseException e) {
+        return ZonedDateTime.parse(dateAsString, DateTimeFormatter.ISO_DATE_TIME);
       }
     }
   }
 
-  private static class VtsDateTimeJsonSerializer implements JsonSerializer<DateTime> {
+  private static class VtsZonedDateTimeJsonSerializer implements JsonSerializer<ZonedDateTime> {
     @Override
     public JsonElement serialize(
-        DateTime dateTime, Type type, JsonSerializationContext jsonSerializationContext) {
-      return new JsonPrimitive(ISODateTimeFormat.dateTime().print(dateTime));
+        ZonedDateTime dateTime, Type type, JsonSerializationContext jsonSerializationContext) {
+      return new JsonPrimitive(dateTime.format(DateTimeFormatter.ISO_DATE_TIME));
     }
   }
 }

@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,7 +47,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.StreamUtils;
@@ -76,7 +77,7 @@ public class ValintalaskennanTulosExcelTest {
   private final Haku haku =
       new Haku("hakuoid", map("fi", "Haku 1"), new HashSet<>(), null, null, null, null, null, null);
 
-  private final DateTime nyt = DateTime.now();
+  private final Date nyt = new Date();
 
   @Test
   public void sheetNames() {
@@ -95,13 +96,13 @@ public class ValintalaskennanTulosExcelTest {
             asList(
                 valinnanvaihe(
                     1,
-                    nyt.toDate(),
+                    nyt,
                     asList(
                         setName.apply(valintatapajono(1, jonosijat())),
                         setName.apply(valintatapajono(2, Collections.emptyList())))),
                 valinnanvaihe(
                     2,
-                    nyt.minusMonths(12).toDate(),
+                    Date.from(nyt.toInstant().minus(365, ChronoUnit.DAYS)),
                     Collections.singletonList(
                         setName.apply(valintatapajono(1, Collections.emptyList()))))),
             hakemukset());
@@ -127,13 +128,13 @@ public class ValintalaskennanTulosExcelTest {
             asList(
                 valinnanvaihe(
                     1,
-                    nyt.toDate(),
+                    nyt,
                     asList(
                         valintatapajono(1, jonosijat()),
                         valintatapajono(2, Collections.emptyList()))),
                 valinnanvaihe(
                     2,
-                    nyt.minusMonths(12).toDate(),
+                    Date.from(nyt.toInstant().minus(365, ChronoUnit.DAYS)),
                     Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
             hakemukset());
 
@@ -143,9 +144,7 @@ public class ValintalaskennanTulosExcelTest {
             asList("Tarjoaja", "Tarjoaja 1"),
             asList("Hakukohde", "Hakukohde 1"),
             asList("Vaihe", "Vaihe 1"),
-            asList(
-                "Päivämäärä",
-                ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
+            asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt)), // "01.01.1970 02.00"
             asList("Jono", "Erittäin pitkä valintatapajonon nimi 1"),
             Collections.emptyList(),
             asList(
@@ -199,13 +198,13 @@ public class ValintalaskennanTulosExcelTest {
             asList(
                 valinnanvaihe(
                     1,
-                    nyt.toDate(),
+                    nyt,
                     asList(
                         valintatapajono(1, ataruJonosijat()),
                         valintatapajono(2, Collections.emptyList()))),
                 valinnanvaihe(
                     2,
-                    nyt.minusMonths(12).toDate(),
+                    Date.from(nyt.toInstant().minus(365, ChronoUnit.DAYS)),
                     Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
             Collections.singletonList(
                 MockAtaruAsyncResource.getAtaruHakemusWrapper(
@@ -217,9 +216,7 @@ public class ValintalaskennanTulosExcelTest {
             asList("Tarjoaja", "Tarjoaja 1"),
             asList("Hakukohde", "Hakukohde 1"),
             asList("Vaihe", "Vaihe 1"),
-            asList(
-                "Päivämäärä",
-                ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
+            asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt)), // "01.01.1970 02.00"
             asList("Jono", "Erittäin pitkä valintatapajonon nimi 1"),
             Collections.emptyList(),
             asList(
@@ -271,13 +268,13 @@ public class ValintalaskennanTulosExcelTest {
             asList(
                 valinnanvaihe(
                     1,
-                    nyt.toDate(),
+                    nyt,
                     asList(
                         valintatapajono(1, ataruJonosijat()),
                         valintatapajono(2, Collections.emptyList()))),
                 valinnanvaihe(
                     2,
-                    nyt.minusMonths(12).toDate(),
+                    Date.from(nyt.toInstant().minus(365, ChronoUnit.DAYS)),
                     Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
             Collections.singletonList(
                 MockAtaruAsyncResource.getAtaruHakemusWrapper(
@@ -289,9 +286,7 @@ public class ValintalaskennanTulosExcelTest {
             asList("Tarjoaja", "Tarjoaja 1"),
             asList("Hakukohde", "Hakukohde 1"),
             asList("Vaihe", "Vaihe 1"),
-            asList(
-                "Päivämäärä",
-                ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
+            asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt)), // "01.01.1970 02.00"
             asList("Jono", "Erittäin pitkä valintatapajonon nimi 1"),
             Collections.emptyList(),
             asList(
@@ -341,7 +336,7 @@ public class ValintalaskennanTulosExcelTest {
             Collections.singletonList(
                 valinnanvaihe(
                     1,
-                    nyt.toDate(),
+                    nyt,
                     Collections.singletonList(
                         valintatapajono(1, ataruJonosijatJoissaOnEriSarakkeita())))),
             asList(
@@ -356,9 +351,7 @@ public class ValintalaskennanTulosExcelTest {
             asList("Tarjoaja", "Tarjoaja 1"),
             asList("Hakukohde", "Hakukohde 1"),
             asList("Vaihe", "Vaihe 1"),
-            asList(
-                "Päivämäärä",
-                ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())), // "01.01.1970 02.00"
+            asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt)), // "01.01.1970 02.00"
             asList("Jono", "Erittäin pitkä valintatapajonon nimi 1"),
             Collections.emptyList(),
             asList(
@@ -427,13 +420,13 @@ public class ValintalaskennanTulosExcelTest {
             asList(
                 valinnanvaihe(
                     1,
-                    nyt.toDate(),
+                    nyt,
                     asList(
                         valintatapajono(1, jonosijat()),
                         valintatapajono(2, Collections.emptyList()))),
                 valinnanvaihe(
                     2,
-                    nyt.minusMonths(12).toDate(),
+                    Date.from(nyt.toInstant().minus(365, ChronoUnit.DAYS)),
                     Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
             hakemukset());
 
@@ -443,7 +436,7 @@ public class ValintalaskennanTulosExcelTest {
             asList("Tarjoaja", "Tarjoaja 1"),
             asList("Hakukohde", "Hakukohde 1"),
             asList("Vaihe", "Vaihe 1"),
-            asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt.toDate())),
+            asList("Päivämäärä", ExcelExportUtil.DATE_FORMAT.format(nyt)),
             asList("Jono", "Erittäin pitkä valintatapajonon nimi 2"),
             Collections.emptyList(),
             Collections.singletonList("Jonolle ei ole valintalaskennan tuloksia")),
@@ -500,13 +493,13 @@ public class ValintalaskennanTulosExcelTest {
                 asList(
                     valinnanvaihe(
                         1,
-                        nyt.toDate(),
+                        nyt,
                         asList(
                             valintatapajono(1, jonosijatToisellaEiHakemusta),
                             valintatapajono(2, Collections.emptyList()))),
                     valinnanvaihe(
                         2,
-                        nyt.minusMonths(12).toDate(),
+                        Date.from(nyt.toInstant().minus(365, ChronoUnit.DAYS)),
                         Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
                 hakemukset()));
   }
@@ -523,13 +516,13 @@ public class ValintalaskennanTulosExcelTest {
             asList(
                 valinnanvaihe(
                     1,
-                    nyt.toDate(),
+                    nyt,
                     asList(
                         valintatapajono(1, jonosijat()),
                         valintatapajono(2, Collections.emptyList()))),
                 valinnanvaihe(
                     2,
-                    nyt.minusMonths(12).toDate(),
+                    Date.from(nyt.toInstant().minus(365, ChronoUnit.DAYS)),
                     Collections.singletonList(valintatapajono(1, Collections.emptyList())))),
             hakemukset());
 
@@ -600,8 +593,8 @@ public class ValintalaskennanTulosExcelTest {
         Collections.emptyList(),
         2,
         10,
-        new DateTime().plusDays(1).toDate(),
-        new DateTime().plusDays(2).toDate(),
+        Date.from(Instant.now().plus(1, ChronoUnit.DAYS)),
+        Date.from(Instant.now().plus(2, ChronoUnit.DAYS)),
         "tayttojono",
         100L);
   }
