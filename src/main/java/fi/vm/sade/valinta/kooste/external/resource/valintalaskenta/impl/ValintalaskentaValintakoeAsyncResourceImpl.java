@@ -47,7 +47,7 @@ public class ValintalaskentaValintakoeAsyncResourceImpl
         new TypeToken<List<ValintakoeOsallistuminenDTO>>() {},
         hakukohdeOids,
         Collections.emptyMap(),
-        5 * 60 * 1000);
+        20 * 60 * 1000);
   }
 
   @Override
