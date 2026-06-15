@@ -32,6 +32,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +46,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.util.IOUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -540,7 +541,7 @@ public class PistesyottoResource {
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 ByteArrayOutputStream xlsx = readFileToBytearray(request.getInputStream());
                 final String uuid = UUID.randomUUID().toString();
-                Long expirationTime = DateTime.now().plusDays(7).toDate().getTime();
+                Long expirationTime = Instant.now().plus(7, ChronoUnit.DAYS).toEpochMilli();
                 List<String> tags = asList();
                 dokumenttiAsyncResource
                     .tallenna(

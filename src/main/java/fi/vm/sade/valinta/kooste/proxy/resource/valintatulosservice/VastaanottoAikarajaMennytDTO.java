@@ -2,14 +2,14 @@ package fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VastaanottoAikarajaMennytDTO {
   private String hakemusOid;
   private boolean mennyt;
-  private DateTime vastaanottoDeadline;
+  private ZonedDateTime vastaanottoDeadline;
 
   public String getHakemusOid() {
     return hakemusOid;
@@ -27,11 +27,11 @@ public class VastaanottoAikarajaMennytDTO {
     this.mennyt = mennyt;
   }
 
-  public DateTime getVastaanottoDeadline() {
+  public ZonedDateTime getVastaanottoDeadline() {
     return vastaanottoDeadline;
   }
 
-  public void setVastaanottoDeadline(DateTime vastaanottoDeadline) {
+  public void setVastaanottoDeadline(ZonedDateTime vastaanottoDeadline) {
     this.vastaanottoDeadline = vastaanottoDeadline;
   }
 }

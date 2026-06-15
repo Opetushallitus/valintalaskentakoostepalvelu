@@ -16,12 +16,13 @@ import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import io.reactivex.Observable;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +104,6 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
   }
 
   protected Date defaultExpirationDate() {
-    return DateTime.now().plusHours(168).toDate();
+    return Date.from(Instant.now().plus(168, ChronoUnit.HOURS));
   }
 }

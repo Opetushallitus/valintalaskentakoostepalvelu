@@ -23,7 +23,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import org.junit.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -63,7 +64,7 @@ public class TarjontaAsyncResourceImplTest {
         }
       };
 
-  @Before
+  @BeforeEach
   public void init() throws IOException {
     ReflectionTestUtils.setField(tarjontaAsyncResource, "urlConfiguration", urlConfiguration);
     setMocks();

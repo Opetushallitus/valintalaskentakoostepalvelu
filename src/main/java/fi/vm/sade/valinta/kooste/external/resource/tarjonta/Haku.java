@@ -2,10 +2,9 @@ package fi.vm.sade.valinta.kooste.external.resource.tarjonta;
 
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.KoutaHaku;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 public class Haku {
   public final String oid;
@@ -54,7 +53,7 @@ public class Haku {
 
   public Haku(KoutaHaku dto) {
 
-    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss");
+    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     this.oid = dto.oid;
     this.nimi = new HashMap<>();
@@ -69,7 +68,7 @@ public class Haku {
               .map(kh -> Arrays.asList(kh.alkaa, kh.paattyy))
               .flatMap(Collection::stream)
               .filter(Objects::nonNull)
-              .map(aikaleima -> DateTime.parse(aikaleima, fmt).getYear())
+              .map(aikaleima -> LocalDateTime.parse(aikaleima, fmt).getYear())
               .mapToInt(v -> v)
               .max();
       if (tuorein.isPresent()) {
