@@ -10,6 +10,8 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritu
 import fi.vm.sade.valinta.kooste.util.sure.ArvosanaToAvainArvoDTOConverter;
 import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.HakemusDTO;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +19,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +79,7 @@ public class OppijaToAvainArvoDTOConverter {
 
   public static Stream<SuoritusJaArvosanat> removeLaskennanAlkamisenJalkeenMyonnetytArvosanat(
       Stream<SuoritusJaArvosanat> filtteroimattomat, ParametritDTO parametritDTO) {
-    Optional<DateTime> date = valintalaskennanStartDate(parametritDTO);
+    Optional<LocalDate> date = valintalaskennanStartDate(parametritDTO);
     if (date.isPresent()) {
       return filtteroimattomat.map(
           s -> {
@@ -130,10 +131,10 @@ public class OppijaToAvainArvoDTOConverter {
     };
   }
 
-  private static Optional<DateTime> valintalaskennanStartDate(ParametritDTO parametritDTO) {
+  private static Optional<LocalDate> valintalaskennanStartDate(ParametritDTO parametritDTO) {
     return ofNullable(parametritDTO)
         .flatMap(parametrit -> ofNullable(parametrit.getPH_VLS()))
         .flatMap(parametri -> ofNullable(parametri.getDateStart()))
-        .map(DateTime::new);
+        .map(date -> date.toInstant().atZone(ZoneId.of("Europe/Helsinki")).toLocalDate());
   }
 }

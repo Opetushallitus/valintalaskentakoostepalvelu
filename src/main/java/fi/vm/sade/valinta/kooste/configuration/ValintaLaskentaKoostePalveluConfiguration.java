@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.configuration;
 
-import com.fasterxml.jackson.datatype.joda.JodaModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fi.vm.sade.valinta.dokumenttipalvelu.Dokumenttipalvelu;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
@@ -43,7 +43,7 @@ public class ValintaLaskentaKoostePalveluConfiguration {
   }
 
   @Bean
-  public com.fasterxml.jackson.databind.Module jodaModule() {
-    return new JodaModule();
+  public com.fasterxml.jackson.databind.Module javaTimeModule() {
+    return new JavaTimeModule();
   }
 }

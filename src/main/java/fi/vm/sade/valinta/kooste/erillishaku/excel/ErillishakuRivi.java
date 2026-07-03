@@ -454,7 +454,7 @@ public class ErillishakuRivi {
       }
 
       LocalDate localDate = LocalDate.parse(s, SYNTYMAAIKAFORMAT);
-      return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+      return Date.from(localDate.atStartOfDay().atZone(ZoneId.of("Europe/Helsinki")).toInstant());
     } catch (Exception e) {
       LOG.error("Syntymäaikaa {} ei voitu parsia muodossa dd.MM.yyyy", syntymaAika);
       return null;

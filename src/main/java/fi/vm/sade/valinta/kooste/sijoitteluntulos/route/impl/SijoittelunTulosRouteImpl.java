@@ -48,6 +48,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,7 +65,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,7 @@ public class SijoittelunTulosRouteImpl
   private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosRouteImpl.class);
 
   private final long getTimeToLive() {
-    return DateTime.now().plusHours(720).toDate().getTime();
+    return Instant.now().plus(720, ChronoUnit.HOURS).toEpochMilli();
   }
 
   private final boolean pakkaaTiedostotTarriin;
