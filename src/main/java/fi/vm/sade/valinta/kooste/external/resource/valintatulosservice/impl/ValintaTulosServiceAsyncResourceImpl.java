@@ -27,7 +27,6 @@ import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoA
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -39,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import org.apache.commons.io.IOUtils;
+import org.asynchttpclient.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -71,20 +70,13 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   @Override
   public Observable<String> getHakemuksenValintatulosAsString(String hakuOid, String hakemusOid) {
     return Observable.fromFuture(
-        this.client
-            .getResponse(
+        this.casClient
+            .get(
                 this.urlConfiguration.url(
                     "valinta-tulos-service.haku.hakuoid.hakemus", hakuOid, hakemusOid),
-                Duration.ofMinutes(30l),
-                builder -> builder)
-            .thenApply(
-                response -> {
-                  try {
-                    return IOUtils.toString(response.body());
-                  } catch (IOException e) {
-                    throw new RuntimeException(e);
-                  }
-                }));
+                Collections.emptyMap(),
+                30 * 60 * 1000)
+            .thenApply(Response::getResponseBody));
   }
 
   @Override
