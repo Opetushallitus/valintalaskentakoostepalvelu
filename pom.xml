@@ -26,7 +26,7 @@
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>10.1.0-SNAPSHOT</sijoittelu.version>
         <valinta-sharedutils.version>8.3-SNAPSHOT</valinta-sharedutils.version>
-        <valintaperusteet.version>8.2-SNAPSHOT</valintaperusteet.version>
+        <valintaperusteet.version>8.2-OY-5771-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>8.0-SNAPSHOT</valintalaskenta.version>
     </properties>
 
@@ -98,7 +98,7 @@
             <dependency>
                 <groupId>opiskelijavalinnat-utils</groupId>
                 <artifactId>java-cas</artifactId>
-                <version>2.3.0-SNAPSHOT</version>
+                <version>2.3.0-OY-5723-SNAPSHOT</version>
                 <exclusions>
                     <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
