@@ -10,13 +10,6 @@ host.cas={{host_cas}}
 host.ilb={{host_ilb}}
 host.alb={{host_alb}}
 host.virkailija={{host_virkailija}}
-kela.ftp.username={{kela_ftp_username}}
-kela.ftp.password={{kela_ftp_password}}
-kela.ftp.parameters={{kela_ftp_parameters}}
-kela.ftp.host={{kela_ftp_host}}
-kela.ftp.port={{kela_ftp_port}}
-kela.ftp.protocol={{kela_ftp_protocol}}
-kela.ftp.path={{kela_ftp_path}}
 valintalaskentakoostepalvelu.app.username.to.haku={{valintalaskentakoostepalvelu_app_username_to_haku}}
 valintalaskentakoostepalvelu.app.password.to.haku={{valintalaskentakoostepalvelu_app_password_to_haku}}
 valintalaskentakoostepalvelu.app.username.to.hakukohderyhmapalvelu={{valintalaskentakoostepalvelu_app_username_to_hakukohderyhmapalvelu}}
@@ -112,9 +105,6 @@ valintalaskentakoostepalvelu.seuranta.rest.url=https://${host.virkailija}/seuran
 
 #ORGANISAATIO
 valintalaskentakoostepalvelu.organisaatio-service-url=https://${host.virkailija}/organisaatio-service
-
-#KELARESURSSI:
-valintalaskentakoostepalvelu.rajapinnat.kela-service.rest.url=https://${host.virkailija}/kela-service/resources/
 
 #SECURELINK:
 host.haku={{host_haku}}
