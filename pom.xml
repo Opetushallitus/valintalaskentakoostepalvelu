@@ -17,7 +17,6 @@
     <name>Valintalaskentakoostepalvelu</name>
 
     <properties>
-        <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
         <mockito.version>5.21.0</mockito.version>
         <!-- java-cas 2.3.0 edellyttää netty 4.2 -linjaa (netty-codec-base, netty-codec-compression) -->
@@ -118,11 +117,6 @@
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>fi.vm.sade.rajapinnat</groupId>
-                <artifactId>kela-api</artifactId>
-                <version>${kela.version}</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.tarjonta</groupId>
@@ -540,10 +534,6 @@
         <dependency>
             <groupId>fi.vm.sade.java-utils</groupId>
             <artifactId>opintopolku-cas-servlet-filter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.rajapinnat</groupId>
-            <artifactId>kela-api</artifactId>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade</groupId>
