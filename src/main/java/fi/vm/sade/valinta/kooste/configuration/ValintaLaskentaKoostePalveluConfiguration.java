@@ -16,7 +16,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @PropertySource(
     value = {
-      "classpath:META-INF/kela.properties",
       "classpath:META-INF/valintalaskentakoostepalvelu.properties",
       "file:///${user.home:''}/oph-configuration/common.properties",
       "file:///${user.home:''}/oph-configuration/valinta.properties",
