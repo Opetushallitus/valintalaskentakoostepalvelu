@@ -92,7 +92,7 @@
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>opintopolku-user-details-service</artifactId>
-                <version>0.5.3-SNAPSHOT</version>
+                <version>0.5.4-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>opiskelijavalinnat-utils</groupId>
@@ -109,7 +109,7 @@
             <dependency>
                 <groupId>fi.vm.sade.java-utils</groupId>
                 <artifactId>opintopolku-cas-servlet-filter</artifactId>
-                <version>1.0.1-SNAPSHOT</version>
+                <version>1.0.2-SNAPSHOT</version>
                 <exclusions>
                     <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
