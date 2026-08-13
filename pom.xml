@@ -550,21 +550,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>fi.vm.sade.valintaperusteet</groupId>
-            <artifactId>seuranta-api</artifactId>
-            <version>5.4-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.cxf</groupId>
-                    <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>joda-time</groupId>
-                    <artifactId>joda-time</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>fi.vm.sade.organisaatio</groupId>
             <artifactId>organisaatio-api</artifactId>
         </dependency>
