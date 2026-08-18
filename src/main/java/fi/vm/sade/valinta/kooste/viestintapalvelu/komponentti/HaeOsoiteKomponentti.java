@@ -2,11 +2,11 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import fi.vm.sade.koodisto.service.types.common.KieliType;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
+import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Maakoodi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
@@ -32,9 +32,12 @@ public class HaeOsoiteKomponentti {
     this.koodiService = koodiService;
   }
 
+  /**
+   * @param preferoitutyyppi FI, SV tai EN
+   */
   public Osoite haeOsoiteYhteystiedoista(
       Yhteystieto yhteystiedot,
-      final KieliType preferoitutyyppi,
+      String preferoitutyyppi,
       String organisaationimi,
       String email,
       String numero) {
@@ -78,7 +81,7 @@ public class HaeOsoiteKomponentti {
       maakoodi = new Maakoodi(StringUtils.EMPTY, "FI");
     }
     String country = null;
-    if (KieliType.EN.equals(preferoitutyyppi)) {
+    if (KieliUtil.ENGLANTI.equals(preferoitutyyppi)) {
       country = "FINLAND";
     }
     return new OsoiteBuilder()
@@ -109,7 +112,10 @@ public class HaeOsoiteKomponentti {
     return null;
   }
 
-  private static String getKuvaus(List<Metadata> meta, KieliType kieli) {
+  /**
+   * @param kieli FI, SV tai EN
+   */
+  private static String getKuvaus(List<Metadata> meta, String kieli) {
     for (Metadata data : meta) {
       if (kieli.equals(data.getKieli())) {
         return data.getKuvaus();
