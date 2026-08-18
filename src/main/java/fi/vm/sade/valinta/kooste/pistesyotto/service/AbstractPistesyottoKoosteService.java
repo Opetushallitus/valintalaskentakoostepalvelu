@@ -5,7 +5,7 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
 import static org.apache.commons.collections.ListUtils.union;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.Changes;
