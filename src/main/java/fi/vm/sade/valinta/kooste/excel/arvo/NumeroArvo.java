@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.excel.arvo;
 import fi.vm.sade.valinta.kooste.excel.ArvoTyyppi;
 import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.Numero;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class NumeroArvo extends Arvo {
   private final Number numero;
