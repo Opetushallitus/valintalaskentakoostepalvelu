@@ -137,18 +137,6 @@
                 <version>5.4-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>fi.vm.sade.organisaatio</groupId>
-                <artifactId>organisaatio-api</artifactId>
-                <version>2023.09.111204.RELEASE</version>
-                <exclusions>
-                    <!-- tätä ei tarvita, voi häiritä uudemman springdocin toimintaa -->
-                    <exclusion>
-                        <groupId>org.springdoc</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>fi.vm.sade.valintaperusteet</groupId>
                 <artifactId>valintaperusteet-api</artifactId>
                 <version>${valintaperusteet.version}</version>
@@ -526,10 +514,6 @@
             <groupId>fi.vm.sade.tarjonta</groupId>
             <artifactId>tarjonta-api</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>fi.vm.sade.organisaatio</groupId>
-            <artifactId>organisaatio-api</artifactId>
         </dependency>
         <dependency>
             <groupId>fi.vm.sade.valintaperusteet</groupId>
