@@ -1,12 +1,11 @@
 package fi.vm.sade.valinta.kooste.viestintapalvelu.komponentti;
 
 import com.google.common.collect.Sets;
-import fi.vm.sade.koodisto.service.types.common.KieliType;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Metadata;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Yhteystieto;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
+import fi.vm.sade.valinta.kooste.util.KoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import java.util.Arrays;
@@ -107,7 +106,7 @@ public class LueHakijapalvelunOsoite {
       if (!postit.isEmpty()) {
         return osoiteKomponentti.haeOsoiteYhteystiedoista(
             postit.iterator().next(),
-            KieliType.EN,
+            KieliUtil.ENGLANTI,
             organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_en#1"),
             email,
             numero);
@@ -115,7 +114,7 @@ public class LueHakijapalvelunOsoite {
       if (!englanninkielisetYhteystiedot.isEmpty()) {
         return osoiteKomponentti.haeOsoiteYhteystiedoista(
             englanninkielisetYhteystiedot.iterator().next(),
-            KieliType.EN,
+            KieliUtil.ENGLANTI,
             organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_en#1"),
             email,
             numero);
@@ -141,7 +140,7 @@ public class LueHakijapalvelunOsoite {
       if (!postit.isEmpty()) {
         return osoiteKomponentti.haeOsoiteYhteystiedoista(
             postit.iterator().next(),
-            KieliType.SV,
+            KieliUtil.RUOTSI,
             organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_sv#1"),
             email,
             numero);
@@ -149,7 +148,7 @@ public class LueHakijapalvelunOsoite {
       if (!ruotsinkielisetYhteystiedot.isEmpty()) {
         return osoiteKomponentti.haeOsoiteYhteystiedoista(
             ruotsinkielisetYhteystiedot.iterator().next(),
-            KieliType.SV,
+            KieliUtil.RUOTSI,
             organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_sv#1"),
             email,
             numero);
@@ -173,7 +172,7 @@ public class LueHakijapalvelunOsoite {
     if (!suomenkielisetPostit.isEmpty()) {
       return osoiteKomponentti.haeOsoiteYhteystiedoista(
           suomenkielisetPostit.iterator().next(),
-          KieliType.FI,
+          KieliUtil.SUOMI,
           organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_fi#1"),
           email,
           numero);
@@ -183,7 +182,7 @@ public class LueHakijapalvelunOsoite {
     if (!postit.isEmpty()) {
       return osoiteKomponentti.haeOsoiteYhteystiedoista(
           postit.iterator().next(),
-          KieliType.FI,
+          KieliUtil.SUOMI,
           organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_fi#1"),
           email,
           numero);
@@ -191,7 +190,7 @@ public class LueHakijapalvelunOsoite {
     if (!yhteystiedot.isEmpty()) {
       return osoiteKomponentti.haeOsoiteYhteystiedoista(
           yhteystiedot.iterator().next(),
-          KieliType.FI,
+          KieliUtil.SUOMI,
           organisaatio.getMetadata().getHakutoimistonNimi().get("kieli_fi#1"),
           email,
           numero);
@@ -224,21 +223,18 @@ public class LueHakijapalvelunOsoite {
   private static Predicate<Yhteystieto> suomenkieliset() {
     return yhteystiedot ->
         KieliUtil.SUOMI.equals(
-            KieliUtil.normalisoiKielikoodi(
-                TarjontaUriToKoodistoUtil.cleanUri(yhteystiedot.getKieli())));
+            KieliUtil.normalisoiKielikoodi(KoodistoUtil.cleanUri(yhteystiedot.getKieli())));
   }
 
   private static Predicate<Yhteystieto> ruotsinkieliset() {
     return yhteystiedot ->
         KieliUtil.RUOTSI.equals(
-            KieliUtil.normalisoiKielikoodi(
-                TarjontaUriToKoodistoUtil.cleanUri(yhteystiedot.getKieli())));
+            KieliUtil.normalisoiKielikoodi(KoodistoUtil.cleanUri(yhteystiedot.getKieli())));
   }
 
   private static Predicate<Yhteystieto> englanninkieliset() {
     return yhteystiedot ->
         KieliUtil.ENGLANTI.equals(
-            KieliUtil.normalisoiKielikoodi(
-                TarjontaUriToKoodistoUtil.cleanUri(yhteystiedot.getKieli())));
+            KieliUtil.normalisoiKielikoodi(KoodistoUtil.cleanUri(yhteystiedot.getKieli())));
   }
 }
