@@ -72,8 +72,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractPistesyottoKoosteService {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
-  public static final String OPPILAITOS =
-      fi.vm.sade.organisaatio.api.model.types.OrganisaatioTyyppi.OPPILAITOS.name().toUpperCase();
+  public static final String OPPILAITOS = "OPPILAITOS";
 
   public static String KIELIKOE_SUORITUS_TILA = "VALMIS";
   public static String KIELIKOE_ARVOSANA_AINE = "kielikoe";

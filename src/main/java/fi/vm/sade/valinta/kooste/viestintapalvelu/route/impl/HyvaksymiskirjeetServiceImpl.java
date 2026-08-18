@@ -25,7 +25,6 @@ import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Tunniste;
-import fi.vm.sade.valinta.kooste.viestintapalvelu.Hakijapalvelu;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.HyvaksymiskirjeDTO;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.JalkiohjauskirjeDTO;
@@ -953,33 +952,6 @@ public class HyvaksymiskirjeetServiceImpl implements HyvaksymiskirjeetService {
                                 String.format(
                                     "Ei %s tai %s templateDetailia hakukohteelle %s",
                                     VAKIOTEMPLATE, VAKIODETAIL, hakukohdeOid)))));
-  }
-
-  private CompletableFuture<Map<String, Optional<Osoite>>> hakukohteidenHakutoimistojenOsoitteet(
-      Map<String, MetaHakukohde> hakukohteet, String asiointikieli) {
-    return CompletableFutureUtil.sequence(
-            hakukohteet.values().stream()
-                .map(MetaHakukohde::getTarjoajaOid)
-                .distinct()
-                .collect(
-                    Collectors.toMap(
-                        tarjoajaOid -> tarjoajaOid, organisaatioAsyncResource::haeHakutoimisto)))
-        .thenApplyAsync(
-            hakutoimistot ->
-                hakukohteet.entrySet().stream()
-                    .collect(
-                        Collectors.toMap(
-                            Map.Entry::getKey,
-                            e -> {
-                              MetaHakukohde hakukohde = e.getValue();
-                              String kieli =
-                                  asiointikieli == null
-                                      ? hakukohde.getHakukohteenKieli()
-                                      : asiointikieli;
-                              return hakutoimistot
-                                  .getOrDefault(hakukohde.getTarjoajaOid(), Optional.empty())
-                                  .flatMap(t -> Hakijapalvelu.osoite(t, kieli));
-                            })));
   }
 
   private CompletableFuture<String> letterBatchToViestintapalvelu(
