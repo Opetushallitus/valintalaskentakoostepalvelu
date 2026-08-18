@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.excel;
 
 import com.google.common.collect.Lists;
 import java.util.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Rivi {
   private final List<Solu> solut;
