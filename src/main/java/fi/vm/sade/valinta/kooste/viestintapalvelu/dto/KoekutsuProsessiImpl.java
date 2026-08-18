@@ -5,7 +5,7 @@ import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class KoekutsuProsessiImpl extends DokumenttiProsessi implements KirjeProsessi {
 

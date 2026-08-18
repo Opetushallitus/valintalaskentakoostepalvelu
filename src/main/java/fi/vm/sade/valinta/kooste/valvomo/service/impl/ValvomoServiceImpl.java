@@ -16,7 +16,7 @@ import java.util.Iterator;
 import org.apache.commons.collections.Buffer;
 import org.apache.commons.collections.BufferUtils;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
-import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

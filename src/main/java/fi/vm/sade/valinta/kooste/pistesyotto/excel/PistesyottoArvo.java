@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class PistesyottoArvo {
   private final String arvo;
