@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu;
 
 import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
-import fi.vm.sade.valinta.kooste.util.TarjontaUriToKoodistoUtil;
+import fi.vm.sade.valinta.kooste.util.KoodistoUtil;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Osoite;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.OsoiteBuilder;
 import java.util.Map;
@@ -79,6 +79,6 @@ public class Hakijapalvelu {
   }
 
   private static String normalizeLang(String lang) {
-    return KieliUtil.normalisoiKielikoodi(TarjontaUriToKoodistoUtil.cleanUri(lang));
+    return KieliUtil.normalisoiKielikoodi(KoodistoUtil.cleanUri(lang));
   }
 }
