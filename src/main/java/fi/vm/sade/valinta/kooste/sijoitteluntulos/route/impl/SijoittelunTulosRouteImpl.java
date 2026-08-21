@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.sijoitteluntulos.route.impl;
 
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.DokumenttiUtils.defaultExpirationDate;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.DokumenttiUtils.generateId;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -48,8 +47,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -77,10 +74,6 @@ import org.springframework.util.StopWatch;
 public class SijoittelunTulosRouteImpl
     implements SijoittelunTulosTaulukkolaskentaRoute, SijoittelunTulosOsoitetarratRoute {
   private static final Logger LOG = LoggerFactory.getLogger(SijoittelunTulosRouteImpl.class);
-
-  private final long getTimeToLive() {
-    return Instant.now().plus(720, ChronoUnit.HOURS).toEpochMilli();
-  }
 
   private final boolean pakkaaTiedostotTarriin;
   private final SijoittelunTulosExcelKomponentti sijoittelunTulosExcel;
@@ -238,7 +231,6 @@ public class SijoittelunTulosRouteImpl
                 .tallenna(
                     id,
                     "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
-                    getTimeToLive(),
                     Stream.concat(prosessi.getTags().stream(), Stream.of(hakukohdeOid)).toList(),
                     "application/vnd.ms-excel",
                     input)
@@ -399,7 +391,6 @@ public class SijoittelunTulosRouteImpl
               .tallenna(
                   id,
                   "osoitetarrat_" + hakukohdeOid + ".pdf",
-                  getTimeToLive(),
                   Stream.concat(prosessi.getTags().stream(), Stream.of(hakukohdeOid)).toList(),
                   "application/pdf",
                   input)
@@ -437,12 +428,7 @@ public class SijoittelunTulosRouteImpl
         String id = generateId();
         dokumenttiAsyncResource
             .tallenna(
-                id,
-                "sijoitteluntuloksethaulle.tar",
-                defaultExpirationDate().getTime(),
-                prosessi.getTags(),
-                "application/x-tar",
-                tar)
+                id, "sijoitteluntuloksethaulle.tar", prosessi.getTags(), "application/x-tar", tar)
             .subscribe(
                 ok -> {
                   prosessi.setDokumenttiId(id);

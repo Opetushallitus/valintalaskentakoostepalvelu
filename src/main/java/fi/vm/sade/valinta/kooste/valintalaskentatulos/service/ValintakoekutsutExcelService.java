@@ -23,8 +23,6 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.Teksti;
 import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.HakemusOsallistuminenDTO;
 import io.reactivex.Observable;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -131,14 +129,10 @@ public class ValintakoekutsutExcelService {
                               Optional.ofNullable(hakemusOids).orElse(Collections.emptySet()));
                       prosessi.inkrementoiTehtyjaToita();
                       String id = UUID.randomUUID().toString();
-                      long expirationDate =
-                          Instant.now().plus(168, ChronoUnit.HOURS).toEpochMilli();
-
                       dokumenttiAsyncResource
                           .tallenna(
                               id,
                               "valintakoekutsut.xlsx",
-                              expirationDate,
                               prosessi.getTags(),
                               "application/vnd.ms-excel",
                               filedata)
