@@ -29,8 +29,6 @@ import io.reactivex.Observable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -367,7 +365,6 @@ public class OsoitetarratService {
                       .tallenna(
                           id,
                           "osoitetarrat.pdf",
-                          defaultExpirationDate().getTime(),
                           Stream.concat(prosessi.getTags().stream(), hakukohdeOid.stream())
                               .toList(),
                           "application/pdf",
@@ -406,10 +403,6 @@ public class OsoitetarratService {
     } catch (Throwable t) {
       poikkeuskasittelija.accept(t);
     }
-  }
-
-  private Date defaultExpirationDate() {
-    return Date.from(Instant.now().plus(168, ChronoUnit.HOURS)); // almost a day
   }
 
   private PoikkeusKasittelijaSovitin poikkeuskasittelija(DokumenttiProsessi prosessi) {

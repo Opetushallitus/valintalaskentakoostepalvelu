@@ -5,7 +5,6 @@ import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncRes
 import io.reactivex.Observable;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +38,9 @@ public class DokumenttiAsyncResourceImpl implements DokumenttiAsyncResource {
 
   @Override
   public Observable<ResponseEntity<Void>> tallenna(
-      String id,
-      String filename,
-      Long expirationDate,
-      List<String> tags,
-      String mimeType,
-      InputStream filedata) {
+      String id, String filename, List<String> tags, String mimeType, InputStream filedata) {
     return Observable.fromFuture(
-            dokumenttipalvelu.saveAsync(
-                id, filename, new Date(expirationDate), tags, mimeType, filedata))
+            dokumenttipalvelu.saveAsync(id, filename, tags, mimeType, filedata))
         .map(response -> ResponseEntity.ok().build());
   }
 }
