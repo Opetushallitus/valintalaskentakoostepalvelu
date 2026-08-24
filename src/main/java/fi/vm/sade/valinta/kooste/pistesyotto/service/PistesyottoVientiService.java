@@ -16,10 +16,7 @@ import fi.vm.sade.valinta.kooste.util.PoikkeusKasittelijaSovitin;
 import fi.vm.sade.valinta.kooste.valvomo.dto.Poikkeus;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.DokumenttiProsessi;
 import io.reactivex.Observable;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.tuple.Pair;
@@ -87,7 +84,6 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
                   dokumenttiAsyncResource.tallenna(
                       id,
                       "pistesyotto.xlsx",
-                      defaultExpirationDate().getTime(),
                       prosessi.getTags(),
                       "application/octet-stream",
                       pistesyottoExcel.getExcel().vieXlsx());
@@ -101,9 +97,5 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
               prosessi.setDokumenttiId(idWithResponse.getLeft());
             },
             poikkeuskasittelija);
-  }
-
-  protected Date defaultExpirationDate() {
-    return Date.from(Instant.now().plus(168, ChronoUnit.HOURS));
   }
 }

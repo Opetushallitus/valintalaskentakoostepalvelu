@@ -38,8 +38,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -228,7 +226,6 @@ public class ValintalaskentaExcelResource {
                             return dokumenttiAsyncResource.tallenna(
                                 id,
                                 "sijoitteluntulos_" + hakukohdeOid + ".xlsx",
-                                Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli(),
                                 Arrays.asList("taulukkolaskennat", hakukohdeOid),
                                 "application/vnd.ms-excel",
                                 xls);

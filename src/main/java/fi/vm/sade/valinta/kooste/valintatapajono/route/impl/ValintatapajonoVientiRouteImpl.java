@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.valintatapajono.route.impl;
 
-import static fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.DokumenttiUtils.defaultExpirationDate;
 import static fi.vm.sade.valinta.kooste.viestintapalvelu.route.impl.DokumenttiUtils.generateId;
 
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
@@ -161,11 +160,9 @@ public class ValintatapajonoVientiRouteImpl implements ValintatapajonoVientiRout
     }
     try {
       String id = generateId();
-      Long expirationTime = defaultExpirationDate().getTime();
       List<String> tags = dokumenttiprosessi.getTags();
       dokumenttiAsyncResource
-          .tallenna(
-              id, "valintatapajono.xlsx", expirationTime, tags, "application/octet-stream", xlsx)
+          .tallenna(id, "valintatapajono.xlsx", tags, "application/octet-stream", xlsx)
           .subscribe(
               ok -> {
                 dokumenttiprosessi.setDokumenttiId(id);
