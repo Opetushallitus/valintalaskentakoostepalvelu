@@ -331,7 +331,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     HakijaPaginationObject hp = new HakijaPaginationObject();
     hp.setResults(Collections.singletonList(hakija1));
     hp.setTotalCount(hp.getResults().size());
-    mockToReturnJson(GET, "/valinta-tulos-service/haku/HAKU1/hyvaksytyt", hp);
+    mockToReturnJson(GET, "/valinta-tulos-service/cas/haku/HAKU1/hyvaksytyt", hp);
   }
 
   private void mockMolemmatHyvaksyttyKutsu() {
@@ -354,7 +354,7 @@ public class HyvaksymiskirjeetKokoHaulleServiceE2ETest {
     HakijaPaginationObject hp = new HakijaPaginationObject();
     hp.setResults(Arrays.asList(hakija1, hakija2));
     hp.setTotalCount(hp.getResults().size());
-    mockToReturnJson(GET, "/valinta-tulos-service/haku/HAKU1/hyvaksytyt", hp);
+    mockToReturnJson(GET, "/valinta-tulos-service/cas/haku/HAKU1/hyvaksytyt", hp);
   }
 
   private void mockParams() {
