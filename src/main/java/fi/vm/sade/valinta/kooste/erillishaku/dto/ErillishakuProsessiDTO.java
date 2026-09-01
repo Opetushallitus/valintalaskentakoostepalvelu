@@ -7,7 +7,7 @@ import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.KirjeProsessi;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class ErillishakuProsessiDTO extends DokumenttiProsessi implements KirjeProsessi {
 

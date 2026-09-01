@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 import static fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel.VAKIO_EI_OSALLISTUNUT;
 import static fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel.VAKIO_MERKITSEMATTA;
 import static fi.vm.sade.valinta.kooste.pistesyotto.excel.PistesyottoExcel.VAKIO_OSALLISTUI;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import com.google.common.collect.Maps;
 import java.util.Arrays;

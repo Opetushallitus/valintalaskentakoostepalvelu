@@ -17,7 +17,7 @@ import fi.vm.sade.valintalaskenta.domain.dto.valintatieto.ValintatietoValinnanva
 import java.math.BigDecimal;
 import java.util.*;
 import org.apache.commons.collections.comparators.ComparatorChain;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

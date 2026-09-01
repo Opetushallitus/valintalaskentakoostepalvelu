@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class BooleanDataArvo extends TilaDataArvo {
   private final Map<String, String> konvertteri;

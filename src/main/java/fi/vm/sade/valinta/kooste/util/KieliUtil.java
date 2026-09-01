@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
 import com.google.common.collect.Sets;
-import fi.vm.sade.koodisto.service.types.common.KieliType;
 import java.util.Collection;
 import java.util.Set;
 
@@ -70,20 +69,6 @@ public class KieliUtil {
       return RUOTSI;
     } else {
       return ENGLANTI;
-    }
-  }
-
-  public static KieliType kieliToKieliType(String kieli) {
-    switch (kieli) {
-      case SUOMI:
-        return KieliType.FI;
-      case RUOTSI:
-      case RUOTSI_2:
-        return KieliType.SV;
-      case ENGLANTI:
-        return KieliType.EN;
-      default:
-        return KieliType.FI;
     }
   }
 }
