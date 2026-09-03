@@ -139,13 +139,14 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   @Override
   public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
@@ -184,55 +185,57 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(
       String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<List<Valintatulos>> findValintatuloksetByHakemus(
       String hakuOid, String hakemusOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakemus", hakuOid, hakemusOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(
       String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
     return Observable.fromFuture(
-        this.client.postJson(
+        this.casClient.post(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.myohastyneet.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30l),
+            new com.google.gson.reflect.TypeToken<>() {},
             hakemusOids,
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<VastaanottoAikarajaMennytDTO>>() {}.getType()));
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<List<TilaHakijalleDto>> findTilahakijalle(
       String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids) {
     return Observable.fromFuture(
-        this.client.postJson(
+        this.casClient.post(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.tilahakijalle.haku.hakukohde.valintatapajono",
                 hakuOid,
                 hakukohdeOid,
                 valintatapajonoOid),
-            Duration.ofMinutes(30l),
+            new com.google.gson.reflect.TypeToken<>() {},
             hakemusOids,
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<TilaHakijalleDto>>() {}.getType()));
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
