@@ -153,31 +153,28 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(
       String hakukohdeOid, AuditSession session) {
     return Observable.fromFuture(
-        this.client.postJson(
+        this.casClient.post(
             this.urlConfiguration.url(
-                "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu",
-                "read",
-                hakukohdeOid),
-            Duration.ofMinutes(30l),
-            Map.of("auditSession", session),
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<Lukuvuosimaksu>>() {}.getType()));
+                "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.read"),
+            new com.google.gson.reflect.TypeToken<>() {},
+            Map.of("auditSession", session, "hakukohdeOids", List.of(hakukohdeOid)),
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<String> saveLukuvuosimaksut(
       String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
     return Observable.fromFuture(
-        this.client
-            .postJson(
+        this.casClient
+            .post(
                 this.urlConfiguration.url(
-                    "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu",
-                    "write",
+                    "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.write",
                     hakukohdeOid),
-                Duration.ofMinutes(30l),
+                new com.google.gson.reflect.TypeToken<>() {},
                 Map.of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session),
-                new TypeToken<>() {}.getType(),
-                new TypeToken<Void>() {}.getType())
+                Collections.emptyMap(),
+                30 * 60 * 1000)
             .thenApply(r -> "OK"));
   }
 
