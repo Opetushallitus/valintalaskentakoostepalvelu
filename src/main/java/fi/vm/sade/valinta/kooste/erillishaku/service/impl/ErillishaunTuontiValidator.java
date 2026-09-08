@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 import static com.codepoetics.protonpack.StreamUtils.zipWithIndex;
 import static fi.vm.sade.valinta.kooste.erillishaku.service.impl.ErillishaunTuontiHelper.*;
 import static fi.vm.sade.valinta.kooste.util.HenkilotunnusTarkistusUtil.tarkistaHenkilotunnus;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.sijoittelu.domain.EhdollisenHyvaksymisenEhtoKoodi;
@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class ErillishaunTuontiValidator {

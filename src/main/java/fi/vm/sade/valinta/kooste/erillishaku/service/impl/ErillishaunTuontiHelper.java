@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.erillishaku.service.impl;
 
 import static java.util.Optional.of;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.google.common.collect.Lists;
 import fi.vm.sade.sijoittelu.domain.HakemuksenTila;
@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
