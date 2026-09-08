@@ -539,7 +539,7 @@ public class PistesyottoResource {
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 ByteArrayOutputStream xlsx = readFileToBytearray(request.getInputStream());
                 final String uuid = UUID.randomUUID().toString();
-                List<String> tags = asList();
+                List<String> tags = asList("pistesyotto", "tuonti", hakukohdeOid);
                 dokumenttiAsyncResource
                     .tallenna(
                         uuid,
