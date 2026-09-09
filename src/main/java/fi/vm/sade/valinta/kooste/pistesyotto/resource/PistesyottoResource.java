@@ -453,7 +453,11 @@ public class PistesyottoResource {
             authorityCheck -> {
               if (authorityCheck.test(hakukohdeOid)) {
                 DokumenttiProsessi prosessi =
-                    new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
+                    new DokumenttiProsessi(
+                        "Pistesyöttö",
+                        "vienti",
+                        hakuOid,
+                        asList("pistesyotto", "vienti", hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 excelVientiPool.submit(
                     () -> {

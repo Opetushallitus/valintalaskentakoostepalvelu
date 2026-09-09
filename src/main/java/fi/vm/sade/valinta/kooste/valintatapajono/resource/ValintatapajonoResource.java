@@ -83,7 +83,11 @@ public class ValintatapajonoResource {
     authorityCheckService.checkAuthorizationForHakukohteet(
         List.of(hakukohdeOid), List.of(ROLE_TULOSTENTUONTI));
     DokumenttiProsessi prosessi =
-        new DokumenttiProsessi("Valintatapajono", "vienti", hakuOid, Arrays.asList(hakukohdeOid));
+        new DokumenttiProsessi(
+            "Valintatapajono",
+            "vienti",
+            hakuOid,
+            Arrays.asList("valintatapajono", "vienti", hakukohdeOid));
     valintatapajonoVienti.vie(prosessi, hakuOid, hakukohdeOid, valintatapajonoOid);
     dokumenttiProsessiKomponentti.tuoUusiProsessi(prosessi);
     return prosessi.toProsessiId();
