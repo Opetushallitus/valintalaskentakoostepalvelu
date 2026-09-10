@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -28,7 +27,6 @@ import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
 import java.lang.reflect.Type;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -82,96 +80,99 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   @Override
   public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(
       String hakuOid, String hakukohdeOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
+    return this.casClient
+        .<HakijaPaginationObject>get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
-            Duration.ofMinutes(30l),
-            new TypeToken<HakijaPaginationObject>() {}.getType())
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
+    return this.casClient
+        .<HakijaPaginationObject>get(
             this.urlConfiguration.url("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
-            Duration.ofMinutes(30l),
-            new TypeToken<HakijaPaginationObject>() {}.getType())
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
-    return this.client.getJson(
+    return this.casClient.get(
         this.urlConfiguration.url(
             "valinta-tulos-service.haku.sijoitteluajo.latest.hakemus", hakuOid, hakemusOid),
-        Duration.ofMinutes(30),
-        new TypeToken<HakijaDTO>() {}.getType());
+        new com.google.gson.reflect.TypeToken<>() {},
+        Collections.emptyMap(),
+        30 * 60 * 1000);
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
+    return this.casClient
+        .<HakijaPaginationObject>get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hakijat", hakuOid, hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<HakijaPaginationObject>() {}.getType())
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
+    return this.casClient
+        .<HakijaPaginationObject>get(
             this.urlConfiguration.url("valinta-tulos-service.haku.ilmanhyvaksyntaa", hakuOid),
-            Duration.ofMinutes(30),
-            new TypeToken<HakijaPaginationObject>() {}.getType())
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(
       String hakukohdeOid, AuditSession session) {
     return Observable.fromFuture(
-        this.client.postJson(
+        this.casClient.post(
             this.urlConfiguration.url(
-                "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu",
-                "read",
-                hakukohdeOid),
-            Duration.ofMinutes(30l),
-            Map.of("auditSession", session),
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<Lukuvuosimaksu>>() {}.getType()));
+                "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.read"),
+            new com.google.gson.reflect.TypeToken<>() {},
+            Map.of("auditSession", session, "hakukohdeOids", List.of(hakukohdeOid)),
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<String> saveLukuvuosimaksut(
       String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
     return Observable.fromFuture(
-        this.client
-            .postJson(
+        this.casClient
+            .post(
                 this.urlConfiguration.url(
-                    "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu",
-                    "write",
+                    "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.write",
                     hakukohdeOid),
-                Duration.ofMinutes(30l),
+                new com.google.gson.reflect.TypeToken<>() {},
                 Map.of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session),
-                new TypeToken<>() {}.getType(),
-                new TypeToken<Void>() {}.getType())
+                Collections.emptyMap(),
+                30 * 60 * 1000)
             .thenApply(r -> "OK"));
   }
 
@@ -179,55 +180,57 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(
       String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<List<Valintatulos>> findValintatuloksetByHakemus(
       String hakuOid, String hakemusOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakemus", hakuOid, hakemusOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(
       String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
     return Observable.fromFuture(
-        this.client.postJson(
+        this.casClient.post(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.myohastyneet.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30l),
+            new com.google.gson.reflect.TypeToken<>() {},
             hakemusOids,
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<VastaanottoAikarajaMennytDTO>>() {}.getType()));
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<List<TilaHakijalleDto>> findTilahakijalle(
       String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids) {
     return Observable.fromFuture(
-        this.client.postJson(
+        this.casClient.post(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.tilahakijalle.haku.hakukohde.valintatapajono",
                 hakuOid,
                 hakukohdeOid,
                 valintatapajonoOid),
-            Duration.ofMinutes(30l),
+            new com.google.gson.reflect.TypeToken<>() {},
             hakemusOids,
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<TilaHakijalleDto>>() {}.getType()));
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
@@ -296,24 +299,26 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(
       String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde",
                 hakuOid,
                 "latest",
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<HakukohdeDTO>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
   public Observable<Map<String, HyvaksynnanEhto>> getHyvaksynnanehdot(String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot", hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<Map<String, HyvaksynnanEhto>>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
@@ -330,11 +335,12 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<Map<String, Map<String, HyvaksynnanEhto>>>
       getHyvaksynnanehdotValintatapajonoissa(String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot.jonoissa", hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<Map<String, Map<String, HyvaksynnanEhto>>>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
