@@ -135,13 +135,6 @@ public class HttpClients {
             .build());
   }
 
-  @Bean(name = "ValintaTulosServiceHttpClient")
-  public HttpClient getValintaTulosServiceHttpClient(CookieManager cookieManager) {
-    return new HttpClient(
-        defaultHttpClientBuilder(cookieManager).build(),
-        ValintaTulosServiceAsyncResourceImpl.getGson());
-  }
-
   @Profile({"default", "dev"})
   @Bean(name = "ValintaTulosServiceCasClient")
   public RestCasClient getValintaTulosServiceCasClient(
