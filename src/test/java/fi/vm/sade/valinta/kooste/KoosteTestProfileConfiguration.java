@@ -15,6 +15,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Dsl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,13 +83,6 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
     p0.setProperty("valintalaskentakoostepalvelu.kirjeet.polling.interval.millis", "50");
     p0.setProperty("root.organisaatio.oid", "");
-    p0.setProperty("kela.ftp.protocol", "ftp");
-    p0.setProperty("kela.ftp.username", "username");
-    p0.setProperty("kela.ftp.password", "password");
-    p0.setProperty("kela.ftp.parameters", "");
-    p0.setProperty("kela.ftp.host", "host");
-    p0.setProperty("kela.ftp.port", "22");
-    p0.setProperty("kela.ftp.path", "/");
 
     p0.setProperty("host.ilb", "http://" + proxyServer);
 
@@ -138,7 +132,9 @@ public class KoosteTestProfileConfiguration {
         public void handleMessage(Message message) throws Fault {}
       };
 
-  private static final AsyncHttpClient asyncHttpClient = Dsl.asyncHttpClient();
+  // AsyncHttpClient 3.0.8+ ottaa HTTP/2:n oletuksena käyttöön, mitä ei haluta
+  private static final AsyncHttpClient asyncHttpClient =
+      Dsl.asyncHttpClient(new DefaultAsyncHttpClientConfig.Builder().setHttp2Enabled(false));
   private static RestCasClient REST_CAS_CLIENT =
       new RestCasClient(
           request -> asyncHttpClient.executeRequest(request).toCompletableFuture()) {};

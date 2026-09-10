@@ -32,8 +32,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.util.IOUtils;
 import org.slf4j.Logger;
@@ -541,20 +539,18 @@ public class PistesyottoResource {
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 ByteArrayOutputStream xlsx = readFileToBytearray(request.getInputStream());
                 final String uuid = UUID.randomUUID().toString();
-                Long expirationTime = Instant.now().plus(7, ChronoUnit.DAYS).toEpochMilli();
                 List<String> tags = asList();
                 dokumenttiAsyncResource
                     .tallenna(
                         uuid,
                         "pistesyotto.xlsx",
-                        expirationTime,
                         tags,
                         "application/octet-stream",
                         new ByteArrayInputStream(xlsx.toByteArray()))
                     .subscribe(
                         response ->
                             LOG.info(
-                                "Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {} 7 päiväksi.",
+                                "Käyttäjä {} aloitti pistesyötön tuonnin haussa {} ja hakukohteelle {}. Excel on tallennettu dokumenttipalveluun uuid:lla {}.",
                                 auditSession.getPersonOid(),
                                 hakuOid,
                                 hakukohdeOid,

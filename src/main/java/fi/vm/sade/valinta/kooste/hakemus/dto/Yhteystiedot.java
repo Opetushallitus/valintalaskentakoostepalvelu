@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.hakemus.dto;
 
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import java.util.Collection;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Yhteystiedot {
 
