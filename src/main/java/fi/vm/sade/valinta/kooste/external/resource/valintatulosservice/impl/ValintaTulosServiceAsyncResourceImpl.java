@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -16,7 +15,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ErillishakuOperation;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -28,7 +26,6 @@ import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
 import java.lang.reflect.Type;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -45,15 +42,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosServiceAsyncResource {
-  private final HttpClient client;
   private final RestCasClient casClient;
   private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public ValintaTulosServiceAsyncResourceImpl(
-      @Qualifier("ValintaTulosServiceHttpClient") HttpClient client,
       @Qualifier("ValintaTulosServiceCasClient") RestCasClient casClient) {
-    this.client = client;
     this.casClient = casClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
   }
@@ -301,14 +295,15 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(
       String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde",
                 hakuOid,
                 "latest",
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<HakukohdeDTO>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override

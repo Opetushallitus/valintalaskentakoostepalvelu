@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.Gson;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -47,16 +46,15 @@ public class ValintaTulosServiceAsyncResourceImplTest {
   private static final String JONO_OID = "jono-oid";
   private static final String HAKUKOHDE_OID = "hakukohde-oid";
 
-  private final HttpClient httpClient = Mockito.mock(HttpClient.class);
   private final RestCasClient casClient = Mockito.mock(RestCasClient.class);
   private final ValintaTulosServiceAsyncResource service =
-      new ValintaTulosServiceAsyncResourceImpl(httpClient, casClient);
+      new ValintaTulosServiceAsyncResourceImpl(casClient);
 
   private final Gson gson = ValintaTulosServiceAsyncResourceImpl.getGson();
 
   @BeforeEach
   void setUp() {
-    Mockito.reset(httpClient, casClient);
+    Mockito.reset(casClient);
     MockServicesApp.start();
   }
 
