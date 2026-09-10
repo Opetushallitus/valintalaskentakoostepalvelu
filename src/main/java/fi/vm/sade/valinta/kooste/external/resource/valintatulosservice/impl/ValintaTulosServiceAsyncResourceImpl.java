@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -28,7 +27,6 @@ import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
 import java.lang.reflect.Type;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -304,14 +302,15 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(
       String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde",
                 hakuOid,
                 "latest",
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<HakukohdeDTO>() {}.getType()));
+            new com.google.gson.reflect.TypeToken<>() {},
+            Collections.emptyMap(),
+            30 * 60 * 1000));
   }
 
   @Override
