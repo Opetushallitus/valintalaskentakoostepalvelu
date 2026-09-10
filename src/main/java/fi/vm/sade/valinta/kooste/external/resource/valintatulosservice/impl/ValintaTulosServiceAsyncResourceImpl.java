@@ -153,11 +153,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return Observable.fromFuture(
         this.casClient.post(
             this.urlConfiguration.url(
-                "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu",
-                "read",
-                hakukohdeOid),
+                "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.read"),
             new com.google.gson.reflect.TypeToken<>() {},
-            Map.of("auditSession", session),
+            Map.of("auditSession", session, "hakukohdeOids", List.of(hakukohdeOid)),
             Collections.emptyMap(),
             30 * 60 * 1000));
   }
@@ -169,8 +167,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         this.casClient
             .post(
                 this.urlConfiguration.url(
-                    "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu",
-                    "write",
+                    "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.write",
                     hakukohdeOid),
                 new com.google.gson.reflect.TypeToken<>() {},
                 Map.of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session),
