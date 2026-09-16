@@ -43,6 +43,11 @@ public class RestCasClient {
     this.gson = DateDeserializer.gsonBuilder().create();
   }
 
+  protected RestCasClient(Function<Request, CompletableFuture<Response>> executor, Gson gson) {
+    this.executor = executor;
+    this.gson = gson;
+  }
+
   protected Gson gson;
 
   public <T> CompletableFuture<T> post(

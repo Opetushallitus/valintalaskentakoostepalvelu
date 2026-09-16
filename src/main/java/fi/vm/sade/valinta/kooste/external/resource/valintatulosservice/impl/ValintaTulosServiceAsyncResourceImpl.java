@@ -8,6 +8,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.Target;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
@@ -15,7 +16,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ErillishakuOperation;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -43,15 +43,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosServiceAsyncResource {
-  private final HttpClient client;
+  public static final int TIMEOUT_30_MINS = 30 * 60 * 1000;
+
   private final RestCasClient casClient;
   private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public ValintaTulosServiceAsyncResourceImpl(
-      @Qualifier("ValintaTulosServiceHttpClient") HttpClient client,
       @Qualifier("ValintaTulosServiceCasClient") RestCasClient casClient) {
-    this.client = client;
     this.casClient = casClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
   }
@@ -73,7 +72,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 this.urlConfiguration.url(
                     "valinta-tulos-service.haku.hakuoid.hakemus", hakuOid, hakemusOid),
                 Collections.emptyMap(),
-                30 * 60 * 1000)
+                TIMEOUT_30_MINS)
             .thenApply(Response::getResponseBody));
   }
 
@@ -84,9 +83,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         .<HakijaPaginationObject>get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000)
+            TIMEOUT_30_MINS)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
@@ -95,9 +94,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return this.casClient
         .<HakijaPaginationObject>get(
             this.urlConfiguration.url("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000)
+            TIMEOUT_30_MINS)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
@@ -106,9 +105,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return this.casClient.get(
         this.urlConfiguration.url(
             "valinta-tulos-service.haku.sijoitteluajo.latest.hakemus", hakuOid, hakemusOid),
-        new com.google.gson.reflect.TypeToken<>() {},
+        new TypeToken<>() {},
         Collections.emptyMap(),
-        30 * 60 * 1000);
+        TIMEOUT_30_MINS);
   }
 
   @Override
@@ -117,9 +116,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         .<HakijaPaginationObject>get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hakijat", hakuOid, hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000)
+            TIMEOUT_30_MINS)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
@@ -128,9 +127,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return this.casClient
         .<HakijaPaginationObject>get(
             this.urlConfiguration.url("valinta-tulos-service.haku.ilmanhyvaksyntaa", hakuOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000)
+            TIMEOUT_30_MINS)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
@@ -142,9 +141,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -152,12 +151,11 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
       String hakukohdeOid, AuditSession session) {
     return Observable.fromFuture(
         this.casClient.post(
-            this.urlConfiguration.url(
-                "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.read"),
-            new com.google.gson.reflect.TypeToken<>() {},
+            this.urlConfiguration.url("valinta-tulos-service.lukuvuosimaksu.read"),
+            new TypeToken<>() {},
             Map.of("auditSession", session, "hakukohdeOids", List.of(hakukohdeOid)),
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -167,12 +165,10 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         this.casClient
             .post(
                 this.urlConfiguration.url(
-                    "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.write",
-                    hakukohdeOid),
-                new com.google.gson.reflect.TypeToken<>() {},
+                    "valinta-tulos-service.lukuvuosimaksu.write", hakukohdeOid),
                 Map.of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session),
                 Collections.emptyMap(),
-                30 * 60 * 1000)
+                TIMEOUT_30_MINS)
             .thenApply(r -> "OK"));
   }
 
@@ -185,9 +181,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 "valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -197,9 +193,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakemus", hakuOid, hakemusOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -211,10 +207,10 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 "valinta-tulos-service.virkailija.myohastyneet.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             hakemusOids,
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -227,10 +223,10 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 hakuOid,
                 hakukohdeOid,
                 valintatapajonoOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             hakemusOids,
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -259,7 +255,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return Observable.fromFuture(
         this.casClient.post(
             url,
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             new ValinnantulosRequest(valinnantulokset),
             Map.of(
                 "Accept",
@@ -268,7 +264,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 "application/json",
                 "X-If-Unmodified-Since",
                 auditSession.getIfUnmodifiedSince().orElseThrow()),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -291,8 +287,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     url += "?hyvaksymiskirjeet=true";
 
     return Observable.fromFuture(
-        this.casClient.get(
-            url, new com.google.gson.reflect.TypeToken<>() {}, Collections.emptyMap(), 60 * 1000));
+        this.casClient.get(url, new TypeToken<>() {}, Collections.emptyMap(), 60 * 1000));
   }
 
   @Override
@@ -305,9 +300,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 hakuOid,
                 "latest",
                 hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -316,9 +311,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot", hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -326,7 +321,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return this.casClient.get(
         this.urlConfiguration.url(
             "valinta-tulos-service.haku.valintatulostiedothakukohteille", hakuOid),
-        new com.google.gson.reflect.TypeToken<>() {},
+        new TypeToken<>() {},
         Collections.emptyMap(),
         60 * 1000);
   }
@@ -338,9 +333,9 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot.jonoissa", hakukohdeOid),
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             Collections.emptyMap(),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
