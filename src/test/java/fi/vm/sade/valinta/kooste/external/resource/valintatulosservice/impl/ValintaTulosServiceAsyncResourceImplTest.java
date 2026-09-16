@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Lukuvuosimaksu;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.Valinnantulos;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.proxy.resource.valintatulosservice.VastaanottoAikarajaMennytDTO;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import org.asynchttpclient.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -82,10 +84,6 @@ public class ValintaTulosServiceAsyncResourceImplTest {
 
     @Test
     public void writesToAuditLog(CapturedOutput output) {
-      List<String> roles = List.of("role1", "role2", "role3");
-      AuditSession auditSession = new AuditSession(PERSON_OID, roles, USER_AGENT, INET_ADDRESS);
-      auditSession.setIfUnmodifiedSince(
-          Optional.of(OffsetDateTime.now().format(RFC_1123_DATE_TIME)));
       Valinnantulos valinnantulos = new Valinnantulos();
       valinnantulos.setHenkiloOid(PERSON_OID);
       valinnantulos.setHakemusOid(HAKEMUS_OID);
@@ -95,7 +93,7 @@ public class ValintaTulosServiceAsyncResourceImplTest {
           .thenReturn(CompletableFuture.completedFuture(List.of(valinnantulos)));
 
       Observable<List<Valinnantulos>> response =
-          service.getErillishaunValinnantulokset(auditSession, JONO_OID);
+          service.getErillishaunValinnantulokset(auditSession(), JONO_OID);
 
       assertThat(response.blockingSingle()).singleElement().isEqualTo(valinnantulos);
       List<String> auditLines =
@@ -125,10 +123,6 @@ public class ValintaTulosServiceAsyncResourceImplTest {
   class PostErillishaunValinnantulokset {
     @Test
     public void writesToAuditLog(CapturedOutput output) {
-      List<String> roles = List.of("role1", "role2", "role3");
-      AuditSession auditSession = new AuditSession(PERSON_OID, roles, USER_AGENT, INET_ADDRESS);
-      auditSession.setIfUnmodifiedSince(
-          Optional.of(OffsetDateTime.now().format(RFC_1123_DATE_TIME)));
       Valinnantulos valinnantulos = new Valinnantulos();
       valinnantulos.setHenkiloOid(PERSON_OID);
       valinnantulos.setHakemusOid(HAKEMUS_OID);
@@ -138,7 +132,7 @@ public class ValintaTulosServiceAsyncResourceImplTest {
           .thenReturn(CompletableFuture.completedFuture(List.of()));
 
       Observable<List<ValintatulosUpdateStatus>> response =
-          service.postErillishaunValinnantulokset(auditSession, JONO_OID, List.of(valinnantulos));
+          service.postErillishaunValinnantulokset(auditSession(), JONO_OID, List.of(valinnantulos));
 
       assertThat(response.blockingSingle()).isEmpty();
       List<String> auditLines =
@@ -168,6 +162,44 @@ public class ValintaTulosServiceAsyncResourceImplTest {
     }
   }
 
+  @Nested
+  class FetchLukuvuosimaksut {
+    @Test
+    public void callsTheCorrectUrl() {
+      when(casClient.post(any(), any(), any(), any(), anyInt()))
+          .thenReturn(CompletableFuture.completedFuture(List.of()));
+
+      Observable<List<Lukuvuosimaksu>> response =
+          service.fetchLukuvuosimaksut(HAKUKOHDE_OID, auditSession());
+
+      assertThat(response.blockingSingle()).isEmpty();
+      String url = "^http://127.0.0.1:\\d+/valinta-tulos-service/auth/lukuvuosimaksu/read/bulk$";
+      verify(casClient).post(matches(url), any(), any(), any(), eq(30 * 60 * 1000));
+      verifyNoMoreInteractions(casClient);
+    }
+  }
+
+  @Nested
+  class SaveLukuvuosimaksut {
+    @Test
+    public void callsTheCorrectUrl() {
+      Response httpResponse = Mockito.mock(Response.class);
+      when(casClient.post(any(), any(), any(), any(), anyInt()))
+          .thenReturn(CompletableFuture.completedFuture(httpResponse));
+
+      Observable<String> response =
+          service.saveLukuvuosimaksut(HAKUKOHDE_OID, auditSession(), List.of());
+
+      assertThat(response.blockingSingle()).isEqualTo("OK");
+      String url =
+          String.format(
+              "^http://127.0.0.1:\\d+/valinta-tulos-service/auth/lukuvuosimaksu/write/%s$",
+              HAKUKOHDE_OID);
+      verify(casClient).post(matches(url), any(), any(), eq(30 * 60 * 1000));
+      verifyNoMoreInteractions(casClient);
+    }
+  }
+
   @Test
   public void vastaanottoAikarajaMennytDTOsCanBeParsed() {
     String hakemusOid = "1.2.246.562.11.00004697189";
@@ -187,5 +219,12 @@ public class ValintaTulosServiceAsyncResourceImplTest {
         ZonedDateTime.of(2016, 7, 15, 12, 0, 0, 0, ZoneOffset.UTC),
         parsedDto.getVastaanottoDeadline());
     assertTrue(parsedDto.isMennyt());
+  }
+
+  private static AuditSession auditSession() {
+    List<String> roles = List.of("role1", "role2", "role3");
+    AuditSession auditSession = new AuditSession(PERSON_OID, roles, USER_AGENT, INET_ADDRESS);
+    auditSession.setIfUnmodifiedSince(Optional.of(OffsetDateTime.now().format(RFC_1123_DATE_TIME)));
+    return auditSession;
   }
 }

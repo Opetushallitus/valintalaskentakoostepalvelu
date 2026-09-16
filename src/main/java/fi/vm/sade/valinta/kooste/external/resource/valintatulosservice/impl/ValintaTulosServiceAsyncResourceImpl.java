@@ -165,7 +165,6 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 this.urlConfiguration.url(
                     "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu.write",
                     hakukohdeOid),
-                new com.google.gson.reflect.TypeToken<>() {},
                 Map.of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session),
                 Collections.emptyMap(),
                 30 * 60 * 1000)
