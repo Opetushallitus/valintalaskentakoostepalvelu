@@ -151,8 +151,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
       String hakukohdeOid, AuditSession session) {
     return Observable.fromFuture(
         this.casClient.post(
-            this.urlConfiguration.url(
-                    "valinta-tulos-service.lukuvuosimaksu.read"),
+            this.urlConfiguration.url("valinta-tulos-service.lukuvuosimaksu.read"),
             new TypeToken<>() {},
             Map.of("auditSession", session, "hakukohdeOids", List.of(hakukohdeOid)),
             Collections.emptyMap(),
@@ -166,8 +165,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
         this.casClient
             .post(
                 this.urlConfiguration.url(
-                        "valinta-tulos-service.lukuvuosimaksu.write",
-                    hakukohdeOid),
+                    "valinta-tulos-service.lukuvuosimaksu.write", hakukohdeOid),
                 Map.of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session),
                 Collections.emptyMap(),
                 TIMEOUT_30_MINS)
