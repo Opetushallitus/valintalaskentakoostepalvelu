@@ -34,6 +34,8 @@ public class KoskiAsyncHttpClient {
         new DefaultAsyncHttpClientConfig.Builder()
             .setMaxRedirects(5)
             .setConnectTimeout(Duration.ofMillis(10 * 1000))
+            // AsyncHttpClient 3.0.8+ ottaa HTTP/2:n oletuksena käyttöön, mitä ei haluta
+            .setHttp2Enabled(false)
             .build());
   }
 

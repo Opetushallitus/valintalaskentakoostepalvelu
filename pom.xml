@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.12</version>
+        <version>3.5.16</version>
     </parent>
 
     <artifactId>valintalaskentakoostepalvelu</artifactId>
@@ -20,11 +20,13 @@
         <kela.version>12.0-SNAPSHOT</kela.version>
         <slf4j.version>1.7.28</slf4j.version>
         <mockito.version>5.21.0</mockito.version>
+        <!-- java-cas 2.3.0 edellyttää netty 4.2 -linjaa (netty-codec-base, netty-codec-compression) -->
+        <netty.version>4.2.17.Final</netty.version>
 
         <maven-antrun-plugin.version>1.7</maven-antrun-plugin.version>
         <sijoittelu.version>10.1.0-SNAPSHOT</sijoittelu.version>
-        <valinta-sharedutils.version>8.0-SNAPSHOT</valinta-sharedutils.version>
-        <valintaperusteet.version>8.0-SNAPSHOT</valintaperusteet.version>
+        <valinta-sharedutils.version>8.3-SNAPSHOT</valinta-sharedutils.version>
+        <valintaperusteet.version>8.2-OY-5771-SNAPSHOT</valintaperusteet.version>
         <valintalaskenta.version>8.0-SNAPSHOT</valintalaskenta.version>
     </properties>
 
@@ -96,7 +98,7 @@
             <dependency>
                 <groupId>opiskelijavalinnat-utils</groupId>
                 <artifactId>java-cas</artifactId>
-                <version>2.0.1-SNAPSHOT</version>
+                <version>2.3.0-OY-5723-SNAPSHOT</version>
                 <exclusions>
                     <!-- tätä ei haluta stackiin, jotta lokitus toimii oikein -->
                     <exclusion>
@@ -226,7 +228,7 @@
             <dependency>
                 <groupId>fi.vm.sade.dokumenttipalvelu</groupId>
                 <artifactId>dokumenttipalvelu</artifactId>
-                <version>6.10-SNAPSHOT</version>
+                <version>6.16-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback.access</groupId>
@@ -303,14 +305,14 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>2.21.2</version>
+                <version>2.21.4</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade</groupId>
                 <artifactId>auditlogger</artifactId>
-                <version>9.2.5-SNAPSHOT</version>
+                <version>9.2.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -335,7 +337,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.9</version>
+                <version>42.7.12</version>
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>
@@ -363,12 +365,6 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-rs-client</artifactId>
-                <version>4.1.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -468,16 +464,16 @@
                 <version>2.2.41</version>
             </dependency>
 
-            <!-- korjaa haavoittuneet versiot, fi.vm.sade.tarjonta:tarjonta-api:2018-15-SNAPSHOT kirjastoja -->
+            <!-- korjaa haavoittuneet versiot, fi.vm.sade.tarjonta:tarjonta-api:2018-15-SNAPSHOT kirjastoja.
+                 BOM tarvitaan koska osa cxf-artefakteista (esim. cxf-rt-frontend-jaxws ->
+                 cxf-rt-ws-policy -> neethi) tulee transitiivisesti eikä yksittäiset
+                 pinnaukset yhtenäistäisi niitä. -->
             <dependency>
                 <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-core</artifactId>
-                <version>4.1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                <version>4.1.4</version>
+                <artifactId>cxf-bom</artifactId>
+                <version>4.1.8</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- korjaa versiokonflikti kirjastojen
@@ -493,18 +489,10 @@
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
-                <version>10.1.54</version>
+                <version>10.1.57</version>
             </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http</artifactId>
-                <version>4.1.132.Final</version>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http2</artifactId>
-                <version>4.1.132.Final</version>
-            </dependency>
+            <!-- netty-versio tulee spring-boot-dependencies:n netty-bom-importista,
+                 ks. ${netty.version} -->
 
         </dependencies>
     </dependencyManagement>
@@ -925,31 +913,6 @@ buildTtime=${maven.build.timestamp}
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>oph-sade-artifactory-snapshots</id>
-            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-snapshot-local</url>
-            <releases>
-                <enabled>false</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>oph-sade-artifactory-releases</id>
-            <url>https://artifactory.opintopolku.fi/artifactory/oph-sade-release-local</url>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
                 <checksumPolicy>warn</checksumPolicy>
             </snapshots>
         </repository>
