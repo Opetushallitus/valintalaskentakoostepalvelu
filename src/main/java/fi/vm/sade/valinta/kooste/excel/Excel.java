@@ -9,7 +9,6 @@ import static org.apache.poi.ss.usermodel.HorizontalAlignment.LEFT;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import fi.vm.sade.valinta.kooste.util.OphCellStyles;
-import java.awt.*;
 import java.awt.Color;
 import java.io.*;
 import java.util.*;
