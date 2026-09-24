@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -83,13 +84,6 @@ public class KoosteTestProfileConfiguration {
     p0.setProperty("valintalaskentakoostepalvelu.tarjontaService.url", "http://localhost");
     p0.setProperty("valintalaskentakoostepalvelu.kirjeet.polling.interval.millis", "50");
     p0.setProperty("root.organisaatio.oid", "");
-    p0.setProperty("kela.ftp.protocol", "ftp");
-    p0.setProperty("kela.ftp.username", "username");
-    p0.setProperty("kela.ftp.password", "password");
-    p0.setProperty("kela.ftp.parameters", "");
-    p0.setProperty("kela.ftp.host", "host");
-    p0.setProperty("kela.ftp.port", "22");
-    p0.setProperty("kela.ftp.path", "/");
 
     p0.setProperty("host.ilb", "http://" + proxyServer);
 
@@ -173,7 +167,9 @@ public class KoosteTestProfileConfiguration {
 
   @Bean(name = "ValintaTulosServiceCasClient")
   public RestCasClient getValintaTulosServiceCasClient() {
-    return REST_CAS_CLIENT;
+    return new RestCasClient(
+        request -> asyncHttpClient.executeRequest(request).toCompletableFuture(),
+        ValintaTulosServiceAsyncResourceImpl.getGson()) {};
   }
 
   @Bean(name = "ViestintapalveluCasClient")

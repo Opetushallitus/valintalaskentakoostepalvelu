@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.proxy.resource.erillishaku.util;
 
 import java.util.Optional;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class PseudoSatunnainenOID {
   public static String trimToNull(String valintatapajonoOid) {
