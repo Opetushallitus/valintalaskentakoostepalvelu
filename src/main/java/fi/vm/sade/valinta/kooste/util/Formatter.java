@@ -5,8 +5,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.Locale;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.FastDateFormat;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 public class Formatter {
   public static final FastDateFormat PVMFORMATTER = FastDateFormat.getInstance("dd.MM.yyyy HH:mm");

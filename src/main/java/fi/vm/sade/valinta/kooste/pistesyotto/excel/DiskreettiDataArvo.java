@@ -3,7 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 import com.google.common.collect.Sets;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class DiskreettiDataArvo extends TilaDataArvo {
   private final Set<String> arvot;
