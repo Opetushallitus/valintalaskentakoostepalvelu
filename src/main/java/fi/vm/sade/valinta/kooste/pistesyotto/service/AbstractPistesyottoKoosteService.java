@@ -5,7 +5,7 @@ import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSu
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.tyhja;
 import static org.apache.commons.collections.ListUtils.union;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import com.google.common.collect.Sets;
 import fi.vm.sade.auditlog.Changes;
@@ -72,8 +72,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractPistesyottoKoosteService {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
-  public static final String OPPILAITOS =
-      fi.vm.sade.organisaatio.api.model.types.OrganisaatioTyyppi.OPPILAITOS.name().toUpperCase();
+  public static final String OPPILAITOS = "OPPILAITOS";
 
   public static String KIELIKOE_SUORITUS_TILA = "VALMIS";
   public static String KIELIKOE_ARVOSANA_AINE = "kielikoe";

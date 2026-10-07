@@ -1,7 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto;
 
-import static org.apache.commons.lang.StringUtils.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

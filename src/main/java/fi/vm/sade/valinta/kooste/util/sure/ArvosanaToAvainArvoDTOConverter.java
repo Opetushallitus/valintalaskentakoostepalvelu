@@ -7,8 +7,8 @@ import fi.vm.sade.valintalaskenta.domain.dto.AvainArvoDTO;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.Fraction;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.Fraction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

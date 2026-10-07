@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.dokumentit;
 
-import static org.apache.commons.lang.StringUtils.trimToNull;
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 import fi.vm.sade.valinta.kooste.dokumentit.dao.DokumenttiRepository;
 import fi.vm.sade.valinta.kooste.dokumentit.dto.DokumenttiDto;

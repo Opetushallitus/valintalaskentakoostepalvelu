@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.valvomo.dto;
 
 import java.util.Optional;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Tunniste {
   private final String tunniste;
