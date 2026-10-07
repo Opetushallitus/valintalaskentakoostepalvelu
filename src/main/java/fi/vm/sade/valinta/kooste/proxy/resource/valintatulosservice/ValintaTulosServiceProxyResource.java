@@ -229,6 +229,39 @@ public class ValintaTulosServiceProxyResource {
   }
 
   @GetMapping(
+      value = "/haku/{hakuOid}/hakemusOid/{hakemusOid:.+}",
+      produces = MediaType.APPLICATION_JSON_VALUE + ";charset:utf-8")
+  @PreAuthorize(
+      "hasAnyRole('ROLE_APP_SIJOITTELU_READ','ROLE_APP_SIJOITTELU_READ_UPDATE','ROLE_APP_SIJOITTELU_CRUD')")
+  public DeferredResult<ResponseEntity<String>> getValintatulos(
+      @PathVariable("hakuOid") String hakuOid, @PathVariable("hakemusOid") String hakemusOid) {
+
+    DeferredResult<ResponseEntity<String>> result = new DeferredResult<>(30000L);
+    result.onTimeout(
+        () -> {
+          LOG.error(
+              "getValintatulos proxy -palvelukutsu on aikakatkaistu: /valintatulos/haku/{}/hakemusOid/{}",
+              hakuOid,
+              hakemusOid);
+          result.setErrorResult(
+              ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT)
+                  .body("Valintatulokset proxy -palvelukutsu on aikakatkaistu"));
+        });
+    valintaTulosServiceResource
+        .getHakemuksenValintatulosAsString(hakuOid, hakemusOid)
+        .subscribe(
+            toiveenValintaTulokset ->
+                result.setResult(ResponseEntity.status(HttpStatus.OK).body(toiveenValintaTulokset)),
+            error -> {
+              LOG.error("getHakemuksenValintatulosAsString throws", error);
+              result.setErrorResult(
+                  ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error.getMessage()));
+            });
+
+    return result;
+  }
+
+  @GetMapping(
       value = "/hakemus/{hakemusOid}/haku/{hakuOid:.+}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize(
@@ -237,7 +270,7 @@ public class ValintaTulosServiceProxyResource {
       @PathVariable("hakemusOid") String hakemusOid, @PathVariable("hakuOid") String hakuOid) {
 
     DeferredResult<ResponseEntity<List<Valintatulos>>> result =
-        new DeferredResult<>(5 * 60 * 1000l);
+        new DeferredResult<>(5 * 60 * 1000L);
     result.onTimeout(
         () -> {
           LOG.error(
