@@ -453,7 +453,11 @@ public class PistesyottoResource {
             authorityCheck -> {
               if (authorityCheck.test(hakukohdeOid)) {
                 DokumenttiProsessi prosessi =
-                    new DokumenttiProsessi("Pistesyöttö", "vienti", hakuOid, asList(hakukohdeOid));
+                    new DokumenttiProsessi(
+                        "Pistesyöttö",
+                        "vienti",
+                        hakuOid,
+                        asList("pistesyotto", "vienti", hakukohdeOid));
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 excelVientiPool.submit(
                     () -> {
@@ -539,7 +543,7 @@ public class PistesyottoResource {
                 dokumenttiKomponentti.tuoUusiProsessi(prosessi);
                 ByteArrayOutputStream xlsx = readFileToBytearray(request.getInputStream());
                 final String uuid = UUID.randomUUID().toString();
-                List<String> tags = asList();
+                List<String> tags = asList("pistesyotto", "tuonti", hakukohdeOid);
                 dokumenttiAsyncResource
                     .tallenna(
                         uuid,
