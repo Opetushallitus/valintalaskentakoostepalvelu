@@ -1,5 +1,6 @@
 package fi.vm.sade.valinta.kooste;
 
+import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl.ValintaTulosServiceAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -166,7 +167,9 @@ public class KoosteTestProfileConfiguration {
 
   @Bean(name = "ValintaTulosServiceCasClient")
   public RestCasClient getValintaTulosServiceCasClient() {
-    return REST_CAS_CLIENT;
+    return new RestCasClient(
+        request -> asyncHttpClient.executeRequest(request).toCompletableFuture(),
+        ValintaTulosServiceAsyncResourceImpl.getGson()) {};
   }
 
   @Bean(name = "ViestintapalveluCasClient")

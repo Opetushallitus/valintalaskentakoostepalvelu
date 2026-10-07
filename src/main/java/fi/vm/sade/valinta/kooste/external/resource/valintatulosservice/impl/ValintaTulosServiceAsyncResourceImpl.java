@@ -1,6 +1,5 @@
 package fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.impl;
 
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -9,6 +8,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.auditlog.Target;
 import fi.vm.sade.sijoittelu.domain.Valintatulos;
@@ -16,7 +16,6 @@ import fi.vm.sade.sijoittelu.tulos.dto.HakukohdeDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaDTO;
 import fi.vm.sade.sijoittelu.tulos.dto.raportointi.HakijaPaginationObject;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
-import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.sijoittelu.ValintatulosUpdateStatus;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ErillishakuOperation;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.ValintaTulosServiceAsyncResource;
@@ -28,7 +27,6 @@ import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.sharedutils.http.DateDeserializer;
 import io.reactivex.Observable;
 import java.lang.reflect.Type;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -45,15 +43,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosServiceAsyncResource {
-  private final HttpClient client;
+  public static final int TIMEOUT_30_MINS = 30 * 60 * 1000;
+
   private final RestCasClient casClient;
   private final UrlConfiguration urlConfiguration;
 
   @Autowired
   public ValintaTulosServiceAsyncResourceImpl(
-      @Qualifier("ValintaTulosServiceHttpClient") HttpClient client,
       @Qualifier("ValintaTulosServiceCasClient") RestCasClient casClient) {
-    this.client = client;
     this.casClient = casClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
   }
@@ -75,103 +72,103 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 this.urlConfiguration.url(
                     "valinta-tulos-service.haku.hakuoid.hakemus", hakuOid, hakemusOid),
                 Collections.emptyMap(),
-                30 * 60 * 1000)
+                TIMEOUT_30_MINS)
             .thenApply(Response::getResponseBody));
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(
       String hakuOid, String hakukohdeOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
+    return this.casClient
+        .<HakijaPaginationObject>get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksytyt", hakuOid, hakukohdeOid),
-            Duration.ofMinutes(30l),
-            new TypeToken<HakijaPaginationObject>() {}.getType())
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getKoulutuspaikalliset(String hakuOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
+    return this.casClient
+        .<HakijaPaginationObject>get(
             this.urlConfiguration.url("valinta-tulos-service.haku.hyvaksytyt", hakuOid),
-            Duration.ofMinutes(30l),
-            new TypeToken<HakijaPaginationObject>() {}.getType())
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<HakijaDTO> getHakijaByHakemus(String hakuOid, String hakemusOid) {
-    return this.client.getJson(
+    return this.casClient.get(
         this.urlConfiguration.url(
             "valinta-tulos-service.haku.sijoitteluajo.latest.hakemus", hakuOid, hakemusOid),
-        Duration.ofMinutes(30),
-        new TypeToken<HakijaDTO>() {}.getType());
+        new TypeToken<>() {},
+        Collections.emptyMap(),
+        TIMEOUT_30_MINS);
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getKaikkiHakijat(String hakuOid, String hakukohdeOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
+    return this.casClient
+        .<HakijaPaginationObject>get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hakijat", hakuOid, hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<HakijaPaginationObject>() {}.getType())
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public CompletableFuture<List<HakijaDTO>> getHakijatIlmanKoulutuspaikkaa(String hakuOid) {
-    return this.client
-        .<HakijaPaginationObject>getJson(
+    return this.casClient
+        .<HakijaPaginationObject>get(
             this.urlConfiguration.url("valinta-tulos-service.haku.ilmanhyvaksyntaa", hakuOid),
-            Duration.ofMinutes(30),
-            new TypeToken<HakijaPaginationObject>() {}.getType())
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS)
         .thenApplyAsync(HakijaPaginationObject::getResults);
   }
 
   @Override
   public Observable<List<Valintatulos>> findValintatulokset(String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   @Override
   public Observable<List<Lukuvuosimaksu>> fetchLukuvuosimaksut(
       String hakukohdeOid, AuditSession session) {
     return Observable.fromFuture(
-        this.client.postJson(
-            this.urlConfiguration.url(
-                "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu",
-                "read",
-                hakukohdeOid),
-            Duration.ofMinutes(30l),
-            Map.of("auditSession", session),
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<Lukuvuosimaksu>>() {}.getType()));
+        this.casClient.post(
+            this.urlConfiguration.url("valinta-tulos-service.lukuvuosimaksu.read"),
+            new TypeToken<>() {},
+            Map.of("auditSession", session, "hakukohdeOids", List.of(hakukohdeOid)),
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   @Override
   public Observable<String> saveLukuvuosimaksut(
       String hakukohdeOid, AuditSession session, List<LukuvuosimaksuMuutos> muutokset) {
     return Observable.fromFuture(
-        this.client
-            .postJson(
+        this.casClient
+            .post(
                 this.urlConfiguration.url(
-                    "valinta-tulos-service.virkailija.valintatulos.lukuvuosimaksu",
-                    "write",
-                    hakukohdeOid),
-                Duration.ofMinutes(30l),
+                    "valinta-tulos-service.lukuvuosimaksu.write", hakukohdeOid),
                 Map.of("lukuvuosimaksuMuutokset", muutokset, "auditSession", session),
-                new TypeToken<>() {}.getType(),
-                new TypeToken<Void>() {}.getType())
+                Collections.emptyMap(),
+                TIMEOUT_30_MINS)
             .thenApply(r -> "OK"));
   }
 
@@ -179,55 +176,57 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<List<Valintatulos>> findValintatuloksetIlmanHakijanTilaa(
       String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.ilmanhakijantilaa.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   @Override
   public Observable<List<Valintatulos>> findValintatuloksetByHakemus(
       String hakuOid, String hakemusOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.valintatulos.haku.hakemus", hakuOid, hakemusOid),
-            Duration.ofMinutes(30),
-            new TypeToken<List<Valintatulos>>() {}.getType()));
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   @Override
   public Observable<List<VastaanottoAikarajaMennytDTO>> findVastaanottoAikarajaMennyt(
       String hakuOid, String hakukohdeOid, Set<String> hakemusOids) {
     return Observable.fromFuture(
-        this.client.postJson(
+        this.casClient.post(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.myohastyneet.haku.hakukohde",
                 hakuOid,
                 hakukohdeOid),
-            Duration.ofMinutes(30l),
+            new TypeToken<>() {},
             hakemusOids,
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<VastaanottoAikarajaMennytDTO>>() {}.getType()));
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   @Override
   public Observable<List<TilaHakijalleDto>> findTilahakijalle(
       String hakuOid, String hakukohdeOid, String valintatapajonoOid, Set<String> hakemusOids) {
     return Observable.fromFuture(
-        this.client.postJson(
+        this.casClient.post(
             this.urlConfiguration.url(
                 "valinta-tulos-service.virkailija.tilahakijalle.haku.hakukohde.valintatapajono",
                 hakuOid,
                 hakukohdeOid,
                 valintatapajonoOid),
-            Duration.ofMinutes(30l),
+            new TypeToken<>() {},
             hakemusOids,
-            new TypeToken<>() {}.getType(),
-            new TypeToken<List<TilaHakijalleDto>>() {}.getType()));
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -256,7 +255,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return Observable.fromFuture(
         this.casClient.post(
             url,
-            new com.google.gson.reflect.TypeToken<>() {},
+            new TypeToken<>() {},
             new ValinnantulosRequest(valinnantulokset),
             Map.of(
                 "Accept",
@@ -265,7 +264,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
                 "application/json",
                 "X-If-Unmodified-Since",
                 auditSession.getIfUnmodifiedSince().orElseThrow()),
-            30 * 60 * 1000));
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -288,32 +287,33 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     url += "?hyvaksymiskirjeet=true";
 
     return Observable.fromFuture(
-        this.casClient.get(
-            url, new com.google.gson.reflect.TypeToken<>() {}, Collections.emptyMap(), 60 * 1000));
+        this.casClient.get(url, new TypeToken<>() {}, Collections.emptyMap(), 60 * 1000));
   }
 
   @Override
   public Observable<HakukohdeDTO> getHakukohdeBySijoitteluajoPlainDTO(
       String hakuOid, String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.sijoittelu.sijoitteluajo.hakukohde",
                 hakuOid,
                 "latest",
                 hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<HakukohdeDTO>() {}.getType()));
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   @Override
   public Observable<Map<String, HyvaksynnanEhto>> getHyvaksynnanehdot(String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot", hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<Map<String, HyvaksynnanEhto>>() {}.getType()));
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   @Override
@@ -321,7 +321,7 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
     return this.casClient.get(
         this.urlConfiguration.url(
             "valinta-tulos-service.haku.valintatulostiedothakukohteille", hakuOid),
-        new com.google.gson.reflect.TypeToken<>() {},
+        new TypeToken<>() {},
         Collections.emptyMap(),
         60 * 1000);
   }
@@ -330,11 +330,12 @@ public class ValintaTulosServiceAsyncResourceImpl implements ValintaTulosService
   public Observable<Map<String, Map<String, HyvaksynnanEhto>>>
       getHyvaksynnanehdotValintatapajonoissa(String hakukohdeOid) {
     return Observable.fromFuture(
-        this.client.getJson(
+        this.casClient.get(
             this.urlConfiguration.url(
                 "valinta-tulos-service.haku.hakukohde.hyvaksynnanehdot.jonoissa", hakukohdeOid),
-            Duration.ofMinutes(30),
-            new TypeToken<Map<String, Map<String, HyvaksynnanEhto>>>() {}.getType()));
+            new TypeToken<>() {},
+            Collections.emptyMap(),
+            TIMEOUT_30_MINS));
   }
 
   private static class OffsetDateTimeJsonSerializer implements JsonSerializer<OffsetDateTime> {
