@@ -223,7 +223,7 @@ public class HakemuksetConverterUtil {
                     h,
                     harkinnanvaraisuusByHakemus.get(h.getHakemusoid())));
       } else {
-        LOG.warn(
+        LOG.debug(
             String.format(
                 "oppijat is null when calling getHakemusDTOS for haku %s (\"%s\"), hakukohde %s for %d applications.",
                 haku.oid, haku.nimi, hakukohdeOid, hakemusDtot.size()));

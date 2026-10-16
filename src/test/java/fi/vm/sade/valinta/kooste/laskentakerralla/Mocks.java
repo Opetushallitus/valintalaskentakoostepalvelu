@@ -9,7 +9,6 @@ import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.Harkinnanv
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -32,8 +31,6 @@ public class Mocks {
       mock(OhjausparametritAsyncResource.class);
   static ValintalaskentaAsyncResource valintalaskentaAsyncResource =
       mock(ValintalaskentaAsyncResource.class);
-  static SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource =
-      mock(SuoritusrekisteriAsyncResource.class);
   static TarjontaAsyncResource tarjontaAsyncResource = mock(TarjontaAsyncResource.class);
   static ValintapisteAsyncResource valintapisteAsyncResource =
       mock(ValintapisteAsyncResource.class);
@@ -50,7 +47,6 @@ public class Mocks {
     reset(valintaperusteetAsyncResource);
     reset(ohjausparametritAsyncResource);
     reset(valintalaskentaAsyncResource);
-    reset(suoritusrekisteriAsyncResource);
     reset(tarjontaAsyncResource);
     reset(valintapisteAsyncResource);
   }
