@@ -4,6 +4,7 @@ import fi.vm.sade.auditlog.Changes;
 import fi.vm.sade.valinta.kooste.AuthorizationUtil;
 import fi.vm.sade.valinta.kooste.KoosteAudit;
 import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.dto.HakemuksenHarkinnanvaraisuus;
+import fi.vm.sade.valinta.kooste.external.resource.suorituspalvelu.SuorituspalveluAsyncResource;
 import fi.vm.sade.valinta.sharedutils.AuditLog;
 import fi.vm.sade.valinta.sharedutils.ValintaResource;
 import fi.vm.sade.valinta.sharedutils.ValintaperusteetOperation;
@@ -36,6 +37,8 @@ public class HarkinnanvaraisuusResource {
 
   @Autowired private HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource;
 
+  @Autowired private SuorituspalveluAsyncResource suorituspalveluAsyncResource;
+
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   @PostMapping(
@@ -66,8 +69,8 @@ public class HarkinnanvaraisuusResource {
         Changes.EMPTY,
         Collections.emptyMap());
 
-    harkinnanvaraisuusAsyncResource
-        .getHarkinnanvaraisuudetForHakemukses(hakemusOids)
+    suorituspalveluAsyncResource
+        .haeHarkinnanvaraisuudet(hakemusOids)
         .thenApply(result -> deferredResult.setResult(result))
         .exceptionally(
             e -> {
