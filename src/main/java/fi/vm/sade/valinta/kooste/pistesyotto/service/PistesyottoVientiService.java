@@ -3,9 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.dokumentti.DokumenttiAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -39,17 +37,13 @@ public class PistesyottoVientiService extends AbstractPistesyottoKoosteService {
       ApplicationAsyncResource applicationAsyncResource,
       AtaruAsyncResource ataruAsyncResource,
       TarjontaAsyncResource tarjontaAsyncResource,
-      OhjausparametritAsyncResource ohjausparametritAsyncResource,
       OrganisaatioAsyncResource organisaatioAsyncResource,
-      DokumenttiAsyncResource dokumenttiAsyncResource,
-      SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource) {
+      DokumenttiAsyncResource dokumenttiAsyncResource) {
     super(
         applicationAsyncResource,
         ataruAsyncResource,
         valintapisteAsyncResource,
-        suoritusrekisteriAsyncResource,
         tarjontaAsyncResource,
-        ohjausparametritAsyncResource,
         organisaatioAsyncResource,
         valintaperusteetAsyncResource,
         valintalaskentaValintakoeAsyncResource);

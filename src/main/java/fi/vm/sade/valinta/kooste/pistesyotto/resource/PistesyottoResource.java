@@ -80,7 +80,7 @@ public class PistesyottoResource {
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
-      summary = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+      summary = "Lisätietokenttien haku hakemukselta")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   public DeferredResult<ResponseEntity> koostaPistetiedotYhdelleHakemukselle(
@@ -143,7 +143,7 @@ public class PistesyottoResource {
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
-      summary = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+      summary = "Lisätietokenttien haku hakemukselta")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   public DeferredResult<ResponseEntity> tallennaKoostetutPistetiedotHakemukselle(
@@ -237,7 +237,7 @@ public class PistesyottoResource {
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
-      summary = "Lisätietokenttien haku hakemukselta ja suoritusrekisteristä")
+      summary = "Lisätietokenttien haku hakemukselta")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   public DeferredResult<ResponseEntity<PistesyottoValilehtiDTO>> koostaPistetiedotHakemuksille(
@@ -309,7 +309,7 @@ public class PistesyottoResource {
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
-      summary = "Lisätietokenttien tallennus hakemuksille ja suoritusrekisteriin")
+      summary = "Lisätietokenttien tallennus hakemuksille")
   @PreAuthorize(
       "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
   public DeferredResult<ResponseEntity<Set<TuontiErrorDTO>>> tallennaKoostetutPistetiedot(

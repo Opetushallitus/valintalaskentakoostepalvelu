@@ -3,9 +3,7 @@ package fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.impl;
 import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
 import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
@@ -37,33 +35,6 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
       @Qualifier("SuoritusrekisteriCasClient") RestCasClient httpClient) {
     this.httpClient = httpClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
-  }
-
-  @Override
-  public Observable<List<Oppija>> getOppijatByHakukohde(String hakukohdeOid, String hakuOid) {
-    return Observable.fromFuture(
-        this.httpClient.get(
-            this.urlConfiguration.url("suoritusrekisteri.oppijat")
-                + "?hakukohde="
-                + hakukohdeOid
-                + "&haku="
-                + hakuOid,
-            new TypeToken<List<Oppija>>() {},
-            Collections.emptyMap(),
-            10 * 60 * 1000));
-  }
-
-  @Override
-  public CompletableFuture<List<Oppija>> getOppijatByHakukohdeWithoutEnsikertalaisuus(
-      String hakukohdeOid, String hakuOid) {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("hakukohde", hakukohdeOid);
-    parameters.put("haku", hakuOid);
-    parameters.put("ensikertalaisuudet", "false");
-    String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
-
-    return httpClient.get(
-        url, new TypeToken<List<Oppija>>() {}, Collections.emptyMap(), 5 * 60 * 1000);
   }
 
   @Override
@@ -137,53 +108,5 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
         .thenApplyAsync(
             (List<List<Oppija>> r) ->
                 r.stream().flatMap(List::stream).collect(Collectors.toList()));
-  }
-
-  @Override
-  public CompletableFuture<Suoritus> postSuoritus(Suoritus suoritus) {
-    return httpClient.post(
-        this.urlConfiguration.url("suoritusrekisteri.suoritukset"),
-        new com.google.gson.reflect.TypeToken<Suoritus>() {},
-        suoritus,
-        Collections.emptyMap(),
-        10 * 60 * 1000);
-  }
-
-  @Override
-  public CompletableFuture<Arvosana> postArvosana(Arvosana arvosana) {
-    return httpClient.post(
-        this.urlConfiguration.url("suoritusrekisteri.arvosanat"),
-        new com.google.gson.reflect.TypeToken<Arvosana>() {},
-        arvosana,
-        Collections.emptyMap(),
-        10 * 6 * 1000);
-  }
-
-  @Override
-  public CompletableFuture<Arvosana> updateExistingArvosana(
-      String arvosanaId, Arvosana arvosanaWithUpdatedValues) {
-
-    return httpClient.post(
-        this.urlConfiguration.url("suoritusrekisteri.arvosanat.id", arvosanaId),
-        new com.google.gson.reflect.TypeToken<Arvosana>() {},
-        arvosanaWithUpdatedValues,
-        Collections.emptyMap(),
-        10 * 60 * 1000);
-  }
-
-  @Override
-  public CompletableFuture<String> deleteSuoritus(String suoritusId) {
-    return httpClient.delete(
-        this.urlConfiguration.url("suoritusrekisteri.suoritukset.id", suoritusId),
-        Map.of("Accept", "*/*"),
-        60 * 1000);
-  }
-
-  @Override
-  public CompletableFuture<String> deleteArvosana(String arvosanaId) {
-    return httpClient.delete(
-        this.urlConfiguration.url("suoritusrekisteri.arvosanat.id", arvosanaId),
-        Map.of("Accept", "*/*"),
-        60 * 1000);
   }
 }
