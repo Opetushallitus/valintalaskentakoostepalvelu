@@ -69,12 +69,21 @@ public class HarkinnanvaraisuusResource {
         Changes.EMPTY,
         Collections.emptyMap());
 
+    LOG.info(
+        "Haetaan harkinnanvaraisuustiedot Suorituspalvelusta {} hakemukselle", hakemusOids.size());
     suorituspalveluAsyncResource
         .haeHarkinnanvaraisuudet(hakemusOids)
-        .thenApply(result -> deferredResult.setResult(result))
+        .thenApply(
+            result -> {
+              LOG.info(
+                  "Saatiin Suorituspalvelusta harkinnanvaraisuustiedot {} hakemukselle",
+                  result.size());
+              return deferredResult.setResult(result);
+            })
         .exceptionally(
             e -> {
-              LOG.error("Hakemusten harkinnanvaraisuustietojen haku epäonnistui: ", e);
+              LOG.error(
+                  "Hakemusten harkinnanvaraisuustietojen haku Suorituspalvelusta epäonnistui: ", e);
               deferredResult.setErrorResult(e);
               return null;
             });
