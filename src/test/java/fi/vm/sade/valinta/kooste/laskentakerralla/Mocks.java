@@ -5,7 +5,6 @@ import static org.mockito.Mockito.reset;
 
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
@@ -15,7 +14,6 @@ import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.Valintaperus
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.mocks.MockOppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.valintalaskenta.actor.KoskiService;
-import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 
 public class Mocks {
 
@@ -23,8 +21,6 @@ public class Mocks {
       mock(OrganisaatioAsyncResource.class);
   static ApplicationAsyncResource applicationAsyncResource = mock(ApplicationAsyncResource.class);
   static AtaruAsyncResource ataruAsyncResource = mock(AtaruAsyncResource.class);
-  static HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource =
-      mock(HarkinnanvaraisuusAsyncResource.class);
   static ValintaperusteetAsyncResource valintaperusteetAsyncResource =
       mock(ValintaperusteetAsyncResource.class);
   static OhjausparametritAsyncResource ohjausparametritAsyncResource =
@@ -35,8 +31,6 @@ public class Mocks {
   static ValintapisteAsyncResource valintapisteAsyncResource =
       mock(ValintapisteAsyncResource.class);
   static KoskiService koskiService = mock(KoskiService.class);
-  static HakemuksetConverterUtil hakemuksetConverterUtil =
-      new HakemuksetConverterUtil("9999-12-31", "9999-12-31", harkinnanvaraisuusAsyncResource);
   static OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource =
       new MockOppijanumerorekisteriAsyncResource();
 

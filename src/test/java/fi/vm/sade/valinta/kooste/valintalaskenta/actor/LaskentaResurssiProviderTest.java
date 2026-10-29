@@ -16,9 +16,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetJarjestyskriteeri
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -58,8 +55,6 @@ public class LaskentaResurssiProviderTest {
   private final ValintapisteAsyncResource valintapisteAsyncResource =
       mock(ValintapisteAsyncResource.class);
   private final KoskiService koskiService = mock(KoskiService.class);
-  private final OhjausparametritAsyncResource ohjausparametritAsyncResource =
-      mock(OhjausparametritAsyncResource.class);
 
   private final HakemusWrapper hakemus = MockAtaruAsyncResource.getAtaruHakemusWrapper(HAKEMUS_OID);
 
@@ -74,16 +69,12 @@ public class LaskentaResurssiProviderTest {
             tarjontaAsyncResource,
             valintapisteAsyncResource,
             koskiService,
-            new HakemuksetConverterUtil(
-                "9999-12-31", "9999-12-31", mock(HarkinnanvaraisuusAsyncResource.class)),
+            new HakemuksetConverterUtil(),
             mock(OppijanumerorekisteriAsyncResource.class),
-            ohjausparametritAsyncResource,
             mock(CloudWatchClient.class),
             mock(ParametritDao.class),
             "test");
 
-    when(ohjausparametritAsyncResource.haeHaunOhjausparametrit(HAKU_OID))
-        .thenReturn(CompletableFuture.completedFuture(new ParametritDTO()));
     when(tarjontaAsyncResource.haeHaku(HAKU_OID))
         .thenReturn(
             CompletableFuture.completedFuture(

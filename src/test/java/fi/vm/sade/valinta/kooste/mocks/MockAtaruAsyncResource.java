@@ -76,12 +76,6 @@ public class MockAtaruAsyncResource implements AtaruAsyncResource {
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(
-      List<String> oids) {
-    return CompletableFuture.completedFuture(byOidsResult); // todo add harkinnanvaraisuustietos
-  }
-
-  @Override
   public Observable<List<AtaruSyntheticApplicationResponse>> putApplicationPrototypes(
       Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
     return Observable.fromFuture(

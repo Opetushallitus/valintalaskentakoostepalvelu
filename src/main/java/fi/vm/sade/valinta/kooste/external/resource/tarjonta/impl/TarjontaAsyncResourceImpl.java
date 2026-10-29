@@ -60,10 +60,6 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
   private final Cache<String, CompletableFuture<List<String>>> hakukohderyhmanHakukohteetCache =
       CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build();
 
-  private final Cache<String, CompletableFuture<Map<String, List<String>>>>
-      haunHakukohteidenHakukohderyhmatCache =
-          CacheBuilder.newBuilder().expireAfterAccess(1, TimeUnit.HOURS).build();
-
   @Autowired
   public TarjontaAsyncResourceImpl(
       @Qualifier("TarjontaHttpClient") HttpClient client,
@@ -309,18 +305,6 @@ public class TarjontaAsyncResourceImpl implements TarjontaAsyncResource {
             Duration.ofMinutes(5),
             new TypeToken<ResultV1RDTO<Set<String>>>() {}.getType())
         .thenApplyAsync(r -> r.getResult() == null ? new HashSet<>() : r.getResult());
-  }
-
-  @Override
-  public CompletableFuture<Map<String, List<String>>> haunHakukohderyhmatCached(String hakuOid) {
-    try {
-      return haunHakukohteidenHakukohderyhmatCache.get(
-          hakuOid, () -> hakukohdeRyhmasForHakukohdes(hakuOid));
-    } catch (ExecutionException e) {
-      LOG.error(
-          "Haun {} hakukohteiden hakukohderyhmien haku epäonnistui: {}", hakuOid, e.getMessage());
-      return CompletableFuture.failedFuture(e);
-    }
   }
 
   @Override

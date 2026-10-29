@@ -103,9 +103,6 @@ valintalaskentakoostepalvelu.global.http.connectionTimeoutMillis={{valintalasken
 valintalaskentakoostepalvelu.global.http.receiveTimeoutMillis={{valintalaskentakoostepalvelu_global_http_receivetimeoutmillis}}
 valintalaskentakoostepalvelu.hakuimport.threadpoolsize={{ valintalaskentakoostepalvelu_hakuimport_threadpoolsize | default("10") }}
 valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize={{ valintalaskentakoostepalvelu_hakukohdeimport_threadpoolsize | default("10") }}
-# Päivämäärä, josta lähtien abien pohjakoulutus päätellään suoritusrekisteristä löytyvien lukiosuoritusten perusteella
-valintalaskentakoostepalvelu.abi.pohjakoulutus.paattely.leikkuripvm={{ valintalaskentakoostepalvelu_pohjakoulutus_paattely_leikkuripvm | default('2020-06-01') }}
-
 valintalaskentakoostepalvelu.harkinnanvaraisuus.paattely.leikkuripvm={{ suoritusrekisteri_koski_deadline_date | default('2022-06-06') }}
 
 #SEURANTA

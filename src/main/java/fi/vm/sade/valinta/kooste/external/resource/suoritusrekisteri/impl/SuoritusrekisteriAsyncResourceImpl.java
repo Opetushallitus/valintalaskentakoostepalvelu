@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RestCasClient;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import fi.vm.sade.valinta.kooste.util.CompletableFutureUtil;
-import io.reactivex.Observable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,38 +34,6 @@ public class SuoritusrekisteriAsyncResourceImpl implements SuoritusrekisteriAsyn
       @Qualifier("SuoritusrekisteriCasClient") RestCasClient httpClient) {
     this.httpClient = httpClient;
     this.urlConfiguration = UrlConfiguration.getInstance();
-  }
-
-  @Override
-  public Observable<Oppija> getSuorituksetByOppija(String opiskelijaOid, String hakuOid) {
-    String uri =
-        this.urlConfiguration.url("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid)
-            + "?haku="
-            + hakuOid;
-    LOG.info("Calling url {}", uri);
-    return Observable.fromFuture(
-        this.httpClient.get(
-            uri, new TypeToken<Oppija>() {}, Collections.emptyMap(), 10 * 60 * 1000));
-  }
-
-  @Override
-  public CompletableFuture<List<Oppija>> getSuorituksetByOppijas(
-      List<String> opiskelijaOids, String hakuOid, boolean fetchEnsikertalaisuus) {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("ensikertalaisuudet", fetchEnsikertalaisuus ? "true" : "false");
-    parameters.put("haku", hakuOid);
-    String url = this.urlConfiguration.url("suoritusrekisteri.oppijat", parameters);
-    return batchedPostOppijasFuture(opiskelijaOids, url);
-  }
-
-  @Override
-  public Observable<Oppija> getSuorituksetWithoutEnsikertalaisuus(String opiskelijaOid) {
-    String url =
-        this.urlConfiguration.url("suoritusrekisteri.oppijat.opiskelijaoid", opiskelijaOid);
-    LOG.info("Calling url {}", url);
-    return Observable.fromFuture(
-        this.httpClient.get(
-            url, new TypeToken<Oppija>() {}, Collections.emptyMap(), 10 * 60 * 1000));
   }
 
   @Override

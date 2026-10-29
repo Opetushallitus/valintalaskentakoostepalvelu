@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuudenSyy;
 import java.util.List;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
@@ -41,15 +40,5 @@ public class HakemuksenHarkinnanvaraisuus {
 
   public void setHakutoiveet(List<HakutoiveenHarkinnanvaraisuus> hakutoiveet) {
     this.hakutoiveet = hakutoiveet;
-  }
-
-  public boolean hasYksilollistettyMatAi() {
-    return this.hakutoiveet.stream()
-        .anyMatch(
-            ht ->
-                List.of(
-                        HarkinnanvaraisuudenSyy.SURE_YKS_MAT_AI,
-                        HarkinnanvaraisuudenSyy.ATARU_YKS_MAT_AI)
-                    .contains(ht.getHarkinnanvaraisuudenSyy()));
   }
 }

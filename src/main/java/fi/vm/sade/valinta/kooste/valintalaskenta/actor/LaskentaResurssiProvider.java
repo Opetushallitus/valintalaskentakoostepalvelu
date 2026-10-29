@@ -7,8 +7,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
@@ -52,13 +50,10 @@ public class LaskentaResurssiProvider {
   private final TarjontaAsyncResource tarjontaAsyncResource;
   private final KoskiService koskiService;
   private final HakemuksetConverterUtil hakemuksetConverterUtil;
-  private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
   private final ParametritDao parametritDao;
   private final ExecutorService executor = Executors.newWorkStealingPool(256);
 
   private final int NO_LIMIT_PERMITS = Integer.MAX_VALUE;
-  private final ConcurrencyLimiter parametritLimiter =
-      new ConcurrencyLimiter("parametrit", this.executor);
   private final ConcurrencyLimiter hakuLimiter = new ConcurrencyLimiter("haku", this.executor);
   private final ConcurrencyLimiter hakukohderyhmatLimiter =
       new ConcurrencyLimiter("hakukohderyhmat", this.executor);
@@ -75,7 +70,6 @@ public class LaskentaResurssiProvider {
 
   private final Map<String, ConcurrencyLimiter> limiters =
       Map.of(
-          "parametritLimiter", parametritLimiter,
           "hakuLimiter", hakuLimiter,
           "ataruhakemuksetLimiter", ataruhakemuksetLimiter,
           "hakukohderyhmatLimiter", hakukohderyhmatLimiter,
@@ -97,7 +91,6 @@ public class LaskentaResurssiProvider {
       KoskiService koskiService,
       HakemuksetConverterUtil hakemuksetConverterUtil,
       OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
-      OhjausparametritAsyncResource ohjausparametritAsyncResource,
       CloudWatchClient cloudWatchClient,
       ParametritDao parametritDao,
       @Value("${environment.name}") String environmentName) {
@@ -108,7 +101,6 @@ public class LaskentaResurssiProvider {
     this.koskiService = koskiService;
     this.hakemuksetConverterUtil = hakemuksetConverterUtil;
     this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
-    this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
     this.cloudWatchClient = cloudWatchClient;
     this.environmentName = environmentName;
     this.parametritDao = parametritDao;
@@ -269,7 +261,6 @@ public class LaskentaResurssiProvider {
       CompletableFuture<Haku> haku,
       String hakukohdeOid,
       boolean isErillishaku,
-      CompletableFuture<ParametritDTO> parametritDTO,
       CompletableFuture<List<ValintaperusteetDTO>> valintaperusteetF,
       CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesF,
       CompletableFuture<PisteetWithLastModified> valintapisteetForHakukohdesF,
@@ -278,7 +269,6 @@ public class LaskentaResurssiProvider {
       CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOidF) {
     return CompletableFuture.allOf(
             haku,
-            parametritDTO,
             valintapisteetForHakukohdesF,
             hakijaryhmatF,
             valintaperusteetF,
@@ -311,15 +301,10 @@ public class LaskentaResurssiProvider {
                   isErillishaku,
                   hakukohdeOid,
                   hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
-                      haku.join(),
                       hakukohdeOid,
                       ryhmatHakukohteittain,
                       hakemukset,
-                      pisteetWithLastModified.valintapisteet,
-                      null,
-                      parametritDTO.join(),
-                      true,
-                      true),
+                      pisteetWithLastModified.valintapisteet),
                   valintaperusteet,
                   hakijaryhmatF.join(),
                   false);
@@ -386,12 +371,6 @@ public class LaskentaResurssiProvider {
     Map<String, Duration> waitDurations = new ConcurrentHashMap<>();
     Map<String, Duration> invokeDurations = new ConcurrentHashMap<>();
 
-    final CompletableFuture<ParametritDTO> parametritDTOFuture =
-        this.parametritLimiter.withConcurrencyLimit(
-            1,
-            waitDurations,
-            invokeDurations,
-            () -> ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid));
     final CompletableFuture<Haku> hakuFuture =
         this.hakuLimiter.withConcurrencyLimit(
             1, waitDurations, invokeDurations, () -> tarjontaAsyncResource.haeHaku(hakuOid));
@@ -523,7 +502,6 @@ public class LaskentaResurssiProvider {
             hakuFuture,
             hakukohdeOid,
             isErillishaku,
-            parametritDTOFuture,
             valintaperusteet,
             hakukohdeRyhmasForHakukohdes,
             valintapisteetHakemuksille,
