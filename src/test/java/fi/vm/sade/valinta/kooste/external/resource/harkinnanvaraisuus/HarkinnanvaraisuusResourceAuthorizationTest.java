@@ -41,11 +41,6 @@ public class HarkinnanvaraisuusResourceAuthorizationTest {
     }
 
     @Bean
-    HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource() {
-      return mock(HarkinnanvaraisuusAsyncResource.class);
-    }
-
-    @Bean
     SuorituspalveluAsyncResource suorituspalveluAsyncResource() {
       return mock(SuorituspalveluAsyncResource.class);
     }

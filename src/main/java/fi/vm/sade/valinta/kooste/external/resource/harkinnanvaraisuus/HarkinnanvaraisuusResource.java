@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +33,6 @@ import org.springframework.web.context.request.async.DeferredResult;
 @Tag(name = "/harkinnanvaraisuus", description = "Hakemusten harkinnanvaraisuustiedot")
 public class HarkinnanvaraisuusResource {
   private static final Logger LOG = LoggerFactory.getLogger(HarkinnanvaraisuusResource.class);
-
-  @Autowired private HarkinnanvaraisuusAsyncResource harkinnanvaraisuusAsyncResource;
 
   @Autowired private SuorituspalveluAsyncResource suorituspalveluAsyncResource;
 
@@ -84,53 +81,6 @@ public class HarkinnanvaraisuusResource {
             e -> {
               LOG.error(
                   "Hakemusten harkinnanvaraisuustietojen haku Suorituspalvelusta epäonnistui: ", e);
-              deferredResult.setErrorResult(e);
-              return null;
-            });
-
-    return deferredResult;
-  }
-
-  @PreAuthorize(
-      "hasAnyRole('ROLE_APP_HAKEMUS_READ_UPDATE', 'ROLE_APP_HAKEMUS_READ', 'ROLE_APP_HAKEMUS_CRUD', 'ROLE_APP_HAKEMUS_LISATIETORU', 'ROLE_APP_HAKEMUS_LISATIETOCRUD')")
-  @PostMapping(
-      value = "/atarutiedoille",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  @Operation(
-      summary = "Synkatut harkinnanvaraisuudet atarutiedoille",
-      responses = {
-        @ApiResponse(
-            responseCode = "OK",
-            content =
-                @Content(schema = @Schema(implementation = HakemuksenHarkinnanvaraisuus[].class)))
-      })
-  public DeferredResult<List<HakemuksenHarkinnanvaraisuus>>
-      hakemustenHarkinnanvaraisuustiedotAtarutiedoille(
-          @RequestBody List<HakemuksenHarkinnanvaraisuus> atarutiedot, HttpServletRequest request) {
-
-    DeferredResult<List<HakemuksenHarkinnanvaraisuus>> deferredResult =
-        new DeferredResult<>(60 * 60 * 1000l);
-
-    String targetOids =
-        atarutiedot.stream()
-            .map(HakemuksenHarkinnanvaraisuus::getHakemusOid)
-            .collect(Collectors.joining(","));
-    AuditLog.log(
-        KoosteAudit.AUDIT,
-        AuthorizationUtil.createAuditSession(request).asAuditUser(),
-        ValintaperusteetOperation.HAKEMUS, // fixme, sharedutils
-        ValintaResource.HAKEMUKSET, // fixme, sharedutils
-        targetOids,
-        Changes.EMPTY,
-        Collections.emptyMap());
-
-    harkinnanvaraisuusAsyncResource
-        .getSyncedHarkinnanvaraisuudes(atarutiedot)
-        .thenApply(result -> deferredResult.setResult(result))
-        .exceptionally(
-            e -> {
-              LOG.error("Hakemusten harkinnanvaraisuustietojen haku epäonnistui: ", e);
               deferredResult.setErrorResult(e);
               return null;
             });

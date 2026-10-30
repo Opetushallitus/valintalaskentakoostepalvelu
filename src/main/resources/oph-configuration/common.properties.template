@@ -103,7 +103,6 @@ valintalaskentakoostepalvelu.global.http.connectionTimeoutMillis={{valintalasken
 valintalaskentakoostepalvelu.global.http.receiveTimeoutMillis={{valintalaskentakoostepalvelu_global_http_receivetimeoutmillis}}
 valintalaskentakoostepalvelu.hakuimport.threadpoolsize={{ valintalaskentakoostepalvelu_hakuimport_threadpoolsize | default("10") }}
 valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize={{ valintalaskentakoostepalvelu_hakukohdeimport_threadpoolsize | default("10") }}
-valintalaskentakoostepalvelu.harkinnanvaraisuus.paattely.leikkuripvm={{ suoritusrekisteri_koski_deadline_date | default('2022-06-06') }}
 
 #SEURANTA
 valintalaskentakoostepalvelu.seuranta.rest.url=https://${host.virkailija}/seuranta-service/resources

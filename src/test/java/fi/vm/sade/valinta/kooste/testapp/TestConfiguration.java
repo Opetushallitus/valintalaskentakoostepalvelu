@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
 import fi.vm.sade.javautils.opintopolku_spring_security.OidProvider;
 import fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer;
-import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl.HarkinnanvaraisuusAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
@@ -124,13 +122,6 @@ public class TestConfiguration {
       ApplicationContext ctx) {
     return ctx.getAutowireCapableBeanFactory()
         .createBean(ValinnanvaiheenValintakoekutsutService.class);
-  }
-
-  @Bean
-  public HarkinnanvaraisuusAsyncResource getHarkinnanvaraisuusAsyncResource(
-      ApplicationContext ctx) {
-    return ctx.getAutowireCapableBeanFactory()
-        .createBean(HarkinnanvaraisuusAsyncResourceImpl.class);
   }
 
   @Bean

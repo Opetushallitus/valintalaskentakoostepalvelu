@@ -7,7 +7,6 @@ import fi.vm.sade.valinta.kooste.erillishaku.excel.Sukupuoli;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloCreateDTO;
 import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloPerustietoDto;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloViiteDto;
 import io.reactivex.Observable;
 import java.time.LocalDate;
 import java.util.*;
@@ -66,12 +65,6 @@ public class MockOppijanumerorekisteriAsyncResource implements Oppijanumerorekis
   @Override
   public CompletableFuture<Map<String, HenkiloPerustietoDto>> haeHenkilot(List<String> personOids) {
     return CompletableFuture.completedFuture(new HashMap<>());
-  }
-
-  @Override
-  public CompletableFuture<List<HenkiloViiteDto>> haeHenkiloOidDuplikaatit(Set<String> personOids) {
-    return CompletableFuture.completedFuture(
-        personOids.stream().map(oid -> new HenkiloViiteDto(oid, oid)).collect(Collectors.toList()));
   }
 
   public static HenkiloPerustietoDto toHenkiloPerustietoDto(HenkiloCreateDTO proto) {
