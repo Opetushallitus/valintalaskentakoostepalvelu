@@ -191,11 +191,6 @@ public class KoosteTestProfileConfiguration {
     return REST_CAS_CLIENT;
   }
 
-  @Bean(name = "SuoritusrekisteriCasClient")
-  public RestCasClient getSuoritusrekisteriCasClient() {
-    return REST_CAS_CLIENT;
-  }
-
   @Bean(name = "SuorituspalveluCasClient")
   public RestCasClient getSuorituspalveluCasClient() {
     return REST_CAS_CLIENT;

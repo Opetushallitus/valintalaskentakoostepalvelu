@@ -235,26 +235,6 @@ public class HttpClients {
         defaultHttpClientBuilder(cookieManager).build(), DateDeserializer.gsonBuilder().create());
   }
 
-  @Bean(name = "SuoritusrekisteriInternalHttpClient")
-  public java.net.http.HttpClient getSuoritusrekisteriInternalHttpClient(
-      CookieManager cookieManager) {
-    return defaultHttpClientBuilder(cookieManager).build();
-  }
-
-  @Profile({"default", "dev"})
-  @Bean(name = "SuoritusrekisteriCasClient")
-  public RestCasClient getSuoritusrekisteriCasClient(
-      @Value("${cas.service.suoritusrekisteri}") String service,
-      @Value("${valintalaskentakoostepalvelu.app.username.to.valintatieto}") String username,
-      @Value("${valintalaskentakoostepalvelu.app.password.to.valintatieto}") String password) {
-    String ticketsUrl = UrlConfiguration.getInstance().url("cas.tickets");
-    return new RestCasClient(
-        new CasConfig.CasConfigBuilder(
-                username, password, ticketsUrl, service, CSRF_VALUE, CALLER_ID, "")
-            .setJsessionName("JSESSIONID")
-            .build());
-  }
-
   @Profile({"default", "dev"})
   @Bean(name = "SuorituspalveluCasClient")
   public RestCasClient getSuorituspalveluCasClient(

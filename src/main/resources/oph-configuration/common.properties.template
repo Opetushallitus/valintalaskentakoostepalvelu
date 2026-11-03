@@ -41,8 +41,6 @@ valintalaskentakoostepalvelu.app.username.to.valinta-tulos-service={{valintalask
 valintalaskentakoostepalvelu.app.password.to.valinta-tulos-service={{valintalaskentakoostepalvelu_app_password_to_valinta_tulos_service}}
 valintalaskentakoostepalvelu.app.username.to.viestintapalvelu={{valintalaskentakoostepalvelu_app_username_to_viestintapalvelu}}
 valintalaskentakoostepalvelu.app.password.to.viestintapalvelu={{valintalaskentakoostepalvelu_app_password_to_viestintapalvelu}}
-valintalaskentakoostepalvelu.app.username.to.suoritusrekisteri={{valintalaskentakoostepalvelu_app_username_to_haku}}
-valintalaskentakoostepalvelu.app.password.to.suoritusrekisteri={{valintalaskentakoostepalvelu_app_password_to_haku}}
 
 # Oletusarvoja
 cas.callback.valintalaskentakoostepalvelu=http://{{ cluster_valinta_host }}:{{ cluster_valinta_port }}/valintalaskentakoostepalvelu
@@ -59,7 +57,6 @@ cas.service.valintalaskenta-service=https://${host.virkailija}/valintalaskenta-l
 cas.service.oppijan-tunnistus=https://${host.virkailija}/oppijan-tunnistus/auth/cas
 cas.service.valintaperusteet-service=https://${host.virkailija}/valintaperusteet-service/j_spring_cas_security_check
 cas.service.viestintapalvelu=https://${host.virkailija}/viestintapalvelu/j_spring_cas_security_check
-cas.service.suoritusrekisteri=https://${host.virkailija}/suoritusrekisteri/j_spring_cas_security_check
 cas.service.suorituspalvelu=https://${host.virkailija}/suorituspalvelu/api/login/j_spring_cas_security_check
 cas.service.authentication-service=https://${host.virkailija}/authentication-service/j_spring_cas_security_check
 cas.service.oppijanumerorekisteri-service=https://${host.virkailija}/oppijanumerorekisteri-service/j_spring_cas_security_check
