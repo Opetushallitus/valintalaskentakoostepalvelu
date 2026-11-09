@@ -9,10 +9,10 @@ import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class ValintaTulosServiceProxyResourceTest {
+public class VastaanottoAikarajaMennytDTOTest {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public ValintaTulosServiceProxyResourceTest() {
+  public VastaanottoAikarajaMennytDTOTest() {
     objectMapper.registerModule(
         new ValintaTulosServiceProxyResource.ValintaTulosServiceSerializersModule());
   }
@@ -25,7 +25,9 @@ public class ValintaTulosServiceProxyResourceTest {
     String vastaanottoDeadline = "2016-07-15T12:00:00Z";
     dto.setVastaanottoDeadline(ZonedDateTime.of(2016, 7, 15, 12, 0, 0, 0, ZoneOffset.UTC));
     dto.setMennyt(true);
+
     String jsonString = objectMapper.writeValueAsString(dto);
+
     Assertions.assertEquals(
         String.format(
             "{\"hakemusOid\":\"%s\",\"mennyt\":true,\"vastaanottoDeadline\":\"%s\"}",
@@ -39,7 +41,9 @@ public class ValintaTulosServiceProxyResourceTest {
     dto.setHakemusOid(hakemusOid);
     dto.setVastaanottoDeadline(null);
     dto.setMennyt(true);
+
     String jsonString = objectMapper.writeValueAsString(dto);
+
     Assertions.assertEquals(
         String.format("{\"hakemusOid\":\"%s\",\"mennyt\":true}", hakemusOid), jsonString);
   }
