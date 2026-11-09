@@ -1,7 +1,7 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class TilaDataArvo extends PistesyottoDataArvo {
   private final Map<String, String> tilaKonvertteri;

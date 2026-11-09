@@ -1,7 +1,6 @@
 package fi.vm.sade.valinta.kooste.external.resource.organisaatio.impl;
 
 import com.google.gson.reflect.TypeToken;
-import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,24 +48,6 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
         this.urlConfiguration.url("organisaatio-service.organisaatio.hierarkia.tyyppi", parameters),
         Duration.ofMinutes(1),
         new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType());
-  }
-
-  @Override
-  public CompletableFuture<Optional<HakutoimistoDTO>> haeHakutoimisto(String organisaatioId) {
-    return this.client
-        .getResponse(
-            this.urlConfiguration.url(
-                "organisaatio-service.organisaatio.hakutoimisto", organisaatioId),
-            Duration.ofMinutes(1),
-            x -> x)
-        .thenApply(
-            response -> {
-              if (response.statusCode() == 404) {
-                return Optional.empty();
-              }
-              return Optional.of(
-                  this.client.parseJson(response, new TypeToken<HakutoimistoDTO>() {}.getType()));
-            });
   }
 
   @Override

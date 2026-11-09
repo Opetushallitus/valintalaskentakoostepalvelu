@@ -2,7 +2,7 @@ package fi.vm.sade.valinta.kooste.viestintapalvelu.dto;
 
 import fi.vm.sade.valinta.kooste.util.KieliUtil;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /** Metadataa luotavan dokumentin mukauttamiseen */
 public class DokumentinLisatiedot {

@@ -11,7 +11,6 @@ import static javax.ws.rs.HttpMethod.GET;
 import fi.vm.sade.tarjonta.service.resources.v1.dto.HakuV1RDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametriDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
-import fi.vm.sade.valinta.kooste.server.SeurantaServerMock;
 import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import java.util.Arrays;
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Test;
 
 @Disabled
 public class LaskentaKerrallaE2ETest {
-  private final SeurantaServerMock seurantaServerMock = new SeurantaServerMock();
 
   @BeforeEach
   public void startServer() {
@@ -36,7 +34,6 @@ public class LaskentaKerrallaE2ETest {
 
   @Test
   public void testaaLaskentaa() {
-    mockForward(seurantaServerMock);
     HttpResourceBuilder.WebClientExposingHttpResource http =
         new HttpResourceBuilder(getClass().getName())
             .address(

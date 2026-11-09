@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.util.excel;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Highlight {
   private final Object text;
