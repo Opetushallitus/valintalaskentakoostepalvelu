@@ -27,7 +27,7 @@
         <sijoittelu.version>10.1.0-SNAPSHOT</sijoittelu.version>
         <valinta-sharedutils.version>8.3-SNAPSHOT</valinta-sharedutils.version>
         <valintaperusteet.version>8.2-SNAPSHOT</valintaperusteet.version>
-        <valintalaskenta.version>8.0-SNAPSHOT</valintalaskenta.version>
+        <valintalaskenta.version>8.3-SNAPSHOT</valintalaskenta.version>
     </properties>
 
     <dependencyManagement>
@@ -212,6 +212,13 @@
                         <artifactId>slf4j-reload4j</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <!-- yhtenäistää sijoittelu-algoritmi-domainin transitiivisesti tuoman version
+                 valintalaskenta-domainin version kanssa -->
+            <dependency>
+                <groupId>fi.vm.sade.valintaperusteet</groupId>
+                <artifactId>valintalaskenta-laskenta-api</artifactId>
+                <version>${valintalaskenta.version}</version>
             </dependency>
             <dependency>
                 <groupId>fi.vm.sade.valintaperusteet</groupId>

@@ -269,12 +269,6 @@ public class AtaruAsyncResourceImpl implements AtaruAsyncResource {
   }
 
   @Override
-  public CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(
-      List<String> oids) {
-    return getApplications(null, oids, true);
-  }
-
-  @Override
   public Observable<List<AtaruSyntheticApplicationResponse>> putApplicationPrototypes(
       Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit) {
     String url = this.urlConfiguration.url("ataru.post-synthetic-applications");

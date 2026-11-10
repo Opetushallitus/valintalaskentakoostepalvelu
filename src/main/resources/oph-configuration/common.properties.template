@@ -41,8 +41,6 @@ valintalaskentakoostepalvelu.app.username.to.valinta-tulos-service={{valintalask
 valintalaskentakoostepalvelu.app.password.to.valinta-tulos-service={{valintalaskentakoostepalvelu_app_password_to_valinta_tulos_service}}
 valintalaskentakoostepalvelu.app.username.to.viestintapalvelu={{valintalaskentakoostepalvelu_app_username_to_viestintapalvelu}}
 valintalaskentakoostepalvelu.app.password.to.viestintapalvelu={{valintalaskentakoostepalvelu_app_password_to_viestintapalvelu}}
-valintalaskentakoostepalvelu.app.username.to.suoritusrekisteri={{valintalaskentakoostepalvelu_app_username_to_haku}}
-valintalaskentakoostepalvelu.app.password.to.suoritusrekisteri={{valintalaskentakoostepalvelu_app_password_to_haku}}
 
 # Oletusarvoja
 cas.callback.valintalaskentakoostepalvelu=http://{{ cluster_valinta_host }}:{{ cluster_valinta_port }}/valintalaskentakoostepalvelu
@@ -59,7 +57,7 @@ cas.service.valintalaskenta-service=https://${host.virkailija}/valintalaskenta-l
 cas.service.oppijan-tunnistus=https://${host.virkailija}/oppijan-tunnistus/auth/cas
 cas.service.valintaperusteet-service=https://${host.virkailija}/valintaperusteet-service/j_spring_cas_security_check
 cas.service.viestintapalvelu=https://${host.virkailija}/viestintapalvelu/j_spring_cas_security_check
-cas.service.suoritusrekisteri=https://${host.virkailija}/suoritusrekisteri/j_spring_cas_security_check
+cas.service.suorituspalvelu=https://${host.virkailija}/suorituspalvelu/api/login/j_spring_cas_security_check
 cas.service.authentication-service=https://${host.virkailija}/authentication-service/j_spring_cas_security_check
 cas.service.oppijanumerorekisteri-service=https://${host.virkailija}/oppijanumerorekisteri-service/j_spring_cas_security_check
 root.organisaatio.oid=1.2.246.562.10.00000000001
@@ -102,10 +100,6 @@ valintalaskentakoostepalvelu.global.http.connectionTimeoutMillis={{valintalasken
 valintalaskentakoostepalvelu.global.http.receiveTimeoutMillis={{valintalaskentakoostepalvelu_global_http_receivetimeoutmillis}}
 valintalaskentakoostepalvelu.hakuimport.threadpoolsize={{ valintalaskentakoostepalvelu_hakuimport_threadpoolsize | default("10") }}
 valintalaskentakoostepalvelu.hakukohdeimport.threadpoolsize={{ valintalaskentakoostepalvelu_hakukohdeimport_threadpoolsize | default("10") }}
-# Päivämäärä, josta lähtien abien pohjakoulutus päätellään suoritusrekisteristä löytyvien lukiosuoritusten perusteella
-valintalaskentakoostepalvelu.abi.pohjakoulutus.paattely.leikkuripvm={{ valintalaskentakoostepalvelu_pohjakoulutus_paattely_leikkuripvm | default('2020-06-01') }}
-
-valintalaskentakoostepalvelu.harkinnanvaraisuus.paattely.leikkuripvm={{ suoritusrekisteri_koski_deadline_date | default('2022-06-06') }}
 
 #SEURANTA
 valintalaskentakoostepalvelu.seuranta.rest.url=https://${host.virkailija}/seuranta-service/resources

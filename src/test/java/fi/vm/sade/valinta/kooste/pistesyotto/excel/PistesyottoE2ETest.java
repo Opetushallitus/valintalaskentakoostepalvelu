@@ -25,20 +25,11 @@ import fi.vm.sade.valinta.kooste.MockOpintopolkuCasAuthenticationFilter;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvio;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanat;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultTulos;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
-import fi.vm.sade.valinta.kooste.pistesyotto.service.AbstractPistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
@@ -48,7 +39,6 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -118,12 +108,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     mockToReturnJsonWithParams(
         GET,
-        "/suoritusrekisteri/rest/v1/oppijat",
-        Arrays.asList(createOppija()),
-        ImmutableMap.of("haku", "testioidi1", "hakukohde", "1.2.246.562.5.85532589612"));
-
-    mockToReturnJsonWithParams(
-        GET,
         "/haku-app/applications/listfull",
         convertToHakemusSkeletons(applicationAdditionalDataDtos),
         ImmutableMap.of("asId", "testioidi1", "aoOid", "1.2.246.562.5.85532589612"));
@@ -143,7 +127,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
     mockTarjontaHakukohdeCall();
     mockTarjontaHakuCall();
-    mockOrganisaatioKutsu();
 
     Organisaatio organisaatio = new Organisaatio();
     organisaatio.setOid("1.2.3.44444.5");
@@ -162,11 +145,7 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
   }
 
   @Test
-  public void tuonnissaKirjoitetaanSuoritusrekisteriinjaValintaPisteServiceen() throws Throwable {
-    final Semaphore suoritusCounter = new Semaphore(0);
-    final Semaphore arvosanaCounter = new Semaphore(0);
-    mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
-
+  public void tuonnissaKirjoitetaanValintaPisteServiceen() throws Throwable {
     String url = resourcesAddress + "/pistesyotto/tuonti";
     HttpResourceBuilder.WebClientExposingHttpResource http = createHttpResource(url);
     final Semaphore counter = new Semaphore(0);
@@ -199,8 +178,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
             }));
     postExcelAndExpectOkResponseWithRetry(http, "1.2.246.562.5.85532589612");
     try {
-      Assertions.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
-      Assertions.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
       Assertions.assertTrue(counter.tryAcquire(1, 25, TimeUnit.SECONDS));
     } catch (InterruptedException e) {
       Assertions.fail();
@@ -209,10 +186,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
 
   @Test
   public void tuontiOnnistuuKayttajalleJollaOnOikeudetHakukohteeseen() throws Throwable {
-    final Semaphore suoritusCounter = new Semaphore(0);
-    final Semaphore arvosanaCounter = new Semaphore(0);
-    mockSuoritusrekisteri(suoritusCounter, arvosanaCounter);
-
     String kayttajanOrganisaatioOid = "1.2.246.562.10.666";
     MockOpintopolkuCasAuthenticationFilter.setRolesToReturnInFakeAuthentication(
         "ROLE_APP_HAKEMUS_READ_UPDATE_" + kayttajanOrganisaatioOid);
@@ -238,8 +211,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
             }));
     postExcelAndExpectOkResponseWithRetry(http, hakukohdeOidFromUiRequest);
     try {
-      Assertions.assertTrue(suoritusCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
-      Assertions.assertTrue(arvosanaCounter.tryAcquire(5, 25, TimeUnit.SECONDS));
       Assertions.assertTrue(counter.tryAcquire(1, 25, TimeUnit.SECONDS));
     } catch (InterruptedException e) {
       Assertions.fail();
@@ -335,73 +306,6 @@ public class PistesyottoE2ETest extends PistesyotonTuontiTestBase {
     haku.setHakukohdeOids(singletonList("1.2.246.562.5.85532589612"));
     haku.setTarjoajaOids(new String[] {});
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/testioidi1", new Result(haku));
-  }
-
-  private void mockOrganisaatioKutsu() {
-
-    OrganisaatioTyyppiHierarkia hierarkia =
-        new OrganisaatioTyyppiHierarkia(
-            1,
-            Arrays.asList(
-                new OrganisaatioTyyppi(
-                    "1.2.246.562.10.45042175963",
-                    ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
-                    Arrays.asList(
-                        new OrganisaatioTyyppi(
-                            "1.2.246.562.10.45698499378",
-                            ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
-                            Arrays.asList(
-                                new OrganisaatioTyyppi(
-                                    "1.2.3.44444.5",
-                                    ImmutableMap.of(
-                                        "fi",
-                                        "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                    Arrays.asList(),
-                                    null,
-                                    Arrays.asList("TOIMIPISTE"))),
-                            "oppilaitostyyppi_21#1",
-                            Arrays.asList("OPPILAITOS"))),
-                    null,
-                    Arrays.asList("KOULUTUSTOIMIJA"))));
-    mockToReturnJsonWithParams(
-        GET,
-        "/organisaatio-service/rest/organisaatio/v2/hierarkia/hae/tyyppi.*",
-        hierarkia,
-        ImmutableMap.of(
-            "oid",
-            "1.2.3.44444.5",
-            "aktiiviset",
-            "true",
-            "suunnitellut",
-            "true",
-            "lakkautetut",
-            "true"));
-  }
-
-  private Oppija createOppija() {
-    String valmistuminen =
-        new SimpleDateFormat(SuoritusJaArvosanatWrapper.SUORITUS_PVM_FORMAT).format(new Date());
-    Oppija oppija = new Oppija();
-    oppija.setOppijanumero("1.2.246.562.24.77642460905");
-    Suoritus suoritus = new Suoritus();
-    suoritus.setHenkiloOid("1.2.246.562.24.77642460905");
-    suoritus.setTila(AbstractPistesyottoKoosteService.KIELIKOE_SUORITUS_TILA);
-    suoritus.setYksilollistaminen(
-        AbstractPistesyottoKoosteService.KIELIKOE_SUORITUS_YKSILOLLISTAMINEN);
-    suoritus.setVahvistettu(true);
-    suoritus.setSuoritusKieli("FI");
-    suoritus.setMyontaja("1.2.3.4444.5");
-    suoritus.setKomo(SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE);
-    suoritus.setValmistuminen(valmistuminen);
-    Arvosana arvosana = new Arvosana();
-    arvosana.setAine(AbstractPistesyottoKoosteService.KIELIKOE_ARVOSANA_AINE);
-    arvosana.setLisatieto("FI");
-    arvosana.setArvio(new Arvio("TRUE", null, null));
-    SuoritusJaArvosanat suoritusJaArvosanat = new SuoritusJaArvosanat();
-    suoritusJaArvosanat.setSuoritus(suoritus);
-    suoritusJaArvosanat.setArvosanat(Arrays.asList(arvosana));
-    oppija.setSuoritukset(Arrays.asList(suoritusJaArvosanat));
-    return oppija;
   }
 
   private void mockTarjontaHakukohdeCall() {

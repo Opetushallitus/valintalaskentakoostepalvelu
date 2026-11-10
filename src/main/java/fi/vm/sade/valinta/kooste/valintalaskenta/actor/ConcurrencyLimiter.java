@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
  * Luokka jonka avulla voi hallita lähtötietojen haun rinnakkaisuutta taustajärjestelmistä. Perustuu
  * semaforiin, ts. siihen että rinnakkaisille kutsuille on tarjolla tietty määrä lupia, joita kutsut
  * tarvitsevat. Lupia voi tarvita joko yhden per kutsu, tai sitten suuremman määrän riippuen
- * haettavan data määrästä (esim. suoritusrekisteri). Tämä luokka pitää myös kirjaa odotukseen ja
- * kutsujen suorittamiseen käytetystä ajasta jotta tämä voidaan raportoida CloudWatchiin.
+ * haettavan data määrästä (esim. hakemukset). Tämä luokka pitää myös kirjaa odotukseen ja kutsujen
+ * suorittamiseen käytetystä ajasta jotta tämä voidaan raportoida CloudWatchiin.
  */
 public class ConcurrencyLimiter {
 
