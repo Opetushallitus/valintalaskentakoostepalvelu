@@ -316,10 +316,6 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
                 + "/pistesyotto/koostetutPistetiedot/hakemus/"
                 + applicationAdditionaData.getOid());
 
-    mockTarjontaHakukohdeCall();
-    mockTarjontaHakukohdeRyhmaCall();
-    mockKoutaHakukohdeSearchCall();
-
     String hakijaOid = applicationAdditionaData.getPersonOid();
     mockToReturnJson(
         POST,

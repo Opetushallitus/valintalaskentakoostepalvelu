@@ -16,7 +16,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetJarjestyskriteeri
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetValinnanVaiheDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -70,7 +69,6 @@ public class LaskentaResurssiProviderTest {
             valintapisteAsyncResource,
             koskiService,
             new HakemuksetConverterUtil(),
-            mock(OppijanumerorekisteriAsyncResource.class),
             mock(CloudWatchClient.class),
             mock(ParametritDao.class),
             "test");

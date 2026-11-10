@@ -7,7 +7,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -46,7 +45,6 @@ public class LaskentaResurssiProvider {
   private final ValintapisteAsyncResource valintapisteAsyncResource;
   private final AtaruAsyncResource ataruAsyncResource;
   private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
-  private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final TarjontaAsyncResource tarjontaAsyncResource;
   private final KoskiService koskiService;
   private final HakemuksetConverterUtil hakemuksetConverterUtil;
@@ -90,7 +88,6 @@ public class LaskentaResurssiProvider {
       ValintapisteAsyncResource valintapisteAsyncResource,
       KoskiService koskiService,
       HakemuksetConverterUtil hakemuksetConverterUtil,
-      OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
       CloudWatchClient cloudWatchClient,
       ParametritDao parametritDao,
       @Value("${environment.name}") String environmentName) {
@@ -100,7 +97,6 @@ public class LaskentaResurssiProvider {
     this.valintapisteAsyncResource = valintapisteAsyncResource;
     this.koskiService = koskiService;
     this.hakemuksetConverterUtil = hakemuksetConverterUtil;
-    this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
     this.cloudWatchClient = cloudWatchClient;
     this.environmentName = environmentName;
     this.parametritDao = parametritDao;
