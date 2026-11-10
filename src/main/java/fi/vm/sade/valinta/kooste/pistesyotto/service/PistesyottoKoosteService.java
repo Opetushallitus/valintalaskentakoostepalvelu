@@ -154,6 +154,11 @@ public class PistesyottoKoosteService extends AbstractPistesyottoKoosteService {
       ApplicationAdditionalDataDTO pistetietoDTO,
       Optional<String> ifUnmodifiedSince,
       AuditSession auditSession) {
+    try {
+      tarkistaKielikoepistetiedot(pistetietoDTO);
+    } catch (IllegalArgumentException e) {
+      return Observable.error(e);
+    }
     return Observable.fromFuture(
             valintapisteAsyncResource.putValintapisteet(
                 ifUnmodifiedSince,

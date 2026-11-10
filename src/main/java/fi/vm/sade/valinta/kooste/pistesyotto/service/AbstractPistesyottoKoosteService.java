@@ -19,6 +19,7 @@ import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResourc
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Osallistuminen;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -55,6 +56,12 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractPistesyottoKoosteService {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractPistesyottoKoosteService.class);
+
+  private static final Set<String> KIELIKOKEEN_SALLITUT_OSALLISTUMISET_ILMAN_TULOSTA =
+      Set.of(
+          Osallistuminen.EI_OSALLISTUNUT.name(),
+          Osallistuminen.MERKITSEMATTA.name(),
+          Osallistuminen.EI_VAADITA.name());
 
   protected final ApplicationAsyncResource applicationAsyncResource;
   protected final AtaruAsyncResource ataruAsyncResource;
@@ -338,6 +345,12 @@ public abstract class AbstractPistesyottoKoosteService {
       List<ApplicationAdditionalDataDTO> pistetiedotHakemukselle,
       ValintaperusteetOperation auditLogOperation,
       AuditSession auditSession) {
+    try {
+      pistetiedotHakemukselle.forEach(
+          AbstractPistesyottoKoosteService::tarkistaKielikoepistetiedot);
+    } catch (IllegalArgumentException e) {
+      return CompletableFuture.failedFuture(e);
+    }
     return tallennaPisteetValintaPisteServiceen(
             hakuOid,
             hakukohdeOid,
@@ -353,6 +366,32 @@ public abstract class AbstractPistesyottoKoosteService {
                         "Virhe tallennettaessa koostettuja pistetietoja haun %s hakukohteelle %s",
                         hakuOid, hakukohdeOid),
                     t);
+              }
+            });
+  }
+
+  static void tarkistaKielikoepistetiedot(ApplicationAdditionalDataDTO pistetieto) {
+    Map<String, String> additionalData = pistetieto.getAdditionalData();
+    additionalData.keySet().stream()
+        .filter(avain -> avain.matches(PistesyottoExcel.KIELIKOE_REGEX))
+        .forEach(
+            avain -> {
+              String osallistuminen =
+                  additionalData.get(Valintapisteet.withOsallistuminenSuffix(avain));
+              if (Osallistuminen.OSALLISTUI.name().equals(osallistuminen)) {
+                String tulos = additionalData.get(avain);
+                if (!"true".equals(tulos) && !"false".equals(tulos)) {
+                  throw new IllegalArgumentException(
+                      String.format(
+                          "Huono kielikokeen %s tulos '%s' hakemuksella %s",
+                          avain, tulos, pistetieto.getOid()));
+                }
+              } else if (osallistuminen == null
+                  || !KIELIKOKEEN_SALLITUT_OSALLISTUMISET_ILMAN_TULOSTA.contains(osallistuminen)) {
+                throw new IllegalArgumentException(
+                    String.format(
+                        "Huono kielikokeen %s osallistumistieto '%s' hakemuksella %s",
+                        avain, osallistuminen, pistetieto.getOid()));
               }
             });
   }

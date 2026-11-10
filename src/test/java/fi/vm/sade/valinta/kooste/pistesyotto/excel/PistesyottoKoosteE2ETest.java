@@ -25,6 +25,8 @@ import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Answers;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.HakemusOid;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodi;
+import fi.vm.sade.valinta.kooste.external.resource.koodisto.dto.Koodisto;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultHakukohde;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultOrganization;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.dto.ResultSearch;
@@ -37,6 +39,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.dto.HenkiloValilehtiDTO;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.Osallistumistieto;
 import fi.vm.sade.valinta.kooste.pistesyotto.dto.PistesyottoValilehtiDTO;
 import fi.vm.sade.valinta.kooste.server.MockServer;
+import fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec;
 import fi.vm.sade.valinta.kooste.testapp.MockServicesApp;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
@@ -297,6 +300,63 @@ public class PistesyottoKoosteE2ETest extends PistesyotonTuontiTestBase {
     } catch (InterruptedException e) {
       Assertions.fail();
     }
+  }
+
+  @Test
+  public void testHakemuksenPistetietojenTallennusEpaonnistuuVirheellisellaKielikoetuloksella()
+      throws Exception {
+    ApplicationAdditionalDataDTO applicationAdditionaData =
+        luePistetiedot("List_ApplicationAdditionalDataDTO.json").get(0);
+    applicationAdditionaData.getAdditionalData().put("kielikoe_fi", "hyvaksytty");
+    applicationAdditionaData.getAdditionalData().put("kielikoe_fi-OSALLISTUMINEN", "OSALLISTUI");
+
+    HttpResourceBuilder.WebClientExposingHttpResource http =
+        createClient(
+            MockServicesApp.resourcesAddress
+                + "/pistesyotto/koostetutPistetiedot/hakemus/"
+                + applicationAdditionaData.getOid());
+
+    mockTarjontaHakukohdeCall();
+    mockTarjontaHakukohdeRyhmaCall();
+    mockKoutaHakukohdeSearchCall();
+
+    String hakijaOid = applicationAdditionaData.getPersonOid();
+    mockToReturnJson(
+        POST,
+        "/lomake-editori/api/external/valintalaskenta",
+        singletonList(
+            new HakemusSpec.AtaruHakemusBuilder()
+                .setOid(applicationAdditionaData.getOid())
+                .setHakemusPersonOid(hakijaOid)
+                .setHakutoiveet(singletonList("testihakukohde"))
+                .setCountryOfResidence("246")
+                .getHakemus()));
+    Koodisto maatjavaltiot1 = new Koodisto();
+    maatjavaltiot1.setKoodistoUri("maatjavaltiot1");
+    Koodi suomi = new Koodi();
+    suomi.setKoodiArvo("FIN");
+    suomi.setKoodisto(maatjavaltiot1);
+    mockToReturnJson(
+        GET, "/koodisto-service/rest/json/relaatio/rinnasteinen/.*", singletonList(suomi));
+    mockToReturnString(
+        POST,
+        "/oppijanumerorekisteri-service/henkilo/masterHenkilosByOidList",
+        String.format(
+            "{\"%1$s\": {\"oidHenkilo\":\"%1$s\",\"etunimet\":\"Frank\",\"sukunimi\":\"Tester\",\"kansalaisuus\":[]}}",
+            hakijaOid));
+    final Semaphore pisteCounter = new Semaphore(0);
+    mockPistetietoNormiTallennus(pisteCounter);
+
+    Response r =
+        http.getWebClient()
+            .header("Content-Type", MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .put(new Gson().toJson(applicationAdditionaData));
+    assertEquals(500, r.getStatus());
+    assertThat(
+        IOUtils.toString((InputStream) r.getEntity(), "UTF-8"),
+        Matchers.containsString("Huono kielikokeen kielikoe_fi tulos 'hyvaksytty'"));
+    assertFalse(pisteCounter.tryAcquire(1, 1, TimeUnit.SECONDS));
   }
 
   @Test
