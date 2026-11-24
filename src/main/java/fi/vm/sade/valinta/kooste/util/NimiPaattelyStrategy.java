@@ -1,6 +1,6 @@
 package fi.vm.sade.valinta.kooste.util;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class NimiPaattelyStrategy {
   public String paatteleNimi(String kutsumanimi, String etunimet) {

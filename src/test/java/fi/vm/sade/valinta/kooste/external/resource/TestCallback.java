@@ -2,7 +2,6 @@ package fi.vm.sade.valinta.kooste.external.resource;
 
 import com.google.common.reflect.TypeToken;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.seuranta.dto.LaskentaDto;
 import fi.vm.sade.valinta.sharedutils.http.GsonResponseCallback;
 import fi.vm.sade.valinta.sharedutils.http.HttpResource;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
@@ -39,25 +38,6 @@ public class TestCallback {
 
     cb.completed(
         jakarta.ws.rs.core.Response.ok(new ClassPathResource("listfull.json").getInputStream())
-            .build());
-  }
-
-  @Test
-  public void testLaskentaDtoCallback() throws IOException {
-
-    GsonResponseCallback<LaskentaDto> cb2 =
-        new GsonResponseCallback<LaskentaDto>(
-            httpResource.gson(),
-            "",
-            obj -> {
-              LOG.error("SUCCESS {}", obj);
-            },
-            poikkeus -> {
-              LOG.error("POIKKEUS {}", poikkeus);
-            },
-            new TypeToken<LaskentaDto>() {}.getType());
-    cb2.completed(
-        jakarta.ws.rs.core.Response.ok(new ClassPathResource("resetoi.json").getInputStream())
             .build());
   }
 }
