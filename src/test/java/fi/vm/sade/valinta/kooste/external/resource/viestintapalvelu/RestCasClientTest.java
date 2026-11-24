@@ -28,7 +28,7 @@ public class RestCasClientTest {
 
   private static final String CAS_URL = "https://testivirkailija.testiopintopolku.fi/cas";
   private static final String SERVICE_URL =
-      "https://testivirkailija.testiopintopolku.fi/suoritusrekisteri";
+      "https://testivirkailija.testiopintopolku.fi/suorituspalvelu";
 
   private AsyncHttpClient mockHttpClient;
 

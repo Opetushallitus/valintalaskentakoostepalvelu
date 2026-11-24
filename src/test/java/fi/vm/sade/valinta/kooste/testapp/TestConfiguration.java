@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.vm.sade.javautils.opintopolku_spring_security.Authorizer;
 import fi.vm.sade.javautils.opintopolku_spring_security.OidProvider;
 import fi.vm.sade.javautils.opintopolku_spring_security.OrganisationHierarchyAuthorizer;
-import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.HarkinnanvaraisuusAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.harkinnanvaraisuus.impl.HarkinnanvaraisuusAsyncResourceImpl;
 import fi.vm.sade.valinta.kooste.external.resource.koodisto.KoodistoAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.ValintapisteAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.viestintapalvelu.RyhmasahkopostiAsyncResource;
@@ -18,9 +16,7 @@ import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoExternalTuontiSe
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoKoosteService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoTuontiService;
 import fi.vm.sade.valinta.kooste.pistesyotto.service.PistesyottoVientiService;
-import fi.vm.sade.valinta.kooste.proxy.resource.suoritukset.OppijanSuorituksetProxyResource;
 import fi.vm.sade.valinta.kooste.proxy.resource.viestintapalvelu.ViestintapalveluProxyResource;
-import fi.vm.sade.valinta.kooste.valintalaskenta.util.HakemuksetConverterUtil;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.komponentti.SijoittelunTulosExcelKomponentti;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.resource.ValintalaskentaExcelResource;
 import fi.vm.sade.valinta.kooste.valintalaskentatulos.service.ValintakoekutsutExcelService;
@@ -112,12 +108,6 @@ public class TestConfiguration {
   }
 
   @Bean
-  public OppijanSuorituksetProxyResource getOppijanSuorituksetProxyResource(
-      ApplicationContext ctx) {
-    return ctx.getAutowireCapableBeanFactory().createBean(OppijanSuorituksetProxyResource.class);
-  }
-
-  @Bean
   public ViestintapalveluProxyResource getViestintapalveluProxyResource(ApplicationContext ctx) {
     return ctx.getAutowireCapableBeanFactory().createBean(ViestintapalveluProxyResource.class);
   }
@@ -135,13 +125,6 @@ public class TestConfiguration {
   }
 
   @Bean
-  public HarkinnanvaraisuusAsyncResource getHarkinnanvaraisuusAsyncResource(
-      ApplicationContext ctx) {
-    return ctx.getAutowireCapableBeanFactory()
-        .createBean(HarkinnanvaraisuusAsyncResourceImpl.class);
-  }
-
-  @Bean
   public OidProvider getOidProvider() {
     return new OidProvider(
         "http://localhost",
@@ -152,11 +135,6 @@ public class TestConfiguration {
   @Bean
   public ValintaperusteetResource getValintaperusteetResource(ApplicationContext ctx) {
     return ctx.getAutowireCapableBeanFactory().createBean(ValintaperusteetResource.class);
-  }
-
-  @Bean
-  public HakemuksetConverterUtil getHakemuksetConverterUtil(ApplicationContext ctx) {
-    return ctx.getAutowireCapableBeanFactory().createBean(HakemuksetConverterUtil.class);
   }
 
   @Bean

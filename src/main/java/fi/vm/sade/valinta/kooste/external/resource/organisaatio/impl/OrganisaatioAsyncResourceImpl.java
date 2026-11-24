@@ -5,12 +5,9 @@ import fi.vm.sade.organisaatio.resource.dto.HakutoimistoDTO;
 import fi.vm.sade.valinta.kooste.external.resource.HttpClient;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.Organisaatio;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
 import fi.vm.sade.valinta.kooste.url.UrlConfiguration;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import org.apache.commons.io.IOUtils;
@@ -35,21 +32,6 @@ public class OrganisaatioAsyncResourceImpl implements OrganisaatioAsyncResource 
         this.urlConfiguration.url("organisaatio-service.organisaatio", organisaatioOid),
         Duration.ofMinutes(1),
         new TypeToken<Organisaatio>() {}.getType());
-  }
-
-  @Override
-  public CompletableFuture<OrganisaatioTyyppiHierarkia> haeOrganisaationTyyppiHierarkia(
-      String organisaatioOid) {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("oid", organisaatioOid);
-    parameters.put("aktiiviset", Boolean.toString(true));
-    parameters.put("suunnitellut", Boolean.toString(true));
-    parameters.put("lakkautetut", Boolean.toString(true));
-
-    return client.getJson(
-        this.urlConfiguration.url("organisaatio-service.organisaatio.hierarkia.tyyppi", parameters),
-        Duration.ofMinutes(1),
-        new TypeToken<OrganisaatioTyyppiHierarkia>() {}.getType());
   }
 
   @Override

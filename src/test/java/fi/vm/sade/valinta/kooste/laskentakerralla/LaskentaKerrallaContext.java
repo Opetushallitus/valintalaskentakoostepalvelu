@@ -3,7 +3,6 @@ package fi.vm.sade.valinta.kooste.laskentakerralla;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -40,11 +39,6 @@ public class LaskentaKerrallaContext {
   @Bean
   public ValintalaskentaAsyncResource valintalaskentaAsyncResource() {
     return Mocks.valintalaskentaAsyncResource;
-  }
-
-  @Bean
-  public SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource() {
-    return Mocks.suoritusrekisteriAsyncResource;
   }
 
   @Bean

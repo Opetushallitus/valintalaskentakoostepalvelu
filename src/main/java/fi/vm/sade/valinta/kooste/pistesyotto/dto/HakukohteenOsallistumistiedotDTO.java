@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.HakutoiveDTO;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeDTO;
 import fi.vm.sade.valintalaskenta.domain.valintakoe.Osallistuminen;
@@ -16,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.tuple.Pair;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_EMPTY)
 public class HakukohteenOsallistumistiedotDTO {
@@ -31,10 +28,7 @@ public class HakukohteenOsallistumistiedotDTO {
   }
 
   public HakukohteenOsallistumistiedotDTO(
-      HakutoiveDTO hakutoiveDTO,
-      Map<String, Pair<Suoritus, Arvosana>> kielikoetulokset,
-      String hakemusOid,
-      List<HakutoiveDTO> kaikkiOsallistumisenHakutoiveet) {
+      HakutoiveDTO hakutoiveDTO, List<HakutoiveDTO> kaikkiOsallistumisenHakutoiveet) {
     this.valintakokeidenOsallistumistiedot =
         hakutoiveDTO.getValinnanVaiheet().stream()
             .flatMap(v -> v.getValintakokeet().stream())
@@ -43,11 +37,7 @@ public class HakukohteenOsallistumistiedotDTO {
                     k -> k.getValintakoeTunniste(),
                     k ->
                         new KokeenOsallistumistietoDTO(
-                            k,
-                            kielikoetulokset.get(k.getValintakoeTunniste()),
-                            hakemusOid,
-                            hakutoiveDTO.getHakukohdeOid(),
-                            kaikkiOsallistumisenHakutoiveet)));
+                            k, hakutoiveDTO.getHakukohdeOid(), kaikkiOsallistumisenHakutoiveet)));
   }
 
   public HakukohteenOsallistumistiedotDTO(ValintaperusteDTO v) {
@@ -99,8 +89,6 @@ public class HakukohteenOsallistumistiedotDTO {
 
     public KokeenOsallistumistietoDTO(
         ValintakoeDTO koe,
-        Pair<Suoritus, Arvosana> kielikoetulos,
-        String hakemusOid,
         String tamanHakutoiveenOid,
         List<HakutoiveDTO> kaikkiOsallistumisenHakutoiveet) {
       switch (koe.getOsallistuminenTulos().getOsallistuminen()) {
@@ -111,17 +99,7 @@ public class HakukohteenOsallistumistiedotDTO {
           this.lahdeMyontajaOid = Optional.empty();
           break;
         case EI_OSALLISTU:
-          if (kielikoetulos != null) {
-            String lahdeHakemusOid = kielikoetulos.getLeft().getMyontaja();
-            if (hakemusOid.equals(lahdeHakemusOid)) {
-              this.osallistumistieto = Osallistumistieto.TOISESSA_HAKUTOIVEESSA;
-              this.lahdeHakemusOid = Optional.empty();
-            } else {
-              this.osallistumistieto = Osallistumistieto.TOISELLA_HAKEMUKSELLA;
-              this.lahdeHakemusOid = Optional.of(lahdeHakemusOid);
-            }
-            this.lahdeMyontajaOid = Optional.of(kielikoetulos.getRight().getSource());
-          } else if (sisaltaaOsallistumisenToisessaHakutoiveessa(
+          if (sisaltaaOsallistumisenToisessaHakutoiveessa(
               kaikkiOsallistumisenHakutoiveet, tamanHakutoiveenOid, koe)) {
             this.osallistumistieto = Osallistumistieto.TOISESSA_HAKUTOIVEESSA;
             this.lahdeHakemusOid = Optional.empty();

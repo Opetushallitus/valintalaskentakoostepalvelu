@@ -30,8 +30,6 @@ public interface TarjontaAsyncResource {
    */
   CompletableFuture<Set<String>> findHakuOidsForAutosyncTarjonta();
 
-  CompletableFuture<Map<String, List<String>>> haunHakukohderyhmatCached(String hakuOid);
-
   CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes(String hakuOid);
 
   CompletableFuture<List<String>> hakukohdeRyhmasForHakukohde(String hakukohdeOid);

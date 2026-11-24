@@ -3,9 +3,7 @@ package fi.vm.sade.valinta.kooste.pistesyotto.service;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.ApplicationAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.organisaatio.OrganisaatioAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintalaskenta.ValintalaskentaValintakoeAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -24,8 +22,6 @@ import io.reactivex.Observable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,9 +46,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
       ValintapisteAsyncResource valintapisteAsyncResource,
       ApplicationAsyncResource applicationAsyncResource,
       AtaruAsyncResource ataruAsyncResource,
-      SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
       TarjontaAsyncResource tarjontaAsyncResource,
-      OhjausparametritAsyncResource ohjausparametritAsyncResource,
       OrganisaatioAsyncResource organisaatioAsyncResource,
       ValintaperusteetAsyncResource valintaperusteetAsyncResource,
       ValintalaskentaValintakoeAsyncResource valintalaskentaValintakoeAsyncResource) {
@@ -60,9 +54,7 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
         applicationAsyncResource,
         ataruAsyncResource,
         valintapisteAsyncResource,
-        suoritusrekisteriAsyncResource,
         tarjontaAsyncResource,
-        ohjausparametritAsyncResource,
         organisaatioAsyncResource,
         valintaperusteetAsyncResource,
         valintalaskentaValintakoeAsyncResource);
@@ -134,8 +126,6 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                   if (!virheet.isEmpty()) {
                     return Observable.error(new PistesyotonTuontivirhe(virheet));
                   }
-                  Date valmistuminen = new Date();
-                  Map<String, List<SingleKielikoeTulos>> uudetKielikoetulokset = new HashMap<>();
                   Optional<String> ifUnmodifiedSince = pistesyottoExcel.getAikaleima();
                   List<ApplicationAdditionalDataDTO> uudetPistetiedot =
                       pistesyottoTuontiAdapteri.getRivit().stream()
@@ -150,11 +140,6 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                                         valintakoetunniste ->
                                             pistesyottoExcel.onkoHakijaOsallistujaValintakokeeseen(
                                                 hakemusOid, valintakoetunniste));
-                                siirraKielikoepistetiedotKielikoetulosMapiin(
-                                    valmistuminen,
-                                    uudetKielikoetulokset,
-                                    hakemusOid,
-                                    newPistetiedot);
                                 additionalData.setAdditionalData(newPistetiedot);
                                 return Stream.of(additionalData);
                               })
@@ -179,7 +164,6 @@ public class PistesyottoTuontiService extends AbstractPistesyottoKoosteService {
                                 hakukohdeOid,
                                 ifUnmodifiedSince,
                                 uudetPistetiedot,
-                                uudetKielikoetulokset,
                                 ValintaperusteetOperation.PISTETIEDOT_TUONTI_EXCEL,
                                 auditSession));
                     return failedPisteet.map(

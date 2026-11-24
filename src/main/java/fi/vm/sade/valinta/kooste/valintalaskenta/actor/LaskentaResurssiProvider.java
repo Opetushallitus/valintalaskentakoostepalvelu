@@ -7,12 +7,6 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteetHakijaryhmaDTO;
 import fi.vm.sade.service.valintaperusteet.dto.ValintatapajonoJarjestyskriteereillaDTO;
 import fi.vm.sade.valinta.kooste.external.resource.ataru.AtaruAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.koski.KoskiOppija;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.OhjausparametritAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.ohjausparametrit.dto.ParametritDTO;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.OppijanumerorekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.oppijanumerorekisteri.dto.HenkiloViiteDto;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.SuoritusrekisteriAsyncResource;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.Haku;
 import fi.vm.sade.valinta.kooste.external.resource.tarjonta.TarjontaAsyncResource;
 import fi.vm.sade.valinta.kooste.external.resource.valintaperusteet.ValintaperusteetAsyncResource;
@@ -51,18 +45,13 @@ public class LaskentaResurssiProvider {
   private final ValintapisteAsyncResource valintapisteAsyncResource;
   private final AtaruAsyncResource ataruAsyncResource;
   private final ValintaperusteetAsyncResource valintaperusteetAsyncResource;
-  private final SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource;
-  private final OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource;
   private final TarjontaAsyncResource tarjontaAsyncResource;
   private final KoskiService koskiService;
   private final HakemuksetConverterUtil hakemuksetConverterUtil;
-  private final OhjausparametritAsyncResource ohjausparametritAsyncResource;
   private final ParametritDao parametritDao;
   private final ExecutorService executor = Executors.newWorkStealingPool(256);
 
   private final int NO_LIMIT_PERMITS = Integer.MAX_VALUE;
-  private final ConcurrencyLimiter parametritLimiter =
-      new ConcurrencyLimiter("parametrit", this.executor);
   private final ConcurrencyLimiter hakuLimiter = new ConcurrencyLimiter("haku", this.executor);
   private final ConcurrencyLimiter hakukohderyhmatLimiter =
       new ConcurrencyLimiter("hakukohderyhmat", this.executor);
@@ -76,20 +65,16 @@ public class LaskentaResurssiProvider {
       new ConcurrencyLimiter("ataruhakemukset", this.executor);
   private final ConcurrencyLimiter valintaperusteetLimiter =
       new ConcurrencyLimiter("valintaperusteet", this.executor);
-  private final ConcurrencyLimiter suorituksetLimiter =
-      new ConcurrencyLimiter("suoritukset", this.executor);
 
   private final Map<String, ConcurrencyLimiter> limiters =
       Map.of(
-          "parametritLimiter", parametritLimiter,
           "hakuLimiter", hakuLimiter,
           "ataruhakemuksetLimiter", ataruhakemuksetLimiter,
           "hakukohderyhmatLimiter", hakukohderyhmatLimiter,
           "valintapisteetLimiter", valintapisteetLimiter,
           "hakijaryhmatLimiter", hakijaryhmatLimiter,
           "koskioppijatLimiter", koskioppijatLimiter,
-          "valintaperusteetLimiter", valintaperusteetLimiter,
-          "suorituksetLimiter", suorituksetLimiter);
+          "valintaperusteetLimiter", valintaperusteetLimiter);
 
   private final CloudWatchClient cloudWatchClient;
 
@@ -99,25 +84,19 @@ public class LaskentaResurssiProvider {
   public LaskentaResurssiProvider(
       AtaruAsyncResource ataruAsyncResource,
       ValintaperusteetAsyncResource valintaperusteetAsyncResource,
-      SuoritusrekisteriAsyncResource suoritusrekisteriAsyncResource,
       TarjontaAsyncResource tarjontaAsyncResource,
       ValintapisteAsyncResource valintapisteAsyncResource,
       KoskiService koskiService,
       HakemuksetConverterUtil hakemuksetConverterUtil,
-      OppijanumerorekisteriAsyncResource oppijanumerorekisteriAsyncResource,
-      OhjausparametritAsyncResource ohjausparametritAsyncResource,
       CloudWatchClient cloudWatchClient,
       ParametritDao parametritDao,
       @Value("${environment.name}") String environmentName) {
     this.ataruAsyncResource = ataruAsyncResource;
     this.valintaperusteetAsyncResource = valintaperusteetAsyncResource;
-    this.suoritusrekisteriAsyncResource = suoritusrekisteriAsyncResource;
     this.tarjontaAsyncResource = tarjontaAsyncResource;
     this.valintapisteAsyncResource = valintapisteAsyncResource;
     this.koskiService = koskiService;
     this.hakemuksetConverterUtil = hakemuksetConverterUtil;
-    this.oppijanumerorekisteriAsyncResource = oppijanumerorekisteriAsyncResource;
-    this.ohjausparametritAsyncResource = ohjausparametritAsyncResource;
     this.cloudWatchClient = cloudWatchClient;
     this.environmentName = environmentName;
     this.parametritDao = parametritDao;
@@ -278,10 +257,7 @@ public class LaskentaResurssiProvider {
       CompletableFuture<Haku> haku,
       String hakukohdeOid,
       boolean isErillishaku,
-      CompletableFuture<ParametritDTO> parametritDTO,
-      boolean withHakijaRyhmat,
       CompletableFuture<List<ValintaperusteetDTO>> valintaperusteetF,
-      CompletableFuture<List<Oppija>> oppijatF,
       CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdesF,
       CompletableFuture<PisteetWithLastModified> valintapisteetForHakukohdesF,
       CompletableFuture<List<ValintaperusteetHakijaryhmaDTO>> hakijaryhmatF,
@@ -289,12 +265,10 @@ public class LaskentaResurssiProvider {
       CompletableFuture<Map<String, KoskiOppija>> koskiOppijaByOppijaOidF) {
     return CompletableFuture.allOf(
             haku,
-            parametritDTO,
             valintapisteetForHakukohdesF,
             hakijaryhmatF,
             valintaperusteetF,
             hakemuksetF,
-            oppijatF,
             hakukohdeRyhmasForHakukohdesF,
             koskiOppijaByOppijaOidF)
         .thenApplyAsync(
@@ -310,7 +284,6 @@ public class LaskentaResurssiProvider {
                   hakukohdeRyhmasForHakukohdesF.join();
               PisteetWithLastModified pisteetWithLastModified = valintapisteetForHakukohdesF.join();
               List<HakemusWrapper> hakemukset = hakemuksetF.join();
-              List<Oppija> oppijat = oppijatF.join();
               Map<String, KoskiOppija> koskiOppijatOppijanumeroittain =
                   koskiOppijaByOppijaOidF.join();
               koskiOppijatOppijanumeroittain.forEach(
@@ -318,43 +291,19 @@ public class LaskentaResurssiProvider {
                     LOG.debug(String.format("Koskesta löytyi oppijalle %s datat: %s", k, v));
                   });
 
-              if (!withHakijaRyhmat) {
-                return new LaskeDTO(
-                    uuid,
-                    haku.join().isKorkeakouluhaku(),
-                    isErillishaku,
-                    hakukohdeOid,
-                    hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
-                        haku.join(),
-                        hakukohdeOid,
-                        ryhmatHakukohteittain,
-                        hakemukset,
-                        pisteetWithLastModified.valintapisteet,
-                        oppijat,
-                        parametritDTO.join(),
-                        true,
-                        true),
-                    valintaperusteet);
-
-              } else {
-                return new LaskeDTO(
-                    uuid,
-                    haku.join().isKorkeakouluhaku(),
-                    isErillishaku,
-                    hakukohdeOid,
-                    hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
-                        haku.join(),
-                        hakukohdeOid,
-                        ryhmatHakukohteittain,
-                        hakemukset,
-                        pisteetWithLastModified.valintapisteet,
-                        oppijat,
-                        parametritDTO.join(),
-                        true,
-                        true),
-                    valintaperusteet,
-                    hakijaryhmatF.join());
-              }
+              return new LaskeDTO(
+                  uuid,
+                  haku.join().isKorkeakouluhaku(),
+                  isErillishaku,
+                  hakukohdeOid,
+                  hakemuksetConverterUtil.muodostaHakemuksetDTOfromHakemukset(
+                      hakukohdeOid,
+                      ryhmatHakukohteittain,
+                      hakemukset,
+                      pisteetWithLastModified.valintapisteet),
+                  valintaperusteet,
+                  hakijaryhmatF.join(),
+                  false);
             },
             this.executor);
   }
@@ -418,12 +367,6 @@ public class LaskentaResurssiProvider {
     Map<String, Duration> waitDurations = new ConcurrentHashMap<>();
     Map<String, Duration> invokeDurations = new ConcurrentHashMap<>();
 
-    final CompletableFuture<ParametritDTO> parametritDTOFuture =
-        this.parametritLimiter.withConcurrencyLimit(
-            1,
-            waitDurations,
-            invokeDurations,
-            () -> ohjausparametritAsyncResource.haeHaunOhjausparametrit(hakuOid));
     final CompletableFuture<Haku> hakuFuture =
         this.hakuLimiter.withConcurrencyLimit(
             1, waitDurations, invokeDurations, () -> tarjontaAsyncResource.haeHaku(hakuOid));
@@ -480,68 +423,6 @@ public class LaskentaResurssiProvider {
               }
             },
             this.executor);
-
-    CompletableFuture<List<HenkiloViiteDto>> henkiloViitteet =
-        hakemukset.thenComposeAsync(
-            hws -> {
-              List<HenkiloViiteDto> viitteet =
-                  hws.stream()
-                      .map(
-                          hw ->
-                              new HenkiloViiteDto(hw.getApplicationPersonOid(), hw.getPersonOid()))
-                      .collect(Collectors.toList());
-              return CompletableFuture.completedFuture(viitteet);
-            },
-            this.executor);
-
-    CompletableFuture<List<Oppija>> oppijasForOidsFromHakemukses =
-        hakuFuture.thenComposeAsync(
-            haku ->
-                henkiloViitteet.thenComposeAsync(
-                    hws ->
-                        this.suorituksetLimiter.withConcurrencyLimit(
-                            hws.size() + 50,
-                            waitDurations,
-                            invokeDurations,
-                            () -> {
-                              LOG.info(
-                                  "Haetaan suoritukset hakukohteen "
-                                      + hakukohdeOid
-                                      + " "
-                                      + hws.size()
-                                      + " oppijalle");
-
-                              LOG.info("Got henkiloViittees: {}", hws);
-                              Map<String, String> masterToOriginal =
-                                  hws.stream()
-                                      .collect(
-                                          Collectors.toMap(
-                                              HenkiloViiteDto::getMasterOid,
-                                              HenkiloViiteDto::getHenkiloOid));
-                              List<String> oppijaOids = new ArrayList<>(masterToOriginal.keySet());
-                              LOG.info(
-                                  "Got personOids from hakemukses and getting Oppijas for these: {} for hakukohde {}",
-                                  oppijaOids,
-                                  hakukohdeOid);
-                              Boolean fetchEnsikertalaisuus = haku.isKorkeakouluhaku();
-                              return createResurssiFuture(
-                                      tunniste,
-                                      "suoritusrekisteriAsyncResource.getSuorituksetByOppijas",
-                                      () ->
-                                          suoritusrekisteriAsyncResource.getSuorituksetByOppijas(
-                                              oppijaOids, hakuOid, fetchEnsikertalaisuus),
-                                      retryHakemuksetAndOppijat)
-                                  .thenApply(
-                                      oppijat -> {
-                                        oppijat.forEach(
-                                            oppija ->
-                                                oppija.setOppijanumero(
-                                                    masterToOriginal.get(
-                                                        oppija.getOppijanumero())));
-                                        return oppijat;
-                                      });
-                            }),
-                    this.executor));
 
     CompletableFuture<Map<String, List<String>>> hakukohdeRyhmasForHakukohdes =
         this.hakukohderyhmatLimiter.withConcurrencyLimit(
@@ -617,10 +498,7 @@ public class LaskentaResurssiProvider {
             hakuFuture,
             hakukohdeOid,
             isErillishaku,
-            parametritDTOFuture,
-            withHakijaRyhmat,
             valintaperusteet,
-            oppijasForOidsFromHakemukses,
             hakukohdeRyhmasForHakukohdes,
             valintapisteetHakemuksille,
             hakijaryhmat,

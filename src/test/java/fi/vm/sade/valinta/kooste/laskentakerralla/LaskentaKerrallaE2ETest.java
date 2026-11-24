@@ -55,7 +55,6 @@ public class LaskentaKerrallaE2ETest {
         Collections.singletonList(valintaperusteet().build()));
     mockToReturnJson(GET, "/ohjausparametrit-service/api/v1/rest/parametri/.*", new ParametriDTO());
     mockToReturnJson(GET, "/tarjonta-service/rest/v1/haku/.*", new Result(new HakuV1RDTO()));
-    mockToReturnJson(GET, "/suoritusrekisteri/rest/v1/oppijat.*", Arrays.asList());
     mockToReturnJson(GET, "/haku-app/applications/listfull.*", Arrays.asList());
     MockServer fakeValintalaskenta = new MockServer();
     final Semaphore counter = new Semaphore(0);

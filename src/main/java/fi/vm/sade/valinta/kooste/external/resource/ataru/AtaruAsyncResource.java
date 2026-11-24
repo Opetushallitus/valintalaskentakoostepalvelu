@@ -19,9 +19,6 @@ public interface AtaruAsyncResource {
 
   CompletableFuture<List<HakemusWrapper>> getApplicationsByOids(List<String> oids);
 
-  CompletableFuture<List<HakemusWrapper>> getApplicationsByOidsWithHarkinnanvaraisuustieto(
-      List<String> oids);
-
   Observable<List<AtaruSyntheticApplicationResponse>> putApplicationPrototypes(
       Collection<AtaruHakemusPrototyyppi> hakemusPrototyypit);
 }

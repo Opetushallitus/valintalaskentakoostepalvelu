@@ -5,19 +5,14 @@ import static fi.vm.sade.valinta.kooste.spec.hakemus.HakemusSpec.lisatiedot;
 import static fi.vm.sade.valinta.kooste.spec.valintalaskenta.ValintalaskentaSpec.osallistuminen;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.hakukohdeJaValintakoe;
 import static fi.vm.sade.valinta.kooste.spec.valintaperusteet.ValintaperusteetSpec.valintaperuste;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hylatty;
-import static fi.vm.sade.valinta.kooste.util.sure.AmmatillisenKielikoetuloksetSurestaConverter.SureHyvaksyttyArvosana.hyvaksytty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
@@ -32,11 +27,7 @@ import fi.vm.sade.service.valintaperusteet.dto.ValintaperusteDTO;
 import fi.vm.sade.valinta.kooste.excel.Rivi;
 import fi.vm.sade.valinta.kooste.excel.Solu;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppi;
-import fi.vm.sade.valinta.kooste.external.resource.organisaatio.dto.OrganisaatioTyyppiHierarkia;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Oppija;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.SuoritusJaArvosanatWrapper;
+import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Piste;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.PisteetWithLastModified;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
 import fi.vm.sade.valinta.kooste.external.resource.valintatulosservice.dto.AuditSession;
@@ -50,9 +41,7 @@ import fi.vm.sade.valinta.kooste.testapp.MockResourcesApp;
 import fi.vm.sade.valinta.kooste.util.DokumenttiProsessiPoller;
 import fi.vm.sade.valinta.kooste.util.ExcelImportUtil;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
-import fi.vm.sade.valinta.kooste.valintalaskenta.spec.SuoritusrekisteriSpec;
 import fi.vm.sade.valinta.kooste.viestintapalvelu.dto.ProsessiId;
-import fi.vm.sade.valinta.sharedutils.http.HttpExceptionWithResponse;
 import fi.vm.sade.valinta.sharedutils.http.HttpResourceBuilder;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import io.reactivex.Observable;
@@ -70,9 +59,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,8 +71,6 @@ import org.springframework.core.io.ClassPathResource;
 
 public class PistesyottoResourceTest {
   static final Logger LOG = LoggerFactory.getLogger(PistesyottoResourceTest.class);
-  private static final String KIELIKOE_KOULUTUSTOIMIJA_OID = "1.2.246.562.10.45042175963";
-  private static final String KIELIKOE_OPPILAITOS_OID = "1.2.246.562.10.45698499378";
   private static final String KIELIKOE_TOIMIPISTE_OID = "1.2.3.44444.5";
   final String root =
       "http://localhost:" + MockResourcesApp.port + "/valintalaskentakoostepalvelu/resources";
@@ -117,7 +101,6 @@ public class PistesyottoResourceTest {
   final String PERSONOID2 = "1.2.3.4.222";
   final String PERSONOID3 = "1.2.3.4.333";
   final String KIELIKOE_TUNNISTE = "kielikoe_fi";
-  final String AMMATILLINEN_KIELIKOE_TYYPPI = SuoritusJaArvosanatWrapper.AMMATILLISEN_KIELIKOE;
   final String OSALLISTUMISENTUNNISTE1 = TUNNISTE1 + "-OSALLISTUMINEN";
   final String OSALLISTUMISENTUNNISTE2 = TUNNISTE2 + "-OSALLISTUMINEN";
   final String KIELIKOE_OSALLISTUMISENTUNNISTE = KIELIKOE_TUNNISTE + "-OSALLISTUMINEN";
@@ -213,30 +196,6 @@ public class PistesyottoResourceTest {
               .setTotuusarvofunktio()
               .build());
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final OrganisaatioTyyppiHierarkia kielikokeitaJarjestavanOppilaitoksenHierarkia =
-      new OrganisaatioTyyppiHierarkia(
-          1,
-          Collections.singletonList(
-              new OrganisaatioTyyppi(
-                  KIELIKOE_KOULUTUSTOIMIJA_OID,
-                  ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
-                  Collections.singletonList(
-                      new OrganisaatioTyyppi(
-                          KIELIKOE_OPPILAITOS_OID,
-                          ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
-                          Collections.singletonList(
-                              new OrganisaatioTyyppi(
-                                  KIELIKOE_TOIMIPISTE_OID,
-                                  ImmutableMap.of(
-                                      "fi",
-                                      "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                  Collections.emptyList(),
-                                  null,
-                                  Collections.singletonList("TOIMIPISTE"))),
-                          "oppilaitostyyppi_21#1",
-                          Collections.singletonList("OPPILAITOS"))),
-                  null,
-                  Collections.singletonList("KOULUTUSTOIMIJA"))));
   private final Response okResponse =
       Response.ok("Success in " + getClass().getSimpleName()).build();
   private PistesyottoExcel pistesyottoExcel =
@@ -754,40 +713,6 @@ public class PistesyottoResourceTest {
       MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
       mockValintakokeetHakukohteille();
       MockApplicationAsyncResource.setResult(hakemukset);
-      MockSuoritusrekisteriAsyncResource.setResult(
-          new SuoritusrekisteriSpec.OppijaBuilder()
-              .setOppijanumero(PERSONOID1)
-              .suoritus()
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .setMyontaja(HAKEMUS1)
-              .arvosana()
-              .setAine(KIELIKOE)
-              .setLisatieto("FI")
-              .setArvosana("hyvaksytty")
-              .build()
-              .build()
-              .suoritus()
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .setMyontaja(HAKEMUS3)
-              .arvosana()
-              .setAine(KIELIKOE)
-              .setLisatieto("FI")
-              .setArvosana("hylatty")
-              .build()
-              .build()
-              .suoritus()
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .setMyontaja(HAKEMUS1)
-              .arvosana()
-              .setAine(KIELIKOE)
-              .setLisatieto("SV")
-              .setArvosana("hylatty")
-              .build()
-              .build()
-              .build());
       List<ApplicationAdditionalDataDTO> additionalDataResult =
           Arrays.asList(
               lisatiedot()
@@ -803,6 +728,25 @@ public class PistesyottoResourceTest {
                   .addLisatieto(OSALLISTUMISENTUNNISTE1, "OSALLISTUI")
                   .build());
       MockApplicationAsyncResource.setAdditionalDataResult(additionalDataResult);
+      List<Valintapisteet> valintapisteet =
+          asValintapisteet(additionalDataResult).stream()
+              .map(
+                  v ->
+                      HAKEMUS1.equals(v.getHakemusOID())
+                          ? new Valintapisteet(
+                              v.getHakemusOID(),
+                              v.getOppijaOID(),
+                              v.getEtunimet(),
+                              v.getSukunimi(),
+                              Collections.singletonList(
+                                  new Piste(
+                                      KIELIKOE_TUNNISTE,
+                                      "true",
+                                      fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto
+                                          .Osallistuminen.OSALLISTUI,
+                                      "tallettaja")))
+                          : v)
+              .collect(Collectors.toList());
 
       MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
@@ -819,8 +763,7 @@ public class PistesyottoResourceTest {
                       Mockito.eq(HAKEMUS_OIDS), Mockito.any(AuditSession.class)))
           .thenReturn(
               CompletableFuture.completedFuture(
-                  new PisteetWithLastModified(
-                      Optional.empty(), asValintapisteet(additionalDataResult))));
+                  new PisteetWithLastModified(Optional.empty(), valintapisteet)));
       Mockito.when(
               Mocks.getValintapisteAsyncResource()
                   .putValintapisteet(
@@ -988,7 +931,6 @@ public class PistesyottoResourceTest {
               lisatiedot().setOid(HAKEMUS3).setEtunimiJaSukunimi("Etunimi", "Sukunimi").build());
       MockApplicationAsyncResource.setAdditionalDataResultByOid(additionalDataResultByOid);
       mockValintakokeetHakukohteille();
-      MockSuoritusrekisteriAsyncResource.setResult(new Oppija());
       MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
       Mockito.when(
@@ -1055,8 +997,6 @@ public class PistesyottoResourceTest {
                       .setEtunimiJaSukunimi("Etunimi", "Sukunimi")
                       .build()),
               null);
-      MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
-          kielikokeitaJarjestavanOppilaitoksenHierarkia);
 
       Response r =
           pistesyottoTuontiResource
@@ -1104,28 +1044,6 @@ public class PistesyottoResourceTest {
       List<ApplicationAdditionalDataDTO> combinedResults = new ArrayList<>(additionalDataResult);
       combinedResults.addAll(additionalDataResultByOid);
       MockApplicationAsyncResource.setAdditionalDataResultByOid(additionalDataResultByOid);
-      MockSuoritusrekisteriAsyncResource.setResult(
-          new SuoritusrekisteriSpec.OppijaBuilder()
-              .setOppijanumero(PERSONOID1)
-              .suoritus()
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .arvosana()
-              .setAine(KIELIKOE)
-              .setLisatieto("FI")
-              .setArvosana("hyvaksytty")
-              .build()
-              .build()
-              .suoritus()
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .arvosana()
-              .setAine(KIELIKOE)
-              .setLisatieto("SV")
-              .setArvosana("hylatty")
-              .build()
-              .build()
-              .build());
       mockValintakokeetHakukohteille();
       MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
 
@@ -1151,60 +1069,6 @@ public class PistesyottoResourceTest {
                   })
           .thenReturn(CompletableFuture.completedFuture(Collections.emptySet()));
 
-      MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
-          new OrganisaatioTyyppiHierarkia(
-              1,
-              Arrays.asList(
-                  new OrganisaatioTyyppi(
-                      "1.2.246.562.10.45042175963",
-                      ImmutableMap.of("fi", "Itä-Savon koulutuskuntayhtymä"),
-                      Arrays.asList(
-                          new OrganisaatioTyyppi(
-                              "1.2.246.562.10.45698499378",
-                              ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto"),
-                              Arrays.asList(
-                                  new OrganisaatioTyyppi(
-                                      "1.2.3.44444.5",
-                                      ImmutableMap.of(
-                                          "fi",
-                                          "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                      Arrays.asList(),
-                                      null,
-                                      Arrays.asList("TOIMIPISTE")),
-                                  new OrganisaatioTyyppi(
-                                      "1.2.3.44444.6",
-                                      ImmutableMap.of(
-                                          "fi",
-                                          "Savonlinnan ammatti- ja aikuisopisto, SAMI, sirkusala"),
-                                      Arrays.asList(),
-                                      null,
-                                      Arrays.asList("TOIMIPISTE"))),
-                              "oppilaitostyyppi_21#1",
-                              Arrays.asList("OPPILAITOS")),
-                          new OrganisaatioTyyppi(
-                              "1.2.246.562.10.45698499379",
-                              ImmutableMap.of("fi", "Savonlinnan ammatti- ja aikuisopisto 2"),
-                              Arrays.asList(
-                                  new OrganisaatioTyyppi(
-                                      "1.2.3.44444.7",
-                                      ImmutableMap.of(
-                                          "fi",
-                                          "Savonlinnan ammatti- ja aikuisopisto, SAMI, kulttuuriala"),
-                                      Arrays.asList(),
-                                      null,
-                                      Arrays.asList("TOIMIPISTE")),
-                                  new OrganisaatioTyyppi(
-                                      "1.2.3.44444.8",
-                                      ImmutableMap.of(
-                                          "fi",
-                                          "Savonlinnan ammatti- ja aikuisopisto, SAMI, sirkusala"),
-                                      Arrays.asList(),
-                                      null,
-                                      Arrays.asList("TOIMIPISTE"))),
-                              "oppilaitostyyppi_21#1",
-                              Arrays.asList("OPPILAITOS"))),
-                      null,
-                      Arrays.asList("OPPILAITOS")))));
       PistesyottoExcel excel =
           new PistesyottoExcel(
               HAKU1,
@@ -1268,32 +1132,14 @@ public class PistesyottoResourceTest {
                   v ->
                       v.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))),
           "Kielikokeita ei löytyä valinta-piste-servicestä");
-      assertThat(
-          "Arvosanoilla on oikea lähde",
-          MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().stream()
-              .filter(a -> "1.2.246.562.10.45698499378".equals(a.getSource()))
-              .collect(Collectors.toList()),
-          hasSize(2));
       assertEquals(
-          1,
-          MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream()
-              .filter(s -> s.getMyontaja().equals(HAKEMUS1))
-              .count(),
-          "Suorituksilla on oikea myöntäjä");
+          "true",
+          tuotuArvo(HAKEMUS1, KIELIKOE_TUNNISTE),
+          "Hyväksytty kielikoe tallennetaan valintapisteisiin");
       assertEquals(
-          1,
-          MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream()
-              .filter(s -> s.getMyontaja().equals(HAKEMUS2))
-              .count(),
-          "Suorituksilla on oikea myöntäjä");
-      assertEquals(
-          2,
-          MockSuoritusrekisteriAsyncResource.suorituksetRef.get().size(),
-          "Kielikokeiden suoritukset löytyvät suresta");
-      assertEquals(
-          2,
-          MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().size(),
-          "Kielikokeiden arvosanat löytyvät suresta");
+          "false",
+          tuotuArvo(HAKEMUS2, KIELIKOE_TUNNISTE),
+          "Hylätty kielikoe tallennetaan valintapisteisiin");
     } finally {
       cleanMocks();
     }
@@ -1392,104 +1238,6 @@ public class PistesyottoResourceTest {
   }
 
   @Test
-  public void pistesyottoTuontiSureVirheellaTest() {
-    cleanMocks();
-    try {
-      MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
-      MockApplicationAsyncResource.setResult(hakemukset);
-      MockApplicationAsyncResource.setResultByOid(hakemukset);
-      List<ApplicationAdditionalDataDTO> applicationAdditionalDataDtos =
-          Arrays.asList(
-              lisatiedot()
-                  .setOid(HAKEMUS1)
-                  .setPersonOid(PERSONOID1)
-                  .setEtunimiJaSukunimi("Etunimi", "Sukunimi")
-                  .build());
-      MockApplicationAsyncResource.setAdditionalDataResult(applicationAdditionalDataDtos);
-      List<ApplicationAdditionalDataDTO> applicationAddtionalDataDtosByOid =
-          Arrays.asList(
-              lisatiedot()
-                  .setOid(HAKEMUS2)
-                  .setPersonOid(PERSONOID2)
-                  .setEtunimiJaSukunimi("Etunimi", "Sukunimi")
-                  .build(),
-              lisatiedot()
-                  .setOid(HAKEMUS3)
-                  .setPersonOid(PERSONOID3)
-                  .setEtunimiJaSukunimi("Etunimi", "Sukunimi")
-                  .build());
-      MockApplicationAsyncResource.setAdditionalDataResultByOid(applicationAddtionalDataDtosByOid);
-      mockValintakokeetHakukohteille();
-
-      Mockito.when(
-              Mocks.getValintapisteAsyncResource()
-                  .getValintapisteet(
-                      ArgumentMatchers.anyCollection(), Mockito.any(AuditSession.class)))
-          .thenReturn(
-              Observable.just(
-                  new PisteetWithLastModified(
-                      Optional.empty(), asValintapisteet(applicationAddtionalDataDtosByOid))));
-      Mockito.when(
-              Mocks.getValintapisteAsyncResource()
-                  .getValintapisteet(
-                      Mockito.eq(HAKU1), Mockito.eq(HAKUKOHDE1), Mockito.any(AuditSession.class)))
-          .thenReturn(
-              CompletableFuture.completedFuture(
-                  new PisteetWithLastModified(
-                      Optional.empty(), asValintapisteet(applicationAdditionalDataDtos))));
-      Mockito.when(
-              Mocks.getValintapisteAsyncResource()
-                  .putValintapisteet(
-                      Mockito.eq(Optional.empty()),
-                      ArgumentMatchers.anyList(),
-                      Mockito.any(AuditSession.class)))
-          .thenReturn(CompletableFuture.completedFuture(Collections.emptySet()));
-
-      MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
-      MockSuoritusrekisteriAsyncResource.setResult(
-          new SuoritusrekisteriSpec.OppijaBuilder()
-              .setOppijanumero(PERSONOID1)
-              .suoritus()
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .setMyontaja(HAKEMUS1)
-              .arvosana()
-              .setAine(KIELIKOE)
-              .setLisatieto("FI")
-              .setArvosana("hyvaksytty")
-              .setSource(KIELIKOE_TOIMIPISTE_OID)
-              .build()
-              .arvosana()
-              .setAine(KIELIKOE)
-              .setLisatieto("SV")
-              .setArvosana("hylatty")
-              .setSource(KIELIKOE_TOIMIPISTE_OID)
-              .build()
-              .build()
-              .build());
-      MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
-          kielikokeitaJarjestavanOppilaitoksenHierarkia);
-      MockSuoritusrekisteriAsyncResource.setPostException(
-          Optional.of(
-              new HttpExceptionWithResponse(
-                  "Something terrible happened", Response.serverError().entity("Boom").build())));
-
-      Response r =
-          pistesyottoTuontiResource
-              .getWebClient()
-              .query("hakuOid", HAKU1)
-              .query("hakukohdeOid", HAKUKOHDE1)
-              .post(
-                  Entity.entity(
-                      pistesyottoExcel.getExcel().vieXlsx(), MediaType.APPLICATION_OCTET_STREAM));
-      assertEquals(500, r.getStatus());
-    } finally {
-      MockSuoritusrekisteriAsyncResource.clear();
-      cleanMocks();
-    }
-  }
-
-  @Test
   public void pistesyottoTuonti3Test() {
     cleanMocks();
     try {
@@ -1519,39 +1267,7 @@ public class PistesyottoResourceTest {
       List<ApplicationAdditionalDataDTO> combinedResults = new ArrayList<>(additionalDataResult);
       combinedResults.addAll(additionalDataResultByOid);
       MockApplicationAsyncResource.setAdditionalDataResultByOid(additionalDataResultByOid);
-      MockSuoritusrekisteriAsyncResource.setResult(
-          new SuoritusrekisteriSpec.OppijaBuilder()
-              .setOppijanumero(PERSONOID1)
-              .suoritus()
-              .setId("123-123-123-1")
-              .setSource("1.2.246.562.10.45698499379")
-              .setMyontaja(HAKEMUS1)
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .arvosana()
-              .setId("123-123-123-1-arvosana")
-              .setAine(KIELIKOE)
-              .setLisatieto("FI")
-              .setArvosana(hyvaksytty)
-              .build()
-              .build()
-              .suoritus()
-              .setId("123-123-123-2")
-              .setSource("1.2.246.562.10.45698499378")
-              .setMyontaja(HAKEMUS3)
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .arvosana()
-              .setId("123-123-123-2-arvosana")
-              .setAine(KIELIKOE)
-              .setLisatieto("FI")
-              .setArvosana(hylatty)
-              .build()
-              .build()
-              .build());
       MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
-      MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
-          kielikokeitaJarjestavanOppilaitoksenHierarkia);
       mockValintakokeetHakukohteille();
 
       Mockito.when(
@@ -1640,68 +1356,20 @@ public class PistesyottoResourceTest {
                   a ->
                       a.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))),
           "Kielikokeita löytyy pisteistä");
-      assertThat(
-          "Kielikokeen suoritus löytyy suresta",
-          MockSuoritusrekisteriAsyncResource.suorituksetRef.get(),
-          hasSize(1));
-      // assertThat("Suresta löytyy oikea kielikoesuoritus",
-      // MockSuoritusrekisteriAsyncResource.suorituksetRef.get(),
-      // hasItem(withHenkiloOid(PERSONOID2))); // TODO eikö henkilöoid mene perille?
-      assertThat(
-          "Suresta löytyy oikea kielikoesuoritus",
-          MockSuoritusrekisteriAsyncResource.suorituksetRef.get(),
-          not(hasItem(withHenkiloOid(PERSONOID3))));
+      assertTrue(
+          isBlank(tuotuArvo(HAKEMUS1, KIELIKOE_TUNNISTE)),
+          "Tyhjä kielikoe tallennetaan tyhjänä valintapisteisiin");
       assertEquals(
-          1,
-          MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream()
-              .filter(s -> s.getMyontaja().equals(HAKEMUS2))
-              .count(),
-          "Suorituksella on oikea myöntäjä");
-      assertEquals(
-          0,
-          MockSuoritusrekisteriAsyncResource.suorituksetRef.get().stream()
-              .filter(s -> s.getMyontaja().equals(HAKEMUS3))
-              .count(),
-          "Suorituksella on oikea myöntäjä");
-      assertEquals(
-          1,
-          MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().stream()
-              .filter(a -> a.getSource().equals("1.2.246.562.10.45698499378"))
-              .count(),
-          "Arvosanoilla on oikea lähde");
-      assertEquals(
-          1,
-          MockSuoritusrekisteriAsyncResource.createdArvosanatRef.get().size(),
-          "Kielikokeen arvosana löytyy suresta");
-      assertThat(
-          "Oikea suoritus on deletoitu",
-          MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get(),
-          hasItem("123-123-123-1"));
-      assertThat(
-          "Oikea arvosana on deletoitu",
-          MockSuoritusrekisteriAsyncResource.deletedArvosanatRef.get(),
-          hasItem("123-123-123-1-arvosana"));
+          "false",
+          tuotuArvo(HAKEMUS2, KIELIKOE_TUNNISTE),
+          "Hylätty kielikoe tallennetaan valintapisteisiin");
     } finally {
       cleanMocks();
     }
   }
 
-  private Matcher<Suoritus> withHenkiloOid(String expectedHenkiloOid) {
-    return new TypeSafeMatcher<Suoritus>() {
-      @Override
-      protected boolean matchesSafely(Suoritus item) {
-        return expectedHenkiloOid.equals(item.getHenkiloOid());
-      }
-
-      @Override
-      public void describeTo(Description description) {
-        description.appendText("suoritus, jonka henkiloOid == " + expectedHenkiloOid);
-      }
-    };
-  }
-
   @Test
-  public void pistesyottoTuontiKunKaikkiAmmatillisenKielikoeTuloksetLoytyvatJoSurestaTest() {
+  public void pistesyottoTuontiTallentaaKielikokeenArvonValintapisteisiinTest() {
     cleanMocks();
     try {
       MockValintaperusteetAsyncResource.setValintaperusteetResult(valintaperusteet);
@@ -1716,25 +1384,7 @@ public class PistesyottoResourceTest {
                   .build());
       MockApplicationAsyncResource.setAdditionalDataResult(additionalDataResult);
       MockApplicationAsyncResource.setAdditionalDataResultByOid(Collections.emptyList());
-      MockSuoritusrekisteriAsyncResource.setResult(
-          new SuoritusrekisteriSpec.OppijaBuilder()
-              .setOppijanumero(PERSONOID1)
-              .suoritus()
-              .setId("123-123-123-1")
-              .setMyontaja(HAKEMUS1)
-              .setHenkiloOid(PERSONOID1)
-              .setKomo(AMMATILLINEN_KIELIKOE_TYYPPI)
-              .setSource(KIELIKOE_OPPILAITOS_OID)
-              .arvosana()
-              .setAine(KIELIKOE)
-              .setLisatieto("FI")
-              .setArvosana(hyvaksytty)
-              .build()
-              .build()
-              .build());
       MockValintalaskentaValintakoeAsyncResource.setResult(osallistumistiedot);
-      MockOrganisaationAsyncResource.setOrganisaationTyyppiHierarkia(
-          kielikokeitaJarjestavanOppilaitoksenHierarkia);
       mockValintakokeetHakukohteille();
 
       Mockito.when(
@@ -1811,11 +1461,10 @@ public class PistesyottoResourceTest {
                   a ->
                       a.getPisteet().stream().anyMatch(p -> p.getTunniste().equals("kielikoe_fi"))),
           "Myös kielikokeet löytyvät valinta-piste-serviceen tuoduista pisteistä");
-      assertThat(MockSuoritusrekisteriAsyncResource.suorituksetRef.get(), hasSize(0));
-      assertThat(
-          "Suorituksia ei deletoitu",
-          MockSuoritusrekisteriAsyncResource.deletedSuorituksetRef.get(),
-          hasSize(0));
+      assertEquals(
+          "true",
+          tuotuArvo(HAKEMUS1, KIELIKOE_TUNNISTE),
+          "Kielikokeen arvo tallennetaan valintapisteisiin");
     } finally {
       cleanMocks();
     }
@@ -1828,14 +1477,22 @@ public class PistesyottoResourceTest {
     MockAtaruAsyncResource.clear();
     MockValintaperusteetAsyncResource.clear();
     MockValintalaskentaValintakoeAsyncResource.clear();
-    MockSuoritusrekisteriAsyncResource.clear();
-    MockOrganisaationAsyncResource.clear();
   }
 
   private void mockValintakokeetHakukohteille() {
     MockValintaperusteetAsyncResource.setHakukohdeResult(
         Collections.singletonList(
             hakukohdeJaValintakoe().addValintakoe(VALINTAKOE1).addValintakoe(KIELIKOE).build()));
+  }
+
+  private String tuotuArvo(String hakemusOid, String tunniste) {
+    return tuodutPisteet.stream()
+        .filter(v -> hakemusOid.equals(v.getHakemusOID()))
+        .flatMap(v -> v.getPisteet().stream())
+        .filter(piste -> tunniste.equals(piste.getTunniste()))
+        .map(Piste::getArvo)
+        .findFirst()
+        .orElse(null);
   }
 
   private List<Valintapisteet> asValintapisteet(

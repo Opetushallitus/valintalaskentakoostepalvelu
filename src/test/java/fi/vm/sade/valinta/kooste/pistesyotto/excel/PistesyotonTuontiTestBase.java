@@ -1,8 +1,5 @@
 package fi.vm.sade.valinta.kooste.pistesyotto.excel;
 
-import static fi.vm.sade.valinta.kooste.Integraatiopalvelimet.mockForward;
-import static javax.ws.rs.HttpMethod.POST;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -17,17 +14,13 @@ import fi.vm.sade.valinta.kooste.excel.Excel;
 import fi.vm.sade.valinta.kooste.excel.ExcelValidointiPoikkeus;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.ApplicationAdditionalDataDTO;
 import fi.vm.sade.valinta.kooste.external.resource.hakuapp.dto.Hakemus;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Arvosana;
-import fi.vm.sade.valinta.kooste.external.resource.suoritusrekisteri.dto.Suoritus;
 import fi.vm.sade.valinta.kooste.external.resource.valintapiste.dto.Valintapisteet;
-import fi.vm.sade.valinta.kooste.server.MockServer;
 import fi.vm.sade.valinta.kooste.util.HakemusWrapper;
 import fi.vm.sade.valinta.kooste.util.HakuappHakemusWrapper;
 import fi.vm.sade.valintalaskenta.domain.dto.valintakoe.ValintakoeOsallistuminenDTO;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +29,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Semaphore;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
@@ -237,52 +229,5 @@ public class PistesyotonTuontiTestBase {
     public T getResult() {
       return result;
     }
-  }
-
-  public static void mockSuoritusrekisteri(
-      final Semaphore suoritusCounter, final Semaphore arvosanaCounter) {
-    MockServer fakeSure = new MockServer();
-    mockForward(
-        POST,
-        fakeSure
-            .addHandler(
-                "/suoritusrekisteri/rest/v1/suoritukset",
-                exchange -> {
-                  try {
-                    Suoritus suoritus =
-                        new Gson()
-                            .fromJson(
-                                IOUtils.toString(exchange.getRequestBody()),
-                                new TypeToken<Suoritus>() {}.getType());
-                    suoritus.setId("suoritus" + suoritus.getHenkiloOid());
-                    exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(200, 0);
-                    OutputStream responseBody = exchange.getResponseBody();
-                    IOUtils.write(new Gson().toJson(suoritus), responseBody);
-                    responseBody.close();
-                    suoritusCounter.release();
-                  } catch (Throwable t) {
-                    t.printStackTrace();
-                  }
-                })
-            .addHandler(
-                "/suoritusrekisteri/rest/v1/arvosanat",
-                exchange -> {
-                  try {
-                    Arvosana arvosana =
-                        new Gson()
-                            .fromJson(
-                                IOUtils.toString(exchange.getRequestBody()),
-                                new TypeToken<Arvosana>() {}.getType());
-                    exchange.getResponseHeaders().add("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(200, 0);
-                    OutputStream responseBody = exchange.getResponseBody();
-                    IOUtils.write(new Gson().toJson(arvosana), responseBody);
-                    responseBody.close();
-                    arvosanaCounter.release();
-                  } catch (Throwable t) {
-                    t.printStackTrace();
-                  }
-                }));
   }
 }
